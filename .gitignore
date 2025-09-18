@@ -1,0 +1,7 @@
+-----backend------
+# chưa có thư mục node_modules
+node_modules/
+
+# chưa có file môi trường 
+.env
+
