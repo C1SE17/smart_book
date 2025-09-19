@@ -120,3 +120,17 @@ CREATE TABLE payments (
     paid_at TIMESTAMP NULL COMMENT 'Thời gian thanh toán',
     FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE
 ) COMMENT='Thông tin thanh toán';
+
+-- 11 . review (bình luận + đánh giá sao)
+CREATE TABLE reviews (
+    review_id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'ID đánh giá',
+    user_id INT NOT NULL COMMENT 'Người đánh giá',
+    book_id INT NOT NULL COMMENT 'Sách được đánh giá',
+    rating TINYINT NOT NULL COMMENT 'Số sao đánh giá (1-5)',
+    review_text TEXT NULL COMMENT 'Nội dung đánh giá (tùy chọn)',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Ngày đánh giá',
+    CONSTRAINT chk_rating CHECK (rating BETWEEN 1 AND 5),
+    CONSTRAINT fk_review_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    CONSTRAINT fk_review_book FOREIGN KEY (book_id) REFERENCES books(book_id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
