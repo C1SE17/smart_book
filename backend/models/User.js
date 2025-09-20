@@ -27,7 +27,39 @@ class User {
             callback(err, results[0]);
         });
     }
+
+    // Cập nhật thông tin người dùng theo user_id
+    static update(userId, userData, callback) {
+        const { name, phone, address } = userData;
+        const query = 'UPDATE users SET name = ?, phone = ?, address = ? WHERE user_id = ?';
+        db.query(query, [name, phone, address, userId], (err, result) => {
+            callback(err, result);
+        });
+    }
+    // Lấy thông tin người dùng theo user_id
+    static getById(userId, callback) {
+        const query = 'SELECT user_id, name, email, phone, address, role FROM users WHERE user_id = ?';
+        db.query(query, [userId], (err, results) => {
+            callback(err, results[0]);
+        });
+    }
+
+    // Xóa người dùng theo user_id
+    static delete(userId, callback) {
+        const query = 'DELETE FROM users WHERE user_id = ?';
+        db.query(query, [userId], (err, result) => {
+            callback(err, result);
+        });
+    }
+    // Lấy toàn bộ người dùng
+    static getAll(callback) {
+        const query = 'SELECT user_id, name, email, phone, address, role FROM users';
+        db.query(query, (err, results) => {
+            callback(err, results);
+        });
+    }
 }
+
 
 // Xuất class User
 module.exports = User;
