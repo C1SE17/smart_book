@@ -6,6 +6,8 @@ const bookRoutes = require('./routes/bookRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const authorRoutes = require('./routes/authorRoutes');
 const publisherRoutes = require('./routes/publisherRoutes');
+const cartRoutes = require('./routes/cartRoutes');
+const orderRoutes = require('./routes/orderRoutes');
 
 // Tải biến môi trường
 dotenv.config();
@@ -38,6 +40,8 @@ app.use('/api/books', bookRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/authors', authorRoutes);
 app.use('/api/publishers', publisherRoutes);
+app.use('/api/cart', cartRoutes); 
+app.use('/api/order', orderRoutes);
 
 // Chạy máy chủ
 app.listen(port, () => {

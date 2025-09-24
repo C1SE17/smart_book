@@ -44,7 +44,7 @@ const userOnly = (req, res, next) => {
         return res.status(401).json({ error: 'Thiếu thông tin người dùng' });
     }
     const userIdFromToken = req.user.userId;
-    const requestedUserId = req.params.user_id || req.body.user_id;
+    const requestedUserId = req.params?.user_id || req.body?.user_id;  // Sửa: Sử dụng optional chaining (?.) để tránh đọc từ undefined
     if (requestedUserId && userIdFromToken != requestedUserId) {
         return res.status(403).json({ error: 'Không có quyền truy cập thông tin người khác' });
     }
