@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Home = () => {
+const Home = ({ onViewProduct }) => {
   return (
     <main className="flex-grow-1">
       {/* Featured Categories Section */}
@@ -45,6 +45,7 @@ const Home = () => {
                   transition: 'all 0.3s ease',
                   cursor: 'pointer'
                 }}
+                onClick={() => onViewProduct(book.book_id)}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-5px)';
                   e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.2)';
@@ -102,16 +103,17 @@ const Home = () => {
           
           <div className="row g-4">
             {[
-              { title: "WHERE THE CRAWDADS SING", author: "Delia Owens", price: "$20 - $30", category: "Fiction", image: "./public/images/book1.jpg" },
-              { title: "Doraemon: Nobita's Little Star Wars", author: "Fujiko F. Fujio", price: "$15 - $25", category: "Manga", image: "./public/images/book2.jpg" },
-              { title: "Demon Slayer - Vô hạn thành", author: "Koyoharu Gotouge", price: "$18 - $28", category: "Manga", image: "./public/images/book3.jpg" },
-              { title: "Conan - Vụ Án Nữ Hoàng 450", author: "Gosho Aoyama", price: "$16 - $26", category: "Manga", image: "./public/images/book4.jpg" }
+              { book_id: 1, title: "WHERE THE CRAWDADS SING", author: "Delia Owens", price: "$20 - $30", category: "Fiction", image: "./public/images/book1.jpg" },
+              { book_id: 2, title: "Doraemon: Nobita's Little Star Wars", author: "Fujiko F. Fujio", price: "$15 - $25", category: "Manga", image: "./public/images/book2.jpg" },
+              { book_id: 3, title: "Demon Slayer - Vô hạn thành", author: "Koyoharu Gotouge", price: "$18 - $28", category: "Manga", image: "./public/images/book3.jpg" },
+              { book_id: 4, title: "Conan - Vụ Án Nữ Hoàng 450", author: "Gosho Aoyama", price: "$16 - $26", category: "Manga", image: "./public/images/book4.jpg" }
             ].map((book, index) => (
               <div key={index} className="col-lg-3 col-md-6">
                 <div className="card h-100 shadow-sm" style={{
                   transition: 'all 0.3s ease',
                   cursor: 'pointer'
                 }}
+                onClick={() => onViewProduct(book.book_id)}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-5px)';
                   e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.2)';
@@ -126,7 +128,7 @@ const Home = () => {
                     alt={book.title}
                     style={{height: '200px', objectFit: 'contain', backgroundColor: '#f8f9fa'}}
                   />
-                  <div className="card-body">
+                  <div className="card-body d-flex flex-column">
                     <h6 className="card-title fw-bold">{book.title}</h6>
                     <p className="card-text text-muted small">{book.author}</p>
                     
@@ -179,16 +181,17 @@ const Home = () => {
           
           <div className="row g-4">
             {[
-              { title: "WHERE THE CRAWDADS SING", author: "Delia Owens", price: "$20 - $30", category: "Fiction", image: "./public/images/book1.jpg" },
-              { title: "Doraemon: Nobita's Little Star Wars", author: "Fujiko F. Fujio", price: "$15 - $25", category: "Manga", image: "./public/images/book2.jpg" },
-              { title: "Demon Slayer - Vô hạn thành", author: "Koyoharu Gotouge", price: "$18 - $28", category: "Manga", image: "./public/images/book3.jpg" },
-              { title: "Conan - Vụ Án Nữ Hoàng 450", author: "Gosho Aoyama", price: "$16 - $26", category: "Manga", image: "./public/images/book4.jpg" }
+              { book_id: 1, title: "WHERE THE CRAWDADS SING", author: "Delia Owens", price: "$20 - $30", category: "Fiction", image: "./public/images/book1.jpg" },
+              { book_id: 2, title: "Doraemon: Nobita's Little Star Wars", author: "Fujiko F. Fujio", price: "$15 - $25", category: "Manga", image: "./public/images/book2.jpg" },
+              { book_id: 3, title: "Demon Slayer - Vô hạn thành", author: "Koyoharu Gotouge", price: "$18 - $28", category: "Manga", image: "./public/images/book3.jpg" },
+              { book_id: 4, title: "Conan - Vụ Án Nữ Hoàng 450", author: "Gosho Aoyama", price: "$16 - $26", category: "Manga", image: "./public/images/book4.jpg" }
             ].map((book, index) => (
               <div key={index} className="col-lg-3 col-md-6">
                 <div className="card h-100 shadow-sm" style={{
                   transition: 'all 0.3s ease',
                   cursor: 'pointer'
                 }}
+                onClick={() => onViewProduct(book.book_id)}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-5px)';
                   e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.2)';
@@ -203,7 +206,7 @@ const Home = () => {
                     alt={book.title}
                     style={{height: '200px', objectFit: 'contain', backgroundColor: '#f8f9fa'}}
                   />
-                  <div className="card-body">
+                  <div className="card-body d-flex flex-column">
                     <h6 className="card-title fw-bold">{book.title}</h6>
                     <p className="card-text text-muted small">{book.author}</p>
                     
@@ -256,16 +259,17 @@ const Home = () => {
           
           <div className="row g-4">
             {[
-              { title: "WHERE THE CRAWDADS SING", author: "Delia Owens", price: "$20 - $30", category: "Fiction", image: "./public/images/book1.jpg" },
-              { title: "Doraemon: Nobita's Little Star Wars", author: "Fujiko F. Fujio", price: "$15 - $25", category: "Manga", image: "./public/images/book2.jpg" },
-              { title: "Demon Slayer - Vô hạn thành", author: "Koyoharu Gotouge", price: "$18 - $28", category: "Manga", image: "./public/images/book3.jpg" },
-              { title: "Conan - Vụ Án Nữ Hoàng 450", author: "Gosho Aoyama", price: "$16 - $26", category: "Manga", image: "./public/images/book4.jpg" }
+              { book_id: 1, title: "WHERE THE CRAWDADS SING", author: "Delia Owens", price: "$20 - $30", category: "Fiction", image: "./public/images/book1.jpg" },
+              { book_id: 2, title: "Doraemon: Nobita's Little Star Wars", author: "Fujiko F. Fujio", price: "$15 - $25", category: "Manga", image: "./public/images/book2.jpg" },
+              { book_id: 3, title: "Demon Slayer - Vô hạn thành", author: "Koyoharu Gotouge", price: "$18 - $28", category: "Manga", image: "./public/images/book3.jpg" },
+              { book_id: 4, title: "Conan - Vụ Án Nữ Hoàng 450", author: "Gosho Aoyama", price: "$16 - $26", category: "Manga", image: "./public/images/book4.jpg" }
             ].map((book, index) => (
               <div key={index} className="col-lg-3 col-md-6">
                 <div className="card h-100 shadow-sm" style={{
                   transition: 'all 0.3s ease',
                   cursor: 'pointer'
                 }}
+                onClick={() => onViewProduct(book.book_id)}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-5px)';
                   e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.2)';
@@ -280,7 +284,7 @@ const Home = () => {
                     alt={book.title}
                     style={{height: '200px', objectFit: 'contain', backgroundColor: '#f8f9fa'}}
                   />
-                  <div className="card-body">
+                  <div className="card-body d-flex flex-column">
                     <h6 className="card-title fw-bold">{book.title}</h6>
                     <p className="card-text text-muted small">{book.author}</p>
                     
@@ -397,6 +401,7 @@ const Home = () => {
                   transition: 'all 0.3s ease',
                   cursor: 'pointer'
                 }}
+                onClick={() => onViewProduct(book.book_id)}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-5px)';
                   e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.2)';

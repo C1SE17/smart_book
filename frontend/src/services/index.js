@@ -1,7 +1,7 @@
 // API Services
 
 // Base API configuration
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+const API_BASE_URL = 'http://localhost:3001';
 
 // Generic API request function
 const apiRequest = async (endpoint, options = {}) => {
@@ -48,8 +48,14 @@ export const authService = {
 
 // Book Services
 export const bookService = {
-  getAll: () => apiRequest('/books'),
+  getAll: (params = {}) => {
+    const queryParams = new URLSearchParams(params).toString();
+    return apiRequest(`/books${queryParams ? `?${queryParams}` : ''}`);
+  },
   getById: (id) => apiRequest(`/books/${id}`),
+  getByCategory: (categoryId) => apiRequest(`/books?category_id=${categoryId}`),
+  getByAuthor: (authorId) => apiRequest(`/books?author_id=${authorId}`),
+  search: (query) => apiRequest(`/books?search=${encodeURIComponent(query)}`),
   create: (bookData) => apiRequest('/books', {
     method: 'POST',
     body: JSON.stringify(bookData)
@@ -60,5 +66,37 @@ export const bookService = {
   }),
   delete: (id) => apiRequest(`/books/${id}`, {
     method: 'DELETE'
+  })
+};
+
+// Cart Services
+export const cartService = {
+  getItems: (token) => apiRequest('/api/cart/items', {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  }),
+  
+  addItem: (bookId, quantity, token) => apiRequest('/api/cart/add', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({ book_id: bookId, quantity })
+  }),
+  
+  updateItem: (cartItemId, quantity, token) => apiRequest(`/api/cart/update/${cartItemId}`, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({ quantity })
+  }),
+  
+  removeItem: (cartItemId, token) => apiRequest(`/api/cart/remove/${cartItemId}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
   })
 };

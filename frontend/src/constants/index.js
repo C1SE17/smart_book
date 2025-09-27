@@ -3,7 +3,7 @@ export const APP_NAME = 'Smart Book';
 export const APP_VERSION = '1.0.0';
 
 // API Constants
-export const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+export const API_BASE_URL = 'http://localhost:3001';
 
 // Routes
 export const ROUTES = {

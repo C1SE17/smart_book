@@ -12,6 +12,9 @@ router.delete('/remove/:cart_item_id', auth, userOnly, CartController.removeFrom
 // Định nghĩa endpoint xem chi tiết giỏ hàng, yêu cầu xác thực và chỉ cho người dùng
 router.get('/details', auth, userOnly, CartController.getCartDetails);
 
+// Định nghĩa endpoint lấy danh sách sản phẩm trong giỏ hàng, yêu cầu xác thực và chỉ cho người dùng
+router.get('/items', auth, userOnly, CartController.getCartDetails);
+
 // Định nghĩa endpoint cập nhật số lượng sản phẩm trong giỏ hàng, yêu cầu xác thực và chỉ cho người dùng
 router.put('/update/:cart_item_id', auth, userOnly, CartController.updateQuantity);
 

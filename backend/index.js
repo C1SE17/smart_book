@@ -37,6 +37,9 @@ app.get('/', (req, res) => {
 // Gắn tuyến API
 app.use('/api/users', userRoutes);
 app.use('/api/books', bookRoutes);
+
+app.use('/books', bookRoutes); // P
+// ublic books route for frontend
 app.use('/api/categories', categoryRoutes);
 app.use('/api/authors', authorRoutes);
 app.use('/api/publishers', publisherRoutes);
