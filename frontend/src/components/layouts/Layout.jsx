@@ -1,8 +1,8 @@
 import React from 'react';
-import TopRocker from './TopRocker';
-import MenuClient from './MenuClient';
-import FooterClient from './FooterClient';
-import BotRocker from './BotRocker';
+import TopRocker from './TopBar';
+import MenuClient from './Menu';
+import FooterClient from './Footer';
+import BotRocker from './Bot';
 
 const Layout = ({ children }) => {
   return (

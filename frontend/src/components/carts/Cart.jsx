@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useLocalStorage } from '../../hooks';
 import { cartService } from '../../services';
-import MenuClient from '../../layouts/MenuClient';
 
-const Cart = ({ onBackToHome, onNavigateTo, onSearch }) => {
+const Cart = ({ onBackToHome, onNavigateTo }) => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [user] = useLocalStorage('user', null);
@@ -82,9 +81,6 @@ const Cart = ({ onBackToHome, onNavigateTo, onSearch }) => {
   }
   return (
     <div className="min-vh-100" style={{ backgroundColor: '#f5f5f5' }}>
-      {/* Main Menu */}
-      <MenuClient onNavigateTo={onNavigateTo} onBackToHome={onBackToHome} onSearch={onSearch} />
-
       <div className="container py-4">
         {/* Back Home Navigation */}
         <div className="mb-3">

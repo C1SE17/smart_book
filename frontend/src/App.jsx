@@ -1,12 +1,12 @@
 import React, { useState, useCallback, useMemo } from 'react'
-import Home from './pages/home/Home'
-import Auth from './pages/auth/Auth'
-import Search from './pages/search/Search'
-import Cart from './pages/cart/Cart'
-import Notification from './pages/notification/Notification'
-import ProductDetail from './pages/product/ProductDetail'
-import Hero from './layouts/Hero'
-import MenuClient from './layouts/MenuClient'
+import Home from './components/Home'
+import Auth from './features/auth/Auth'
+import Search from './pages/auth/search/Search'
+import Cart from './components/carts/Cart'
+import Notification from './pages/auth/notification/Notification'
+import ProductDetail from './components/products/ProductDetail'
+import Hero from './components/layouts/Slide'
+import MenuClient from './components/layouts/Menu'
 import './App.css'
 
 function App() {
@@ -43,32 +43,40 @@ function App() {
     setCurrentPage('product');
   }, []);
 
+  // Category filter handler
+  const handleFilterByCategory = useCallback((categoryId, categoryName) => {
+    setSearchQuery(`category:${categoryName}`);
+    setCurrentPage('search');
+  }, []);
+
   // Memoized page components to avoid recreation
   const pageComponents = useMemo(() => ({
     auth: <Auth onBackToHome={handleBackToHome} onLoginSuccess={handleLoginSuccess} />,
     search: <Search onBackToHome={handleBackToHome} onNavigateTo={handleNavigateTo} initialSearchQuery={searchQuery} onSearch={handleSearch} onViewProduct={handleViewProduct} />,
-    cart: <Cart onBackToHome={handleBackToHome} onNavigateTo={handleNavigateTo} onSearch={handleSearch} />,
-    notification: <Notification onBackToHome={handleBackToHome} onNavigateTo={handleNavigateTo} onSearch={handleSearch} />,
-    product: <ProductDetail onBackToHome={handleBackToHome} onNavigateTo={handleNavigateTo} onSearch={handleSearch} productId={productId} onViewProduct={handleViewProduct} />
+    cart: <Cart onBackToHome={handleBackToHome} onNavigateTo={handleNavigateTo} />,
+    notification: <Notification onBackToHome={handleBackToHome} onNavigateTo={handleNavigateTo} />,
+    product: <ProductDetail onBackToHome={handleBackToHome} onNavigateTo={handleNavigateTo} productId={productId} onViewProduct={handleViewProduct} />
   }), [handleBackToHome, handleLoginSuccess, handleNavigateTo, searchQuery, handleSearch, handleViewProduct, productId]);
 
-  // Simple routing
-  if (currentPage === 'auth') return pageComponents.auth;
-  if (currentPage === 'search') return pageComponents.search;
-  if (currentPage === 'cart') return pageComponents.cart;
-  if (currentPage === 'notification') return pageComponents.notification;
-  if (currentPage === 'product') return pageComponents.product;
-
   return (
-    <div className="d-flex flex-column min-vh-100">
-      {/* Main Menu */}
-      <MenuClient onNavigateTo={handleNavigateTo} onBackToHome={handleBackToHome} onSearch={handleSearch} />
+    <div className="d-flex flex-column min-vh-100" style={{ paddingTop: '80px' }}>
+      {/* Main Menu - Always rendered at top level */}
+      <MenuClient onNavigateTo={handleNavigateTo} onBackToHome={handleBackToHome} onFilterByCategory={handleFilterByCategory} />
 
-      {/* Hero Section */}
-      <Hero />
-
-      {/* Home Page Content */}
-      <Home onViewProduct={handleViewProduct} />
+      {/* Page Content */}
+      {currentPage === 'auth' && pageComponents.auth}
+      {currentPage === 'search' && pageComponents.search}
+      {currentPage === 'cart' && pageComponents.cart}
+      {currentPage === 'notification' && pageComponents.notification}
+      {currentPage === 'product' && pageComponents.product}
+      {currentPage === 'home' && (
+        <>
+          {/* Hero Section */}
+          <Hero />
+          {/* Home Page Content */}
+          <Home onViewProduct={handleViewProduct} />
+        </>
+      )}
 
       {/* Footer */}
       <footer className="bg-light py-5 mt-5">
@@ -154,4 +162,5 @@ function App() {
 }
 
 export default App
+
 

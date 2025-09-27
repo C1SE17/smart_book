@@ -1,5 +1,6 @@
 // Nhập thư viện
 const express = require('express');
+const cors = require('cors');
 const dotenv = require('dotenv');
 const userRoutes = require('./routes/userRoutes');
 const bookRoutes = require('./routes/bookRoutes');
@@ -14,7 +15,13 @@ dotenv.config();
 
 // Khởi tạo ứng dụng Express
 const app = express(); // Đảm bảo app được khai báo trước khi sử dụng
-const port = process.env.PORT || 3306;
+const port = process.env.PORT || 3001;
+
+// CORS middleware
+app.use(cors({
+  origin: 'http://localhost:5173', // Frontend URL
+  credentials: true
+}));
 
 // Phân tích JSON từ body
 app.use(express.json());
@@ -41,6 +48,7 @@ app.use('/api/books', bookRoutes);
 app.use('/books', bookRoutes); // P
 // ublic books route for frontend
 app.use('/api/categories', categoryRoutes);
+app.use('/categories', categoryRoutes); // Public categories route for frontend
 app.use('/api/authors', authorRoutes);
 app.use('/api/publishers', publisherRoutes);
 app.use('/api/cart', cartRoutes); 

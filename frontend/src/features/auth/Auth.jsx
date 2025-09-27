@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Login, Register, ForgotPassword } from '../../components/forms';
+import { Login, Register, ForgotPassword } from '../../components/user';
 
 const Auth = ({ onBackToHome, onLoginSuccess }) => {
   const [authMode, setAuthMode] = useState('login'); // 'login', 'register', 'forgot-password'

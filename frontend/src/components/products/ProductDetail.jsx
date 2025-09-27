@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { bookService, cartService } from '../../services';
 
-const ProductDetail = ({ onBackToHome, onNavigateTo, onSearch, productId, onViewProduct }) => {
+const ProductDetail = ({ onBackToHome, onNavigateTo, productId, onViewProduct }) => {
   const id = productId;
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);

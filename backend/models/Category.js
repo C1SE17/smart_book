@@ -2,7 +2,13 @@ const db = require('../config/db');
 
 class Category {
     static async getAll() { // Lấy tất cả danh mục
-        const [rows] = await db.promise().query('SELECT * FROM categories');
+        const [rows] = await db.promise().query(`
+            SELECT c.*, COUNT(b.book_id) as book_count 
+            FROM categories c 
+            LEFT JOIN books b ON c.category_id = b.category_id 
+            GROUP BY c.category_id 
+            ORDER BY c.name
+        `);
         return rows;
     }
 

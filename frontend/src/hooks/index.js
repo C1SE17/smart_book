@@ -1,6 +1,32 @@
-// Custom React Hooks
+import { useState, useEffect, useRef } from 'react';
 
-import { useState, useEffect } from 'react';
+// Custom hook for local storage
+export const useLocalStorage = (key, initialValue) => {
+  // Get from local storage then parse stored json or return initialValue
+  const [storedValue, setStoredValue] = useState(() => {
+    try {
+      const item = window.localStorage.getItem(key);
+      return item ? JSON.parse(item) : initialValue;
+    } catch (error) {
+      console.error(`Error reading localStorage key "${key}":`, error);
+      return initialValue;
+    }
+  });
+
+  // Return a wrapped version of useState's setter function that persists the new value to localStorage
+  const setValue = (value) => {
+    try {
+      // Allow value to be a function so we have the same API as useState
+      const valueToStore = value instanceof Function ? value(storedValue) : value;
+      setStoredValue(valueToStore);
+      window.localStorage.setItem(key, JSON.stringify(valueToStore));
+    } catch (error) {
+      console.error(`Error setting localStorage key "${key}":`, error);
+    }
+  };
+
+  return [storedValue, setValue];
+};
 
 // Custom hook for API calls
 export const useApi = (apiFunction, dependencies = []) => {
@@ -16,7 +42,7 @@ export const useApi = (apiFunction, dependencies = []) => {
         const result = await apiFunction();
         setData(result);
       } catch (err) {
-        setError(err.message);
+        setError(err);
       } finally {
         setLoading(false);
       }
@@ -28,67 +54,83 @@ export const useApi = (apiFunction, dependencies = []) => {
   return { data, loading, error };
 };
 
-// Custom hook for local storage
-export const useLocalStorage = (key, initialValue) => {
-  const [storedValue, setStoredValue] = useState(() => {
-    try {
-      const item = window.localStorage.getItem(key);
-      return item ? JSON.parse(item) : initialValue;
-    } catch (error) {
-      console.error(`Error reading localStorage key "${key}":`, error);
-      return initialValue;
-    }
-  });
+// Custom hook for debounced value
+export const useDebounce = (value, delay) => {
+  const [debouncedValue, setDebouncedValue] = useState(value);
 
-  const setValue = (value) => {
-    try {
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
-      setStoredValue(valueToStore);
-      window.localStorage.setItem(key, JSON.stringify(valueToStore));
-    } catch (error) {
-      console.error(`Error setting localStorage key "${key}":`, error);
-    }
-  };
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
 
-  return [storedValue, setValue];
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
 };
 
-// Custom hook for form handling
-export const useForm = (initialValues, validate) => {
-  const [values, setValues] = useState(initialValues);
-  const [errors, setErrors] = useState({});
-  const [touched, setTouched] = useState({});
+// Custom hook for previous value
+export const usePrevious = (value) => {
+  const ref = useRef();
+  
+  useEffect(() => {
+    ref.current = value;
+  });
+  
+  return ref.current;
+};
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setValues(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
-  };
+// Custom hook for window size
+export const useWindowSize = () => {
+  const [windowSize, setWindowSize] = useState({
+    width: undefined,
+    height: undefined,
+  });
 
-  const handleBlur = (e) => {
-    const { name } = e.target;
-    setTouched(prev => ({ ...prev, [name]: true }));
-    
-    if (validate) {
-      const validationErrors = validate(values);
-      setErrors(validationErrors);
+  useEffect(() => {
+    function handleResize() {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
     }
-  };
 
-  const resetForm = () => {
-    setValues(initialValues);
-    setErrors({});
-    setTouched({});
-  };
+    window.addEventListener("resize", handleResize);
+    handleResize();
 
-  return {
-    values,
-    errors,
-    touched,
-    handleChange,
-    handleBlur,
-    resetForm
-  };
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  return windowSize;
+};
+
+// Custom hook for online status
+export const useOnlineStatus = () => {
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  return isOnline;
+};
+
+export default {
+  useLocalStorage,
+  useApi,
+  useDebounce,
+  usePrevious,
+  useWindowSize,
+  useOnlineStatus
 };

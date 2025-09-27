@@ -1,7 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import MenuClient from '../../layouts/MenuClient';
 
-const Notification = ({ onBackToHome, onNavigateTo, onSearch }) => {
+const Notification = ({ onBackToHome, onNavigateTo }) => {
   const [activeTab, setActiveTab] = useState('notification');
 
   // Mock notification data - moved outside component to avoid recreation
@@ -105,9 +104,6 @@ const Notification = ({ onBackToHome, onNavigateTo, onSearch }) => {
 
   return (
     <div className="min-vh-100" style={{backgroundColor: '#f5f5f5'}}>
-      {/* Main Menu */}
-      <MenuClient onNavigateTo={onNavigateTo} onBackToHome={onBackToHome} onSearch={onSearch} />
-
       <div className="container py-4">
         {/* Back Home Navigation */}
         <div className="mb-3">

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useLocalStorage } from '../../hooks';
-import { cartService } from '../../services';
-import MenuClient from '../../layouts/MenuClient';
+import { useLocalStorage } from '../../../hooks';
+import { cartService, bookService } from '../../../services';
 
 const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch, onViewProduct }) => {
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
@@ -24,6 +23,35 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch,
       alert('Failed to add item to cart. Please try again.');
     }
   }, [user]);
+
+  // Search function
+  const performSearch = useCallback(async (query) => {
+    setLoading(true);
+    try {
+      if (query.startsWith('category:')) {
+        // Handle category filter
+        const categoryName = query.replace('category:', '');
+        const data = await bookService.getAll({ category: categoryName });
+        setSearchResults(data);
+      } else {
+        // Handle regular search
+        const data = await bookService.search(query);
+        setSearchResults(data);
+      }
+    } catch (error) {
+      console.error('Search error:', error);
+      setSearchResults([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Effect to perform search when initialSearchQuery changes
+  useEffect(() => {
+    if (initialSearchQuery) {
+      performSearch(initialSearchQuery);
+    }
+  }, [initialSearchQuery, performSearch]);
 
   // Mock data for search results - memoized to avoid recreation
   const mockBooks = useMemo(() => [
@@ -146,9 +174,6 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch,
 
   return (
     <div className="min-vh-100" style={{ backgroundColor: '#f5f5f5' }}>
-      {/* Main Menu */}
-      <MenuClient onNavigateTo={onNavigateTo} onBackToHome={onBackToHome} onSearch={onSearch} />
-
       <div className="container py-4">
         <div className="row justify-content-center">
           <div className="col-lg-8 col-md-10">
