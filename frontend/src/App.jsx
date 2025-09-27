@@ -1,12 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react'
-import Home from './components/Home'
+import { Home, Search, Cart, Notification, ProductDetail, Hero, MenuClient } from './components'
 import Auth from './features/auth/Auth'
-import Search from './components/client/search/Search'
-import Cart from './components/client/carts/Cart'
-import Notification from './components/client/notification/Notification'
-import ProductDetail from './components/client/products/ProductDetail'
-import Hero from './components/layouts/Slide'
-import MenuClient from './components/layouts/Menu'
 import './App.css'
 
 function App() {

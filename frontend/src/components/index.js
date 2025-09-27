@@ -1,11 +1,13 @@
-// Forms
-export * from './forms';
+// Common components
+export * from './common';
 
-// Common components will be added here
-// export * from './common';
+// Layout components
+export * from './layouts';
 
-// UI components will be added here  
-// export * from './ui';
+// User components
+export * from './user';
+
+// Client components
 export { default as Home } from './Home';
 export { default as Search } from './client/search/Search';
 export { default as Cart } from './client/carts/Cart';
