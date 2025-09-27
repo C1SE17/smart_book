@@ -1,0 +1,196 @@
+/* Custom styles for SMART BOOK header */
+
+/* Top bar styling */
+.bg-light {
+  background-color: #f8f9fa !important;
+}
+
+/* Navigation styling */
+.navbar-brand {
+  font-weight: 700 !important;
+  font-size: 1.5rem !important;
+}
+
+.nav-link {
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+  color: #007bff !important;
+}
+
+/* Notification bell styling */
+.position-relative .badge {
+  background-color: #000 !important;
+  border: 1px solid #fff;
+}
+
+/* Pink border styling */
+.pink-border {
+  height: 2px;
+  background-color: #ffc0cb;
+  width: 100%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .navbar-nav {
+    text-align: center;
+    margin-top: 1rem;
+  }
+  
+  .nav-link {
+    margin: 0.5rem 0;
+  }
+  
+  .d-flex.align-items-center {
+    justify-content: center;
+    margin-top: 1rem;
+  }
+}
+
+/* Hover effects */
+.nav-link:hover,
+.navbar-brand:hover {
+  transform: translateY(-1px);
+  transition: transform 0.2s ease;
+}
+
+/* Icon hover effects */
+.bi-bell:hover,
+.bi-search:hover,
+.bi-person:hover {
+  color: #007bff !important;
+  transition: color 0.3s ease;
+}
+
+/* Footer styling */
+footer {
+  background-color: #f8f9fa !important;
+}
+
+footer h5 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333 !important;
+  margin-bottom: 1rem;
+}
+
+footer p {
+  font-size: 0.9rem;
+  color: #555 !important;
+  line-height: 1.5;
+  margin-bottom: 0.5rem;
+}
+
+footer p:last-child {
+  margin-bottom: 0;
+}
+
+/* Footer responsive adjustments */
+@media (max-width: 768px) {
+  footer .col-lg-2 {
+    margin-bottom: 2rem;
+  }
+  
+  footer h5 {
+    font-size: 1rem;
+  }
+  
+  footer p {
+    font-size: 0.85rem;
+  }
+}
+
+/* Footer link hover effects */
+footer a {
+  transition: color 0.3s ease;
+}
+
+footer a:hover {
+  color: #007bff !important;
+}
+
+/* Hero Section */
+.hero-section {
+  background: linear-gradient(135deg, #ffc0cb 0%, #ffb3ba 100%);
+}
+
+/* Book Cards */
+.card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: none;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+}
+
+.card-img-top {
+  background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+}
+
+/* Author Avatars */
+.rounded-circle {
+  transition: transform 0.3s ease;
+}
+
+.rounded-circle:hover {
+  transform: scale(1.1);
+}
+
+/* Blog Cards */
+.blog-card {
+  transition: transform 0.3s ease;
+}
+
+.blog-card:hover {
+  transform: translateY(-3px);
+}
+
+/* Section Titles */
+.section-title {
+  position: relative;
+  padding-bottom: 0.5rem;
+}
+
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 50px;
+  height: 3px;
+  background-color: #007bff;
+  border-radius: 2px;
+}
+
+/* Button Hover Effects */
+.btn {
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Star Rating */
+.bi-star-fill {
+  color: #ffc107;
+}
+
+.bi-star {
+  color: #dee2e6;
+}
+
+/* Sticky footer layout */
+.min-vh-100 {
+  min-height: 100vh;
+}
+
+.flex-grow-1 {
+  flex-grow: 1;
+}

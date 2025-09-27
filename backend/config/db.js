@@ -4,9 +4,9 @@ const mysql = require('mysql2');
 const db = mysql.createConnection({
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASS || '123456',
+    password: process.env.DB_PASS || '', // Thử không có mật khẩu
     database: process.env.DB_NAME || 'smart_book',
-    port: process.env.DB_PORT || 3300
+    port: process.env.DB_PORT || 3306
 });
 
 // Kiểm tra kết nối cơ sở dữ liệu
