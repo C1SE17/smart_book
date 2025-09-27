@@ -14,16 +14,6 @@ const Hero = () => {
               style={{
                 transition: 'all 0.3s ease'
               }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.3)';
-                e.currentTarget.style.backgroundColor = '#343a40';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'none';
-                e.currentTarget.style.backgroundColor = '#000';
-              }}
             >
               Learn More
               <i className="bi bi-arrow-right ms-2"></i>

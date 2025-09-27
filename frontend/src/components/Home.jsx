@@ -11,23 +11,7 @@ const Home = ({ onViewProduct }) => {
               <h2 className="fw-bold text-dark">Featured Categories</h2>
             </div>
             <div className="col-auto">
-              <a href="#" className="btn btn-outline-primary" style={{
-                transition: 'all 0.3s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,123,255,0.3)';
-                e.currentTarget.style.backgroundColor = '#0d6efd';
-                e.currentTarget.style.borderColor = '#0d6efd';
-                e.currentTarget.style.color = 'white';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'none';
-                e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.borderColor = '#0d6efd';
-                e.currentTarget.style.color = '#0d6efd';
-              }}>
+              <a href="#" className="btn btn-outline-primary">
                 View All <i className="bi bi-arrow-right ms-1"></i>
               </a>
             </div>
@@ -79,23 +63,7 @@ const Home = ({ onViewProduct }) => {
               <h2 className="fw-bold text-dark">People's Choice</h2>
             </div>
             <div className="col-auto">
-              <a href="#" className="btn btn-outline-primary" style={{
-                transition: 'all 0.3s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,123,255,0.3)';
-                e.currentTarget.style.backgroundColor = '#0d6efd';
-                e.currentTarget.style.borderColor = '#0d6efd';
-                e.currentTarget.style.color = 'white';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'none';
-                e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.borderColor = '#0d6efd';
-                e.currentTarget.style.color = '#0d6efd';
-              }}>
+              <a href="#" className="btn btn-outline-primary">
                 View All <i className="bi bi-arrow-right ms-1"></i>
               </a>
             </div>
@@ -157,23 +125,7 @@ const Home = ({ onViewProduct }) => {
               <h2 className="fw-bold text-dark">New Additions</h2>
             </div>
             <div className="col-auto">
-              <a href="#" className="btn btn-outline-primary" style={{
-                transition: 'all 0.3s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,123,255,0.3)';
-                e.currentTarget.style.backgroundColor = '#0d6efd';
-                e.currentTarget.style.borderColor = '#0d6efd';
-                e.currentTarget.style.color = 'white';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'none';
-                e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.borderColor = '#0d6efd';
-                e.currentTarget.style.color = '#0d6efd';
-              }}>
+              <a href="#" className="btn btn-outline-primary">
                 View All <i className="bi bi-arrow-right ms-1"></i>
               </a>
             </div>
@@ -235,23 +187,7 @@ const Home = ({ onViewProduct }) => {
               <h2 className="fw-bold text-dark">Popular Books</h2>
             </div>
             <div className="col-auto">
-              <a href="#" className="btn btn-outline-primary" style={{
-                transition: 'all 0.3s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,123,255,0.3)';
-                e.currentTarget.style.backgroundColor = '#0d6efd';
-                e.currentTarget.style.borderColor = '#0d6efd';
-                e.currentTarget.style.color = 'white';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'none';
-                e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.borderColor = '#0d6efd';
-                e.currentTarget.style.color = '#0d6efd';
-              }}>
+              <a href="#" className="btn btn-outline-primary">
                 View All <i className="bi bi-arrow-right ms-1"></i>
               </a>
             </div>
@@ -313,23 +249,7 @@ const Home = ({ onViewProduct }) => {
               <h2 className="fw-bold text-dark">Favorite Authors</h2>
             </div>
             <div className="col-auto">
-              <a href="#" className="btn btn-outline-primary" style={{
-                transition: 'all 0.3s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,123,255,0.3)';
-                e.currentTarget.style.backgroundColor = '#0d6efd';
-                e.currentTarget.style.borderColor = '#0d6efd';
-                e.currentTarget.style.color = 'white';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'none';
-                e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.borderColor = '#0d6efd';
-                e.currentTarget.style.color = '#0d6efd';
-              }}>
+              <a href="#" className="btn btn-outline-primary">
                 View All <i className="bi bi-arrow-right ms-1"></i>
               </a>
             </div>
@@ -368,23 +288,7 @@ const Home = ({ onViewProduct }) => {
               <h2 className="fw-bold text-dark">From the Blog</h2>
             </div>
             <div className="col-auto">
-              <a href="#" className="btn btn-outline-primary" style={{
-                transition: 'all 0.3s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,123,255,0.3)';
-                e.currentTarget.style.backgroundColor = '#0d6efd';
-                e.currentTarget.style.borderColor = '#0d6efd';
-                e.currentTarget.style.color = 'white';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'none';
-                e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.borderColor = '#0d6efd';
-                e.currentTarget.style.color = '#0d6efd';
-              }}>
+              <a href="#" className="btn btn-outline-primary">
                 View All <i className="bi bi-arrow-right ms-1"></i>
               </a>
             </div>
@@ -397,19 +301,7 @@ const Home = ({ onViewProduct }) => {
               { title: "Top 10 Must-Read Manga Series", date: "01 Dec, 2019", image: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400&h=200&fit=crop" }
             ].map((post, index) => (
               <div key={index} className="col-lg-4 col-md-6">
-                <div className="card h-100 shadow-sm" style={{
-                  transition: 'all 0.3s ease',
-                  cursor: 'pointer'
-                }}
-                onClick={() => onViewProduct(book.book_id)}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-5px)';
-                  e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.2)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-                }}>
+                <div className="card h-100 shadow-sm">
                   <img 
                     src={post.image} 
                     className="card-img-top" 

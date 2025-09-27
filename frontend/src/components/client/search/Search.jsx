@@ -235,18 +235,6 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch,
                         padding: '8px 12px',
                         transition: 'all 0.3s ease'
                       }}
-                      onMouseEnter={(e) => {
-                        if (!loading) {
-                          e.currentTarget.style.transform = 'translateY(-50%) scale(1.05)';
-                          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,123,255,0.3)';
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        if (!loading) {
-                          e.currentTarget.style.transform = 'translateY(-50%) scale(1)';
-                          e.currentTarget.style.boxShadow = 'none';
-                        }
-                      }}
                     >
                       {loading ? (
                         <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
@@ -270,18 +258,6 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch,
                           style={{
                             borderRadius: '20px',
                             transition: 'all 0.3s ease'
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.transform = 'translateY(-2px)';
-                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-                            e.currentTarget.style.backgroundColor = '#6c757d';
-                            e.currentTarget.style.color = 'white';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.transform = 'translateY(0)';
-                            e.currentTarget.style.boxShadow = 'none';
-                            e.currentTarget.style.backgroundColor = 'transparent';
-                            e.currentTarget.style.color = '#6c757d';
                           }}
                         >
                           {term}
@@ -349,16 +325,6 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch,
                             onClick={(e) => {
                               e.stopPropagation(); // Prevent card click when clicking button
                               addToCart(book.book_id);
-                            }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.transform = 'translateY(-2px)';
-                              e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
-                              e.currentTarget.style.backgroundColor = '#343a40';
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.transform = 'translateY(0)';
-                              e.currentTarget.style.boxShadow = 'none';
-                              e.currentTarget.style.backgroundColor = '#000';
                             }}
                           >
                             Add to Cart

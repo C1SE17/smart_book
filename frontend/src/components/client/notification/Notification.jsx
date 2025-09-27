@@ -140,16 +140,6 @@ const Notification = ({ onBackToHome, onNavigateTo }) => {
                   borderRadius: '0',
                   transition: 'all 0.3s ease'
                 }}
-                onMouseEnter={(e) => {
-                  if (activeTab !== tab.id) {
-                    e.currentTarget.style.backgroundColor = '#f8f9fa';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (activeTab !== tab.id) {
-                    e.currentTarget.style.backgroundColor = 'transparent';
-                  }
-                }}
               >
                 {tab.label}
               </button>
@@ -160,7 +150,8 @@ const Notification = ({ onBackToHome, onNavigateTo }) => {
         {/* Content based on active tab */}
         <div className="row">
           <div className="col-12">
-            {activeTab === 'notification' && (
+            <div style={{ minHeight: '500px' }}>
+              {activeTab === 'notification' && (
               <div className="row g-4">
                 {notifications.map((notification) => (
                   <div key={notification.notification_id} className="col-12">
@@ -169,14 +160,7 @@ const Notification = ({ onBackToHome, onNavigateTo }) => {
                       border: '1px solid #e9ecef',
                       transition: 'all 0.3s ease'
                     }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'translateY(-2px)';
-                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-                    }}>
+>
                       <div className="card-body p-3">
                         <div className="row align-items-center">
                           <div className="col-auto">
@@ -207,16 +191,6 @@ const Notification = ({ onBackToHome, onNavigateTo }) => {
                                 fontWeight: '500',
                                 transition: 'all 0.3s ease'
                               }}
-                              onMouseEnter={(e) => {
-                                e.currentTarget.style.transform = 'translateY(-2px)';
-                                e.currentTarget.style.boxShadow = '0 4px 12px rgba(255,193,7,0.3)';
-                                e.currentTarget.style.backgroundColor = '#ffb300';
-                              }}
-                              onMouseLeave={(e) => {
-                                e.currentTarget.style.transform = 'translateY(0)';
-                                e.currentTarget.style.boxShadow = 'none';
-                                e.currentTarget.style.backgroundColor = '#ffc107';
-                              }}
                             >
                               {notification.action}
                             </button>
@@ -232,7 +206,11 @@ const Notification = ({ onBackToHome, onNavigateTo }) => {
             {activeTab === 'account' && (
               <div className="row g-4">
                 <div className="col-12">
-                  <div className="card shadow-sm">
+                  <div className="card shadow-sm" style={{
+                    backgroundColor: '#f8f9fa',
+                    border: '1px solid #e9ecef',
+                    minHeight: '400px'
+                  }}>
                     <div className="card-body p-4">
                       <h5 className="card-title">My Account</h5>
                       <p className="text-muted">Account information will be displayed here.</p>
@@ -245,7 +223,11 @@ const Notification = ({ onBackToHome, onNavigateTo }) => {
             {activeTab === 'purchases' && (
               <div className="row g-4">
                 <div className="col-12">
-                  <div className="card shadow-sm">
+                  <div className="card shadow-sm" style={{
+                    backgroundColor: '#f8f9fa',
+                    border: '1px solid #e9ecef',
+                    minHeight: '400px'
+                  }}>
                     <div className="card-body p-4">
                       <h5 className="card-title">Purchases</h5>
                       <p className="text-muted">Purchase history will be displayed here.</p>
@@ -258,7 +240,11 @@ const Notification = ({ onBackToHome, onNavigateTo }) => {
             {activeTab === 'voucher' && (
               <div className="row g-4">
                 <div className="col-12">
-                  <div className="card shadow-sm">
+                  <div className="card shadow-sm" style={{
+                    backgroundColor: '#f8f9fa',
+                    border: '1px solid #e9ecef',
+                    minHeight: '400px'
+                  }}>
                     <div className="card-body p-4">
                       <h5 className="card-title">Voucher</h5>
                       <p className="text-muted">Available vouchers will be displayed here.</p>
@@ -267,6 +253,7 @@ const Notification = ({ onBackToHome, onNavigateTo }) => {
                 </div>
               </div>
             )}
+            </div>
           </div>
         </div>
       </div>

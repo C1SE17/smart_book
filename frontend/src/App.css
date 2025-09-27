@@ -50,20 +50,6 @@
   }
 }
 
-/* Hover effects */
-.nav-link:hover,
-.navbar-brand:hover {
-  transform: translateY(-1px);
-  transition: transform 0.2s ease;
-}
-
-/* Icon hover effects */
-.bi-bell:hover,
-.bi-search:hover,
-.bi-person:hover {
-  color: #007bff !important;
-  transition: color 0.3s ease;
-}
 
 /* Footer styling */
 footer {
@@ -103,14 +89,6 @@ footer p:last-child {
   }
 }
 
-/* Footer link hover effects */
-footer a {
-  transition: color 0.3s ease;
-}
-
-footer a:hover {
-  color: #007bff !important;
-}
 
 /* Hero Section */
 .hero-section {
@@ -132,23 +110,7 @@ footer a:hover {
   background: linear-gradient(45deg, #f8f9fa, #e9ecef);
 }
 
-/* Author Avatars */
-.rounded-circle {
-  transition: transform 0.3s ease;
-}
 
-.rounded-circle:hover {
-  transform: scale(1.1);
-}
-
-/* Blog Cards */
-.blog-card {
-  transition: transform 0.3s ease;
-}
-
-.blog-card:hover {
-  transform: translateY(-3px);
-}
 
 /* Section Titles */
 .section-title {
@@ -167,15 +129,6 @@ footer a:hover {
   border-radius: 2px;
 }
 
-/* Button Hover Effects */
-.btn {
-  transition: all 0.3s ease;
-}
-
-.btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
 
 /* Star Rating */
 .bi-star-fill {
@@ -193,4 +146,14 @@ footer a:hover {
 
 .flex-grow-1 {
   flex-grow: 1;
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Prevent scroll jump on page navigation */
+body {
+  scroll-behavior: smooth;
 }

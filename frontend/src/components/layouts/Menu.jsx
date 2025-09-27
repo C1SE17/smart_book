@@ -62,18 +62,19 @@ const MenuClient = ({ onNavigateTo, onBackToHome, onFilterByCategory }) => {
     <nav className="navbar navbar-expand-lg navbar-light bg-white fixed-top" style={{ borderTop: '3px solid #8B5CF6', zIndex: 1000 }}>
       <div className="container">
         {/* Brand Name */}
-        <a 
+        <span 
           className="navbar-brand fw-bold text-dark" 
-          href="#" 
-          onClick={(e) => { e.preventDefault(); onBackToHome(); }}
+          onClick={onBackToHome}
           style={{ 
             fontSize: '1.5rem',
             fontFamily: 'sans-serif',
-            letterSpacing: '0.5px'
+            letterSpacing: '0.5px',
+            cursor: 'pointer',
+        
           }}
         >
           SMART BOOK
-        </a>
+        </span>
 
         {/* Mobile Toggle */}
         <button 
@@ -285,20 +286,6 @@ const MenuClient = ({ onNavigateTo, onBackToHome, onFilterByCategory }) => {
           transition: all 0.3s ease;
         }
 
-        .nav-link:hover {
-          color: #8B5CF6 !important;
-          transition: color 0.3s ease;
-        }
-
-        .navbar-brand:hover {
-          color: #8B5CF6 !important;
-          transition: color 0.3s ease;
-        }
-
-        .nav-link:hover i {
-          color: #8B5CF6 !important;
-          transition: color 0.3s ease;
-        }
       `}</style>
     </nav>
   );

@@ -1,10 +1,10 @@
 import React, { useState, useCallback, useMemo } from 'react'
 import Home from './components/Home'
 import Auth from './features/auth/Auth'
-import Search from './pages/auth/search/Search'
-import Cart from './components/carts/Cart'
-import Notification from './pages/auth/notification/Notification'
-import ProductDetail from './components/products/ProductDetail'
+import Search from './components/client/search/Search'
+import Cart from './components/client/carts/Cart'
+import Notification from './components/client/notification/Notification'
+import ProductDetail from './components/client/products/ProductDetail'
 import Hero from './components/layouts/Slide'
 import MenuClient from './components/layouts/Menu'
 import './App.css'
@@ -19,6 +19,8 @@ function App() {
     setCurrentPage('home');
     setSearchQuery(''); // Clear search when going home
     setProductId(null); // Clear product ID
+    // Reset scroll position to top when going home
+    window.scrollTo(0, 0);
   }, []);
   
   const handleLoginSuccess = useCallback((userData) => {
@@ -26,27 +28,39 @@ function App() {
     setCurrentPage('home'); // Redirect to home after login
     setSearchQuery(''); // Clear search
     setProductId(null); // Clear product ID
+    // Reset scroll position to top after login
+    window.scrollTo(0, 0);
   }, []);
 
   // Navigation handlers
-  const handleNavigateTo = useCallback((page) => () => setCurrentPage(page), []);
+  const handleNavigateTo = useCallback((page) => () => {
+    setCurrentPage(page);
+    // Reset scroll position to top when navigating
+    window.scrollTo(0, 0);
+  }, []);
   
   // Search handler that navigates to search page with query
   const handleSearch = useCallback((query) => {
     setSearchQuery(query);
     setCurrentPage('search');
+    // Reset scroll position to top when searching
+    window.scrollTo(0, 0);
   }, []);
 
   // Product detail handler
   const handleViewProduct = useCallback((id) => {
     setProductId(id);
     setCurrentPage('product');
+    // Reset scroll position to top when viewing product
+    window.scrollTo(0, 0);
   }, []);
 
   // Category filter handler
   const handleFilterByCategory = useCallback((categoryId, categoryName) => {
     setSearchQuery(`category:${categoryName}`);
     setCurrentPage('search');
+    // Reset scroll position to top when filtering by category
+    window.scrollTo(0, 0);
   }, []);
 
   // Memoized page components to avoid recreation
@@ -59,7 +73,7 @@ function App() {
   }), [handleBackToHome, handleLoginSuccess, handleNavigateTo, searchQuery, handleSearch, handleViewProduct, productId]);
 
   return (
-    <div className="d-flex flex-column min-vh-100" style={{ paddingTop: '80px' }}>
+    <div className="d-flex flex-column min-vh-100" style={{ paddingTop: '80px', transition: 'all 0.3s ease' }}>
       {/* Main Menu - Always rendered at top level */}
       <MenuClient onNavigateTo={handleNavigateTo} onBackToHome={handleBackToHome} onFilterByCategory={handleFilterByCategory} />
 
