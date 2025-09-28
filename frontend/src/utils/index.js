@@ -6,6 +6,9 @@ export const validateEmail = (email) => {
   return emailRegex.test(email);
 };
 
+// Performance utilities
+export * from './performance';
+
 // Password validation
 export const validatePassword = (password) => {
   // At least 8 characters, 1 uppercase, 1 lowercase, 1 number

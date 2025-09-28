@@ -30,7 +30,7 @@ const ForgotPassword = ({ onBackToLogin, onBackToHome }) => {
     const newErrors = {};
 
     if (!formData.email) {
-      newErrors.email = 'Email is required';
+      newErrors.email = 'Email là bắt buộc';
     } else if (!validateEmail(formData.email)) {
       newErrors.email = 'Please enter a valid email';
     }
@@ -57,7 +57,7 @@ const ForgotPassword = ({ onBackToLogin, onBackToHome }) => {
       
     } catch (error) {
       console.error('Password reset error:', error);
-      setErrors({ general: 'Failed to send reset email. Please try again.' });
+      setErrors({ general: 'Gửi email đặt lại mật khẩu thất bại. Vui lòng thử lại.' });
     } finally {
       setLoading(false);
     }

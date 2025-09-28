@@ -1,7 +1,7 @@
 // API Services
 
 // Base API configuration
-const API_BASE_URL = 'http://localhost:3001';
+const API_BASE_URL = 'http://localhost:3306/api';
 
 // Generic API request function
 const apiRequest = async (endpoint, options = {}) => {
@@ -45,7 +45,7 @@ export const userService = {
   },
 
   getProfile: async (token) => {
-    return apiRequest('/users/profile', {
+    return apiRequest('/users/users/1', {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -53,12 +53,47 @@ export const userService = {
   },
 
   updateProfile: async (userData, token) => {
-    return apiRequest('/users/profile', {
+    return apiRequest('/users/update', {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify(userData)
+    });
+  },
+
+  changePassword: async (passwordData, token) => {
+    return apiRequest('/users/change-password', {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(passwordData)
+    });
+  },
+
+  getOrders: async (token) => {
+    return apiRequest('/order', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+  },
+
+  getNotifications: async (token) => {
+    return apiRequest('/users/notifications', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+  },
+
+  markNotificationRead: async (notificationId, token) => {
+    return apiRequest(`/users/notifications/${notificationId}/read`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
     });
   }
 };

@@ -1,6 +1,59 @@
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 
-const Home = ({ onViewProduct }) => {
+const Home = ({ onViewProduct, onViewAllCategories, onFilterByCategory }) => {
+  // Memoize data to prevent recreation on every render
+  const featuredCategories = useMemo(() => [
+    { title: "Books and Stories", category: "Fiction", image: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=300&h=200&fit=crop" },
+    { title: "Foreign Literature", category: "Literature", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=200&fit=crop" },
+    { title: "Sala Thanks by Theme", category: "Self-Help", image: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=300&h=200&fit=crop" },
+    { title: "Burley by Author", category: "Biography", image: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=300&h=200&fit=crop" }
+  ], []);
+
+  const peoplesChoiceBooks = useMemo(() => [
+    { book_id: 1, title: "WHERE THE CRAWDADS SING", author: "Delia Owens", price: "180,000 VNĐ", category: "Fiction", image: "./public/images/book1.jpg" },
+    { book_id: 2, title: "Doraemon: Nobita's Little Star Wars", author: "Fujiko F. Fujio", price: "120,000 VNĐ", category: "Manga", image: "./public/images/book2.jpg" },
+    { book_id: 3, title: "Demon Slayer - Vô hạn thành", author: "Koyoharu Gotouge", price: "150,000 VNĐ", category: "Manga", image: "./public/images/book3.jpg" },
+    { book_id: 4, title: "Conan - Vụ Án Nữ Hoàng 450", author: "Gosho Aoyama", price: "130,000 VNĐ", category: "Manga", image: "./public/images/book4.jpg" }
+  ], []);
+
+  const newAdditionsBooks = useMemo(() => [
+    { book_id: 1, title: "WHERE THE CRAWDADS SING", author: "Delia Owens", price: "180,000 VNĐ", category: "Fiction", image: "./public/images/book1.jpg" },
+    { book_id: 2, title: "Doraemon: Nobita's Little Star Wars", author: "Fujiko F. Fujio", price: "120,000 VNĐ", category: "Manga", image: "./public/images/book2.jpg" },
+    { book_id: 3, title: "Demon Slayer - Vô hạn thành", author: "Koyoharu Gotouge", price: "150,000 VNĐ", category: "Manga", image: "./public/images/book3.jpg" },
+    { book_id: 4, title: "Conan - Vụ Án Nữ Hoàng 450", author: "Gosho Aoyama", price: "130,000 VNĐ", category: "Manga", image: "./public/images/book4.jpg" }
+  ], []);
+
+  const popularBooks = useMemo(() => [
+    { book_id: 1, title: "WHERE THE CRAWDADS SING", author: "Delia Owens", price: "180,000 VNĐ", category: "Fiction", image: "./public/images/book1.jpg" },
+    { book_id: 2, title: "Doraemon: Nobita's Little Star Wars", author: "Fujiko F. Fujio", price: "120,000 VNĐ", category: "Manga", image: "./public/images/book2.jpg" },
+    { book_id: 3, title: "Demon Slayer - Vô hạn thành", author: "Koyoharu Gotouge", price: "150,000 VNĐ", category: "Manga", image: "./public/images/book3.jpg" },
+    { book_id: 4, title: "Conan - Vụ Án Nữ Hoàng 450", author: "Gosho Aoyama", price: "130,000 VNĐ", category: "Manga", image: "./public/images/book4.jpg" }
+  ], []);
+
+  const authors = useMemo(() => [
+    { name: "Fujiko Fujio", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face" },
+    { name: "Delia Owens", image: "https://photo.znews.vn/w960/Uploaded/sgorvz/2025_05_23/tac_gia_70_tuoi.jpg" },
+    { name: "Koyoharu Gotouge", image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face" },
+    { name: "Gosho Aoyama", image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&crop=face" },
+    { name: "Haruki Murakami", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face" },
+    { name: "J.K. Rowling", image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&crop=face" }
+  ], []);
+
+  const blogPosts = useMemo(() => [
+    { title: "Fujiko F. Fujio - The Creator of Doraemon", date: "24 Oct, 2019", image: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=200&fit=crop" },
+    { title: "The Art of Manga Storytelling", date: "15 Nov, 2019", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=200&fit=crop" },
+    { title: "Top 10 Must-Read Manga Series", date: "01 Dec, 2019", image: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400&h=200&fit=crop" }
+  ], []);
+
+  // Memoize event handlers
+  const handleBookClick = useCallback((bookId) => {
+    onViewProduct(bookId);
+  }, [onViewProduct]);
+
+  const handleCategoryClick = useCallback((category) => {
+    onFilterByCategory(category);
+  }, [onFilterByCategory]);
+
   return (
     <main className="flex-grow-1">
       {/* Featured Categories Section */}
@@ -11,25 +64,20 @@ const Home = ({ onViewProduct }) => {
               <h2 className="fw-bold text-dark">Featured Categories</h2>
             </div>
             <div className="col-auto">
-              <a href="#" className="btn btn-outline-primary">
+              <a href="/books" className="btn btn-outline-primary">
                 View All <i className="bi bi-arrow-right ms-1"></i>
               </a>
             </div>
           </div>
           
           <div className="row g-4">
-            {[
-              { title: "Books and Stories", category: "Fiction", image: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=300&h=200&fit=crop" },
-              { title: "Foreign Literature", category: "Literature", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=200&fit=crop" },
-              { title: "Sala Thanks by Theme", category: "Self-Help", image: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=300&h=200&fit=crop" },
-              { title: "Burley by Author", category: "Biography", image: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=300&h=200&fit=crop" }
-            ].map((book, index) => (
+            {featuredCategories.map((book, index) => (
               <div key={index} className="col-lg-3 col-md-6">
                 <div className="card h-100 shadow-sm" style={{
                   transition: 'all 0.3s ease',
                   cursor: 'pointer'
                 }}
-                onClick={() => onViewProduct(book.book_id)}
+                onClick={() => handleBookClick(book.book_id)}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-5px)';
                   e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.2)';
@@ -71,17 +119,17 @@ const Home = ({ onViewProduct }) => {
           
           <div className="row g-4">
             {[
-              { book_id: 1, title: "WHERE THE CRAWDADS SING", author: "Delia Owens", price: "$20 - $30", category: "Fiction", image: "./public/images/book1.jpg" },
-              { book_id: 2, title: "Doraemon: Nobita's Little Star Wars", author: "Fujiko F. Fujio", price: "$15 - $25", category: "Manga", image: "./public/images/book2.jpg" },
-              { book_id: 3, title: "Demon Slayer - Vô hạn thành", author: "Koyoharu Gotouge", price: "$18 - $28", category: "Manga", image: "./public/images/book3.jpg" },
-              { book_id: 4, title: "Conan - Vụ Án Nữ Hoàng 450", author: "Gosho Aoyama", price: "$16 - $26", category: "Manga", image: "./public/images/book4.jpg" }
+              { book_id: 1, title: "WHERE THE CRAWDADS SING", author: "Delia Owens", price: "180,000 VNĐ", category: "Fiction", image: "./public/images/book1.jpg" },
+              { book_id: 2, title: "Doraemon: Nobita's Little Star Wars", author: "Fujiko F. Fujio", price: "120,000 VNĐ", category: "Manga", image: "./public/images/book2.jpg" },
+              { book_id: 3, title: "Demon Slayer - Vô hạn thành", author: "Koyoharu Gotouge", price: "150,000 VNĐ", category: "Manga", image: "./public/images/book3.jpg" },
+              { book_id: 4, title: "Conan - Vụ Án Nữ Hoàng 450", author: "Gosho Aoyama", price: "130,000 VNĐ", category: "Manga", image: "./public/images/book4.jpg" }
             ].map((book, index) => (
               <div key={index} className="col-lg-3 col-md-6">
                 <div className="card h-100 shadow-sm" style={{
                   transition: 'all 0.3s ease',
                   cursor: 'pointer'
                 }}
-                onClick={() => onViewProduct(book.book_id)}
+                onClick={() => handleBookClick(book.book_id)}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-5px)';
                   e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.2)';
@@ -133,17 +181,17 @@ const Home = ({ onViewProduct }) => {
           
           <div className="row g-4">
             {[
-              { book_id: 1, title: "WHERE THE CRAWDADS SING", author: "Delia Owens", price: "$20 - $30", category: "Fiction", image: "./public/images/book1.jpg" },
-              { book_id: 2, title: "Doraemon: Nobita's Little Star Wars", author: "Fujiko F. Fujio", price: "$15 - $25", category: "Manga", image: "./public/images/book2.jpg" },
-              { book_id: 3, title: "Demon Slayer - Vô hạn thành", author: "Koyoharu Gotouge", price: "$18 - $28", category: "Manga", image: "./public/images/book3.jpg" },
-              { book_id: 4, title: "Conan - Vụ Án Nữ Hoàng 450", author: "Gosho Aoyama", price: "$16 - $26", category: "Manga", image: "./public/images/book4.jpg" }
+              { book_id: 1, title: "WHERE THE CRAWDADS SING", author: "Delia Owens", price: "180,000 VNĐ", category: "Fiction", image: "./public/images/book1.jpg" },
+              { book_id: 2, title: "Doraemon: Nobita's Little Star Wars", author: "Fujiko F. Fujio", price: "120,000 VNĐ", category: "Manga", image: "./public/images/book2.jpg" },
+              { book_id: 3, title: "Demon Slayer - Vô hạn thành", author: "Koyoharu Gotouge", price: "150,000 VNĐ", category: "Manga", image: "./public/images/book3.jpg" },
+              { book_id: 4, title: "Conan - Vụ Án Nữ Hoàng 450", author: "Gosho Aoyama", price: "130,000 VNĐ", category: "Manga", image: "./public/images/book4.jpg" }
             ].map((book, index) => (
               <div key={index} className="col-lg-3 col-md-6">
                 <div className="card h-100 shadow-sm" style={{
                   transition: 'all 0.3s ease',
                   cursor: 'pointer'
                 }}
-                onClick={() => onViewProduct(book.book_id)}
+                onClick={() => handleBookClick(book.book_id)}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-5px)';
                   e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.2)';
@@ -195,17 +243,17 @@ const Home = ({ onViewProduct }) => {
           
           <div className="row g-4">
             {[
-              { book_id: 1, title: "WHERE THE CRAWDADS SING", author: "Delia Owens", price: "$20 - $30", category: "Fiction", image: "./public/images/book1.jpg" },
-              { book_id: 2, title: "Doraemon: Nobita's Little Star Wars", author: "Fujiko F. Fujio", price: "$15 - $25", category: "Manga", image: "./public/images/book2.jpg" },
-              { book_id: 3, title: "Demon Slayer - Vô hạn thành", author: "Koyoharu Gotouge", price: "$18 - $28", category: "Manga", image: "./public/images/book3.jpg" },
-              { book_id: 4, title: "Conan - Vụ Án Nữ Hoàng 450", author: "Gosho Aoyama", price: "$16 - $26", category: "Manga", image: "./public/images/book4.jpg" }
+              { book_id: 1, title: "WHERE THE CRAWDADS SING", author: "Delia Owens", price: "180,000 VNĐ", category: "Fiction", image: "./public/images/book1.jpg" },
+              { book_id: 2, title: "Doraemon: Nobita's Little Star Wars", author: "Fujiko F. Fujio", price: "120,000 VNĐ", category: "Manga", image: "./public/images/book2.jpg" },
+              { book_id: 3, title: "Demon Slayer - Vô hạn thành", author: "Koyoharu Gotouge", price: "150,000 VNĐ", category: "Manga", image: "./public/images/book3.jpg" },
+              { book_id: 4, title: "Conan - Vụ Án Nữ Hoàng 450", author: "Gosho Aoyama", price: "130,000 VNĐ", category: "Manga", image: "./public/images/book4.jpg" }
             ].map((book, index) => (
               <div key={index} className="col-lg-3 col-md-6">
                 <div className="card h-100 shadow-sm" style={{
                   transition: 'all 0.3s ease',
                   cursor: 'pointer'
                 }}
-                onClick={() => onViewProduct(book.book_id)}
+                onClick={() => handleBookClick(book.book_id)}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-5px)';
                   e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.2)';

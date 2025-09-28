@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { validateEmail } from '../../utils';
+import { userService } from '../../services';
 
-const Register = ({ onToggleMode }) => {
+const Register = ({ onToggleMode, onRegisterSuccess }) => {
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -33,31 +34,31 @@ const Register = ({ onToggleMode }) => {
     const newErrors = {};
 
     if (!formData.fullName.trim()) {
-      newErrors.fullName = 'Full name is required';
+      newErrors.fullName = 'Họ tên là bắt buộc';
     } else if (formData.fullName.trim().length < 2) {
-      newErrors.fullName = 'Full name must be at least 2 characters';
+      newErrors.fullName = 'Họ tên phải có ít nhất 2 ký tự';
     }
 
     if (!formData.email) {
-      newErrors.email = 'Email is required';
+      newErrors.email = 'Email là bắt buộc';
     } else if (!validateEmail(formData.email)) {
-      newErrors.email = 'Please enter a valid email';
+      newErrors.email = 'Vui lòng nhập email hợp lệ';
     }
 
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = 'Mật khẩu là bắt buộc';
     } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+      newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
     }
 
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Please confirm your password';
+      newErrors.confirmPassword = 'Vui lòng xác nhận mật khẩu';
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+      newErrors.confirmPassword = 'Mật khẩu xác nhận không khớp';
     }
 
     if (!formData.agreeTerms) {
-      newErrors.agreeTerms = 'You must agree to the terms and conditions';
+      newErrors.agreeTerms = 'Bạn phải đồng ý với điều khoản và điều kiện';
     }
 
     setErrors(newErrors);
@@ -74,18 +75,36 @@ const Register = ({ onToggleMode }) => {
     setLoading(true);
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Gọi API backend để đăng ký
+      const response = await userService.register({
+        name: formData.fullName,
+        email: formData.email,
+        password: formData.password,
+        phone: '',
+        address: '',
+        role: 'customer'
+      });
       
-      console.log('Register successful:', formData);
+      console.log('Đăng ký thành công:', response);
       
-      // You can add success logic here
-      alert('Registration successful! Please login with your credentials.');
-      onToggleMode(); // Switch to login form
+      // Hiển thị thông báo thành công
+      setErrors({ success: 'Đăng ký thành công! Vui lòng đăng nhập với thông tin của bạn.' });
+      
+      // Gọi callback thành công nếu có
+      if (onRegisterSuccess) {
+        onRegisterSuccess(response);
+      }
+      
+      // Tự động chuyển sang login sau 2 giây
+      setTimeout(() => {
+        if (onToggleMode) {
+          onToggleMode();
+        }
+      }, 2000);
       
     } catch (error) {
-      console.error('Register error:', error);
-      setErrors({ general: 'Registration failed. Please try again.' });
+      console.error('Lỗi đăng ký:', error);
+      setErrors({ general: 'Đăng ký thất bại. Vui lòng thử lại.' });
     } finally {
       setLoading(false);
     }
@@ -107,6 +126,14 @@ const Register = ({ onToggleMode }) => {
           {/* Divider Line */}
           <hr className="text-muted mb-4" style={{opacity: 0.3}} />
 
+          {/* Success Message */}
+          {errors.success && (
+            <div className="alert alert-success" role="alert">
+              <i className="bi bi-check-circle me-2"></i>
+              {errors.success}
+            </div>
+          )}
+
           {/* General Error Message */}
           {errors.general && (
             <div className="alert alert-danger" role="alert">
@@ -120,7 +147,7 @@ const Register = ({ onToggleMode }) => {
             {/* Full Name Field */}
             <div className="mb-3">
               <label htmlFor="fullName" className="form-label text-dark fw-medium">
-                Full Name <span className="text-danger">*</span>
+                Họ và tên <span className="text-danger">*</span>
               </label>
               <input
                 type="text"
@@ -129,7 +156,7 @@ const Register = ({ onToggleMode }) => {
                 name="fullName"
                 value={formData.fullName}
                 onChange={handleChange}
-                placeholder="Enter your full name"
+                placeholder="Nhập họ và tên của bạn"
                 style={{
                   backgroundColor: '#f8f9fa',
                   border: errors.fullName ? '1px solid #dc3545' : '1px solid #e9ecef',
@@ -156,7 +183,7 @@ const Register = ({ onToggleMode }) => {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                placeholder="Enter your email"
+                placeholder="Nhập email của bạn"
                 style={{
                   backgroundColor: '#f8f9fa',
                   border: errors.email ? '1px solid #dc3545' : '1px solid #e9ecef',
@@ -183,7 +210,7 @@ const Register = ({ onToggleMode }) => {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                placeholder="Enter your password"
+                placeholder="Nhập mật khẩu của bạn"
                 style={{
                   backgroundColor: '#f8f9fa',
                   border: errors.password ? '1px solid #dc3545' : '1px solid #e9ecef',
@@ -210,7 +237,7 @@ const Register = ({ onToggleMode }) => {
                 name="confirmPassword"
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                placeholder="Confirm your password"
+                placeholder="Xác nhận mật khẩu của bạn"
                 style={{
                   backgroundColor: '#f8f9fa',
                   border: errors.confirmPassword ? '1px solid #dc3545' : '1px solid #e9ecef',
@@ -236,7 +263,7 @@ const Register = ({ onToggleMode }) => {
                 onChange={handleChange}
               />
               <label className="form-check-label text-dark" htmlFor="agreeTerms">
-                I agree to the <a href="#" className="text-primary text-decoration-none">Terms and Conditions</a>
+                Tôi đồng ý với <a href="#" className="text-primary text-decoration-none">Điều khoản và Điều kiện</a>
               </label>
               {errors.agreeTerms && (
                 <div className="invalid-feedback d-block">
@@ -262,10 +289,10 @@ const Register = ({ onToggleMode }) => {
               {loading ? (
                 <>
                   <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                  Registering...
+                  Đang đăng ký...
                 </>
               ) : (
-                'Register'
+                'Đăng ký'
               )}
             </button>
           </form>
@@ -273,14 +300,14 @@ const Register = ({ onToggleMode }) => {
           {/* Additional Options */}
           <div className="text-center mt-4">
             <p className="text-muted small mb-0">
-              Already have an account? 
+              Đã có tài khoản? 
               <button 
                 type="button"
                 onClick={onToggleMode}
                 className="btn btn-link text-primary text-decoration-none p-0 ms-1"
                 style={{border: 'none', background: 'none'}}
               >
-                Sign in
+                Đăng nhập
               </button>
             </p>
           </div>

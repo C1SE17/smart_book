@@ -15,7 +15,7 @@ dotenv.config();
 
 // Khởi tạo ứng dụng Express
 const app = express(); // Đảm bảo app được khai báo trước khi sử dụng
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 3306;
 
 // CORS middleware
 app.use(cors({

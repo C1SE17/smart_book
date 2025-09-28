@@ -1,16 +1,38 @@
-import React, { useState, useCallback, useMemo } from 'react'
-import { Home, Search, Cart, Notification, ProductDetail, Hero, MenuClient } from './components'
+import React, { useState, useCallback, useMemo, useEffect } from 'react'
+import { Search, Cart, Notification, ProductDetail, Slide, MenuClient, OrderDetail, FeaturedCategories, BooksPage } from './components'
+import Home from './components/Home'
+import { UserProfile } from './components/user'
 import Auth from './features/auth/Auth'
+import { handleRoute, navigateTo } from './routes'
 import './App.css'
 
 function App() {
-  const [currentPage, setCurrentPage] = useState('home'); // 'home', 'auth', 'search', 'cart', 'notification', or 'product'
+  const [currentPage, setCurrentPage] = useState('home'); // 'home', 'auth', 'search', 'cart', 'notification', 'product', or 'profile'
   const [searchQuery, setSearchQuery] = useState(''); // Global search state
   const [productId, setProductId] = useState(null); // Product ID for product detail page
+  const [user, setUser] = useState(null); // User authentication state
+  const [profileTab, setProfileTab] = useState('profile'); // Profile tab state
+
+  // Handle URL routing
+  useEffect(() => {
+    const handlePopState = () => {
+      handleRoute(window.location.pathname, setCurrentPage, setProductId, setSearchQuery, setProfileTab);
+    };
+
+    // Initial route handling
+    handlePopState();
+
+    // Listen for browser back/forward
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
 
   // Memoized navigation handlers
   const handleBackToHome = useCallback(() => {
-    setCurrentPage('home');
+    navigateTo('/');
     setSearchQuery(''); // Clear search when going home
     setProductId(null); // Clear product ID
     // Reset scroll position to top when going home
@@ -19,16 +41,51 @@ function App() {
   
   const handleLoginSuccess = useCallback((userData) => {
     console.log('User logged in:', userData);
-    setCurrentPage('home'); // Redirect to home after login
+    setUser(userData); // Store user data
+    navigateTo('/'); // Redirect to home after login
     setSearchQuery(''); // Clear search
     setProductId(null); // Clear product ID
     // Reset scroll position to top after login
     window.scrollTo(0, 0);
   }, []);
 
+  const handleLogout = useCallback(() => {
+    setUser(null); // Clear user data
+    navigateTo('/'); // Redirect to home after logout
+    setSearchQuery(''); // Clear search
+    setProductId(null); // Clear product ID
+    // Reset scroll position to top after logout
+    window.scrollTo(0, 0);
+  }, []);
+
+  const handleViewAllNotifications = useCallback(() => {
+    console.log('Navigate to all notifications');
+    navigateTo('/notification');
+  }, []);
+
+  const handleUpdateProfile = useCallback((updatedUserData) => {
+    setUser(prev => ({
+      ...prev,
+      ...updatedUserData
+    }));
+  }, []);
+
   // Navigation handlers
   const handleNavigateTo = useCallback((page) => () => {
-    setCurrentPage(page);
+    const routeMap = {
+      'home': '/',
+      'books': '/books',
+      'profile': '/profile',
+      'cart': '/cart',
+      'auth': '/login',
+      'register': '/register',
+      'search': '/search',
+      'product': '/product',
+      'notification': '/notification'
+    };
+    
+    const path = routeMap[page] || '/';
+    navigateTo(path);
     // Reset scroll position to top when navigating
     window.scrollTo(0, 0);
   }, []);
@@ -36,15 +93,16 @@ function App() {
   // Search handler that navigates to search page with query
   const handleSearch = useCallback((query) => {
     setSearchQuery(query);
-    setCurrentPage('search');
+    navigateTo('/search', { q: query });
     // Reset scroll position to top when searching
     window.scrollTo(0, 0);
   }, []);
 
   // Product detail handler
   const handleViewProduct = useCallback((id) => {
+    console.log('handleViewProduct called with id:', id);
     setProductId(id);
-    setCurrentPage('product');
+    navigateTo('/product', { id: id });
     // Reset scroll position to top when viewing product
     window.scrollTo(0, 0);
   }, []);
@@ -52,7 +110,7 @@ function App() {
   // Category filter handler
   const handleFilterByCategory = useCallback((categoryId, categoryName) => {
     setSearchQuery(`category:${categoryName}`);
-    setCurrentPage('search');
+    navigateTo('/search', { q: `category:${categoryName}` });
     // Reset scroll position to top when filtering by category
     window.scrollTo(0, 0);
   }, []);
@@ -63,28 +121,81 @@ function App() {
     search: <Search onBackToHome={handleBackToHome} onNavigateTo={handleNavigateTo} initialSearchQuery={searchQuery} onSearch={handleSearch} onViewProduct={handleViewProduct} />,
     cart: <Cart onBackToHome={handleBackToHome} onNavigateTo={handleNavigateTo} />,
     notification: <Notification onBackToHome={handleBackToHome} onNavigateTo={handleNavigateTo} />,
-    product: <ProductDetail onBackToHome={handleBackToHome} onNavigateTo={handleNavigateTo} productId={productId} onViewProduct={handleViewProduct} />
-  }), [handleBackToHome, handleLoginSuccess, handleNavigateTo, searchQuery, handleSearch, handleViewProduct, productId]);
+    product: <ProductDetail onBackToHome={handleBackToHome} onNavigateTo={handleNavigateTo} productId={productId} onViewProduct={handleViewProduct} />,
+    profile: <UserProfile user={user} onBackToHome={handleBackToHome} onUpdateProfile={handleUpdateProfile} />
+  }), [handleBackToHome, handleLoginSuccess, handleNavigateTo, searchQuery, handleSearch, handleViewProduct, productId, user, handleUpdateProfile]);
+
+  // Remove console.log in production
+  if (process.env.NODE_ENV === 'development') {
+    console.log('App render - currentPage:', currentPage, 'productId:', productId);
+  }
 
   return (
     <div className="d-flex flex-column min-vh-100" style={{ paddingTop: '80px', transition: 'all 0.3s ease' }}>
       {/* Main Menu - Always rendered at top level */}
-      <MenuClient onNavigateTo={handleNavigateTo} onBackToHome={handleBackToHome} onFilterByCategory={handleFilterByCategory} />
+      <MenuClient 
+        onNavigateTo={handleNavigateTo} 
+        onBackToHome={handleBackToHome} 
+        onFilterByCategory={handleFilterByCategory}
+        user={user}
+        onLogout={handleLogout}
+        onViewAllNotifications={handleViewAllNotifications}
+      />
 
       {/* Page Content */}
       {currentPage === 'auth' && pageComponents.auth}
+      {currentPage === 'register' && pageComponents.auth}
       {currentPage === 'search' && pageComponents.search}
       {currentPage === 'cart' && pageComponents.cart}
       {currentPage === 'notification' && pageComponents.notification}
       {currentPage === 'product' && pageComponents.product}
-      {currentPage === 'home' && (
-        <>
-          {/* Hero Section */}
-          <Hero />
-          {/* Home Page Content */}
-          <Home onViewProduct={handleViewProduct} />
-        </>
+      {currentPage === 'profile' && (
+        <UserProfile 
+          user={user} 
+          onBackToHome={handleBackToHome} 
+          onUpdateProfile={handleUpdateProfile}
+          activeTab={profileTab}
+          onTabChange={setProfileTab}
+        />
       )}
+      {currentPage === 'order-detail' && (
+        <OrderDetail 
+          orderId={productId} 
+          onBackToProfile={() => {
+            navigateTo('/profile/orders');
+          }}
+        />
+      )}
+          {currentPage === 'books' && (
+            <BooksPage 
+              onBackToHome={handleBackToHome}
+              onViewProduct={handleViewProduct}
+              onFilterByCategory={handleFilterByCategory}
+            />
+          )}
+      {currentPage === 'categories' && (
+        <div className="min-vh-100 d-flex align-items-center justify-content-center" style={{ backgroundColor: '#f5f5f5' }}>
+          <div className="text-center">
+            <h3>Categories page coming soon...</h3>
+            <button className="btn btn-primary mt-3" onClick={handleBackToHome}>
+              Back to Home
+            </button>
+          </div>
+        </div>
+      )}
+          {currentPage === 'home' && (
+            <>
+              {/* Slide Section */}
+              <Slide />
+              {/* Home Page Content */}
+              <Home onViewProduct={handleViewProduct} />
+              {/* Featured Categories */}
+              <FeaturedCategories 
+                onFilterByCategory={handleFilterByCategory}
+                onViewAllCategories={() => navigateTo('/categories')}
+              />
+            </>
+          )}
 
       {/* Footer */}
       <footer className="bg-light py-5 mt-5">

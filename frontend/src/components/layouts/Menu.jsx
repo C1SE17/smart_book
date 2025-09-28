@@ -1,20 +1,20 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { categoryService } from '../../services';
+import { NotificationDropdown } from '../common';
 
-const MenuClient = ({ onNavigateTo, onBackToHome, onFilterByCategory }) => {
+const MenuClient = ({ onNavigateTo, onBackToHome, onFilterByCategory, user, onLogout, onViewAllNotifications }) => {
   const [showShopDropdown, setShowShopDropdown] = useState(false);
   const [showCategoriesDropdown, setShowCategoriesDropdown] = useState(false);
   const [categories, setCategories] = useState([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [shopDropdownTimeout, setShopDropdownTimeout] = useState(null);
 
   // Fetch categories from backend
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         setCategoriesLoading(true);
-        console.log('Fetching categories...');
         const data = await categoryService.getAll();
-        console.log('Categories fetched:', data);
         setCategories(data);
       } catch (error) {
         console.error('Error fetching categories:', error);
@@ -34,12 +34,28 @@ const MenuClient = ({ onNavigateTo, onBackToHome, onFilterByCategory }) => {
     fetchCategories();
   }, []);
 
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (shopDropdownTimeout) {
+        clearTimeout(shopDropdownTimeout);
+      }
+    };
+  }, [shopDropdownTimeout]);
+
   const handleShopMouseEnter = useCallback(() => {
+    if (shopDropdownTimeout) {
+      clearTimeout(shopDropdownTimeout);
+      setShopDropdownTimeout(null);
+    }
     setShowShopDropdown(true);
-  }, []);
+  }, [shopDropdownTimeout]);
 
   const handleShopMouseLeave = useCallback(() => {
-    setShowShopDropdown(false);
+    const timeout = setTimeout(() => {
+      setShowShopDropdown(false);
+    }, 300);
+    setShopDropdownTimeout(timeout);
   }, []);
 
   const handleCategoriesMouseEnter = useCallback(() => {
@@ -59,28 +75,29 @@ const MenuClient = ({ onNavigateTo, onBackToHome, onFilterByCategory }) => {
 
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-light bg-white fixed-top" style={{ borderTop: '3px solid #8B5CF6', zIndex: 1000 }}>
+    <nav className="navbar navbar-expand-lg navbar-light bg-white fixed-top" style={{ borderTop: '3px solid #8B5CF6', zIndex: 1040 }}>
       <div className="container">
         {/* Brand Name */}
-        <span 
-          className="navbar-brand fw-bold text-dark" 
+        <span
+          className="navbar-brand fw-bold text-dark"
           onClick={onBackToHome}
-          style={{ 
+          style={{
             fontSize: '1.5rem',
             fontFamily: 'sans-serif',
             letterSpacing: '0.5px',
             cursor: 'pointer',
-        
+
           }}
         >
           SMART BOOK
         </span>
 
+
         {/* Mobile Toggle */}
-        <button 
-          className="navbar-toggler" 
-          type="button" 
-          data-bs-toggle="collapse" 
+        <button
+          className="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
           data-bs-target="#navbarNav"
         >
           <span className="navbar-toggler-icon"></span>
@@ -90,99 +107,145 @@ const MenuClient = ({ onNavigateTo, onBackToHome, onFilterByCategory }) => {
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav mx-auto">
             <li className="nav-item">
-              <a 
-                className="nav-link text-dark fw-normal" 
-                href="#" 
+              <a
+                className="nav-link text-dark fw-normal"
+                href="#"
                 onClick={(e) => { e.preventDefault(); onBackToHome(); }}
                 style={{ fontSize: '1rem', fontFamily: 'sans-serif' }}
               >
                 Home
               </a>
             </li>
-            
+
             {/* Shop Dropdown */}
-            <li 
-              className="nav-item dropdown" 
-              onMouseEnter={handleShopMouseEnter}
-              onMouseLeave={handleShopMouseLeave}
-            >
-              <a 
-                className="nav-link dropdown-toggle text-dark fw-normal" 
-                href="#" 
+                <li
+                  className="nav-item dropdown"
+                  onMouseEnter={handleShopMouseEnter}
+                  onMouseLeave={handleShopMouseLeave}
+                  style={{ position: 'relative' }}
+                >
+              <a
+                className="nav-link dropdown-toggle text-dark fw-normal"
+                href="#"
                 role="button"
                 style={{ fontSize: '1rem', fontFamily: 'sans-serif' }}
               >
                 Shop
               </a>
-              {showShopDropdown && (
-                <div 
-                  className="dropdown-menu show" 
-                  style={{
-                    minWidth: '800px',
-                    padding: '40px',
-                    borderRadius: '12px',
-                    boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
-                    border: 'none',
-                    animation: 'fadeIn 0.3s ease-in-out'
-                  }}
-                >
-                  <div className="row">
-                    {/* Product Types Column */}
-                    <div className="col-md-3">
-                      <h6 className="fw-bold mb-3" style={{ fontSize: '1.2rem', color: '#333' }}>Sách</h6>
-                      <div className="d-flex flex-column">
-                        <a href="#" className="dropdown-item mb-2" style={{ fontSize: '1rem', lineHeight: '1.4' }}>Fiction</a>
-                        <a href="#" className="dropdown-item mb-2" style={{ fontSize: '1rem', lineHeight: '1.4' }}>Non-Fiction</a>
-                        <a href="#" className="dropdown-item mb-2" style={{ fontSize: '1rem', lineHeight: '1.4' }}>Science</a>
-                        <a href="#" className="dropdown-item mb-2" style={{ fontSize: '1rem', lineHeight: '1.4' }}>History</a>
-                        <a href="#" className="dropdown-item mb-2" style={{ fontSize: '1rem', lineHeight: '1.4' }}>Biography</a>
-                      </div>
-                    </div>
+                  {showShopDropdown && (
+                    <div
+                      className="dropdown-menu show"
+                      style={{
+                        position: 'absolute',
+                        top: '100%',
+                        left: '0',
+                        minWidth: '600px',
+                        padding: '40px',
+                        borderRadius: '12px',
+                        boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
+                        border: 'none',
+                        animation: 'fadeIn 0.3s ease-in-out',
+                        zIndex: 1050,
+                        marginTop: '10px',
+                        transform: 'translateY(0)',
+                        transition: 'none'
+                      }}
+                      onMouseEnter={handleShopMouseEnter}
+                      onMouseLeave={handleShopMouseLeave}
+                    >
+                      <div className="row">
+                        {/* Categories Column */}
+                        <div className="col-md-6">
+                          <h6 className="fw-bold mb-3" style={{ fontSize: '1.2rem', color: '#333' }}>Categories</h6>
+                          <div className="d-flex flex-column">
+                            {categoriesLoading ? (
+                              <div className="text-muted">Loading categories...</div>
+                            ) : (
+                              categories.slice(0, 6).map((category) => (
+                                <a 
+                                  key={category.category_id} 
+                                  href="#" 
+                                  className="dropdown-item mb-2" 
+                                  style={{ fontSize: '1rem', lineHeight: '1.4' }}
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    handleCategoryClick(category.category_id, category.name);
+                                    setShowShopDropdown(false);
+                                  }}
+                                >
+                                  {category.name}
+                                  {category.book_count && (
+                                    <span className="text-muted ms-2">({category.book_count})</span>
+                                  )}
+                                </a>
+                              ))
+                            )}
+                          </div>
+                        </div>
 
-                    {/* Chính trị & Cuộc sống Column */}
-                    <div className="col-md-3">
-                      <h6 className="fw-bold mb-3" style={{ fontSize: '1.2rem', color: '#333' }}>Chính trị & Cuộc sống</h6>
-                      <div className="d-flex flex-column">
-                        <a href="#" className="dropdown-item mb-2" style={{ fontSize: '1rem', lineHeight: '1.4' }}>Politics</a>
-                        <a href="#" className="dropdown-item mb-2" style={{ fontSize: '1rem', lineHeight: '1.4' }}>Economics</a>
-                        <a href="#" className="dropdown-item mb-2" style={{ fontSize: '1rem', lineHeight: '1.4' }}>Philosophy</a>
-                        <a href="#" className="dropdown-item mb-2" style={{ fontSize: '1rem', lineHeight: '1.4' }}>Self-Help</a>
-                        <a href="#" className="dropdown-item mb-2" style={{ fontSize: '1rem', lineHeight: '1.4' }}>Psychology</a>
+                        {/* Shop Pages Column */}
+                        <div className="col-md-6">
+                          <h6 className="fw-bold mb-3" style={{ fontSize: '1.2rem', color: '#333' }}>Shop Pages</h6>
+                          <div className="d-flex flex-column">
+                            <a 
+                              href="#" 
+                              className="dropdown-item mb-2" 
+                              style={{ fontSize: '1rem', lineHeight: '1.4' }}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                onNavigateTo('books')();
+                                setShowShopDropdown(false);
+                              }}
+                            >
+                              Shop
+                            </a>
+                            <a 
+                              href="#" 
+                              className="dropdown-item mb-2" 
+                              style={{ fontSize: '1rem', lineHeight: '1.4' }}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                onNavigateTo('cart')();
+                                setShowShopDropdown(false);
+                              }}
+                            >
+                              Cart
+                            </a>
+                            <a 
+                              href="#" 
+                              className="dropdown-item mb-2" 
+                              style={{ fontSize: '1rem', lineHeight: '1.4' }}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                onNavigateTo('books')();
+                                setShowShopDropdown(false);
+                              }}
+                            >
+                              Checkout
+                            </a>
+                            <a 
+                              href="#" 
+                              className="dropdown-item mb-2" 
+                              style={{ fontSize: '1rem', lineHeight: '1.4' }}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                onNavigateTo('profile')();
+                                setShowShopDropdown(false);
+                              }}
+                            >
+                              My account
+                            </a>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-
-                    {/* Đồ chơi & Khác Column */}
-                    <div className="col-md-3">
-                      <h6 className="fw-bold mb-3" style={{ fontSize: '1.2rem', color: '#333' }}>Đồ chơi & Khác</h6>
-                      <div className="d-flex flex-column">
-                        <a href="#" className="dropdown-item mb-2" style={{ fontSize: '1rem', lineHeight: '1.4' }}>Toys</a>
-                        <a href="#" className="dropdown-item mb-2" style={{ fontSize: '1rem', lineHeight: '1.4' }}>Games</a>
-                        <a href="#" className="dropdown-item mb-2" style={{ fontSize: '1rem', lineHeight: '1.4' }}>Stationery</a>
-                        <a href="#" className="dropdown-item mb-2" style={{ fontSize: '1rem', lineHeight: '1.4' }}>Gifts</a>
-                        <a href="#" className="dropdown-item mb-2" style={{ fontSize: '1rem', lineHeight: '1.4', whiteSpace: 'nowrap' }}>Phong Cách Sống - Làm đẹp</a>
-                      </div>
-                    </div>
-
-                    {/* Shop Pages Column */}
-                    <div className="col-md-3">
-                      <h6 className="fw-bold mb-3" style={{ fontSize: '1.2rem', color: '#333' }}>Shop Pages</h6>
-                      <div className="d-flex flex-column">
-                        <a href="#" className="dropdown-item mb-2" style={{ fontSize: '1rem', lineHeight: '1.4' }}>Best Sellers</a>
-                        <a href="#" className="dropdown-item mb-2" style={{ fontSize: '1rem', lineHeight: '1.4' }}>New Arrivals</a>
-                        <a href="#" className="dropdown-item mb-2" style={{ fontSize: '1rem', lineHeight: '1.4' }}>Sale</a>
-                        <a href="#" className="dropdown-item mb-2" style={{ fontSize: '1rem', lineHeight: '1.4' }}>Featured</a>
-                        <a href="#" className="dropdown-item mb-2" style={{ fontSize: '1rem', lineHeight: '1.4' }}>Reviews</a>
-                      </div>
-                    </div>
-                  </div>
                 </div>
               )}
             </li>
 
             <li className="nav-item">
-              <a 
-                className="nav-link text-dark fw-normal" 
-                href="#" 
+              <a
+                className="nav-link text-dark fw-normal"
+                href="#"
                 style={{ fontSize: '1rem', fontFamily: 'sans-serif' }}
               >
                 Blog
@@ -190,9 +253,9 @@ const MenuClient = ({ onNavigateTo, onBackToHome, onFilterByCategory }) => {
             </li>
 
             <li className="nav-item">
-              <a 
-                className="nav-link text-dark fw-normal" 
-                href="#" 
+              <a
+                className="nav-link text-dark fw-normal"
+                href="#"
                 style={{ fontSize: '1rem', fontFamily: 'sans-serif' }}
               >
                 Pages
@@ -200,9 +263,9 @@ const MenuClient = ({ onNavigateTo, onBackToHome, onFilterByCategory }) => {
             </li>
 
             <li className="nav-item">
-              <a 
-                className="nav-link text-dark fw-normal" 
-                href="#" 
+              <a
+                className="nav-link text-dark fw-normal"
+                href="#"
                 style={{ fontSize: '1rem', fontFamily: 'sans-serif' }}
               >
                 Contact
@@ -212,81 +275,167 @@ const MenuClient = ({ onNavigateTo, onBackToHome, onFilterByCategory }) => {
 
           {/* Right Side Icons */}
           <ul className="navbar-nav">
-            {/* Notification Bell */}
-            <li className="nav-item me-3">
-              <a 
-                className="nav-link position-relative" 
-                href="#" 
-                onClick={(e) => { e.preventDefault(); onNavigateTo('notification')(); }}
-                style={{ color: '#333' }}
-              >
-                <i className="bi bi-bell" style={{ fontSize: '1.2rem' }}></i>
-                <span 
-                  className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                  style={{ fontSize: '0.6rem', width: '8px', height: '8px' }}
-                >
-                </span>
-              </a>
-            </li>
+                {/* Notification Dropdown */}
+                <li className="nav-item me-3">
+                  <NotificationDropdown onViewAllNotifications={onViewAllNotifications} />
+                </li>
 
-            {/* Search Icon */}
-            <li className="nav-item me-3">
-              <a 
-                className="nav-link" 
-                href="#" 
-                onClick={(e) => { e.preventDefault(); onNavigateTo('search')(); }}
-                style={{ color: '#333' }}
-              >
-                <i className="bi bi-search" style={{ fontSize: '1.2rem' }}></i>
-              </a>
-            </li>
+                {/* Search Icon */}
+                <li className="nav-item me-3">
+                  <a
+                    className="nav-link"
+                    href="#"
+                    onClick={(e) => { e.preventDefault(); onNavigateTo('search')(); }}
+                    style={{ color: '#333' }}
+                  >
+                    <i className="fas fa-search" style={{ fontSize: '1.2rem' }}></i>
+                  </a>
+                </li>
 
-            {/* Cart */}
-            <li className="nav-item me-3">
-              <a 
-                className="nav-link position-relative" 
-                href="#" 
-                onClick={(e) => { e.preventDefault(); onNavigateTo('cart')(); }}
-                style={{ color: '#333' }}
-              >
-                <i className="bi bi-cart" style={{ fontSize: '1.2rem' }}></i>
-                <span 
-                  className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                  style={{ fontSize: '0.6rem', width: '8px', height: '8px' }}
-                >
-                </span>
-              </a>
-            </li>
+                {/* Cart */}
+                <li className="nav-item me-3">
+                  <a
+                    className="nav-link position-relative"
+                    href="#"
+                    onClick={(e) => { e.preventDefault(); onNavigateTo('cart')(); }}
+                    style={{ color: '#333' }}
+                  >
+                    <i className="fas fa-shopping-cart" style={{ fontSize: '1.2rem' }}></i>
+                  </a>
+                </li>
 
             {/* User Profile */}
             <li className="nav-item">
-              <a 
-                className="nav-link" 
-                href="#" 
-                onClick={(e) => { e.preventDefault(); onNavigateTo('auth')(); }}
-                style={{ color: '#333' }}
-              >
-                <i className="bi bi-person" style={{ fontSize: '1.2rem' }}></i>
-              </a>
+              {user ? (
+                <div className="dropdown">
+                      <a
+                        className="nav-link dropdown-toggle d-flex align-items-center"
+                        href="#"
+                        role="button"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
+                        style={{ color: '#333' }}
+                      >
+                        <i className="fas fa-user me-2" style={{ fontSize: '1.2rem' }}></i>
+                        <span className="fw-medium">{user.name || user.email || 'User'}</span>
+                      </a>
+                  <ul className="dropdown-menu dropdown-menu-end">
+                        <li>
+                          <a
+                            className="dropdown-item"
+                            href="#"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              onNavigateTo('profile')();
+                            }}
+                          >
+                            <i className="fas fa-user me-2"></i>
+                            Profile
+                          </a>
+                        </li>
+                        <li>
+                          <a
+                            className="dropdown-item"
+                            href="#"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              onNavigateTo('profile')();
+                              // Navigate to settings tab
+                              setTimeout(() => {
+                                window.history.pushState({}, '', '/profile/settings');
+                                window.dispatchEvent(new PopStateEvent('popstate'));
+                              }, 100);
+                            }}
+                          >
+                            <i className="fas fa-cog me-2"></i>
+                            Cài đặt
+                          </a>
+                        </li>
+                        <li>
+                          <a
+                            className="dropdown-item"
+                            href="#"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              onNavigateTo('profile')();
+                              // Navigate to orders tab
+                              setTimeout(() => {
+                                window.history.pushState({}, '', '/profile/orders');
+                                window.dispatchEvent(new PopStateEvent('popstate'));
+                              }, 100);
+                            }}
+                          >
+                            <i className="fas fa-shopping-bag me-2"></i>
+                            Đơn hàng
+                          </a>
+                        </li>
+                        <li>
+                          <a
+                            className="dropdown-item"
+                            href="#"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              onNavigateTo('profile')();
+                              // Navigate to security tab
+                              setTimeout(() => {
+                                window.history.pushState({}, '', '/profile/security');
+                                window.dispatchEvent(new PopStateEvent('popstate'));
+                              }, 100);
+                            }}
+                          >
+                            <i className="fas fa-shield-alt me-2"></i>
+                            Bảo mật
+                          </a>
+                        </li>
+                        <li><hr className="dropdown-divider" /></li>
+                        <li>
+                          <button
+                            className="dropdown-item text-danger"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              onLogout();
+                            }}
+                          >
+                            <i className="fas fa-sign-out-alt me-2"></i>
+                            Logout
+                          </button>
+                        </li>
+                  </ul>
+                </div>
+              ) : (
+                <a
+                  className="nav-link"
+                  href="#"
+                  onClick={(e) => { e.preventDefault(); onNavigateTo('auth')(); }}
+                  style={{ color: '#333' }}
+                >
+                  <i className="fas fa-user" style={{ fontSize: '1.2rem' }}></i>
+                </a>
+              )}
             </li>
           </ul>
         </div>
       </div>
 
-      {/* CSS for animations */}
-      <style jsx>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(-10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .dropdown-item:hover {
-          background-color: #f8f9fa;
-          transform: translateX(5px);
-          transition: all 0.3s ease;
-        }
+          {/* CSS for animations */}
+          <style jsx>{`
+            @keyframes fadeIn {
+              from { opacity: 0; }
+              to { opacity: 1; }
+            }
+            
+            .dropdown-item:hover {
+              background-color: #f8f9fa;
+              transform: translateX(5px);
+              transition: all 0.3s ease;
+            }
 
-      `}</style>
+            .dropdown-menu {
+              transform: translateY(0) !important;
+              transition: none !important;
+            }
+
+          `}</style>
     </nav>
   );
 };

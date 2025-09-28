@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { validateEmail } from '../../utils';
+import { userService } from '../../services';
 
 const Login = ({ onToggleMode, onLoginSuccess, onForgotPassword }) => {
   const [formData, setFormData] = useState({
@@ -32,15 +33,15 @@ const Login = ({ onToggleMode, onLoginSuccess, onForgotPassword }) => {
     const newErrors = {};
 
     if (!formData.email) {
-      newErrors.email = 'Email is required';
+      newErrors.email = 'Email là bắt buộc';
     } else if (!validateEmail(formData.email)) {
-      newErrors.email = 'Please enter a valid email';
+      newErrors.email = 'Vui lòng nhập email hợp lệ';
     }
 
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = 'Mật khẩu là bắt buộc';
     } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+      newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
     }
 
     setErrors(newErrors);
@@ -57,24 +58,32 @@ const Login = ({ onToggleMode, onLoginSuccess, onForgotPassword }) => {
     setLoading(true);
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Gọi API backend để đăng nhập
+      const response = await userService.login({
+        email: formData.email,
+        password: formData.password
+      });
       
-      console.log('Login successful:', formData);
+      console.log('Đăng nhập thành công:', response);
       
-      // Store user data if remember me is checked
+      // Lưu dữ liệu user nếu được chọn "Ghi nhớ"
       if (formData.rememberMe) {
         localStorage.setItem('userEmail', formData.email);
+        localStorage.setItem('userToken', response.token);
       }
       
-      // Call success callback
+      // Gọi callback thành công với dữ liệu user từ backend
       if (onLoginSuccess) {
-        onLoginSuccess(formData);
+        onLoginSuccess({
+          ...response.user,
+          token: response.token,
+          isLoggedIn: true
+        });
       }
       
     } catch (error) {
-      console.error('Login error:', error);
-      setErrors({ general: 'Login failed. Please try again.' });
+      console.error('Lỗi đăng nhập:', error);
+      setErrors({ general: 'Đăng nhập thất bại. Vui lòng thử lại.' });
     } finally {
       setLoading(false);
     }
@@ -118,7 +127,7 @@ const Login = ({ onToggleMode, onLoginSuccess, onForgotPassword }) => {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                placeholder="Enter your email"
+                placeholder="Nhập email của bạn"
                 style={{
                   backgroundColor: '#f8f9fa',
                   border: errors.email ? '1px solid #dc3545' : '1px solid #e9ecef',
@@ -146,7 +155,7 @@ const Login = ({ onToggleMode, onLoginSuccess, onForgotPassword }) => {
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  placeholder="Enter your password"
+                  placeholder="Nhập mật khẩu của bạn"
                   style={{
                     backgroundColor: '#f8f9fa',
                     border: errors.password ? '1px solid #dc3545' : '1px solid #e9ecef',
@@ -188,7 +197,7 @@ const Login = ({ onToggleMode, onLoginSuccess, onForgotPassword }) => {
                   onChange={handleChange}
                 />
                 <label className="form-check-label text-dark" htmlFor="rememberMe">
-                  Remember me
+                  Ghi nhớ đăng nhập
                 </label>
               </div>
               <button 
@@ -197,7 +206,7 @@ const Login = ({ onToggleMode, onLoginSuccess, onForgotPassword }) => {
                 className="btn btn-link text-danger text-decoration-none p-0 small"
                 style={{border: 'none', background: 'none'}}
               >
-                Lost your password?
+                Quên mật khẩu?
               </button>
             </div>
 
@@ -218,10 +227,10 @@ const Login = ({ onToggleMode, onLoginSuccess, onForgotPassword }) => {
               {loading ? (
                 <>
                   <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                  Logging in...
+                  Đang đăng nhập...
                 </>
               ) : (
-                'Log in'
+                'Đăng nhập'
               )}
             </button>
           </form>
@@ -244,7 +253,7 @@ const Login = ({ onToggleMode, onLoginSuccess, onForgotPassword }) => {
               }}
             >
               <i className="bi bi-google me-2"></i>
-              Continue with Google
+              Tiếp tục với Google
             </button>
             <button
               type="button"
@@ -257,21 +266,21 @@ const Login = ({ onToggleMode, onLoginSuccess, onForgotPassword }) => {
               }}
             >
               <i className="bi bi-facebook me-2"></i>
-              Continue with Facebook
+              Tiếp tục với Facebook
             </button>
           </div>
 
           {/* Additional Options */}
           <div className="text-center">
             <p className="text-muted small mb-0">
-              Don't have an account? 
+              Chưa có tài khoản? 
               <button 
                 type="button"
                 onClick={onToggleMode}
                 className="btn btn-link text-primary text-decoration-none p-0 ms-1 fw-medium"
                 style={{border: 'none', background: 'none'}}
               >
-                Sign up
+                Đăng ký
               </button>
             </p>
           </div>

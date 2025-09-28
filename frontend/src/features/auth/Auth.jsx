@@ -1,8 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Login, Register, ForgotPassword } from '../../components/user';
 
 const Auth = ({ onBackToHome, onLoginSuccess }) => {
   const [authMode, setAuthMode] = useState('login'); // 'login', 'register', 'forgot-password'
+
+  // Check URL to determine initial auth mode
+  useEffect(() => {
+    const updateAuthMode = () => {
+      const path = window.location.pathname;
+      if (path === '/register') {
+        setAuthMode('register');
+      } else if (path === '/forgot-password') {
+        setAuthMode('forgot-password');
+      } else {
+        setAuthMode('login');
+      }
+    };
+
+    // Initial check
+    updateAuthMode();
+
+    // Listen for URL changes
+    window.addEventListener('popstate', updateAuthMode);
+    
+    return () => {
+      window.removeEventListener('popstate', updateAuthMode);
+    };
+  }, []);
 
   const handleLoginSuccess = (userData) => {
     console.log('Login successful:', userData);
@@ -12,35 +36,56 @@ const Auth = ({ onBackToHome, onLoginSuccess }) => {
     }
   };
 
+  const handleRegisterSuccess = (userData) => {
+    console.log('Register successful:', userData);
+    // You can add more logic here if needed
+  };
+
+  const handleToggleToRegister = () => {
+    window.history.pushState({}, '', '/register');
+    setAuthMode('register');
+  };
+
+  const handleToggleToLogin = () => {
+    window.history.pushState({}, '', '/login');
+    setAuthMode('login');
+  };
+
+  const handleForgotPassword = () => {
+    window.history.pushState({}, '', '/forgot-password');
+    setAuthMode('forgot-password');
+  };
+
   const renderAuthComponent = () => {
     switch (authMode) {
       case 'login':
         return (
           <Login 
-            onToggleMode={() => setAuthMode('register')} 
+            onToggleMode={handleToggleToRegister} 
             onLoginSuccess={handleLoginSuccess}
-            onForgotPassword={() => setAuthMode('forgot-password')}
+            onForgotPassword={handleForgotPassword}
           />
         );
       case 'register':
         return (
           <Register 
-            onToggleMode={() => setAuthMode('login')}
+            onToggleMode={handleToggleToLogin}
+            onRegisterSuccess={handleRegisterSuccess}
           />
         );
       case 'forgot-password':
         return (
           <ForgotPassword 
-            onBackToLogin={() => setAuthMode('login')}
+            onBackToLogin={handleToggleToLogin}
             onBackToHome={onBackToHome}
           />
         );
       default:
         return (
           <Login 
-            onToggleMode={() => setAuthMode('register')} 
+            onToggleMode={handleToggleToRegister} 
             onLoginSuccess={handleLoginSuccess}
-            onForgotPassword={() => setAuthMode('forgot-password')}
+            onForgotPassword={handleForgotPassword}
           />
         );
     }
@@ -54,7 +99,7 @@ const Auth = ({ onBackToHome, onLoginSuccess }) => {
           className="btn btn-outline-secondary btn-sm"
           onClick={onBackToHome}
         >
-          <i className="bi bi-house me-1"></i>
+          <i className="fas fa-home me-1"></i>
           Back to Home
         </button>
       </div>
