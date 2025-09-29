@@ -7,26 +7,26 @@ const Slide = () => {
   const slides = [
     {
       id: 1,
-      title: "Top 10 most favorite books",
-      description: "Discover the best books of all time, hand-picked by our experts.",
+      title: "Top 10 cuốn sách yêu thích",
+      description: "Khám phá những cuốn sách hay nhất mọi thời đại được các chuyên gia của chúng tôi tuyển chọn kỹ lưỡng.",
       image: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=600&h=400&fit=crop",
-      buttonText: "Learn More",
+      buttonText: "Xem thêm",
       backgroundColor: "#ffc0cb"
     },
     {
       id: 2,
-      title: "New Arrivals",
-      description: "Check out our latest collection of books from around the world.",
+      title: "Sách mới",
+      description: "Hãy xem bộ sưu tập sách mới nhất của chúng tôi từ khắp nơi trên thế giới.",
       image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=400&fit=crop",
-      buttonText: "Shop Now",
+      buttonText: "Mua ngay",
       backgroundColor: "#e3f2fd"
     },
     {
       id: 3,
-      title: "Best Sellers",
-      description: "The most popular books that everyone is talking about.",
+      title: "Bán chạy nhất",
+      description: "Những cuốn sách phổ biến nhất mà mọi người đang bàn tán.",
       image: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=600&h=400&fit=crop",
-      buttonText: "View All",
+      buttonText: "Xem tất cả",
       backgroundColor: "#f3e5f5"
     }
   ];

@@ -1,41 +1,33 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { categoryService } from '../../services';
+import React, { useState, useCallback, useEffect } from 'react';
 import { NotificationDropdown } from '../common';
 
-const MenuClient = ({ onNavigateTo, onBackToHome, onFilterByCategory, user, onLogout, onViewAllNotifications }) => {
+const MenuClient = ({ onNavigateTo, onBackToHome, user, onLogout, onViewAllNotifications }) => {
   const [showShopDropdown, setShowShopDropdown] = useState(false);
-  const [showCategoriesDropdown, setShowCategoriesDropdown] = useState(false);
-  const [categories, setCategories] = useState([]);
-  const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [shopDropdownTimeout, setShopDropdownTimeout] = useState(null);
+  const [cartItemCount, setCartItemCount] = useState(0);
 
-  // Fetch categories from backend
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        setCategoriesLoading(true);
-        const data = await categoryService.getAll();
-        setCategories(data);
-      } catch (error) {
-        console.error('Error fetching categories:', error);
-        // Fallback to mock data if API fails
-        setCategories([
-          { category_id: 1, name: 'Fiction', book_count: 15 },
-          { category_id: 2, name: 'Manga', book_count: 25 },
-          { category_id: 3, name: 'Mystery', book_count: 10 },
-          { category_id: 4, name: 'Fantasy', book_count: 20 },
-          { category_id: 5, name: 'Classic Literature', book_count: 12 }
-        ]);
-      } finally {
-        setCategoriesLoading(false);
-      }
-    };
 
-    fetchCategories();
+  // Cập nhật số lượng mục trong giỏ hàng
+  const updateCartCount = useCallback(() => {
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+    setCartItemCount(totalItems);
   }, []);
 
-  // Cleanup timeout on unmount
+  // Lắng nghe cập nhật giỏ hàng
   useEffect(() => {
+    updateCartCount();
+    
+    const handleCartUpdate = () => {
+      updateCartCount();
+    };
+    
+    window.addEventListener('cartUpdated', handleCartUpdate);
+    return () => window.removeEventListener('cartUpdated', handleCartUpdate);
+  }, [updateCartCount]);
+
+  // Dọn dẹp timeout khi unmount
+  React.useEffect(() => {
     return () => {
       if (shopDropdownTimeout) {
         clearTimeout(shopDropdownTimeout);
@@ -58,20 +50,6 @@ const MenuClient = ({ onNavigateTo, onBackToHome, onFilterByCategory, user, onLo
     setShopDropdownTimeout(timeout);
   }, []);
 
-  const handleCategoriesMouseEnter = useCallback(() => {
-    setShowCategoriesDropdown(true);
-  }, []);
-
-  const handleCategoriesMouseLeave = useCallback(() => {
-    setShowCategoriesDropdown(false);
-  }, []);
-
-  const handleCategoryClick = useCallback((categoryId, categoryName) => {
-    if (onFilterByCategory) {
-      onFilterByCategory(categoryId, categoryName);
-    }
-    setShowCategoriesDropdown(false);
-  }, [onFilterByCategory]);
 
 
   return (
@@ -158,28 +136,29 @@ const MenuClient = ({ onNavigateTo, onBackToHome, onFilterByCategory, user, onLo
                         <div className="col-md-6">
                           <h6 className="fw-bold mb-3" style={{ fontSize: '1.2rem', color: '#333' }}>Categories</h6>
                           <div className="d-flex flex-column">
-                            {categoriesLoading ? (
-                              <div className="text-muted">Loading categories...</div>
-                            ) : (
-                              categories.slice(0, 6).map((category) => (
-                                <a 
-                                  key={category.category_id} 
-                                  href="#" 
-                                  className="dropdown-item mb-2" 
-                                  style={{ fontSize: '1rem', lineHeight: '1.4' }}
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    handleCategoryClick(category.category_id, category.name);
-                                    setShowShopDropdown(false);
-                                  }}
-                                >
-                                  {category.name}
-                                  {category.book_count && (
-                                    <span className="text-muted ms-2">({category.book_count})</span>
-                                  )}
-                                </a>
-                              ))
-                            )}
+                            {[
+                              { name: 'Fiction', count: 15 },
+                              { name: 'Manga', count: 25 },
+                              { name: 'Mystery', count: 10 },
+                              { name: 'Fantasy', count: 20 },
+                              { name: 'Classic Literature', count: 12 },
+                              { name: 'Romance', count: 18 }
+                            ].map((category, index) => (
+                              <a 
+                                key={index}
+                                href="#" 
+                                className="dropdown-item mb-2" 
+                                style={{ fontSize: '1rem', lineHeight: '1.4' }}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  onNavigateTo('search')();
+                                  setShowShopDropdown(false);
+                                }}
+                              >
+                                {category.name}
+                                <span className="text-muted ms-2">({category.count})</span>
+                              </a>
+                            ))}
                           </div>
                         </div>
 
@@ -193,7 +172,7 @@ const MenuClient = ({ onNavigateTo, onBackToHome, onFilterByCategory, user, onLo
                               style={{ fontSize: '1rem', lineHeight: '1.4' }}
                               onClick={(e) => {
                                 e.preventDefault();
-                                onNavigateTo('books')();
+                                onNavigateTo('search')();
                                 setShowShopDropdown(false);
                               }}
                             >
@@ -217,7 +196,7 @@ const MenuClient = ({ onNavigateTo, onBackToHome, onFilterByCategory, user, onLo
                               style={{ fontSize: '1rem', lineHeight: '1.4' }}
                               onClick={(e) => {
                                 e.preventDefault();
-                                onNavigateTo('books')();
+                                onNavigateTo('search')();
                                 setShowShopDropdown(false);
                               }}
                             >
@@ -288,7 +267,7 @@ const MenuClient = ({ onNavigateTo, onBackToHome, onFilterByCategory, user, onLo
                     onClick={(e) => { e.preventDefault(); onNavigateTo('search')(); }}
                     style={{ color: '#333' }}
                   >
-                    <i className="fas fa-search" style={{ fontSize: '1.2rem' }}></i>
+                    <i className="fas fa-search" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
                   </a>
                 </li>
 
@@ -300,7 +279,22 @@ const MenuClient = ({ onNavigateTo, onBackToHome, onFilterByCategory, user, onLo
                     onClick={(e) => { e.preventDefault(); onNavigateTo('cart')(); }}
                     style={{ color: '#333' }}
                   >
-                    <i className="fas fa-shopping-cart" style={{ fontSize: '1.2rem' }}></i>
+                    <i className="fas fa-shopping-cart" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
+                    {cartItemCount > 0 && (
+                      <span 
+                        className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                        style={{ 
+                          fontSize: '0.7rem',
+                          minWidth: '18px',
+                          height: '18px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                      >
+                        {cartItemCount}
+                      </span>
+                    )}
                   </a>
                 </li>
 
@@ -316,7 +310,7 @@ const MenuClient = ({ onNavigateTo, onBackToHome, onFilterByCategory, user, onLo
                         aria-expanded="false"
                         style={{ color: '#333' }}
                       >
-                        <i className="fas fa-user me-2" style={{ fontSize: '1.2rem' }}></i>
+                        <i className="fas fa-user me-2" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
                         <span className="fw-medium">{user.name || user.email || 'User'}</span>
                       </a>
                   <ul className="dropdown-menu dropdown-menu-end">
@@ -340,7 +334,7 @@ const MenuClient = ({ onNavigateTo, onBackToHome, onFilterByCategory, user, onLo
                             onClick={(e) => {
                               e.preventDefault();
                               onNavigateTo('profile')();
-                              // Navigate to settings tab
+                              // Chuyển đến tab cài đặt
                               setTimeout(() => {
                                 window.history.pushState({}, '', '/profile/settings');
                                 window.dispatchEvent(new PopStateEvent('popstate'));
@@ -358,7 +352,7 @@ const MenuClient = ({ onNavigateTo, onBackToHome, onFilterByCategory, user, onLo
                             onClick={(e) => {
                               e.preventDefault();
                               onNavigateTo('profile')();
-                              // Navigate to orders tab
+                              // Chuyển đến tab đơn hàng
                               setTimeout(() => {
                                 window.history.pushState({}, '', '/profile/orders');
                                 window.dispatchEvent(new PopStateEvent('popstate'));
@@ -376,7 +370,7 @@ const MenuClient = ({ onNavigateTo, onBackToHome, onFilterByCategory, user, onLo
                             onClick={(e) => {
                               e.preventDefault();
                               onNavigateTo('profile')();
-                              // Navigate to security tab
+                              // Chuyển đến tab bảo mật
                               setTimeout(() => {
                                 window.history.pushState({}, '', '/profile/security');
                                 window.dispatchEvent(new PopStateEvent('popstate'));
@@ -409,7 +403,7 @@ const MenuClient = ({ onNavigateTo, onBackToHome, onFilterByCategory, user, onLo
                   onClick={(e) => { e.preventDefault(); onNavigateTo('auth')(); }}
                   style={{ color: '#333' }}
                 >
-                  <i className="fas fa-user" style={{ fontSize: '1.2rem' }}></i>
+                  <i className="fas fa-user" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
                 </a>
               )}
             </li>

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useLocalStorage } from '../../../hooks';
 import { cartService, bookService } from '../../../services';
 
-const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch, onViewProduct }) => {
+const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch }) => {
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -28,16 +28,9 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch,
   const performSearch = useCallback(async (query) => {
     setLoading(true);
     try {
-      if (query.startsWith('category:')) {
-        // Handle category filter
-        const categoryName = query.replace('category:', '');
-        const data = await bookService.getAll({ category: categoryName });
-        setSearchResults(data);
-      } else {
-        // Handle regular search
-        const data = await bookService.search(query);
-        setSearchResults(data);
-      }
+      // Handle regular search
+      const data = await bookService.search(query);
+      setSearchResults(data);
     } catch (error) {
       console.error('Search error:', error);
       setSearchResults([]);
@@ -250,7 +243,7 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch,
                   <div>
                     <h5 className="fw-bold mb-3">Popular Searches</h5>
                     <div className="d-flex flex-wrap gap-2">
-                      {['Fiction', 'Manga', 'Mystery', 'Fantasy', 'Classic Literature', 'Romance', 'Science Fiction', 'Biography'].map((term) => (
+                      {['Doraemon', 'Harry Potter', 'The Great Gatsby', 'Demon Slayer', 'Conan', 'Romance', 'Science Fiction', 'Biography'].map((term) => (
                         <button
                           key={term}
                           className="btn btn-outline-secondary btn-sm"
@@ -273,7 +266,7 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch,
 
         {/* Search Results */}
         {searchQuery && (
-          <div className="row">
+          <div className="row mt-5">
             <div className="col-12">
               {loading ? (
                 <div className="text-center py-5">
@@ -290,7 +283,7 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch,
                         transition: 'all 0.3s ease',
                         cursor: 'pointer'
                       }}
-                        onClick={() => onViewProduct(book.book_id)}
+                        onClick={() => console.log('Book clicked:', book.book_id)}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.transform = 'translateY(-5px)';
                           e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.2)';

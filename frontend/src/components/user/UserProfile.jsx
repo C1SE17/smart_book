@@ -17,7 +17,7 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
   const [successMessage, setSuccessMessage] = useState('');
   const [userProfile, setUserProfile] = useState(null);
 
-  // Use mock data when user is not logged in
+  // Mock data for demo mode
   const displayUser = user || {
     id: 1,
     name: 'Nguyễn Văn A',
@@ -38,7 +38,6 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
 
   // Khởi tạo dữ liệu form khi user thay đổi
   useEffect(() => {
-    if (displayUser) {
       const newFormData = {
         name: displayUser.name || '',
         email: displayUser.email || '',
@@ -48,13 +47,11 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
       };
       setFormData(newFormData);
       setUserProfile(displayUser);
-    }
   }, [displayUser]);
 
-  // Lấy thông tin profile từ backend
+  // Fetch user profile from backend
   const fetchUserProfile = useCallback(async () => {
     if (!user?.token) {
-      // Use mock data when not logged in
       setUserProfile(displayUser);
       return;
     }
@@ -72,19 +69,18 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
       });
     } catch (error) {
       console.error('Lỗi lấy thông tin profile:', error);
-      // Fallback về dữ liệu user local
       setUserProfile(displayUser);
     } finally {
       setLoading(false);
     }
   }, [user, displayUser]);
 
-  // Tải dữ liệu profile khi component mount
+  // Load profile data on mount
   useEffect(() => {
     fetchUserProfile();
   }, [fetchUserProfile]);
 
-  // Sync activeTab với prop từ parent
+  // Sync activeTab with parent prop
   useEffect(() => {
     if (propActiveTab && propActiveTab !== activeTab) {
       setActiveTab(propActiveTab);
@@ -163,11 +159,8 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
   const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
     
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
-    // If not logged in, just show demo message
     if (!user?.token) {
       setSuccessMessage('Đây là chế độ demo. Vui lòng đăng nhập để cập nhật thông tin thực.');
       setIsEditing(false);
@@ -178,21 +171,15 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
     setLoading(true);
     
     try {
-      // Cập nhật profile qua API
       const updatedProfile = await userService.updateProfile(formData, user.token);
-      
-      console.log('Cập nhật profile thành công:', updatedProfile);
-      
-      // Cập nhật state local
       setUserProfile(updatedProfile);
+      
       if (onUpdateProfile) {
         onUpdateProfile(updatedProfile);
       }
       
       setSuccessMessage('Cập nhật thông tin thành công!');
       setIsEditing(false);
-      
-      // Xóa thông báo thành công sau 3 giây
       setTimeout(() => setSuccessMessage(''), 3000);
       
     } catch (error) {
@@ -204,7 +191,6 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
   }, [formData, validateForm, user?.token, onUpdateProfile]);
 
   const handleCancel = useCallback(() => {
-    // Đặt lại dữ liệu form về dữ liệu user gốc
     setFormData({
       name: userProfile?.name || '',
       email: userProfile?.email || '',
@@ -216,14 +202,12 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
     setIsEditing(false);
   }, [userProfile]);
 
-  // Handle tab change with URL update
   const handleTabChange = useCallback((tabId) => {
     setActiveTab(tabId);
     if (onTabChange) {
       onTabChange(tabId);
     }
     
-    // Update URL based on tab
     const tabRoutes = {
       'profile': '/profile',
       'orders': '/profile/orders',
@@ -235,7 +219,6 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
     window.history.pushState({}, '', newPath);
   }, [onTabChange]);
 
-  // Ensure we always have data to display
   const currentUser = userProfile || displayUser;
   const currentFormData = formData.name ? formData : {
     name: currentUser?.name || '',
@@ -249,10 +232,9 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
     <div className="min-vh-100" style={{ backgroundColor: '#f5f5f5', transition: 'all 0.3s ease' }}>
       <div className="container py-4">
         <div style={{ minHeight: '600px', transition: 'all 0.3s ease' }}>
-          {/* Demo Notice for non-logged in users */}
           {!user && (
             <div className="alert alert-info mb-3" role="alert">
-              <i className="fas fa-info-circle me-2"></i>
+              <i className="fas fa-info-circle me-2" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
               <strong>Chế độ demo:</strong> Bạn đang xem dữ liệu mẫu. 
               <button 
                 className="btn btn-link text-primary p-0 ms-2"
@@ -268,7 +250,6 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
             </div>
           )}
 
-          {/* Back Home Navigation */}
           <div className="mb-3">
             <button
               className="btn btn-link text-dark p-0 no-hover"
@@ -281,13 +262,12 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
                 boxShadow: 'none'
               }}
             >
-              <i className="fas fa-arrow-left me-1"></i>
+              <i className="fas fa-arrow-left me-1" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
               Home/
               <span className="fw-bold" style={{ fontSize: '16px' }}> {tabs.find(tab => tab.id === activeTab)?.label || 'Hồ sơ'}</span>
             </button>
           </div>
 
-          {/* Tabs */}
           <div className="mb-4">
             <div className="d-flex border-bottom">
               {tabs.map((tab) => (
@@ -309,21 +289,194 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
             </div>
           </div>
 
-          {/* Content based on active tab */}
           <div className="row">
             <div className="col-12">
               <div style={{ minHeight: '600px' }}>
                 {activeTab === 'profile' && (
                   <div className="row g-4">
                     <div className="col-12">
-                      <div className="card" style={{
-                        backgroundColor: '#f8f9fa',
-                        border: '1px solid #e9ecef',
-                        minHeight: '500px'
-                      }}>
+                      <div className="card shadow-sm">
                         <div className="card-body p-4">
-                          <h5 className="card-title mb-4">Profile Information</h5>
-                          <p>This is the profile tab content.</p>
+                          <div className="d-flex justify-content-between align-items-center mb-4">
+                            <h5 className="card-title mb-0">Thông Tin Cá Nhân</h5>
+                            {!isEditing && (
+                              <button
+                                className="btn btn-outline-primary"
+                                onClick={() => setIsEditing(true)}
+                              >
+                                <i className="fas fa-edit me-2" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
+                                Chỉnh Sửa
+                              </button>
+                            )}
+                          </div>
+
+                          {successMessage && (
+                            <div className="alert alert-success alert-dismissible fade show" role="alert">
+                              <i className="fas fa-check-circle me-2" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
+                              {successMessage}
+                              <button
+                                type="button"
+                                className="btn-close"
+                                onClick={() => setSuccessMessage('')}
+                              ></button>
+                            </div>
+                          )}
+
+                          {errors.general && (
+                            <div className="alert alert-danger alert-dismissible fade show" role="alert">
+                              <i className="fas fa-exclamation-circle me-2" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
+                              {errors.general}
+                              <button
+                                type="button"
+                                className="btn-close"
+                                onClick={() => setErrors(prev => ({ ...prev, general: '' }))}
+                              ></button>
+                            </div>
+                          )}
+
+                          <form onSubmit={handleSubmit}>
+                            <div className="row g-3">
+                              {/* Name Field */}
+                              <div className="col-md-6">
+                                <label htmlFor="name" className="form-label">
+                                  Họ và tên <span className="text-danger">*</span>
+                                </label>
+                                <input
+                                  type="text"
+                                  className={`form-control ${errors.name ? 'is-invalid' : ''}`}
+                                  id="name"
+                                  name="name"
+                                  value={currentFormData.name}
+                                  onChange={handleChange}
+                                  disabled={!isEditing}
+                                  placeholder="Nhập họ và tên"
+                                />
+                                {errors.name && (
+                                  <div className="invalid-feedback">
+                                    {errors.name}
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Email Field */}
+                              <div className="col-md-6">
+                                <label htmlFor="email" className="form-label">
+                                  Email <span className="text-danger">*</span>
+                                </label>
+                                <input
+                                  type="email"
+                                  className={`form-control ${errors.email ? 'is-invalid' : ''}`}
+                                  id="email"
+                                  name="email"
+                                  value={currentFormData.email}
+                                  onChange={handleChange}
+                                  disabled={!isEditing}
+                                  placeholder="Nhập email"
+                                />
+                                {errors.email && (
+                                  <div className="invalid-feedback">
+                                    {errors.email}
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Phone Field */}
+                              <div className="col-md-6">
+                                <label htmlFor="phone" className="form-label">
+                                  Số điện thoại
+                                </label>
+                                <input
+                                  type="tel"
+                                  className={`form-control ${errors.phone ? 'is-invalid' : ''}`}
+                                  id="phone"
+                                  name="phone"
+                                  value={currentFormData.phone}
+                                  onChange={handleChange}
+                                  disabled={!isEditing}
+                                  placeholder="Nhập số điện thoại"
+                                />
+                                {errors.phone && (
+                                  <div className="invalid-feedback">
+                                    {errors.phone}
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Role Field */}
+                              <div className="col-md-6">
+                                <label htmlFor="role" className="form-label">
+                                  Vai trò
+                                </label>
+                                <select
+                                  className="form-select"
+                                  id="role"
+                                  name="role"
+                                  value={currentFormData.role}
+                                  onChange={handleChange}
+                                  disabled={!isEditing}
+                                >
+                                  <option value="customer">Khách hàng</option>
+                                  <option value="admin">Quản trị viên</option>
+                                </select>
+                              </div>
+
+                              {/* Address Field */}
+                              <div className="col-12">
+                                <label htmlFor="address" className="form-label">
+                                  Địa chỉ
+                                </label>
+                                <textarea
+                                  className={`form-control ${errors.address ? 'is-invalid' : ''}`}
+                                  id="address"
+                                  name="address"
+                                  rows="3"
+                                  value={currentFormData.address}
+                                  onChange={handleChange}
+                                  disabled={!isEditing}
+                                  placeholder="Nhập địa chỉ đầy đủ"
+                                ></textarea>
+                                {errors.address && (
+                                  <div className="invalid-feedback">
+                                    {errors.address}
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Action Buttons */}
+                              {isEditing && (
+                                <div className="col-12">
+                                  <div className="d-flex gap-2">
+                                    <button
+                                      type="submit"
+                                      className="btn btn-primary"
+                                      disabled={loading}
+                                    >
+                                      {loading ? (
+                                        <>
+                                          <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                          Đang lưu...
+                                        </>
+                                      ) : (
+                                        <>
+                                          <i className="fas fa-save me-2" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
+                                          Lưu thay đổi
+                                        </>
+                                      )}
+                                    </button>
+                                    <button
+                                      type="button"
+                                      className="btn btn-outline-secondary"
+                                      onClick={handleCancel}
+                                      disabled={loading}
+                                    >
+                                      <i className="fas fa-times me-2" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
+                                      Hủy
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </form>
                         </div>
                       </div>
                     </div>
@@ -333,14 +486,155 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
                 {activeTab === 'orders' && (
                   <div className="row g-4">
                     <div className="col-12">
-                      <div className="card" style={{
-                        backgroundColor: '#f8f9fa',
-                        border: '1px solid #e9ecef',
-                        minHeight: '500px'
-                      }}>
+                      <div className="card shadow-sm">
                         <div className="card-body p-4">
-                          <h5 className="card-title mb-4">Đơn hàng của tôi</h5>
-                          <p>This is the orders tab content.</p>
+                          <h5 className="card-title mb-4">Đơn Hàng Của Tôi</h5>
+
+                          {/* Order Filter */}
+                          <div className="row mb-4">
+                            <div className="col-md-6">
+                              <select className="form-select">
+                                <option value="">Tất cả trạng thái</option>
+                                <option value="pending">Chờ xử lý</option>
+                                <option value="processing">Đang xử lý</option>
+                                <option value="shipped">Đã giao</option>
+                                <option value="delivered">Hoàn thành</option>
+                                <option value="cancelled">Đã hủy</option>
+                              </select>
+                            </div>
+                            <div className="col-md-6">
+                              <div className="input-group">
+                                <input
+                                  type="text"
+                                  className="form-control"
+                                  placeholder="Tìm kiếm đơn hàng..."
+                                />
+                                <button className="btn btn-outline-secondary" type="button">
+                                  <i className="fas fa-search" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Orders List */}
+                          <div className="table-responsive">
+                            <table className="table table-hover">
+                              <thead className="table-light">
+                                <tr>
+                                  <th>Mã đơn hàng</th>
+                                  <th>Ngày đặt</th>
+                                  <th>Sản phẩm</th>
+                                  <th>Tổng tiền</th>
+                                  <th>Trạng thái</th>
+                                  <th>Thao tác</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {/* Mock Order Data */}
+                                <tr>
+                                  <td>
+                                    <span className="fw-semibold text-primary">#ORD001</span>
+                                  </td>
+                                  <td>15/12/2024</td>
+                                  <td>
+                                    <div className="d-flex align-items-center">
+
+                                      <div>
+                                        <div className="fw-semibold">Doraemon: Nobita's Little Star Wars</div>
+                                        <small className="text-muted">x2</small>
+                                      </div>
+                                    </div>
+                                  </td>
+                                  <td className="fw-semibold">240.000 VNĐ</td>
+                                  <td>
+                                    <span className="badge bg-success">Đã giao</span>
+                                  </td>
+                                  <td>
+                                    <button className="btn btn-sm btn-outline-primary me-1">
+                                      <i className="fas fa-eye" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
+                                    </button>
+                                    <button className="btn btn-sm btn-outline-success">
+                                      <i className="fas fa-redo" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
+                                    </button>
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td>
+                                    <span className="fw-semibold text-primary">#ORD002</span>
+                                  </td>
+                                  <td>10/12/2024</td>
+                                  <td>
+                                    <div className="d-flex align-items-center">
+
+                                      <div>
+                                        <div className="fw-semibold">WHERE THE CRAWDADS SING</div>
+                                        <small className="text-muted">x1</small>
+                                      </div>
+                                    </div>
+                                  </td>
+                                  <td className="fw-semibold">180.000 VNĐ</td>
+                                  <td>
+                                    <span className="badge bg-warning">Đang xử lý</span>
+                                  </td>
+                                  <td>
+                                    <button className="btn btn-sm btn-outline-primary me-1">
+                                      <i className="fas fa-eye" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
+                                    </button>
+                                    <button className="btn btn-sm btn-outline-danger">
+                                      <i className="fas fa-times" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
+                                    </button>
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td>
+                                    <span className="fw-semibold text-primary">#ORD003</span>
+                                  </td>
+                                  <td>05/12/2024</td>
+                                  <td>
+                                    <div className="d-flex align-items-center">
+
+                                      <div>
+                                        <div className="fw-semibold">Demon Slayer - Vô hạn thành</div>
+                                        <small className="text-muted">x1</small>
+                                      </div>
+                                    </div>
+                                  </td>
+                                  <td className="fw-semibold">150.000 VNĐ</td>
+                                  <td>
+                                    <span className="badge bg-danger">Đã hủy</span>
+                                  </td>
+                                  <td>
+                                    <button className="btn btn-sm btn-outline-primary me-1">
+                                      <i className="fas fa-eye" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
+                                    </button>
+                                    <button className="btn btn-sm btn-outline-primary">
+                                      <i className="fas fa-shopping-cart" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
+                                    </button>
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+
+                          {/* Pagination */}
+                          <div className="d-flex justify-content-between align-items-center mt-4">
+                            <div className="text-muted">
+                              Hiển thị 1-3 của 3 đơn hàng
+                            </div>
+                            <nav>
+                              <ul className="pagination pagination-sm mb-0">
+                                <li className="page-item disabled">
+                                  <span className="page-link">Trước</span>
+                                </li>
+                                <li className="page-item active">
+                                  <span className="page-link">1</span>
+                                </li>
+                                <li className="page-item disabled">
+                                  <span className="page-link">Sau</span>
+                                </li>
+                              </ul>
+                            </nav>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -350,14 +644,125 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
                 {activeTab === 'settings' && (
                   <div className="row g-4">
                     <div className="col-12">
-                      <div className="card" style={{
-                        backgroundColor: '#f8f9fa',
-                        border: '1px solid #e9ecef',
-                        minHeight: '500px'
-                      }}>
+                      <div className="card shadow-sm">
                         <div className="card-body p-4">
-                          <h5 className="card-title mb-4">Account Settings</h5>
-                          <p>This is the settings tab content.</p>
+                          <h5 className="card-title mb-4">Cài Đặt Tài Khoản</h5>
+
+                          {/* Notification Settings */}
+                          <div className="mb-4">
+                            <h6 className="text-muted mb-3">Thông Báo</h6>
+                            <div className="row g-3">
+                              <div className="col-12">
+                                <div className="form-check form-switch">
+                                  <input
+                                    className="form-check-input"
+                                    type="checkbox"
+                                    id="emailNotifications"
+                                    defaultChecked
+                                  />
+                                  <label className="form-check-label" htmlFor="emailNotifications">
+                                    Nhận thông báo qua email
+                                  </label>
+                                </div>
+                              </div>
+                              <div className="col-12">
+                                <div className="form-check form-switch">
+                                  <input
+                                    className="form-check-input"
+                                    type="checkbox"
+                                    id="orderUpdates"
+                                    defaultChecked
+                                  />
+                                  <label className="form-check-label" htmlFor="orderUpdates">
+                                    Cập nhật đơn hàng
+                                  </label>
+                                </div>
+                              </div>
+                              <div className="col-12">
+                                <div className="form-check form-switch">
+                                  <input
+                                    className="form-check-input"
+                                    type="checkbox"
+                                    id="promotions"
+                                  />
+                                  <label className="form-check-label" htmlFor="promotions">
+                                    Khuyến mãi và ưu đãi
+                                  </label>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <hr className="my-4" />
+
+                          {/* Privacy Settings */}
+                          <div className="mb-4">
+                            <h6 className="text-muted mb-3">Quyền Riêng Tư</h6>
+                            <div className="row g-3">
+                              <div className="col-12">
+                                <div className="form-check form-switch">
+                                  <input
+                                    className="form-check-input"
+                                    type="checkbox"
+                                    id="profileVisibility"
+                                    defaultChecked
+                                  />
+                                  <label className="form-check-label" htmlFor="profileVisibility">
+                                    Hiển thị hồ sơ công khai
+                                  </label>
+                                </div>
+                              </div>
+                              <div className="col-12">
+                                <div className="form-check form-switch">
+                                  <input
+                                    className="form-check-input"
+                                    type="checkbox"
+                                    id="dataSharing"
+                                  />
+                                  <label className="form-check-label" htmlFor="dataSharing">
+                                    Chia sẻ dữ liệu để cải thiện dịch vụ
+                                  </label>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <hr className="my-4" />
+
+                          {/* Language & Region */}
+                          <div className="mb-4">
+                            <h6 className="text-muted mb-3">Ngôn Ngữ & Vùng</h6>
+                            <div className="row g-3">
+                              <div className="col-md-6">
+                                <label htmlFor="language" className="form-label">
+                                  Ngôn ngữ
+                                </label>
+                                <select className="form-select" id="language">
+                                  <option value="vi">Tiếng Việt</option>
+                                  <option value="en">English</option>
+                                </select>
+                              </div>
+                              <div className="col-md-6">
+                                <label htmlFor="timezone" className="form-label">
+                                  Múi giờ
+                                </label>
+                                <select className="form-select" id="timezone">
+                                  <option value="Asia/Ho_Chi_Minh">Asia/Ho_Chi_Minh (GMT+7)</option>
+                                  <option value="UTC">UTC (GMT+0)</option>
+                                </select>
+                              </div>
+                            </div>
+                          </div>
+
+                          <hr className="my-4" />
+
+                          {/* Save Settings Button */}
+                          <div className="d-flex justify-content-end">
+                            <button className="btn btn-primary">
+                              <i className="fas fa-save me-2" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
+                              Lưu Cài Đặt
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -367,14 +772,105 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
                 {activeTab === 'security' && (
                   <div className="row g-4">
                     <div className="col-12">
-                      <div className="card" style={{
-                        backgroundColor: '#f8f9fa',
-                        border: '1px solid #e9ecef',
-                        minHeight: '500px'
-                      }}>
+                      <div className="card shadow-sm">
                         <div className="card-body p-4">
-                          <h5 className="card-title mb-4">Security Settings</h5>
-                          <p>This is the security tab content.</p>
+                          <h5 className="card-title mb-4">Bảo Mật Tài Khoản</h5>
+
+                          {/* Change Password Section */}
+                          <div className="mb-4">
+                            <h6 className="text-muted mb-3">Đổi Mật Khẩu</h6>
+                            <form>
+                              <div className="row g-3">
+                                <div className="col-md-6">
+                                  <label htmlFor="currentPassword" className="form-label">
+                                    Mật khẩu hiện tại
+                                  </label>
+                                  <input
+                                    type="password"
+                                    className="form-control"
+                                    id="currentPassword"
+                                    placeholder="Nhập mật khẩu hiện tại"
+                                  />
+                                </div>
+                                <div className="col-md-6">
+                                  <label htmlFor="newPassword" className="form-label">
+                                    Mật khẩu mới
+                                  </label>
+                                  <input
+                                    type="password"
+                                    className="form-control"
+                                    id="newPassword"
+                                    placeholder="Nhập mật khẩu mới"
+                                  />
+                                </div>
+                                <div className="col-md-6">
+                                  <label htmlFor="confirmPassword" className="form-label">
+                                    Xác nhận mật khẩu mới
+                                  </label>
+                                  <input
+                                    type="password"
+                                    className="form-control"
+                                    id="confirmPassword"
+                                    placeholder="Nhập lại mật khẩu mới"
+                                  />
+                                </div>
+                                <div className="col-12">
+                                  <button type="submit" className="btn btn-primary">
+                                    <i className="fas fa-key me-2" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
+                                    Đổi Mật Khẩu
+                                  </button>
+                                </div>
+                              </div>
+                            </form>
+                          </div>
+
+                          <hr className="my-4" />
+
+                          {/* Account Security Info */}
+                          <div className="mb-4">
+                            <h6 className="text-muted mb-3">Thông Tin Bảo Mật</h6>
+                            <div className="row g-3">
+                              <div className="col-md-6">
+                                <div className="d-flex align-items-center">
+                                  <i className="fas fa-shield-alt text-success me-3" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
+                                  <div>
+                                    <div className="fw-semibold">Trạng thái tài khoản</div>
+                                    <small className="text-muted">Tài khoản đang hoạt động</small>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="col-md-6">
+                                <div className="d-flex align-items-center">
+                                  <i className="fas fa-clock text-info me-3" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
+                                  <div>
+                                    <div className="fw-semibold">Lần đăng nhập cuối</div>
+                                    <small className="text-muted">Hôm nay, 14:30</small>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <hr className="my-4" />
+
+                          {/* Danger Zone */}
+                          <div className="mb-4">
+                            <h6 className="text-danger mb-3">Vùng Nguy Hiểm</h6>
+                            <div className="alert alert-warning" role="alert">
+                              <i className="fas fa-exclamation-triangle me-2" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
+                              <strong>Cảnh báo:</strong> Các hành động dưới đây có thể ảnh hưởng đến tài khoản của bạn.
+                            </div>
+                            <div className="d-flex gap-2">
+                              <button className="btn btn-outline-danger">
+                                <i className="fas fa-sign-out-alt me-2" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
+                                Đăng xuất tất cả thiết bị
+                              </button>
+                              <button className="btn btn-outline-danger">
+                                <i className="fas fa-trash me-2" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
+                                Xóa tài khoản
+                              </button>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>

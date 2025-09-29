@@ -152,45 +152,6 @@ export const bookService = {
   }
 };
 
-// Category Service
-export const categoryService = {
-  getAll: async () => {
-    return apiRequest('/categories');
-  },
-
-  getById: async (id) => {
-    return apiRequest(`/categories/${id}`);
-  },
-
-  create: async (categoryData, token) => {
-    return apiRequest('/categories', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(categoryData)
-    });
-  },
-
-  update: async (id, categoryData, token) => {
-    return apiRequest(`/categories/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(categoryData)
-    });
-  },
-
-  delete: async (id, token) => {
-    return apiRequest(`/categories/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-  }
-};
 
 // Author Service
 export const authorService = {
@@ -364,7 +325,6 @@ export const orderService = {
 export default {
   userService,
   bookService,
-  categoryService,
   authorService,
   publisherService,
   cartService,

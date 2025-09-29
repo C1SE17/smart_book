@@ -14,6 +14,8 @@ export const routes = {
   search: "/search",
   product: "/product",
   notification: "/notification",
+  blog: "/blog",
+  blogDetail: "/blog-detail",
 };
 
 // Route handlers
@@ -29,7 +31,6 @@ export const handleRoute = (
   if (path === "/" || path === "/home") {
     setCurrentPage("home");
   } else if (path === "/books") {
-    console.log("Setting currentPage to books");
     setCurrentPage("books");
   } else if (path === "/categories") {
     setCurrentPage("categories");
@@ -67,6 +68,16 @@ export const handleRoute = (
     }
   } else if (path === "/notification") {
     setCurrentPage("notification");
+  } else if (path === "/blog") {
+    setCurrentPage("blog");
+  } else if (path.startsWith("/blog-detail")) {
+    setCurrentPage("blog-detail");
+    // Extract blog ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const id = urlParams.get("id");
+    if (id) {
+      setProductId(parseInt(id)); // Reuse productId for blogId
+    }
   } else if (path.startsWith("/order/")) {
     setCurrentPage("order-detail");
     // Extract order ID from URL
