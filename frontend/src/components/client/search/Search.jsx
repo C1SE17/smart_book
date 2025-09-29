@@ -28,8 +28,8 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch 
   const performSearch = useCallback(async (query) => {
     setLoading(true);
     try {
-      // Handle regular search
-      const data = await bookService.search(query);
+      // Use bookService.getAll with search parameter
+      const data = await bookService.getAll({ search: query });
       setSearchResults(data);
     } catch (error) {
       console.error('Search error:', error);
@@ -131,25 +131,8 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch 
   const handleSearch = useCallback(async () => {
     if (!searchQuery.trim()) return;
 
-    setLoading(true);
-
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Filter books based on search query
-      const filteredBooks = mockBooks.filter(book => 
-        book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        book.description.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-
-      setSearchResults(filteredBooks);
-    } catch (error) {
-      console.error('Search error:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [searchQuery, mockBooks]);
+    await performSearch(searchQuery);
+  }, [searchQuery, performSearch]);
 
   const handleKeyPress = useCallback((e) => {
     if (e.key === 'Enter') {
@@ -307,7 +290,7 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch 
                           </p>
 
                           <div className="d-flex justify-content-between align-items-center mt-auto">
-                            <span className="fw-bold text-primary">${book.price}</span>
+                            <span className="fw-bold text-primary">{(book.price || 0).toLocaleString('vi-VN')} VNĐ</span>
                           </div>
 
                           <button

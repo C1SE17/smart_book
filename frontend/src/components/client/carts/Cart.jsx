@@ -1,32 +1,49 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-
-// Dữ liệu sách giả để hiển thị chi tiết sách
-const mockBooks = {
-  1: { title: "WHERE THE CRAWDADS SING", author: "Delia Owens", price: 180000, image: "./public/images/book1.jpg" },
-  2: { title: "Doraemon: Nobita's Little Star Wars", author: "Fujiko F. Fujio", price: 120000, image: "./public/images/book2.jpg" },
-  3: { title: "Demon Slayer - Vô hạn thành", author: "Koyoharu Gotouge", price: 150000, image: "./public/images/book3.jpg" },
-  4: { title: "Conan - Vụ Án Nữ Hoàng 450", author: "Gosho Aoyama", price: 130000, image: "./public/images/book4.jpg" }
-};
+import { bookService } from '../../../services';
 
 const Cart = ({ onBackToHome, onNavigateTo }) => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchCartItems = useCallback(() => {
+  const fetchCartItems = useCallback(async () => {
     setLoading(true);
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
     
-    const itemsWithDetails = cart.map(item => ({
-      ...item,
-      book_title: mockBooks[item.book_id]?.title || `Book ${item.book_id}`,
-      author: mockBooks[item.book_id]?.author || 'Unknown Author',
-      price: mockBooks[item.book_id]?.price || 0,
-      total_price: (mockBooks[item.book_id]?.price || 0) * item.quantity,
-      image_url: mockBooks[item.book_id]?.image || './public/images/book1.jpg'
-    }));
-    
-    setCartItems(itemsWithDetails);
-    setLoading(false);
+    try {
+      // Fetch book details for each item in cart
+      const itemsWithDetails = await Promise.all(
+        cart.map(async (item) => {
+          try {
+            const bookDetails = await bookService.getById(item.book_id);
+            return {
+              ...item,
+              book_title: bookDetails.title || `Book ${item.book_id}`,
+              author: bookDetails.author || 'Unknown Author',
+              price: bookDetails.price || 0,
+              total_price: (bookDetails.price || 0) * item.quantity,
+              image_url: bookDetails.cover_image || './public/images/book1.jpg'
+            };
+          } catch (error) {
+            console.error(`Error fetching book ${item.book_id}:`, error);
+            return {
+              ...item,
+              book_title: `Book ${item.book_id}`,
+              author: 'Unknown Author',
+              price: 0,
+              total_price: 0,
+              image_url: './public/images/book1.jpg'
+            };
+          }
+        })
+      );
+      
+      setCartItems(itemsWithDetails);
+    } catch (error) {
+      console.error('Error fetching cart items:', error);
+      setCartItems([]);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -52,17 +69,8 @@ const Cart = ({ onBackToHome, onNavigateTo }) => {
       // Lưu giỏ hàng đã cập nhật vào localStorage
       localStorage.setItem('cart', JSON.stringify(cart));
       
-      // Ánh xạ các mục giỏ hàng với chi tiết sách
-      const itemsWithDetails = cart.map(item => ({
-        ...item,
-        book_title: mockBooks[item.book_id]?.title || `Book ${item.book_id}`,
-        author: mockBooks[item.book_id]?.author || 'Unknown Author',
-        price: mockBooks[item.book_id]?.price || 0,
-        total_price: (mockBooks[item.book_id]?.price || 0) * item.quantity,
-        image_url: mockBooks[item.book_id]?.image || './public/images/book1.jpg'
-      }));
-      
-      setCartItems(itemsWithDetails);
+      // Refresh cart items
+      fetchCartItems();
       
       // Kích hoạt sự kiện cập nhật giỏ hàng
       window.dispatchEvent(new CustomEvent('cartUpdated', { 
@@ -71,7 +79,7 @@ const Cart = ({ onBackToHome, onNavigateTo }) => {
     } catch (error) {
       console.error('Error removing item from cart:', error);
     }
-  }, []);
+  }, [fetchCartItems]);
 
   const updateQuantity = useCallback((bookId, newQuantity) => {
     if (newQuantity < 1) {
@@ -92,17 +100,8 @@ const Cart = ({ onBackToHome, onNavigateTo }) => {
       // Lưu giỏ hàng đã cập nhật vào localStorage
       localStorage.setItem('cart', JSON.stringify(cart));
       
-      // Ánh xạ các mục giỏ hàng với chi tiết sách
-      const itemsWithDetails = cart.map(item => ({
-        ...item,
-        book_title: mockBooks[item.book_id]?.title || `Book ${item.book_id}`,
-        author: mockBooks[item.book_id]?.author || 'Unknown Author',
-        price: mockBooks[item.book_id]?.price || 0,
-        total_price: (mockBooks[item.book_id]?.price || 0) * item.quantity,
-        image_url: mockBooks[item.book_id]?.image || './public/images/book1.jpg'
-      }));
-      
-      setCartItems(itemsWithDetails);
+      // Refresh cart items
+      fetchCartItems();
       
       // Kích hoạt sự kiện cập nhật giỏ hàng
       window.dispatchEvent(new CustomEvent('cartUpdated', { 
@@ -111,7 +110,7 @@ const Cart = ({ onBackToHome, onNavigateTo }) => {
     } catch (error) {
       console.error('Error updating quantity:', error);
     }
-  }, [removeFromCart, mockBooks]);
+  }, [removeFromCart, fetchCartItems]);
 
   const calculateTotal = useMemo(() => {
     return cartItems.reduce((total, item) => {

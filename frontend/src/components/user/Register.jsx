@@ -81,8 +81,7 @@ const Register = ({ onToggleMode, onRegisterSuccess }) => {
         email: formData.email,
         password: formData.password,
         phone: '',
-        address: '',
-        role: 'customer'
+        address: ''
       });
       
       console.log('Đăng ký thành công:', response);

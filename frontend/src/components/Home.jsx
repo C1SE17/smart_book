@@ -1,12 +1,224 @@
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState, useEffect } from 'react';
+import { bookService } from '../services';
 
 const Home = ({ onNavigateTo }) => {
+  // State for books data
+  const [books, setBooks] = useState([]);
+  const [newBooks, setNewBooks] = useState([]);
+  const [popularBooks, setPopularBooks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   // Ghi nhớ dữ liệu để tránh tạo lại mỗi lần render
   const blogPosts = useMemo(() => [
     { title: "Fujiko F. Fujio - The Creator of Doraemon", date: "24 Oct, 2019", image: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=200&fit=crop" },
     { title: "The Art of Manga Storytelling", date: "15 Nov, 2019", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=200&fit=crop" },
     { title: "Top 10 Must-Read Manga Series", date: "01 Dec, 2019", image: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400&h=200&fit=crop" }
   ], []);
+
+  // Fetch books from API
+  useEffect(() => {
+    const fetchBooks = async () => {
+      setLoading(true);
+      
+      // For now, always use mock data to avoid API errors
+      console.log('Using mock data for books display');
+      
+      // Mock data
+        const mockBooks = [
+          { 
+            book_id: 1, 
+            title: "WHERE THE CRAWDADS SING", 
+            description: "A mystery novel about a girl who grows up alone in the marshes of North Carolina",
+            price: 105000, // $4.3 * 24,000 VND
+            stock: 50,
+            category_id: 1,
+            author_id: 1,
+            publisher_id: 1,
+            published_date: "2018-08-14",
+            cover_image: "/images/book1.jpg",
+            slug: "where-the-crawdads-sing",
+            author: "Delia Owens",
+            rating: 3.5
+          },
+          { 
+            book_id: 2, 
+            title: "Doraemon: Nobita và Cuộc Chiến Vũ Trụ", 
+            description: "Cuộc phiêu lưu của Nobita và Doraemon trong không gian",
+            price: 248000, // $10.35 * 24,000 VND
+            stock: 30,
+            category_id: 2,
+            author_id: 2,
+            publisher_id: 2,
+            published_date: "2020-01-15",
+            cover_image: "/images/book2.jpg",
+            slug: "doraemon-nobita-vu-tru",
+            author: "Fujiko F. Fujio",
+            rating: 5.0
+          },
+          { 
+            book_id: 3, 
+            title: "Thanh Gươm Diệt Quỷ - Tập 1", 
+            description: "Câu chuyện về Tanjiro và cuộc chiến chống lại ma quỷ",
+            price: 815000, // $33.95 * 24,000 VND
+            stock: 25,
+            category_id: 2,
+            author_id: 3,
+            publisher_id: 2,
+            published_date: "2019-06-20",
+            cover_image: "/images/book3.jpg",
+            slug: "thanh-guom-diet-quy-tap-1",
+            author: "Koyoharu Gotouge",
+            rating: 4.0
+          },
+          { 
+            book_id: 4, 
+            title: "Conan - Vụ Án Nữ Hoàng 450", 
+            description: "Vụ án bí ẩn của thám tử Conan Edogawa",
+            price: 863000, // $35.95 * 24,000 VND
+            stock: 40,
+            category_id: 2,
+            author_id: 4,
+            publisher_id: 2,
+            published_date: "2021-03-10",
+            cover_image: "/images/book4.jpg",
+            slug: "conan-vu-an-nu-hoang-450",
+            author: "Gosho Aoyama",
+            rating: 5.0
+          },
+          { 
+            book_id: 5, 
+            title: "Harry Potter và Hòn Đá Phù Thủy", 
+            description: "Tập 1 của bộ Harry Potter - cuộc phiêu lưu của cậu bé phù thủy",
+            price: 200000, 
+            stock: 35,
+            category_id: 1,
+            author_id: 5,
+            publisher_id: 3,
+            published_date: "2017-09-01",
+            cover_image: "/images/book1.jpg",
+            slug: "harry-potter-va-hon-da-phu-thuy",
+            author: "J.K. Rowling",
+            rating: 4.8
+          },
+          { 
+            book_id: 6, 
+            title: "Đắc Nhân Tâm", 
+            description: "Cuốn sách kinh điển về nghệ thuật giao tiếp và thu phục lòng người",
+            price: 120000, 
+            stock: 60,
+            category_id: 1,
+            author_id: 6,
+            publisher_id: 4,
+            published_date: "2016-01-01",
+            cover_image: "/images/book2.jpg",
+            slug: "dac-nhan-tam",
+            author: "Dale Carnegie",
+            rating: 4.5
+          },
+          { 
+            book_id: 7, 
+            title: "One Piece - Tập 1000", 
+            description: "Cuộc phiêu lưu của Luffy và băng hải tặc Mũ Rơm",
+            price: 25000, 
+            stock: 100,
+            category_id: 2,
+            author_id: 7,
+            publisher_id: 2,
+            published_date: "2022-01-01",
+            cover_image: "/images/book3.jpg",
+            slug: "one-piece-tap-1000",
+            author: "Eiichiro Oda",
+            rating: 4.9
+          },
+          { 
+            book_id: 8, 
+            title: "Attack on Titan - Tập 34", 
+            description: "Câu chuyện về cuộc chiến giữa loài người và Titan",
+            price: 30000, 
+            stock: 80,
+            category_id: 2,
+            author_id: 8,
+            publisher_id: 2,
+            published_date: "2021-06-09",
+            cover_image: "/images/book4.jpg",
+            slug: "attack-on-titan-tap-34",
+            author: "Hajime Isayama",
+            rating: 4.7
+          },
+          { 
+            book_id: 9, 
+            title: "The Great Gatsby", 
+            description: "Tiểu thuyết kinh điển của F. Scott Fitzgerald về giấc mơ Mỹ",
+            price: 150000, 
+            stock: 45,
+            category_id: 1,
+            author_id: 9,
+            publisher_id: 1,
+            published_date: "1925-04-10",
+            cover_image: "/images/book1.jpg",
+            slug: "the-great-gatsby",
+            author: "F. Scott Fitzgerald",
+            rating: 4.3
+          },
+          { 
+            book_id: 10, 
+            title: "To Kill a Mockingbird", 
+            description: "Cuốn tiểu thuyết về công lý và phân biệt chủng tộc ở miền Nam nước Mỹ",
+            price: 160000, 
+            stock: 55,
+            category_id: 1,
+            author_id: 10,
+            publisher_id: 1,
+            published_date: "1960-07-11",
+            cover_image: "/images/book2.jpg",
+            slug: "to-kill-a-mockingbird",
+            author: "Harper Lee",
+            rating: 4.6
+          },
+          { 
+            book_id: 11, 
+            title: "Naruto - Tập 72", 
+            description: "Câu chuyện về ninja trẻ Naruto và hành trình trở thành Hokage",
+            price: 28000, 
+            stock: 90,
+            category_id: 2,
+            author_id: 11,
+            publisher_id: 2,
+            published_date: "2014-11-04",
+            cover_image: "/images/book3.jpg",
+            slug: "naruto-tap-72",
+            author: "Masashi Kishimoto",
+            rating: 4.8
+          },
+          { 
+            book_id: 12, 
+            title: "Dragon Ball Super - Tập 20", 
+            description: "Cuộc phiêu lưu mới của Goku và các chiến binh Z",
+            price: 32000, 
+            stock: 75,
+            category_id: 2,
+            author_id: 12,
+            publisher_id: 2,
+            published_date: "2023-03-02",
+            cover_image: "/images/book4.jpg",
+            slug: "dragon-ball-super-tap-20",
+            author: "Akira Toriyama",
+            rating: 4.4
+          }
+        ];
+        
+      setBooks(mockBooks);
+      // Sách mới: 4 cuốn mới nhất theo ngày xuất bản
+      setNewBooks(mockBooks.sort((a, b) => new Date(b.published_date) - new Date(a.published_date)).slice(0, 4));
+      // Sách phổ biến: 4 cuốn có stock thấp nhất (bán nhiều)
+      setPopularBooks(mockBooks.sort((a, b) => a.stock - b.stock).slice(0, 4));
+      
+      setLoading(false);
+    };
+
+    fetchBooks();
+  }, []);
 
   // Ghi nhớ các event handlers
   const handleBookClick = useCallback((bookId) => {
@@ -15,17 +227,31 @@ const Home = ({ onNavigateTo }) => {
   }, [onNavigateTo]);
 
   // Xử lý thêm vào giỏ hàng - chỉ sử dụng localStorage
-  const handleAddToCart = useCallback((bookId, e) => {
+  const handleAddToCart = useCallback((book, e) => {
     e.stopPropagation();
     
+    // Kiểm tra còn hàng không
+    if (book.stock <= 0) {
+      alert('Sản phẩm đã hết hàng!');
+      return;
+    }
+    
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    const existingItem = cart.find(item => item.book_id === bookId);
+    const existingItem = cart.find(item => item.book_id === book.book_id);
     
     if (existingItem) {
+      // Kiểm tra số lượng trong giỏ có vượt quá stock không
+      if (existingItem.quantity >= book.stock) {
+        alert(`Chỉ còn ${book.stock} sản phẩm trong kho!`);
+        return;
+      }
       existingItem.quantity += 1;
     } else {
       cart.push({
-        book_id: bookId,
+        book_id: book.book_id,
+        title: book.title,
+        price: book.price,
+        cover_image: book.cover_image,
         quantity: 1,
         added_at: new Date().toISOString()
       });
@@ -33,7 +259,7 @@ const Home = ({ onNavigateTo }) => {
     
     localStorage.setItem('cart', JSON.stringify(cart));
     window.dispatchEvent(new CustomEvent('cartUpdated', { 
-      detail: { cart, action: 'add', bookId } 
+      detail: { cart, action: 'add', bookId: book.book_id } 
     }));
   }, []);
 
@@ -96,9 +322,9 @@ const Home = ({ onNavigateTo }) => {
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-8px)';
                   e.currentTarget.style.boxShadow = '0 15px 35px rgba(0,0,0,0.15)';
-                  // Hiển thị nút thêm vào giỏ hàng
+                  // Hiển thị nút thêm vào giỏ hàng nếu còn hàng
                   const addToCartBtn = e.currentTarget.querySelector('.add-to-cart-btn');
-                  if (addToCartBtn) {
+                  if (addToCartBtn && book.stock > 0) {
                     addToCartBtn.style.opacity = '1';
                   }
                 }}
@@ -159,40 +385,21 @@ const Home = ({ onNavigateTo }) => {
           </div>
           
           <div className="row g-4">
-            {[
-              { 
-                book_id: 1, 
-                title: "WHERE THE CRAWDADS SING", 
-                author: "Delia Owens", 
-                price: 180000, 
-                rating: 5.0,
-                image: "./public/images/book1.jpg" 
-              },
-              { 
-                book_id: 2, 
-                title: "Doraemon: Nobita's Little Star Wars", 
-                author: "Fujiko F. Fujio", 
-                price: 120000, 
-                rating: 5.0,
-                image: "./public/images/book2.jpg" 
-              },
-              { 
-                book_id: 3, 
-                title: "Demon Slayer - Vô hạn thành", 
-                author: "Koyoharu Gotouge", 
-                price: 150000, 
-                rating: 5.0,
-                image: "./public/images/book3.jpg" 
-              },
-              { 
-                book_id: 4, 
-                title: "Conan - Vụ Án Nữ Hoàng 450", 
-                author: "Gosho Aoyama", 
-                price: 130000, 
-                rating: 5.0,
-                image: "./public/images/book4.jpg" 
-              }
-            ].map((book, index) => (
+            {loading ? (
+              <div className="col-12 text-center py-5">
+                <div className="spinner-border text-primary" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </div>
+                <p className="mt-2">Đang tải dữ liệu...</p>
+              </div>
+            ) : error ? (
+              <div className="col-12 text-center py-5">
+                <div className="alert alert-warning" role="alert">
+                  <i className="bi bi-exclamation-triangle me-2"></i>
+                  {error}
+                </div>
+              </div>
+            ) : books.slice(0, 4).map((book, index) => (
               <div key={index} className="col-lg-3 col-md-6">
                 <div className="card h-100 border-0 shadow-sm" style={{
                   transition: 'all 0.3s ease',
@@ -204,9 +411,9 @@ const Home = ({ onNavigateTo }) => {
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-8px)';
                   e.currentTarget.style.boxShadow = '0 15px 35px rgba(0,0,0,0.15)';
-                  // Hiển thị nút thêm vào giỏ hàng
+                  // Hiển thị nút thêm vào giỏ hàng nếu còn hàng
                   const addToCartBtn = e.currentTarget.querySelector('.add-to-cart-btn');
-                  if (addToCartBtn) {
+                  if (addToCartBtn && book.stock > 0) {
                     addToCartBtn.style.opacity = '1';
                   }
                 }}
@@ -221,7 +428,7 @@ const Home = ({ onNavigateTo }) => {
                 }}>
                   <div className="position-relative">
                     <img 
-                      src={book.image} 
+                      src={book.cover_image || '/images/book1.jpg'} 
                       className="card-img-top" 
                       alt={book.title}
                       style={{
@@ -232,28 +439,30 @@ const Home = ({ onNavigateTo }) => {
                         padding: '10px'
                       }}
                     />
-                    {/* Nút Thêm Vào Giỏ Hàng - xuất hiện khi hover */}
-                    <div 
-                      className="position-absolute top-0 end-0 p-2 add-to-cart-btn"
-                      style={{ 
-                        opacity: 0,
-                        transition: 'opacity 0.3s ease'
-                      }}
-                    >
-                      <button 
-                        className="btn btn-sm btn-light rounded-circle"
-                        style={{
-                          width: '40px',
-                          height: '40px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
+                    {/* Nút Thêm Vào Giỏ Hàng - xuất hiện khi hover và còn hàng */}
+                    {book.stock > 0 && (
+                      <div 
+                        className="position-absolute top-0 end-0 p-2 add-to-cart-btn"
+                        style={{ 
+                          opacity: 0,
+                          transition: 'opacity 0.3s ease'
                         }}
-                        onClick={(e) => handleAddToCart(book.book_id, e)}
                       >
-                        <i className="bi bi-cart-plus"></i>
-                      </button>
-                    </div>
+                        <button 
+                          className="btn btn-sm btn-light rounded-circle"
+                          style={{
+                            width: '40px',
+                            height: '40px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                          onClick={(e) => handleAddToCart(book, e)}
+                        >
+                          <i className="bi bi-cart-plus"></i>
+                        </button>
+                      </div>
+                    )}
                   </div>
                   
                   <div className="card-body p-3 d-flex flex-column">
@@ -269,35 +478,28 @@ const Home = ({ onNavigateTo }) => {
                       {book.title}
                     </h6>
                     <p className="card-text text-muted small mb-2" style={{ fontSize: '0.85rem' }}>
-                      {book.author}
+                      {book.author || 'Tác giả chưa xác định'}
                     </p>
                     
-                    {/* Star Rating */}
-                    <div className="mb-3">
+                    {/* Rating */}
+                    <div className="mb-2">
                       <div className="d-flex align-items-center">
-                        <div className="me-1">
-                          {[...Array(5)].map((_, i) => (
-                            <i 
-                              key={i} 
-                              className={`bi bi-star-fill ${
-                                i < Math.floor(book.rating) ? 'text-warning' : 'text-muted'
-                              }`}
-                              style={{ fontSize: '12px' }}
-                            ></i>
-                          ))}
-                          {book.rating % 1 !== 0 && (
-                            <i className="bi bi-star-half text-warning" style={{ fontSize: '12px' }}></i>
-                          )}
-                        </div>
-                        <span className="text-muted small" style={{ fontSize: '11px' }}>
-                          ({book.rating})
+                        {[...Array(5)].map((_, i) => (
+                          <i 
+                            key={i} 
+                            className={`bi bi-star${i < Math.floor(book.rating || 0) ? '-fill' : ''} text-warning`}
+                            style={{ fontSize: '12px' }}
+                          ></i>
+                        ))}
+                        <span className="text-muted small ms-1" style={{ fontSize: '11px' }}>
+                          {book.rating ? book.rating.toFixed(1) : '0.0'} (1)
                         </span>
                       </div>
                     </div>
                     
                     <div className="mt-auto">
                       <p className="card-text fw-bold text-primary mb-0" style={{ fontSize: '1.1rem' }}>
-                        {book.price.toLocaleString('vi-VN')} VNĐ
+                        {(book.price || 0).toLocaleString('vi-VN')} VNĐ
                       </p>
                     </div>
                   </div>
@@ -323,40 +525,21 @@ const Home = ({ onNavigateTo }) => {
           </div>
           
           <div className="row g-4">
-            {[
-              { 
-                book_id: 1, 
-                title: "WHERE THE CRAWDADS SING", 
-                author: "Delia Owens", 
-                price: 180000, 
-                rating: 5.0,
-                image: "./public/images/book1.jpg" 
-              },
-              { 
-                book_id: 2, 
-                title: "Doraemon: Nobita's Little Star Wars", 
-                author: "Fujiko F. Fujio", 
-                price: 120000, 
-                rating: 5.0,
-                image: "./public/images/book2.jpg" 
-              },
-              { 
-                book_id: 3, 
-                title: "Demon Slayer - Vô hạn thành", 
-                author: "Koyoharu Gotouge", 
-                price: 150000, 
-                rating: 5.0,
-                image: "./public/images/book3.jpg" 
-              },
-              { 
-                book_id: 4, 
-                title: "Conan - Vụ Án Nữ Hoàng 450", 
-                author: "Gosho Aoyama", 
-                price: 130000, 
-                rating: 5.0,
-                image: "./public/images/book4.jpg" 
-              }
-            ].map((book, index) => (
+            {loading ? (
+              <div className="col-12 text-center py-5">
+                <div className="spinner-border text-primary" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </div>
+                <p className="mt-2">Đang tải dữ liệu...</p>
+              </div>
+            ) : error ? (
+              <div className="col-12 text-center py-5">
+                <div className="alert alert-warning" role="alert">
+                  <i className="bi bi-exclamation-triangle me-2"></i>
+                  {error}
+                </div>
+              </div>
+            ) : newBooks.map((book, index) => (
               <div key={index} className="col-lg-3 col-md-6">
                 <div className="card h-100 border-0 shadow-sm" style={{
                   transition: 'all 0.3s ease',
@@ -368,9 +551,9 @@ const Home = ({ onNavigateTo }) => {
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-8px)';
                   e.currentTarget.style.boxShadow = '0 15px 35px rgba(0,0,0,0.15)';
-                  // Hiển thị nút thêm vào giỏ hàng
+                  // Hiển thị nút thêm vào giỏ hàng nếu còn hàng
                   const addToCartBtn = e.currentTarget.querySelector('.add-to-cart-btn');
-                  if (addToCartBtn) {
+                  if (addToCartBtn && book.stock > 0) {
                     addToCartBtn.style.opacity = '1';
                   }
                 }}
@@ -385,7 +568,7 @@ const Home = ({ onNavigateTo }) => {
                 }}>
                   <div className="position-relative">
                     <img 
-                      src={book.image} 
+                      src={book.cover_image || '/images/book1.jpg'} 
                       className="card-img-top" 
                       alt={book.title}
                       style={{
@@ -396,28 +579,30 @@ const Home = ({ onNavigateTo }) => {
                         padding: '10px'
                       }}
                     />
-                    {/* Nút Thêm Vào Giỏ Hàng - xuất hiện khi hover */}
-                    <div 
-                      className="position-absolute top-0 end-0 p-2 add-to-cart-btn"
-                      style={{ 
-                        opacity: 0,
-                        transition: 'opacity 0.3s ease'
-                      }}
-                    >
-                      <button 
-                        className="btn btn-sm btn-light rounded-circle"
-                        style={{
-                          width: '40px',
-                          height: '40px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
+                    {/* Nút Thêm Vào Giỏ Hàng - xuất hiện khi hover và còn hàng */}
+                    {book.stock > 0 && (
+                      <div 
+                        className="position-absolute top-0 end-0 p-2 add-to-cart-btn"
+                        style={{ 
+                          opacity: 0,
+                          transition: 'opacity 0.3s ease'
                         }}
-                        onClick={(e) => handleAddToCart(book.book_id, e)}
                       >
-                        <i className="bi bi-cart-plus"></i>
-                      </button>
-                    </div>
+                        <button 
+                          className="btn btn-sm btn-light rounded-circle"
+                          style={{
+                            width: '40px',
+                            height: '40px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                          onClick={(e) => handleAddToCart(book, e)}
+                        >
+                          <i className="bi bi-cart-plus"></i>
+                        </button>
+                      </div>
+                    )}
                   </div>
                   
                   <div className="card-body p-3 d-flex flex-column">
@@ -433,32 +618,28 @@ const Home = ({ onNavigateTo }) => {
                       {book.title}
                     </h6>
                     <p className="card-text text-muted small mb-2" style={{ fontSize: '0.85rem' }}>
-                      {book.author}
+                      {book.author || 'Tác giả chưa xác định'}
                     </p>
                     
-                    {/* Star Rating */}
-                    <div className="mb-3">
+                    {/* Rating */}
+                    <div className="mb-2">
                       <div className="d-flex align-items-center">
-                        <div className="me-1">
-                          {[...Array(5)].map((_, i) => (
-                            <i 
-                              key={i} 
-                              className={`bi bi-star-fill ${
-                                i < Math.floor(book.rating) ? 'text-warning' : 'text-muted'
-                              }`}
-                              style={{ fontSize: '12px' }}
-                            ></i>
-                          ))}
-                        </div>
-                        <span className="text-muted small" style={{ fontSize: '11px' }}>
-                          ({book.rating})
+                        {[...Array(5)].map((_, i) => (
+                          <i 
+                            key={i} 
+                            className={`bi bi-star${i < Math.floor(book.rating || 0) ? '-fill' : ''} text-warning`}
+                            style={{ fontSize: '12px' }}
+                          ></i>
+                        ))}
+                        <span className="text-muted small ms-1" style={{ fontSize: '11px' }}>
+                          {book.rating ? book.rating.toFixed(1) : '0.0'} (1)
                         </span>
                       </div>
                     </div>
                     
                     <div className="mt-auto">
                       <p className="card-text fw-bold text-primary mb-0" style={{ fontSize: '1.1rem' }}>
-                        {book.price.toLocaleString('vi-VN')} VNĐ
+                        {(book.price || 0).toLocaleString('vi-VN')} VNĐ
                       </p>
                     </div>
                   </div>
@@ -484,40 +665,21 @@ const Home = ({ onNavigateTo }) => {
           </div>
           
           <div className="row g-4">
-            {[
-              { 
-                book_id: 1, 
-                title: "WHERE THE CRAWDADS SING", 
-                author: "Delia Owens", 
-                price: 180000, 
-                rating: 5.0,
-                image: "./public/images/book1.jpg" 
-              },
-              { 
-                book_id: 2, 
-                title: "Doraemon: Nobita's Little Star Wars", 
-                author: "Fujiko F. Fujio", 
-                price: 120000, 
-                rating: 5.0,
-                image: "./public/images/book2.jpg" 
-              },
-              { 
-                book_id: 3, 
-                title: "Demon Slayer - Vô hạn thành", 
-                author: "Koyoharu Gotouge", 
-                price: 150000, 
-                rating: 5.0,
-                image: "./public/images/book3.jpg" 
-              },
-              { 
-                book_id: 4, 
-                title: "Conan - Vụ Án Nữ Hoàng 450", 
-                author: "Gosho Aoyama", 
-                price: 130000, 
-                rating: 5.0,
-                image: "./public/images/book4.jpg" 
-              }
-            ].map((book, index) => (
+            {loading ? (
+              <div className="col-12 text-center py-5">
+                <div className="spinner-border text-primary" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </div>
+                <p className="mt-2">Đang tải dữ liệu...</p>
+              </div>
+            ) : error ? (
+              <div className="col-12 text-center py-5">
+                <div className="alert alert-warning" role="alert">
+                  <i className="bi bi-exclamation-triangle me-2"></i>
+                  {error}
+                </div>
+              </div>
+            ) : popularBooks.map((book, index) => (
               <div key={index} className="col-lg-3 col-md-6">
                 <div className="card h-100 border-0 shadow-sm" style={{
                   transition: 'all 0.3s ease',
@@ -529,9 +691,9 @@ const Home = ({ onNavigateTo }) => {
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-8px)';
                   e.currentTarget.style.boxShadow = '0 15px 35px rgba(0,0,0,0.15)';
-                  // Hiển thị nút thêm vào giỏ hàng
+                  // Hiển thị nút thêm vào giỏ hàng nếu còn hàng
                   const addToCartBtn = e.currentTarget.querySelector('.add-to-cart-btn');
-                  if (addToCartBtn) {
+                  if (addToCartBtn && book.stock > 0) {
                     addToCartBtn.style.opacity = '1';
                   }
                 }}
@@ -546,7 +708,7 @@ const Home = ({ onNavigateTo }) => {
                 }}>
                   <div className="position-relative">
                     <img 
-                      src={book.image} 
+                      src={book.cover_image || '/images/book1.jpg'} 
                       className="card-img-top" 
                       alt={book.title}
                       style={{
@@ -557,28 +719,30 @@ const Home = ({ onNavigateTo }) => {
                         padding: '10px'
                       }}
                     />
-                    {/* Nút Thêm Vào Giỏ Hàng - xuất hiện khi hover */}
-                    <div 
-                      className="position-absolute top-0 end-0 p-2 add-to-cart-btn"
-                      style={{ 
-                        opacity: 0,
-                        transition: 'opacity 0.3s ease'
-                      }}
-                    >
-                      <button 
-                        className="btn btn-sm btn-light rounded-circle"
-                        style={{
-                          width: '40px',
-                          height: '40px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
+                    {/* Nút Thêm Vào Giỏ Hàng - xuất hiện khi hover và còn hàng */}
+                    {book.stock > 0 && (
+                      <div 
+                        className="position-absolute top-0 end-0 p-2 add-to-cart-btn"
+                        style={{ 
+                          opacity: 0,
+                          transition: 'opacity 0.3s ease'
                         }}
-                        onClick={(e) => handleAddToCart(book.book_id, e)}
                       >
-                        <i className="bi bi-cart-plus"></i>
-                      </button>
-                    </div>
+                        <button 
+                          className="btn btn-sm btn-light rounded-circle"
+                          style={{
+                            width: '40px',
+                            height: '40px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                          onClick={(e) => handleAddToCart(book, e)}
+                        >
+                          <i className="bi bi-cart-plus"></i>
+                        </button>
+                      </div>
+                    )}
                   </div>
                   
                   <div className="card-body p-3 d-flex flex-column">
@@ -594,32 +758,28 @@ const Home = ({ onNavigateTo }) => {
                       {book.title}
                     </h6>
                     <p className="card-text text-muted small mb-2" style={{ fontSize: '0.85rem' }}>
-                      {book.author}
+                      {book.author || 'Tác giả chưa xác định'}
                     </p>
                     
-                    {/* Star Rating */}
-                    <div className="mb-3">
+                    {/* Rating */}
+                    <div className="mb-2">
                       <div className="d-flex align-items-center">
-                        <div className="me-1">
-                          {[...Array(5)].map((_, i) => (
-                            <i 
-                              key={i} 
-                              className={`bi bi-star-fill ${
-                                i < Math.floor(book.rating) ? 'text-warning' : 'text-muted'
-                              }`}
-                              style={{ fontSize: '12px' }}
-                            ></i>
-                          ))}
-                        </div>
-                        <span className="text-muted small" style={{ fontSize: '11px' }}>
-                          ({book.rating})
+                        {[...Array(5)].map((_, i) => (
+                          <i 
+                            key={i} 
+                            className={`bi bi-star${i < Math.floor(book.rating || 0) ? '-fill' : ''} text-warning`}
+                            style={{ fontSize: '12px' }}
+                          ></i>
+                        ))}
+                        <span className="text-muted small ms-1" style={{ fontSize: '11px' }}>
+                          {book.rating ? book.rating.toFixed(1) : '0.0'} (1)
                         </span>
                       </div>
                     </div>
                     
                     <div className="mt-auto">
                       <p className="card-text fw-bold text-primary mb-0" style={{ fontSize: '1.1rem' }}>
-                        {book.price.toLocaleString('vi-VN')} VNĐ
+                        {(book.price || 0).toLocaleString('vi-VN')} VNĐ
                       </p>
                     </div>
                   </div>

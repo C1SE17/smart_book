@@ -44,8 +44,8 @@ export const userService = {
     });
   },
 
-  getProfile: async (token) => {
-    return apiRequest('/users/users/1', {
+  getProfile: async (userId, token) => {
+    return apiRequest(`/users/users/${userId}`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -62,35 +62,26 @@ export const userService = {
     });
   },
 
-  changePassword: async (passwordData, token) => {
-    return apiRequest('/users/change-password', {
-      method: 'PUT',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(passwordData)
-    });
-  },
-
-  getOrders: async (token) => {
-    return apiRequest('/order', {
+  logout: async (token) => {
+    return apiRequest('/users/logout', {
+      method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`
       }
     });
   },
 
-  getNotifications: async (token) => {
-    return apiRequest('/users/notifications', {
+  getAllUsers: async (token) => {
+    return apiRequest('/users/users', {
       headers: {
         'Authorization': `Bearer ${token}`
       }
     });
   },
 
-  markNotificationRead: async (notificationId, token) => {
-    return apiRequest(`/users/notifications/${notificationId}/read`, {
-      method: 'PUT',
+  deleteUser: async (userId, token) => {
+    return apiRequest(`/users/users/${userId}`, {
+      method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -108,18 +99,6 @@ export const bookService = {
 
   getById: async (id) => {
     return apiRequest(`/books/${id}`);
-  },
-
-  getByCategory: async (categoryId) => {
-    return apiRequest(`/books/category/${categoryId}`);
-  },
-
-  getByAuthor: async (authorId) => {
-    return apiRequest(`/books/author/${authorId}`);
-  },
-
-  search: async (query) => {
-    return apiRequest(`/books/search?q=${encodeURIComponent(query)}`);
   },
 
   create: async (bookData, token) => {
@@ -149,6 +128,14 @@ export const bookService = {
         'Authorization': `Bearer ${token}`
       }
     });
+  },
+
+  getNew: async (limit = 4) => {
+    return apiRequest(`/books/new?limit=${limit}`);
+  },
+
+  getPopular: async (limit = 4) => {
+    return apiRequest(`/books/popular?limit=${limit}`);
   }
 };
 
@@ -185,6 +172,54 @@ export const authorService = {
 
   delete: async (id, token) => {
     return apiRequest(`/authors/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+  }
+};
+
+// Category Service
+export const categoryService = {
+  getAll: async (token) => {
+    return apiRequest('/categories', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+  },
+
+  getById: async (id, token) => {
+    return apiRequest(`/categories/${id}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+  },
+
+  create: async (categoryData, token) => {
+    return apiRequest('/categories', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(categoryData)
+    });
+  },
+
+  update: async (id, categoryData, token) => {
+    return apiRequest(`/categories/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(categoryData)
+    });
+  },
+
+  delete: async (id, token) => {
+    return apiRequest(`/categories/${id}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`
@@ -285,7 +320,7 @@ export const cartService = {
 // Order Service
 export const orderService = {
   getAll: async (token) => {
-    return apiRequest('/orders', {
+    return apiRequest('/order', {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -293,7 +328,7 @@ export const orderService = {
   },
 
   getById: async (orderId, token) => {
-    return apiRequest(`/orders/${orderId}`, {
+    return apiRequest(`/order/${orderId}`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -301,7 +336,7 @@ export const orderService = {
   },
 
   create: async (orderData, token) => {
-    return apiRequest('/orders', {
+    return apiRequest('/order', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`
@@ -311,7 +346,7 @@ export const orderService = {
   },
 
   updateStatus: async (orderId, status, token) => {
-    return apiRequest(`/orders/${orderId}/status`, {
+    return apiRequest(`/order/${orderId}/status`, {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${token}`
@@ -327,6 +362,7 @@ export default {
   bookService,
   authorService,
   publisherService,
+  categoryService,
   cartService,
   orderService
 };

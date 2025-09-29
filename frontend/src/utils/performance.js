@@ -25,11 +25,6 @@ export const throttle = (func, limit) => {
   };
 };
 
-// Lazy loading utility
-export const lazyLoad = (importFunc) => {
-  return React.lazy(importFunc);
-};
-
 // Memoization helper for expensive calculations
 export const memoize = (fn) => {
   const cache = new Map();
@@ -50,11 +45,6 @@ export const optimizeImage = (src, width, height, quality = 80) => {
     return `${src}&w=${width}&h=${height}&q=${quality}&fit=crop`;
   }
   return src;
-};
-
-// Bundle size optimization - only import what you need
-export const chunkImport = (moduleName) => {
-  return import(/* webpackChunkName: "[request]" */ `../components/${moduleName}`);
 };
 
 // Memory cleanup utility
@@ -88,10 +78,8 @@ export const getVisibleItems = (items, containerHeight, itemHeight, scrollTop) =
 export default {
   debounce,
   throttle,
-  lazyLoad,
   memoize,
   optimizeImage,
-  chunkImport,
   cleanup,
   measurePerformance,
   getVisibleItems

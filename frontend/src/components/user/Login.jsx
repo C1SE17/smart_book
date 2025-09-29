@@ -72,10 +72,12 @@ const Login = ({ onToggleMode, onLoginSuccess, onForgotPassword }) => {
         localStorage.setItem('userToken', response.token);
       }
       
+      // Lưu token vào localStorage
+      localStorage.setItem('userToken', response.token);
+      
       // Gọi callback thành công với dữ liệu user từ backend
       if (onLoginSuccess) {
         onLoginSuccess({
-          ...response.user,
           token: response.token,
           isLoggedIn: true
         });

@@ -6,6 +6,7 @@ import BlogDetail from './components/client/blog/BlogDetail'
 import { UserProfile } from './components/user'
 import Auth from './features/auth/Auth'
 import { handleRoute, navigateTo } from './routes'
+import { getToken, removeToken, getUserFromToken } from './utils'
 import './App.css'
 
 function App() {
@@ -15,6 +16,14 @@ function App() {
   const [productId, setProductId] = useState(null); // Product ID for product detail page
   const [user, setUser] = useState(null); // User authentication state
   const [profileTab, setProfileTab] = useState('profile'); // Profile tab state
+
+  // Initialize user state from token
+  useEffect(() => {
+    const token = getToken();
+    if (token) {
+      setUser(getUserFromToken(token));
+    }
+  }, []);
 
   // Handle URL routing
   useEffect(() => {
@@ -53,6 +62,7 @@ function App() {
   }, []);
 
   const handleLogout = useCallback(() => {
+    removeToken(); // Remove token from localStorage
     setUser(null); // Clear user data
     navigateTo('/'); // Redirect to home after logout
     setSearchQuery(''); // Clear search

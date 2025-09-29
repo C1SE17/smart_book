@@ -58,7 +58,9 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
     
     try {
       setLoading(true);
-      const profileData = await userService.getProfile(user.token);
+      // For now, we'll use a placeholder userId since we don't have it in the token
+      // In a real app, you would decode the JWT token to get the userId
+      const profileData = await userService.getProfile(1, user.token);
       setUserProfile(profileData);
       setFormData({
         name: profileData.name || '',

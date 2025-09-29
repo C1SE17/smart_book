@@ -41,18 +41,47 @@ app.get('/', (req, res) => {
     res.send('Xin chào đén với smart book!');
 });
 
+// Test database connection
+app.get('/api/test', (req, res) => {
+    const db = require('./config/db');
+    db.query('SELECT 1 as test', (err, results) => {
+        if (err) {
+            console.error('Database test failed:', err);
+            return res.status(500).json({ error: 'Database connection failed', details: err.message });
+        }
+        res.json({ message: 'Database connection successful', test: results[0] });
+    });
+});
+
 // Gắn tuyến API
 app.use('/api/users', userRoutes);
 app.use('/api/books', bookRoutes);
-
-app.use('/books', bookRoutes); // P
-// ublic books route for frontend
 app.use('/api/categories', categoryRoutes);
-app.use('/categories', categoryRoutes); // Public categories route for frontend
 app.use('/api/authors', authorRoutes);
 app.use('/api/publishers', publisherRoutes);
 app.use('/api/cart', cartRoutes); 
 app.use('/api/order', orderRoutes);
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error('Error:', err);
+    res.status(500).json({ error: 'Internal server error', message: err.message });
+});
+
+// 404 handler
+app.use((req, res) => {
+    res.status(404).json({ error: 'Route not found' });
+});
+
+// Test database connection on startup
+const db = require('./config/db');
+db.query('SELECT 1 as test', (err, results) => {
+    if (err) {
+        console.error('❌ Database connection failed:', err);
+    } else {
+        console.log('✅ Kết nối MySQL thành công');
+    }
+});
 
 // Chạy máy chủ
 app.listen(port, () => {
