@@ -222,8 +222,11 @@ const Home = ({ onNavigateTo }) => {
 
   // Ghi nhớ các event handlers
   const handleBookClick = useCallback((bookId) => {
-    // Chuyển đến trang tìm kiếm khi click vào sách
-    onNavigateTo('search')();
+    // Chuyển đến trang chi tiết sản phẩm khi click vào sách
+    onNavigateTo('product')();
+    // Pass bookId to the product detail page via URL
+    window.history.pushState({}, '', `/product?id=${bookId}`);
+    window.dispatchEvent(new PopStateEvent('popstate'));
   }, [onNavigateTo]);
 
   // Xử lý thêm vào giỏ hàng - chỉ sử dụng localStorage
@@ -274,7 +277,25 @@ const Home = ({ onNavigateTo }) => {
               <h2 className="fw-bold text-dark">Danh Mục Sản Phẩm</h2>
             </div>
             <div className="col-auto">
-              <a href="#" className="btn btn-outline-primary">
+              <a href="#" className="text-decoration-none" style={{
+                fontSize: '14px',
+                fontWeight: '500',
+                color: '#333',
+                transition: 'all 0.3s ease'
+              }}
+              onClick={(e) => {
+                e.preventDefault();
+                window.history.pushState({}, '', '/categories');
+                window.dispatchEvent(new PopStateEvent('popstate'));
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.color = '#007bff';
+                e.target.style.transform = 'translateX(5px)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.color = '#333';
+                e.target.style.transform = 'translateX(0)';
+              }}>
                 Xem Tất Cả <i className="bi bi-arrow-right ms-1"></i>
               </a>
             </div>
@@ -318,24 +339,18 @@ const Home = ({ onNavigateTo }) => {
                   borderRadius: '12px',
                   overflow: 'hidden'
                 }}
-                onClick={() => onNavigateTo('search')()}
+                onClick={() => {
+                  // Chuyển đến trang categories với filter theo danh mục
+                  window.history.pushState({}, '', `/categories?category=${encodeURIComponent(category.name)}`);
+                  window.dispatchEvent(new PopStateEvent('popstate'));
+                }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-8px)';
                   e.currentTarget.style.boxShadow = '0 15px 35px rgba(0,0,0,0.15)';
-                  // Hiển thị nút thêm vào giỏ hàng nếu còn hàng
-                  const addToCartBtn = e.currentTarget.querySelector('.add-to-cart-btn');
-                  if (addToCartBtn && book.stock > 0) {
-                    addToCartBtn.style.opacity = '1';
-                  }
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = 'translateY(0)';
                   e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-                  // Ẩn nút thêm vào giỏ hàng
-                  const addToCartBtn = e.currentTarget.querySelector('.add-to-cart-btn');
-                  if (addToCartBtn) {
-                    addToCartBtn.style.opacity = '0';
-                  }
                 }}>
                   <div className="position-relative">
                     <img 
@@ -378,7 +393,20 @@ const Home = ({ onNavigateTo }) => {
               <h2 className="fw-bold text-dark">Sách Nổi Bật</h2>
             </div>
             <div className="col-auto">
-              <a href="#" className="btn btn-outline-primary">
+              <a href="#" className="text-decoration-none" style={{
+                fontSize: '14px',
+                fontWeight: '500',
+                color: '#333',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.color = '#007bff';
+                e.target.style.transform = 'translateX(5px)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.color = '#333';
+                e.target.style.transform = 'translateX(0)';
+              }}>
                 Xem Tất Cả <i className="bi bi-arrow-right ms-1"></i>
               </a>
             </div>
@@ -518,7 +546,20 @@ const Home = ({ onNavigateTo }) => {
               <h2 className="fw-bold text-dark">Sách Mới</h2>
             </div>
             <div className="col-auto">
-              <a href="#" className="btn btn-outline-primary">
+              <a href="#" className="text-decoration-none" style={{
+                fontSize: '14px',
+                fontWeight: '500',
+                color: '#333',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.color = '#007bff';
+                e.target.style.transform = 'translateX(5px)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.color = '#333';
+                e.target.style.transform = 'translateX(0)';
+              }}>
                 Xem Tất Cả <i className="bi bi-arrow-right ms-1"></i>
               </a>
             </div>
@@ -658,7 +699,20 @@ const Home = ({ onNavigateTo }) => {
               <h2 className="fw-bold text-dark">Sách Phổ Biến</h2>
             </div>
             <div className="col-auto">
-              <a href="#" className="btn btn-outline-primary">
+              <a href="#" className="text-decoration-none" style={{
+                fontSize: '14px',
+                fontWeight: '500',
+                color: '#333',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.color = '#007bff';
+                e.target.style.transform = 'translateX(5px)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.color = '#333';
+                e.target.style.transform = 'translateX(0)';
+              }}>
                 Xem Tất Cả <i className="bi bi-arrow-right ms-1"></i>
               </a>
             </div>
@@ -798,7 +852,20 @@ const Home = ({ onNavigateTo }) => {
                 <h2 className="fw-bold text-dark">Tác Giả Yêu Thích</h2>
             </div>
             <div className="col-auto">
-              <a href="#" className="btn btn-outline-primary">
+              <a href="#" className="text-decoration-none" style={{
+                fontSize: '14px',
+                fontWeight: '500',
+                color: '#333',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.color = '#007bff';
+                e.target.style.transform = 'translateX(5px)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.color = '#333';
+                e.target.style.transform = 'translateX(0)';
+              }}>
                 Xem Tất Cả <i className="bi bi-arrow-right ms-1"></i>
               </a>
             </div>

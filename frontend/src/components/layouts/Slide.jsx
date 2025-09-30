@@ -68,28 +68,27 @@ const Slide = () => {
             <p className="lead text-dark mb-4">
               {currentSlideData.description}
             </p>
-            <button 
-              className="btn btn-lg text-white" 
+            <a 
+              href="#"
+              className="text-decoration-none" 
               style={{
-                backgroundColor: '#333',
-                border: 'none',
-                borderRadius: '8px',
-                padding: '12px 24px',
                 fontSize: '16px',
                 fontWeight: '500',
-                transition: 'all 0.3s ease'
+                color: '#333',
+                transition: 'all 0.3s ease',
+                display: 'inline-block'
               }}
               onMouseEnter={(e) => {
-                e.target.style.backgroundColor = '#555';
-                e.target.style.transform = 'translateY(-2px)';
+                e.target.style.color = '#007bff';
+                e.target.style.transform = 'translateX(5px)';
               }}
               onMouseLeave={(e) => {
-                e.target.style.backgroundColor = '#333';
-                e.target.style.transform = 'translateY(0)';
+                e.target.style.color = '#333';
+                e.target.style.transform = 'translateX(0)';
               }}
             >
-              {currentSlideData.buttonText} <i className="fas fa-arrow-right ms-2"></i>
-            </button>
+              {currentSlideData.buttonText} <i className="bi bi-arrow-right ms-2"></i>
+            </a>
           </div>
           <div className="col-lg-6">
             <div 

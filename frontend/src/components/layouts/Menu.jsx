@@ -2,8 +2,6 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { NotificationDropdown } from '../common';
 
 const MenuClient = ({ onNavigateTo, onBackToHome, user, onLogout, onViewAllNotifications }) => {
-  const [showShopDropdown, setShowShopDropdown] = useState(false);
-  const [shopDropdownTimeout, setShopDropdownTimeout] = useState(null);
   const [cartItemCount, setCartItemCount] = useState(0);
 
 
@@ -25,32 +23,6 @@ const MenuClient = ({ onNavigateTo, onBackToHome, user, onLogout, onViewAllNotif
     window.addEventListener('cartUpdated', handleCartUpdate);
     return () => window.removeEventListener('cartUpdated', handleCartUpdate);
   }, [updateCartCount]);
-
-  // Dọn dẹp timeout khi unmount
-  React.useEffect(() => {
-    return () => {
-      if (shopDropdownTimeout) {
-        clearTimeout(shopDropdownTimeout);
-      }
-    };
-  }, [shopDropdownTimeout]);
-
-  const handleShopMouseEnter = useCallback(() => {
-    if (shopDropdownTimeout) {
-      clearTimeout(shopDropdownTimeout);
-      setShopDropdownTimeout(null);
-    }
-    setShowShopDropdown(true);
-  }, [shopDropdownTimeout]);
-
-  const handleShopMouseLeave = useCallback(() => {
-    const timeout = setTimeout(() => {
-      setShowShopDropdown(false);
-    }, 300);
-    setShopDropdownTimeout(timeout);
-  }, []);
-
-
 
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-white fixed-top" style={{ borderTop: '3px solid #8B5CF6', zIndex: 1040 }}>
@@ -95,130 +67,16 @@ const MenuClient = ({ onNavigateTo, onBackToHome, user, onLogout, onViewAllNotif
               </a>
             </li>
 
-            {/* Shop Dropdown */}
-                <li
-                  className="nav-item dropdown"
-                  onMouseEnter={handleShopMouseEnter}
-                  onMouseLeave={handleShopMouseLeave}
-                  style={{ position: 'relative' }}
-                >
+            {/* Shop Link */}
+            <li className="nav-item">
               <a
-                className="nav-link dropdown-toggle text-dark fw-normal"
+                className="nav-link text-dark fw-normal"
                 href="#"
-                role="button"
+                onClick={(e) => { e.preventDefault(); onNavigateTo('books')(); }}
                 style={{ fontSize: '1rem', fontFamily: 'sans-serif' }}
               >
                 Shop
               </a>
-                  {showShopDropdown && (
-                    <div
-                      className="dropdown-menu show"
-                      style={{
-                        position: 'absolute',
-                        top: '100%',
-                        left: '0',
-                        minWidth: '600px',
-                        padding: '40px',
-                        borderRadius: '12px',
-                        boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
-                        border: 'none',
-                        animation: 'fadeIn 0.3s ease-in-out',
-                        zIndex: 1050,
-                        marginTop: '10px',
-                        transform: 'translateY(0)',
-                        transition: 'none'
-                      }}
-                      onMouseEnter={handleShopMouseEnter}
-                      onMouseLeave={handleShopMouseLeave}
-                    >
-                      <div className="row">
-                        {/* Categories Column */}
-                        <div className="col-md-6">
-                          <h6 className="fw-bold mb-3" style={{ fontSize: '1.2rem', color: '#333' }}>Categories</h6>
-                          <div className="d-flex flex-column">
-                            {[
-                              { name: 'Fiction', count: 15 },
-                              { name: 'Manga', count: 25 },
-                              { name: 'Mystery', count: 10 },
-                              { name: 'Fantasy', count: 20 },
-                              { name: 'Classic Literature', count: 12 },
-                              { name: 'Romance', count: 18 }
-                            ].map((category, index) => (
-                              <a 
-                                key={index}
-                                href="#" 
-                                className="dropdown-item mb-2" 
-                                style={{ fontSize: '1rem', lineHeight: '1.4' }}
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  onNavigateTo('search')();
-                                  setShowShopDropdown(false);
-                                }}
-                              >
-                                {category.name}
-                                <span className="text-muted ms-2">({category.count})</span>
-                              </a>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* Shop Pages Column */}
-                        <div className="col-md-6">
-                          <h6 className="fw-bold mb-3" style={{ fontSize: '1.2rem', color: '#333' }}>Shop Pages</h6>
-                          <div className="d-flex flex-column">
-                            <a 
-                              href="#" 
-                              className="dropdown-item mb-2" 
-                              style={{ fontSize: '1rem', lineHeight: '1.4' }}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                onNavigateTo('search')();
-                                setShowShopDropdown(false);
-                              }}
-                            >
-                              Shop
-                            </a>
-                            <a 
-                              href="#" 
-                              className="dropdown-item mb-2" 
-                              style={{ fontSize: '1rem', lineHeight: '1.4' }}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                onNavigateTo('cart')();
-                                setShowShopDropdown(false);
-                              }}
-                            >
-                              Cart
-                            </a>
-                            <a 
-                              href="#" 
-                              className="dropdown-item mb-2" 
-                              style={{ fontSize: '1rem', lineHeight: '1.4' }}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                onNavigateTo('search')();
-                                setShowShopDropdown(false);
-                              }}
-                            >
-                              Checkout
-                            </a>
-                            <a 
-                              href="#" 
-                              className="dropdown-item mb-2" 
-                              style={{ fontSize: '1rem', lineHeight: '1.4' }}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                onNavigateTo('profile')();
-                                setShowShopDropdown(false);
-                              }}
-                            >
-                              My account
-                            </a>
-                          </div>
-                        </div>
-                      </div>
-                </div>
-              )}
             </li>
 
             <li className="nav-item">
@@ -411,25 +269,6 @@ const MenuClient = ({ onNavigateTo, onBackToHome, user, onLogout, onViewAllNotif
         </div>
       </div>
 
-          {/* CSS for animations */}
-          <style jsx>{`
-            @keyframes fadeIn {
-              from { opacity: 0; }
-              to { opacity: 1; }
-            }
-            
-            .dropdown-item:hover {
-              background-color: #f8f9fa;
-              transform: translateX(5px);
-              transition: all 0.3s ease;
-            }
-
-            .dropdown-menu {
-              transform: translateY(0) !important;
-              transition: none !important;
-            }
-
-          `}</style>
     </nav>
   );
 };

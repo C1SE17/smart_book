@@ -156,18 +156,27 @@ const NotificationDropdown = ({ onViewAllNotifications }) => {
               <i className="bi bi-bell me-2 text-primary"></i>
               Thông báo mới nhận
             </h6>
-            <button
-              className="btn btn-link text-primary p-0"
+            <a
+              href="#"
+              className="text-decoration-none"
               onClick={handleViewAllClick}
               style={{ 
                 fontSize: '14px',
-                textDecoration: 'none',
                 fontWeight: '500',
-                color: '#007bff !important'
+                color: '#333',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.color = '#007bff';
+                e.target.style.transform = 'translateX(5px)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.color = '#333';
+                e.target.style.transform = 'translateX(0)';
               }}
             >
-              Xem tất cả
-            </button>
+              Xem tất cả <i className="bi bi-arrow-right ms-1"></i>
+            </a>
           </div>
 
           {/* Notifications List */}

@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react'
-import { Search, Cart, Notification, Slide, MenuClient, OrderDetail } from './components'
+import { Search, Cart, Notification, Slide, MenuClient, OrderDetail, ShopPage, ProductDetail, CategoriesPage } from './components'
 import Home from './components/Home'
 import BlogPage from './components/client/blog/BlogPage'
 import BlogDetail from './components/client/blog/BlogDetail'
@@ -10,7 +10,7 @@ import { getToken, removeToken, getUserFromToken } from './utils'
 import './App.css'
 
 function App() {
-  const [currentPage, setCurrentPage] = useState('home'); // 'home', 'auth', 'search', 'cart', 'notification', 'product', 'profile', 'blog', or 'blog-detail'
+  const [currentPage, setCurrentPage] = useState('home'); // 'home', 'auth', 'search', 'cart', 'notification', 'product', 'profile', 'blog', 'blog-detail', 'books', or 'categories'
   
   const [searchQuery, setSearchQuery] = useState(''); // Global search state
   const [productId, setProductId] = useState(null); // Product ID for product detail page
@@ -163,6 +163,15 @@ function App() {
       )}
       {currentPage === 'blog-detail' && (
         <BlogDetail onNavigateTo={handleNavigateTo} blogId={productId} />
+      )}
+      {currentPage === 'books' && (
+        <ShopPage onNavigateTo={handleNavigateTo} />
+      )}
+      {currentPage === 'categories' && (
+        <CategoriesPage onNavigateTo={handleNavigateTo} />
+      )}
+      {currentPage === 'product' && (
+        <ProductDetail productId={productId} onNavigateTo={handleNavigateTo} />
       )}
       {currentPage === 'home' && (
         <>
