@@ -20,7 +20,7 @@ const CategoriesPage = ({ onNavigateTo }) => {
     }
   }, []);
 
-  // Sample products data
+  // Dữ liệu sản phẩm mẫu
   const sampleProducts = [
     {
       id: 1,
@@ -288,14 +288,14 @@ const CategoriesPage = ({ onNavigateTo }) => {
     }
   ];
 
-  // Available categories for filtering
+  // Các danh mục có sẵn để lọc
   const categories = [
     "Sách Theo Tác Giả", "Truyện Tranh", "Tiểu Thuyết", "Đồ Chơi",
     "Fiction", "Mystery", "Classic Literature", "Romance", 
     "Science Fiction", "History", "Biography", "Self-Help"
   ];
 
-  // Available authors for filtering
+  // Các tác giả có sẵn để lọc
   const authors = [
     "Koyoharu Gotouge", "Fujiko F. Fujio", "J.K. Rowling", "Gosho Aoyama",
     "Delia Owens", "Eiichiro Oda", "Hajime Isayama", "F. Scott Fitzgerald",
@@ -310,7 +310,7 @@ const CategoriesPage = ({ onNavigateTo }) => {
         setLoading(true);
         setError(null);
         
-        // Try to fetch from API
+        // Thử lấy dữ liệu từ API
         const response = await fetch('http://localhost:5000/api/books', {
           method: 'GET',
           headers: {
@@ -328,7 +328,7 @@ const CategoriesPage = ({ onNavigateTo }) => {
       } catch (err) {
         console.error('Error fetching products:', err);
         
-        // If it's a network error, use sample data silently
+        // Nếu là lỗi mạng, sử dụng dữ liệu mẫu một cách im lặng
         if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
           console.log('Backend not available, using sample products data');
           setProducts(sampleProducts);
@@ -347,11 +347,11 @@ const CategoriesPage = ({ onNavigateTo }) => {
     fetchProducts();
   }, []);
 
-  // Filter and search products
+  // Lọc và tìm kiếm sản phẩm
   useEffect(() => {
     let filtered = [...products];
 
-    // Search by title or author
+    // Tìm kiếm theo tiêu đề hoặc tác giả
     if (searchQuery && searchQuery.trim()) {
       filtered = filtered.filter(product => 
         product.title.toLowerCase().includes(searchQuery.toLowerCase().trim()) ||
@@ -359,22 +359,22 @@ const CategoriesPage = ({ onNavigateTo }) => {
       );
     }
 
-    // Filter by category
+    // Lọc theo danh mục
     if (selectedCategory && selectedCategory.trim()) {
       filtered = filtered.filter(product => product.category === selectedCategory);
     }
 
-    // Filter by author
+    // Lọc theo tác giả
     if (selectedAuthor && selectedAuthor.trim()) {
       filtered = filtered.filter(product => product.author === selectedAuthor);
     }
 
-    // Filter by price range
+    // Lọc theo khoảng giá
     filtered = filtered.filter(product => 
       product.price >= priceRange.min && product.price <= priceRange.max
     );
 
-    // Sort products
+    // Sắp xếp sản phẩm
     switch (sortBy) {
       case 'price-low':
         filtered.sort((a, b) => a.price - b.price);
@@ -389,7 +389,7 @@ const CategoriesPage = ({ onNavigateTo }) => {
         filtered.sort((a, b) => b.rating - a.rating);
         break;
       default:
-        // Keep original order
+        // Giữ nguyên thứ tự ban đầu
         break;
     }
 

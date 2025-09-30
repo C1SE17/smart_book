@@ -12,12 +12,12 @@ import './App.css'
 function App() {
   const [currentPage, setCurrentPage] = useState('home'); // 'home', 'auth', 'search', 'cart', 'notification', 'product', 'profile', 'blog', 'blog-detail', 'books', or 'categories'
   
-  const [searchQuery, setSearchQuery] = useState(''); // Global search state
-  const [productId, setProductId] = useState(null); // Product ID for product detail page
-  const [user, setUser] = useState(null); // User authentication state
-  const [profileTab, setProfileTab] = useState('profile'); // Profile tab state
+  const [searchQuery, setSearchQuery] = useState(''); // State tìm kiếm toàn cục
+  const [productId, setProductId] = useState(null); // ID sản phẩm cho trang chi tiết
+  const [user, setUser] = useState(null); // State xác thực người dùng
+  const [profileTab, setProfileTab] = useState('profile'); // State tab profile
 
-  // Initialize user state from token
+  // Khởi tạo state người dùng từ token
   useEffect(() => {
     const token = getToken();
     if (token) {
@@ -25,16 +25,16 @@ function App() {
     }
   }, []);
 
-  // Handle URL routing
+  // Xử lý định tuyến URL
   useEffect(() => {
     const handlePopState = () => {
       handleRoute(window.location.pathname, setCurrentPage, setProductId, setSearchQuery, setProfileTab);
     };
 
-    // Initial route handling
+    // Xử lý route ban đầu
     handlePopState();
 
-    // Listen for browser back/forward
+    // Lắng nghe sự kiện back/forward của trình duyệt
     window.addEventListener('popstate', handlePopState);
 
     return () => {
@@ -42,32 +42,32 @@ function App() {
     };
   }, []);
 
-  // Memoized navigation handlers
+  // Các handler điều hướng được memoize
   const handleBackToHome = useCallback(() => {
     navigateTo('/');
-    setSearchQuery(''); // Clear search when going home
-    setProductId(null); // Clear product ID
-    // Reset scroll position to top when going home
+    setSearchQuery(''); // Xóa tìm kiếm khi về trang chủ
+    setProductId(null); // Xóa ID sản phẩm
+    // Đặt lại vị trí cuộn lên đầu khi về trang chủ
     window.scrollTo(0, 0);
   }, []);
   
   const handleLoginSuccess = useCallback((userData) => {
     console.log('User logged in:', userData);
-    setUser(userData); // Store user data
-    navigateTo('/'); // Redirect to home after login
-    setSearchQuery(''); // Clear search
-    setProductId(null); // Clear product ID
-    // Reset scroll position to top after login
+    setUser(userData); // Lưu dữ liệu người dùng
+    navigateTo('/'); // Chuyển hướng về trang chủ sau khi đăng nhập
+    setSearchQuery(''); // Xóa tìm kiếm
+    setProductId(null); // Xóa ID sản phẩm
+    // Đặt lại vị trí cuộn lên đầu sau khi đăng nhập
     window.scrollTo(0, 0);
   }, []);
 
   const handleLogout = useCallback(() => {
-    removeToken(); // Remove token from localStorage
-    setUser(null); // Clear user data
-    navigateTo('/'); // Redirect to home after logout
-    setSearchQuery(''); // Clear search
-    setProductId(null); // Clear product ID
-    // Reset scroll position to top after logout
+    removeToken(); // Xóa token khỏi localStorage
+    setUser(null); // Xóa dữ liệu người dùng
+    navigateTo('/'); // Chuyển hướng về trang chủ sau khi đăng xuất
+    setSearchQuery(''); // Xóa tìm kiếm
+    setProductId(null); // Xóa ID sản phẩm
+    // Đặt lại vị trí cuộn lên đầu sau khi đăng xuất
     window.scrollTo(0, 0);
   }, []);
 
@@ -83,7 +83,7 @@ function App() {
     }));
   }, []);
 
-  // Navigation handlers
+  // Các handler điều hướng
   const handleNavigateTo = useCallback((page) => () => {
     const routeMap = {
       'home': '/',
@@ -104,17 +104,17 @@ function App() {
     window.scrollTo(0, 0);
   }, []);
   
-  // Search handler that navigates to search page with query
+  // Handler tìm kiếm chuyển đến trang tìm kiếm với query
   const handleSearch = useCallback((query) => {
     setSearchQuery(query);
     navigateTo('/search', { q: query });
-    // Reset scroll position to top when searching
+    // Đặt lại vị trí cuộn lên đầu khi tìm kiếm
     window.scrollTo(0, 0);
   }, []);
 
 
 
-  // Memoized page components to avoid recreation
+  // Các component trang được memoize để tránh tạo lại
   const pageComponents = useMemo(() => ({
     auth: <Auth onBackToHome={handleBackToHome} onLoginSuccess={handleLoginSuccess} />,
     search: <Search onBackToHome={handleBackToHome} onNavigateTo={handleNavigateTo} initialSearchQuery={searchQuery} onSearch={handleSearch} />,

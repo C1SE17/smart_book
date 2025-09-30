@@ -2,7 +2,7 @@ import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import { bookService } from '../services';
 
 const Home = ({ onNavigateTo }) => {
-  // State for books data
+  // State cho dữ liệu sách
   const [books, setBooks] = useState([]);
   const [newBooks, setNewBooks] = useState([]);
   const [popularBooks, setPopularBooks] = useState([]);
@@ -16,15 +16,15 @@ const Home = ({ onNavigateTo }) => {
     { title: "Top 10 Must-Read Manga Series", date: "01 Dec, 2019", image: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400&h=200&fit=crop" }
   ], []);
 
-  // Fetch books from API
+  // Lấy dữ liệu sách từ API
   useEffect(() => {
     const fetchBooks = async () => {
       setLoading(true);
       
-      // For now, always use mock data to avoid API errors
+      // Hiện tại, luôn sử dụng dữ liệu giả để tránh lỗi API
       console.log('Using mock data for books display');
       
-      // Mock data
+      // Dữ liệu giả
         const mockBooks = [
           { 
             book_id: 1, 
@@ -224,7 +224,7 @@ const Home = ({ onNavigateTo }) => {
   const handleBookClick = useCallback((bookId) => {
     // Chuyển đến trang chi tiết sản phẩm khi click vào sách
     onNavigateTo('product')();
-    // Pass bookId to the product detail page via URL
+    // Truyền bookId đến trang chi tiết sản phẩm qua URL
     window.history.pushState({}, '', `/product?id=${bookId}`);
     window.dispatchEvent(new PopStateEvent('popstate'));
   }, [onNavigateTo]);

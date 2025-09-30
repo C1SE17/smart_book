@@ -9,7 +9,7 @@ const ProductDetail = ({ productId, onNavigateTo }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch book data from API
+  // Lấy dữ liệu sách từ API
   useEffect(() => {
     const fetchBook = async () => {
       if (!productId) {
@@ -21,7 +21,7 @@ const ProductDetail = ({ productId, onNavigateTo }) => {
         setLoading(true);
         setError(null);
         
-        // Try to fetch from API
+        // Thử lấy dữ liệu từ API
         const response = await fetch(`http://localhost:5000/api/books/${productId}`, {
           method: 'GET',
           headers: {
@@ -38,14 +38,14 @@ const ProductDetail = ({ productId, onNavigateTo }) => {
       } catch (err) {
         console.error('Error fetching book:', err);
         
-        // If it's a network error (backend not running), use fallback data silently
+        // Nếu là lỗi mạng (backend không chạy), sử dụng dữ liệu dự phòng một cách im lặng
         if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
           console.log('Backend not available, using fallback data');
           setBook(getProductData(productId));
-          setError(null); // Don't show error for fallback
+          setError(null); // Không hiển thị lỗi cho dữ liệu dự phòng
         } else {
           setError(`Lỗi: ${err.message}`);
-          setBook(getProductData(productId)); // Still use fallback data
+          setBook(getProductData(productId)); // Vẫn sử dụng dữ liệu dự phòng
         }
       } finally {
         setLoading(false);
@@ -55,7 +55,7 @@ const ProductDetail = ({ productId, onNavigateTo }) => {
     fetchBook();
   }, [productId]);
 
-  // Sample product data - fallback data
+  // Dữ liệu sản phẩm mẫu - dữ liệu dự phòng
   const getProductData = (id) => {
     const products = {
       1: {
@@ -203,10 +203,10 @@ Chủ đề:
       }
     };
 
-    return products[id] || products[1]; // Default to first product if not found
+    return products[id] || products[1]; // Mặc định là sản phẩm đầu tiên nếu không tìm thấy
   };
 
-  // Use API data if available, otherwise use fallback data
+  // Sử dụng dữ liệu API nếu có, nếu không thì dùng dữ liệu dự phòng
   const product = book ? {
     id: book.book_id,
     title: book.title,
@@ -272,7 +272,7 @@ Chủ đề:
   };
 
   const handleAddToCart = () => {
-    // Add to cart logic
+    // Logic thêm vào giỏ hàng
     console.log('Added to cart:', { product, quantity });
   };
 
@@ -284,7 +284,7 @@ Chủ đề:
     e.preventDefault();
     if (rating > 0 && review.trim() && reviewerName.trim()) {
       console.log('Review submitted:', { rating, review, reviewerName });
-      // Reset form
+      // Đặt lại form
       setRating(0);
       setReview('');
       setReviewerName('');

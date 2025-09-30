@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 
 const Slide = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  // Slide data
-  const slides = [
+  // Dữ liệu slide - được memoize để tránh tạo lại
+  const slides = useMemo(() => [
     {
       id: 1,
       title: "Top 10 cuốn sách yêu thích",
@@ -29,9 +29,9 @@ const Slide = () => {
       buttonText: "Xem tất cả",
       backgroundColor: "#f3e5f5"
     }
-  ];
+  ], []);
 
-  // Auto slide every 5 seconds
+  // Tự động chuyển slide mỗi 5 giây
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
@@ -40,17 +40,50 @@ const Slide = () => {
     return () => clearInterval(timer);
   }, [slides.length]);
 
-  const nextSlide = () => {
+  const nextSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev + 1) % slides.length);
-  };
+  }, [slides.length]);
 
-  const prevSlide = () => {
+  const prevSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
-  };
+  }, [slides.length]);
 
-  const goToSlide = (index) => {
+  const goToSlide = useCallback((index) => {
     setCurrentSlide(index);
-  };
+  }, []);
+
+  // Các event handler được memoize
+  const handleButtonHover = useCallback((e, isEnter) => {
+    if (isEnter) {
+      e.target.style.color = '#007bff';
+      e.target.style.transform = 'translateX(5px)';
+    } else {
+      e.target.style.color = '#333';
+      e.target.style.transform = 'translateX(0)';
+    }
+  }, []);
+
+  const handleArrowHover = useCallback((e, isEnter) => {
+    if (isEnter) {
+      e.target.style.backgroundColor = 'rgba(0,0,0,0.8)';
+      e.target.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)';
+    } else {
+      e.target.style.backgroundColor = 'rgba(0,0,0,0.6)';
+      e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
+    }
+  }, []);
+
+  const handleDotHover = useCallback((e, isEnter, index) => {
+    if (index !== currentSlide) {
+      if (isEnter) {
+        e.target.style.backgroundColor = 'rgba(255,255,255,0.8)';
+        e.target.style.transform = 'scale(1.2)';
+      } else {
+        e.target.style.backgroundColor = 'rgba(255,255,255,0.5)';
+        e.target.style.transform = 'scale(1)';
+      }
+    }
+  }, [currentSlide]);
 
   const currentSlideData = slides[currentSlide];
 
@@ -78,14 +111,8 @@ const Slide = () => {
                 transition: 'all 0.3s ease',
                 display: 'inline-block'
               }}
-              onMouseEnter={(e) => {
-                e.target.style.color = '#007bff';
-                e.target.style.transform = 'translateX(5px)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.color = '#333';
-                e.target.style.transform = 'translateX(0)';
-              }}
+              onMouseEnter={(e) => handleButtonHover(e, true)}
+              onMouseLeave={(e) => handleButtonHover(e, false)}
             >
               {currentSlideData.buttonText} <i className="bi bi-arrow-right ms-2"></i>
             </a>
@@ -116,7 +143,7 @@ const Slide = () => {
         </div>
       </div>
 
-      {/* Navigation Arrows */}
+      {/* Mũi tên điều hướng */}
       <button
         className="position-absolute top-50 translate-middle-y"
         onClick={prevSlide}
@@ -181,7 +208,7 @@ const Slide = () => {
         <i className="fas fa-chevron-right"></i>
       </button>
 
-      {/* Slide Indicators */}
+      {/* Chỉ báo slide */}
       <div 
         className="position-absolute bottom-0 start-50 translate-middle-x mb-4"
         style={{ zIndex: 10 }}
