@@ -183,6 +183,38 @@ const Cart = ({ onBackToHome, onNavigateTo }) => {
     }
   }, [selectedItems, fetchCartItems]);
 
+  // Xóa tất cả sản phẩm trong giỏ hàng
+  const removeAllItems = useCallback(() => {
+    if (cartItems.length === 0) {
+      alert('Giỏ hàng đã trống!');
+      return;
+    }
+
+    if (window.confirm(`Bạn có chắc chắn muốn xóa tất cả ${cartItems.length} sản phẩm khỏi giỏ hàng?`)) {
+      try {
+        localStorage.setItem('cart', JSON.stringify([]));
+        
+        setSelectedItems([]);
+        setSelectAll(false);
+        fetchCartItems();
+
+        // Hiển thị thông báo thành công
+        if (window.showToast) {
+          window.showToast(`Đã xóa tất cả ${cartItems.length} sản phẩm khỏi giỏ hàng!`, 'success');
+        }
+
+        window.dispatchEvent(new CustomEvent('cartUpdated', {
+          detail: { cart: [], action: 'remove_all', count: cartItems.length }
+        }));
+      } catch (error) {
+        console.error('Error removing all items:', error);
+        if (window.showToast) {
+          window.showToast('Có lỗi xảy ra khi xóa giỏ hàng!', 'error');
+        }
+      }
+    }
+  }, [cartItems, fetchCartItems]);
+
   const handleCheckout = useCallback(() => {
     if (selectedItems.length === 0) {
       alert('Vui lòng chọn ít nhất một sản phẩm để thanh toán!');
@@ -258,7 +290,7 @@ const Cart = ({ onBackToHome, onNavigateTo }) => {
                         <div className="d-flex justify-content-between align-items-center">
                           <h5 className="mb-0 fw-bold">Các Mục Giỏ Hàng</h5>
                           {cartItems.length > 0 && (
-                            <div className="d-flex align-items-center gap-3">
+                            <div className="d-flex align-items-center gap-2">
                               <button
                                 className={`btn btn-sm ${selectAll ? 'btn-primary' : 'btn-outline-primary'}`}
                                 onClick={handleSelectAll}
@@ -267,9 +299,17 @@ const Cart = ({ onBackToHome, onNavigateTo }) => {
                                 <i className={`bi ${selectAll ? 'bi-check-square' : 'bi-square'} me-1`}></i>
                                 {selectAll ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}
                               </button>
+                              <button
+                                className="btn btn-outline-danger btn-sm"
+                                onClick={removeAllItems}
+                                style={{ borderRadius: '6px' }}
+                              >
+                                <i className="bi bi-trash me-1"></i>
+                                Xóa tất cả
+                              </button>
                               {selectedItems.length > 0 && (
                                 <button
-                                  className="btn btn-outline-danger btn-sm"
+                                  className="btn btn-outline-warning btn-sm"
                                   onClick={removeSelectedItems}
                                   style={{ borderRadius: '6px' }}
                                 >

@@ -192,47 +192,11 @@ const MenuClient = ({ onNavigateTo, onBackToHome, user, onLogout, onViewAllNotif
                         href="#"
                         onClick={(e) => {
                           e.preventDefault();
-                          onNavigateTo('profile')();
-                          // Chuyển đến tab cài đặt
-                          setTimeout(() => {
-                            window.history.pushState({}, '', '/profile/settings');
-                            window.dispatchEvent(new PopStateEvent('popstate'));
-                          }, 100);
-                        }}
-                      >
-                        <i className="fas fa-cog me-2"></i>
-                        Cài đặt
-                      </a>
-                    </li>
-                    <li>
-                      <a
-                        className="dropdown-item"
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
                           onNavigateTo('orders')();
                         }}
                       >
                         <i className="fas fa-shopping-bag me-2"></i>
                         Đơn hàng
-                      </a>
-                    </li>
-                    <li>
-                      <a
-                        className="dropdown-item"
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          onNavigateTo('profile')();
-                          // Chuyển đến tab bảo mật
-                          setTimeout(() => {
-                            window.history.pushState({}, '', '/profile/security');
-                            window.dispatchEvent(new PopStateEvent('popstate'));
-                          }, 100);
-                        }}
-                      >
-                        <i className="fas fa-shield-alt me-2"></i>
-                        Bảo mật
                       </a>
                     </li>
                     <li><hr className="dropdown-divider" /></li>

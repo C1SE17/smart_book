@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import ReviewSection from './ReviewSection';
+import ProductRating from './ProductRating';
 
-const ProductDetail = ({ productId, onNavigateTo }) => {
+const ProductDetail = ({ productId, onNavigateTo, user = null }) => {
   const [quantity, setQuantity] = useState(1);
-  const [rating, setRating] = useState(0);
-  const [review, setReview] = useState('');
-  const [reviewerName, setReviewerName] = useState('');
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -219,15 +218,6 @@ Chủ đề:
     fullDescription: book.description || "Không có mô tả chi tiết"
   } : getProductData(productId);
 
-  const reviews = [
-    {
-      id: 1,
-      user: "User 1",
-      rating: 5,
-      comment: "This book is very great, the product is very good",
-      likes: 1
-    }
-  ];
 
   const recommendations = [
     {
@@ -309,10 +299,10 @@ Chủ đề:
       }
       existingItem.quantity += quantity;
 
-      // Hiển thị thông báo thành công
-      if (window.showToast) {
-        window.showToast(`Đã thêm ${quantity} "${book.title}" vào giỏ hàng!`, 'success');
-      }
+    // Hiển thị thông báo thành công
+    if (window.showToast) {
+      window.showToast(`Thêm thành công! Đã thêm ${quantity} "${book.title}" vào giỏ hàng!`, 'success');
+    }
     } else {
       cart.push({
         book_id: book.book_id,
@@ -323,10 +313,10 @@ Chủ đề:
         added_at: new Date().toISOString()
       });
 
-      // Hiển thị thông báo thành công
-      if (window.showToast) {
-        window.showToast(`Đã thêm ${quantity} "${book.title}" vào giỏ hàng!`, 'success');
-      }
+    // Hiển thị thông báo thành công
+    if (window.showToast) {
+      window.showToast(`Thêm thành công! Đã thêm ${quantity} "${book.title}" vào giỏ hàng!`, 'success');
+    }
     }
 
     localStorage.setItem('cart', JSON.stringify(cart));
@@ -386,36 +376,16 @@ Chủ đề:
     onNavigateTo('checkout')();
   };
 
-  const handleRatingClick = (selectedRating) => {
-    setRating(selectedRating);
-  };
-
-  const handleSubmitReview = (e) => {
-    e.preventDefault();
-    if (rating > 0 && review.trim() && reviewerName.trim()) {
-      console.log('Review submitted:', { rating, review, reviewerName });
-      // Đặt lại form
-      setRating(0);
-      setReview('');
-      setReviewerName('');
-    }
-  };
-
-  const renderStars = (rating, interactive = false, onStarClick = null) => {
+  const renderStars = (rating) => {
     return Array.from({ length: 5 }, (_, index) => (
       <i
         key={index}
-        className={`bi bi-star${index < rating ? '-fill' : ''} text-warning`}
-        style={{
-          cursor: interactive ? 'pointer' : 'default',
-          fontSize: interactive ? '20px' : '14px'
-        }}
-        onClick={interactive ? () => onStarClick(index + 1) : undefined}
+        className={`bi bi-star${index < Math.floor(rating || 0) ? '-fill' : ''} text-warning`}
+        style={{ fontSize: '12px' }}
       ></i>
     ));
   };
 
-  const ratingLabels = ['Very Bad', 'Bad', 'Average', 'Good', 'Very Good'];
 
   if (loading) {
     return (
@@ -466,6 +436,15 @@ Chủ đề:
           <div className="ps-lg-4">
             <h1 className="h2 mb-3">{product.title}</h1>
             <p className="text-muted mb-3">{product.description}</p>
+
+            {/* Product Rating */}
+            <div className="mb-3">
+              <ProductRating 
+                productId={productId} 
+                averageRating={4.2} 
+                totalReviews={128} 
+              />
+            </div>
 
             <div className="mb-4">
               <span className="h3 text-primary">
@@ -570,101 +549,9 @@ Chủ đề:
         </div>
       </div>
 
-      {/* Reviews Section */}
+      {/* Reviews and Comments Section */}
       <div className="mb-5">
-        <h3 className="mb-3">Reviews</h3>
-        {reviews.map(review => (
-          <div key={review.id} className="border-bottom pb-3 mb-3">
-            <div className="d-flex justify-content-between align-items-start">
-              <div>
-                <h6 className="mb-1">{review.user}</h6>
-                <div className="mb-2">
-                  {renderStars(review.rating)}
-                </div>
-                <p className="mb-2">{review.comment}</p>
-              </div>
-              <button className="btn btn-outline-danger btn-sm">
-                ❤️ Like ({review.likes})
-              </button>
-            </div>
-          </div>
-        ))}
-        <a href="#" className="text-decoration-none" style={{
-          fontSize: '14px',
-          fontWeight: '500',
-          color: '#333',
-          transition: 'all 0.3s ease'
-        }}
-          onMouseEnter={(e) => {
-            e.target.style.color = '#dc3545';
-            e.target.style.transform = 'translateX(5px)';
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.color = '#333';
-            e.target.style.transform = 'translateX(0)';
-          }}>
-          View all 4 reviews <i className="bi bi-arrow-right ms-1"></i>
-        </a>
-      </div>
-
-      {/* Add Review Section */}
-      <div className="mb-5">
-        <h3 className="mb-3">Add a review</h3>
-        <p className="text-muted mb-3">Your account will not be published. Required fields are marked *</p>
-
-        <form onSubmit={handleSubmitReview}>
-          {/* Rating */}
-          <div className="mb-3">
-            <label className="form-label fw-bold">Your rating *</label>
-            <div className="d-flex align-items-center">
-              <div className="me-3">
-                {renderStars(rating, true, handleRatingClick)}
-              </div>
-              <div className="d-flex flex-wrap">
-                {ratingLabels.map((label, index) => (
-                  <span
-                    key={index}
-                    className={`badge me-2 mb-1 ${index < rating ? 'bg-warning' : 'bg-secondary'}`}
-                    style={{ cursor: 'pointer' }}
-                    onClick={() => handleRatingClick(index + 1)}
-                  >
-                    {label}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Review Text */}
-          <div className="mb-3">
-            <label className="form-label fw-bold">Your review *</label>
-            <textarea
-              className="form-control"
-              rows="4"
-              value={review}
-              onChange={(e) => setReview(e.target.value)}
-              placeholder="Write your review here..."
-              required
-            ></textarea>
-          </div>
-
-          {/* Name */}
-          <div className="mb-3">
-            <label className="form-label fw-bold">Your name *</label>
-            <input
-              type="text"
-              className="form-control"
-              value={reviewerName}
-              onChange={(e) => setReviewerName(e.target.value)}
-              placeholder="Enter your name"
-              required
-            />
-          </div>
-
-          <button type="submit" className="btn btn-dark">
-            Submit
-          </button>
-        </form>
+        <ReviewSection productId={productId} user={user} />
       </div>
 
       {/* Recommendations Section */}

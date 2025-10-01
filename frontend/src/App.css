@@ -157,3 +157,49 @@ html {
 body {
   scroll-behavior: smooth;
 }
+
+/* Toast animations */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.toast-slide-in {
+  animation: slideInRight 0.4s ease-out;
+}
+
+.toast-slide-out {
+  animation: slideOutRight 0.3s ease-in;
+}
+
+.toast-fade-in {
+  animation: fadeInUp 0.3s ease-out;
+}

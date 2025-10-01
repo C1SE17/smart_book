@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import Toast from './Toast';
 
 const ToastContainer = () => {
@@ -10,6 +10,11 @@ const ToastContainer = () => {
         const newToast = { id, message, type, duration };
 
         setToasts(prev => [...prev, newToast]);
+
+        // Tự động xóa toast sau thời gian duration
+        setTimeout(() => {
+            setToasts(prev => prev.filter(toast => toast.id !== id));
+        }, duration);
     }, []);
 
     // Hàm xóa toast
@@ -18,7 +23,7 @@ const ToastContainer = () => {
     }, []);
 
     // Expose addToast globally
-    React.useEffect(() => {
+    useEffect(() => {
         window.showToast = addToast;
         return () => {
             delete window.showToast;
@@ -26,14 +31,23 @@ const ToastContainer = () => {
     }, [addToast]);
 
     return (
-        <div style={{ position: 'fixed', top: 0, right: 0, zIndex: 9999 }}>
+        <div style={{ 
+            position: 'fixed', 
+            top: '20px', 
+            right: '20px', 
+            zIndex: 9999,
+            maxWidth: '400px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '10px'
+        }}>
             {toasts.map((toast, index) => (
                 <div
                     key={toast.id}
+                    className="toast-fade-in"
                     style={{
-                        marginBottom: '10px',
-                        transform: `translateY(${index * 10}px)`,
-                        transition: 'transform 0.3s ease'
+                        animationDelay: `${index * 0.15}s`,
+                        transform: `translateY(${index * 5}px)`
                     }}
                 >
                     <Toast

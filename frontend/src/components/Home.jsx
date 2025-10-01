@@ -274,7 +274,7 @@ const Home = ({ onNavigateTo }) => {
 
       // Hiển thị thông báo thành công
       if (window.showToast) {
-        window.showToast(`Đã thêm "${book.title}" vào giỏ hàng!`, 'success');
+        window.showToast(`✅ Thêm thành công! Đã thêm "${book.title}" vào giỏ hàng!`, 'success');
       }
     }
 

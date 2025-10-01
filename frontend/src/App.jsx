@@ -136,6 +136,7 @@ function App() {
   }), [handleBackToHome, handleLoginSuccess, handleNavigateTo, searchQuery, handleSearch, user, handleUpdateProfile]);
 
 
+
   return (
     <div className="d-flex flex-column min-vh-100" style={{ paddingTop: '80px', transition: 'all 0.3s ease' }}>
       {/* Main Menu - Always rendered at top level */}
@@ -194,7 +195,7 @@ function App() {
         <CategoriesPage onNavigateTo={handleNavigateTo} />
       )}
       {currentPage === 'product' && (
-        <ProductDetail productId={productId} onNavigateTo={handleNavigateTo} />
+        <ProductDetail productId={productId} onNavigateTo={handleNavigateTo} user={user} />
       )}
       {currentPage === 'home' && (
         <>
@@ -202,9 +203,9 @@ function App() {
           <Slide />
           {/* Home Page Content */}
           <Home onNavigateTo={handleNavigateTo} />
-
         </>
       )}
+
 
       {/* Footer */}
       <footer className="bg-light py-5 mt-5">
