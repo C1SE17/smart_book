@@ -6,8 +6,6 @@ export const validateEmail = (email) => {
   return emailRegex.test(email);
 };
 
-// Performance utilities
-export * from './performance';
 
 // Authentication utilities
 export * from './auth';
@@ -61,7 +59,7 @@ export const storage = {
       return null;
     }
   },
-  
+
   set: (key, value) => {
     try {
       localStorage.setItem(key, JSON.stringify(value));
@@ -69,7 +67,7 @@ export const storage = {
       console.error('Error setting to localStorage:', error);
     }
   },
-  
+
   remove: (key) => {
     try {
       localStorage.removeItem(key);
@@ -87,7 +85,7 @@ export const apiHelpers = {
     }
     return await response.json();
   },
-  
+
   getAuthHeaders: (token) => {
     return {
       'Content-Type': 'application/json',

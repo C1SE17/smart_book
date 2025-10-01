@@ -1,9 +1,19 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react'
-import { Search, Cart, Notification, Slide, MenuClient, OrderDetail, ShopPage, ProductDetail, CategoriesPage } from './components'
+import ToastContainer from './components/common/Toast/ToastContainer'
+import Search from './components/client/search/Search'
+import Cart from './components/client/carts/Cart'
+import Notification from './components/client/notification/Notification'
+import Slide from './components/layouts/Slide'
+import MenuClient from './components/layouts/Menu'
+import OrderDetail from './components/client/orders/OrderDetail'
+import ProductDetail from './components/client/shop/ProductDetail'
+import CategoriesPage from './components/client/shop/CategoriesPage'
+import Checkout from './components/client/orders/Checkout'
+import ListOrders from './components/client/orders/ListOrders'
 import Home from './components/Home'
 import BlogPage from './components/client/blog/BlogPage'
 import BlogDetail from './components/client/blog/BlogDetail'
-import { UserProfile } from './components/user'
+import UserProfile from './components/user/UserProfile'
 import Auth from './features/auth/Auth'
 import { handleRoute, navigateTo } from './routes'
 import { getToken, removeToken, getUserFromToken } from './utils'
@@ -11,7 +21,7 @@ import './App.css'
 
 function App() {
   const [currentPage, setCurrentPage] = useState('home'); // 'home', 'auth', 'search', 'cart', 'notification', 'product', 'profile', 'blog', 'blog-detail', 'books', or 'categories'
-  
+
   const [searchQuery, setSearchQuery] = useState(''); // State tìm kiếm toàn cục
   const [productId, setProductId] = useState(null); // ID sản phẩm cho trang chi tiết
   const [user, setUser] = useState(null); // State xác thực người dùng
@@ -50,7 +60,7 @@ function App() {
     // Đặt lại vị trí cuộn lên đầu khi về trang chủ
     window.scrollTo(0, 0);
   }, []);
-  
+
   const handleLoginSuccess = useCallback((userData) => {
     console.log('User logged in:', userData);
     setUser(userData); // Lưu dữ liệu người dùng
@@ -96,14 +106,16 @@ function App() {
       'product': '/product',
       'notification': '/notification',
       'blog': '/blog',
-      'blog-detail': '/blog-detail'
+      'blog-detail': '/blog-detail',
+      'checkout': '/checkout',
+      'orders': '/orders'
     };
-    
+
     const path = routeMap[page] || '/';
     navigateTo(path);
     window.scrollTo(0, 0);
   }, []);
-  
+
   // Handler tìm kiếm chuyển đến trang tìm kiếm với query
   const handleSearch = useCallback((query) => {
     setSearchQuery(query);
@@ -127,9 +139,9 @@ function App() {
   return (
     <div className="d-flex flex-column min-vh-100" style={{ paddingTop: '80px', transition: 'all 0.3s ease' }}>
       {/* Main Menu - Always rendered at top level */}
-      <MenuClient 
-        onNavigateTo={handleNavigateTo} 
-        onBackToHome={handleBackToHome} 
+      <MenuClient
+        onNavigateTo={handleNavigateTo}
+        onBackToHome={handleBackToHome}
         user={user}
         onLogout={handleLogout}
         onViewAllNotifications={handleViewAllNotifications}
@@ -142,20 +154,31 @@ function App() {
       {currentPage === 'cart' && pageComponents.cart}
       {currentPage === 'notification' && pageComponents.notification}
       {currentPage === 'profile' && (
-        <UserProfile 
-          user={user} 
-          onBackToHome={handleBackToHome} 
+        <UserProfile
+          user={user}
+          onBackToHome={handleBackToHome}
           onUpdateProfile={handleUpdateProfile}
           activeTab={profileTab}
           onTabChange={setProfileTab}
         />
       )}
       {currentPage === 'order-detail' && (
-        <OrderDetail 
-          orderId={productId} 
+        <OrderDetail
+          orderId={productId}
           onBackToProfile={() => {
             navigateTo('/profile/orders');
           }}
+        />
+      )}
+      {currentPage === 'checkout' && (
+        <Checkout
+          onBackToHome={handleBackToHome}
+          onNavigateTo={handleNavigateTo}
+        />
+      )}
+      {currentPage === 'orders' && (
+        <ListOrders
+          onNavigateTo={handleNavigateTo}
         />
       )}
       {currentPage === 'blog' && (
@@ -165,7 +188,7 @@ function App() {
         <BlogDetail onNavigateTo={handleNavigateTo} blogId={productId} />
       )}
       {currentPage === 'books' && (
-        <ShopPage onNavigateTo={handleNavigateTo} />
+        <CategoriesPage onNavigateTo={handleNavigateTo} />
       )}
       {currentPage === 'categories' && (
         <CategoriesPage onNavigateTo={handleNavigateTo} />
@@ -179,7 +202,7 @@ function App() {
           <Slide />
           {/* Home Page Content */}
           <Home onNavigateTo={handleNavigateTo} />
-         
+
         </>
       )}
 
@@ -251,6 +274,7 @@ function App() {
           </div>
         </div>
       </div>
+      <ToastContainer />
     </div>
   )
 }

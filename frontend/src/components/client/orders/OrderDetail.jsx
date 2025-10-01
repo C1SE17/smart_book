@@ -47,7 +47,7 @@ const OrderDetail = ({ orderId, onBackToProfile }) => {
   const order = orderDetails[orderId] || orderDetails[1];
 
   return (
-    <div className="min-vh-100" style={{backgroundColor: '#f5f5f5'}}>
+    <div className="min-vh-100" style={{ backgroundColor: '#f5f5f5' }}>
       <div className="container py-4">
         {/* Back Navigation */}
         <div className="mb-3">
@@ -57,9 +57,9 @@ const OrderDetail = ({ orderId, onBackToProfile }) => {
                 <button
                   className="btn btn-link text-dark p-0 no-hover"
                   onClick={onBackToProfile}
-                  style={{ 
-                    border: 'none', 
-                    background: 'none', 
+                  style={{
+                    border: 'none',
+                    background: 'none',
                     fontSize: '16px',
                     textDecoration: 'none',
                     boxShadow: 'none'
@@ -76,9 +76,9 @@ const OrderDetail = ({ orderId, onBackToProfile }) => {
                     window.history.pushState({}, '', '/profile/orders');
                     window.dispatchEvent(new PopStateEvent('popstate'));
                   }}
-                  style={{ 
-                    border: 'none', 
-                    background: 'none', 
+                  style={{
+                    border: 'none',
+                    background: 'none',
                     fontSize: '16px',
                     textDecoration: 'none',
                     boxShadow: 'none'
@@ -109,11 +109,10 @@ const OrderDetail = ({ orderId, onBackToProfile }) => {
                 <div className="row mb-4">
                   <div className="col-md-6">
                     <h6 className="text-muted">Trạng thái đơn hàng</h6>
-                    <span className={`badge fs-6 ${
-                      order.status === 'Delivered' ? 'bg-success' :
+                    <span className={`badge fs-6 ${order.status === 'Delivered' ? 'bg-success' :
                       order.status === 'Shipped' ? 'bg-info' :
-                      order.status === 'Processing' ? 'bg-warning' : 'bg-secondary'
-                    }`}>
+                        order.status === 'Processing' ? 'bg-warning' : 'bg-secondary'
+                      }`}>
                       {order.statusText}
                     </span>
                   </div>
@@ -171,7 +170,7 @@ const OrderDetail = ({ orderId, onBackToProfile }) => {
                 {/* Action Buttons */}
                 <div className="mt-4 pt-3 border-top">
                   <div className="d-flex gap-2">
-                    <button 
+                    <button
                       className="btn btn-outline-primary"
                       onClick={() => {
                         window.history.pushState({}, '', '/profile/orders');

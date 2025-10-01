@@ -4,11 +4,13 @@ import { bookService } from '../../../services';
 const Cart = ({ onBackToHome, onNavigateTo }) => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [selectAll, setSelectAll] = useState(false);
 
   const fetchCartItems = useCallback(async () => {
     setLoading(true);
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    
+
     try {
       // Fetch book details for each item in cart
       const itemsWithDetails = await Promise.all(
@@ -36,7 +38,7 @@ const Cart = ({ onBackToHome, onNavigateTo }) => {
           }
         })
       );
-      
+
       setCartItems(itemsWithDetails);
     } catch (error) {
       console.error('Error fetching cart items:', error);
@@ -48,12 +50,12 @@ const Cart = ({ onBackToHome, onNavigateTo }) => {
 
   useEffect(() => {
     fetchCartItems();
-    
+
     // Lắng nghe cập nhật giỏ hàng từ các component khác
     const handleCartUpdate = () => {
       fetchCartItems();
     };
-    
+
     window.addEventListener('cartUpdated', handleCartUpdate);
     return () => window.removeEventListener('cartUpdated', handleCartUpdate);
   }, []); // Remove fetchCartItems dependency to avoid infinite loop
@@ -62,19 +64,19 @@ const Cart = ({ onBackToHome, onNavigateTo }) => {
     try {
       // Lấy giỏ hàng hiện tại từ localStorage
       let cart = JSON.parse(localStorage.getItem('cart') || '[]');
-      
+
       // Xóa mục có book_id khớp
       cart = cart.filter(item => item.book_id !== bookId);
-      
+
       // Lưu giỏ hàng đã cập nhật vào localStorage
       localStorage.setItem('cart', JSON.stringify(cart));
-      
+
       // Refresh cart items
       fetchCartItems();
-      
+
       // Kích hoạt sự kiện cập nhật giỏ hàng
-      window.dispatchEvent(new CustomEvent('cartUpdated', { 
-        detail: { cart, action: 'remove', bookId } 
+      window.dispatchEvent(new CustomEvent('cartUpdated', {
+        detail: { cart, action: 'remove', bookId }
       }));
     } catch (error) {
       console.error('Error removing item from cart:', error);
@@ -90,37 +92,116 @@ const Cart = ({ onBackToHome, onNavigateTo }) => {
     try {
       // Lấy giỏ hàng hiện tại từ localStorage
       let cart = JSON.parse(localStorage.getItem('cart') || '[]');
-      
+
       // Tìm và cập nhật số lượng mục
       const item = cart.find(item => item.book_id === bookId);
       if (item) {
         item.quantity = newQuantity;
       }
-      
+
       // Lưu giỏ hàng đã cập nhật vào localStorage
       localStorage.setItem('cart', JSON.stringify(cart));
-      
+
       // Refresh cart items
       fetchCartItems();
-      
+
       // Kích hoạt sự kiện cập nhật giỏ hàng
-      window.dispatchEvent(new CustomEvent('cartUpdated', { 
-        detail: { cart, action: 'update', bookId } 
+      window.dispatchEvent(new CustomEvent('cartUpdated', {
+        detail: { cart, action: 'update', bookId }
       }));
     } catch (error) {
       console.error('Error updating quantity:', error);
     }
   }, [removeFromCart, fetchCartItems]);
 
+  // Xử lý chọn/bỏ chọn sản phẩm
+  const handleItemSelect = useCallback((bookId) => {
+    setSelectedItems(prev => {
+      if (prev.includes(bookId)) {
+        return prev.filter(id => id !== bookId);
+      } else {
+        return [...prev, bookId];
+      }
+    });
+  }, []);
+
+  // Xử lý chọn tất cả
+  const handleSelectAll = useCallback(() => {
+    if (selectAll) {
+      setSelectedItems([]);
+      setSelectAll(false);
+    } else {
+      const allBookIds = cartItems.map(item => item.book_id);
+      setSelectedItems(allBookIds);
+      setSelectAll(true);
+    }
+  }, [selectAll, cartItems]);
+
+  // Cập nhật selectAll khi selectedItems thay đổi
+  useEffect(() => {
+    if (cartItems.length > 0) {
+      setSelectAll(selectedItems.length === cartItems.length);
+    }
+  }, [selectedItems, cartItems]);
+
+  // Tính tổng tiền các sản phẩm đã chọn
+  const calculateSelectedTotal = useMemo(() => {
+    return selectedItems.reduce((total, bookId) => {
+      const item = cartItems.find(item => item.book_id === bookId);
+      return total + (item ? parseFloat(item.total_price) : 0);
+    }, 0);
+  }, [selectedItems, cartItems]);
+
+  // Tính tổng tiền tất cả sản phẩm
   const calculateTotal = useMemo(() => {
     return cartItems.reduce((total, item) => {
       return total + parseFloat(item.total_price);
     }, 0);
   }, [cartItems]);
 
+  // Xóa các sản phẩm đã chọn
+  const removeSelectedItems = useCallback(() => {
+    if (selectedItems.length === 0) {
+      alert('Vui lòng chọn ít nhất một sản phẩm để xóa!');
+      return;
+    }
+
+    try {
+      let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      cart = cart.filter(item => !selectedItems.includes(item.book_id));
+      localStorage.setItem('cart', JSON.stringify(cart));
+
+      setSelectedItems([]);
+      setSelectAll(false);
+      fetchCartItems();
+
+      window.dispatchEvent(new CustomEvent('cartUpdated', {
+        detail: { cart, action: 'remove_selected', count: selectedItems.length }
+      }));
+    } catch (error) {
+      console.error('Error removing selected items:', error);
+    }
+  }, [selectedItems, fetchCartItems]);
+
   const handleCheckout = useCallback(() => {
-    // TODO: Triển khai chức năng thanh toán
-  }, []);
+    if (selectedItems.length === 0) {
+      alert('Vui lòng chọn ít nhất một sản phẩm để thanh toán!');
+      return;
+    }
+
+    // Lưu các sản phẩm đã chọn vào sessionStorage để checkout
+    const selectedCartItems = cartItems.filter(item => selectedItems.includes(item.book_id));
+    sessionStorage.setItem('checkoutItems', JSON.stringify(selectedCartItems));
+
+    // Hiển thị thông báo thành công
+    if (window.showToast) {
+      window.showToast(`Đang chuyển đến thanh toán với ${selectedItems.length} sản phẩm!`, 'success');
+    }
+
+    // Chuyển đến trang thanh toán
+    console.log('Proceeding to checkout with selected items:', selectedCartItems);
+    onNavigateTo('checkout')();
+  }, [selectedItems, cartItems, onNavigateTo]);
 
   if (loading) {
     return (
@@ -174,21 +255,57 @@ const Cart = ({ onBackToHome, onNavigateTo }) => {
                   <div className="col-lg-8">
                     <div className="card shadow-sm border-0" style={{ borderRadius: '12px' }}>
                       <div className="card-header bg-white border-0 py-3">
-                        <h5 className="mb-0 fw-bold">Các Mục Giỏ Hàng</h5>
+                        <div className="d-flex justify-content-between align-items-center">
+                          <h5 className="mb-0 fw-bold">Các Mục Giỏ Hàng</h5>
+                          {cartItems.length > 0 && (
+                            <div className="d-flex align-items-center gap-3">
+                              <button
+                                className={`btn btn-sm ${selectAll ? 'btn-primary' : 'btn-outline-primary'}`}
+                                onClick={handleSelectAll}
+                                style={{ borderRadius: '6px' }}
+                              >
+                                <i className={`bi ${selectAll ? 'bi-check-square' : 'bi-square'} me-1`}></i>
+                                {selectAll ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}
+                              </button>
+                              {selectedItems.length > 0 && (
+                                <button
+                                  className="btn btn-outline-danger btn-sm"
+                                  onClick={removeSelectedItems}
+                                  style={{ borderRadius: '6px' }}
+                                >
+                                  <i className="bi bi-trash me-1"></i>
+                                  Xóa đã chọn ({selectedItems.length})
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </div>
                       <div className="card-body p-0">
                         {cartItems.map((item, index) => (
-                          <div key={item.book_id} className={`row align-items-center py-4 px-4 ${index !== cartItems.length - 1 ? 'border-bottom' : ''}`} 
-                               style={{ borderColor: '#e9ecef' }}>
+                          <div key={item.book_id} className={`row align-items-center py-4 px-4 ${index !== cartItems.length - 1 ? 'border-bottom' : ''}`}
+                            style={{ borderColor: '#e9ecef' }}>
+                            <div className="col-md-1">
+                              <div className="form-check">
+                                <input
+                                  className="form-check-input"
+                                  type="checkbox"
+                                  checked={selectedItems.includes(item.book_id)}
+                                  onChange={() => handleItemSelect(item.book_id)}
+                                  id={`item-${item.book_id}`}
+                                  style={{ transform: 'scale(1.2)' }}
+                                />
+                              </div>
+                            </div>
                             <div className="col-md-2">
                               <img
                                 src={item.image_url || './public/images/book1.jpg'}
                                 alt={item.book_title}
                                 className="img-fluid rounded"
-                                style={{ 
-                                  maxHeight: '120px', 
-                                  objectFit: 'contain', 
-                                  backgroundColor: '#f8f9fa', 
+                                style={{
+                                  maxHeight: '120px',
+                                  objectFit: 'contain',
+                                  backgroundColor: '#f8f9fa',
                                   padding: '8px',
                                   borderRadius: '8px',
                                   boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
@@ -202,17 +319,31 @@ const Cart = ({ onBackToHome, onNavigateTo }) => {
                               <p className="text-muted small mb-2" style={{ fontSize: '0.9rem' }}>
                                 by {item.author}
                               </p>
-                              <p className="text-muted small mb-1" style={{ fontSize: '0.85rem' }}>
-                                Giá: <span className="fw-semibold">{item.price.toLocaleString('vi-VN')} VNĐ</span>
-                              </p>
+                              <div className="d-flex align-items-center mb-1">
+                                <p className="text-muted small mb-0 me-3" style={{ fontSize: '0.85rem' }}>
+                                  Giá: <span className="fw-semibold">{item.price.toLocaleString('vi-VN')} VNĐ</span>
+                                </p>
+                                <button
+                                  className="btn btn-outline-danger btn-sm"
+                                  onClick={() => removeFromCart(item.book_id)}
+                                  style={{
+                                    borderRadius: '8px',
+                                    padding: '4px 8px',
+                                    fontSize: '0.75rem'
+                                  }}
+                                >
+                                  <i className="bi bi-trash me-1"></i>
+                                  Xóa
+                                </button>
+                              </div>
                               <p className="text-muted small mb-0" style={{ fontSize: '0.85rem' }}>
                                 Tổng: <span className="fw-semibold text-primary">{item.total_price.toLocaleString('vi-VN')} VNĐ</span>
                               </p>
                             </div>
                             <div className="col-md-2">
-                              <div className="quantity-selector" style={{ 
-                                display: 'flex', 
-                                border: '1px solid #dee2e6', 
+                              <div className="quantity-selector" style={{
+                                display: 'flex',
+                                border: '1px solid #dee2e6',
                                 borderRadius: '8px',
                                 overflow: 'hidden',
                                 maxWidth: '120px',
@@ -221,7 +352,7 @@ const Cart = ({ onBackToHome, onNavigateTo }) => {
                                 <button
                                   className="quantity-btn"
                                   onClick={() => updateQuantity(item.book_id, item.quantity - 1)}
-                                  style={{ 
+                                  style={{
                                     border: 'none',
                                     backgroundColor: 'white',
                                     padding: '8px 12px',
@@ -249,7 +380,7 @@ const Cart = ({ onBackToHome, onNavigateTo }) => {
                                   value={item.quantity}
                                   onChange={(e) => updateQuantity(item.book_id, parseInt(e.target.value))}
                                   min="1"
-                                  style={{ 
+                                  style={{
                                     border: 'none',
                                     outline: 'none',
                                     textAlign: 'center',
@@ -266,7 +397,7 @@ const Cart = ({ onBackToHome, onNavigateTo }) => {
                                 <button
                                   className="quantity-btn"
                                   onClick={() => updateQuantity(item.book_id, item.quantity + 1)}
-                                  style={{ 
+                                  style={{
                                     border: 'none',
                                     backgroundColor: 'white',
                                     padding: '8px 12px',
@@ -290,26 +421,14 @@ const Cart = ({ onBackToHome, onNavigateTo }) => {
                                 </button>
                               </div>
                             </div>
-                            <div className="col-md-2 text-center">
-                              <span className="fw-bold text-dark" style={{ 
+                            <div className="col-md-3 text-center">
+                              <span className="fw-bold text-dark" style={{
                                 fontSize: '1.1rem',
                                 whiteSpace: 'nowrap',
                                 display: 'inline-block'
                               }}>
                                 {item.total_price.toLocaleString('vi-VN')} VNĐ
                               </span>
-                            </div>
-                            <div className="col-md-2 text-center">
-                              <button
-                                className="btn btn-outline-danger btn-sm"
-                                onClick={() => removeFromCart(item.book_id)}
-                                style={{ 
-                                  borderRadius: '8px',
-                                  padding: '8px 12px'
-                                }}
-                              >
-                                <i className="bi bi-trash"></i>
-                              </button>
                             </div>
                           </div>
                         ))}
@@ -325,42 +444,60 @@ const Cart = ({ onBackToHome, onNavigateTo }) => {
                       </div>
                       <div className="card-body p-4">
                         <div className="d-flex justify-content-between mb-3">
-                          <span className="text-muted">Tạm tính ({cartItems.length} mục):</span>
+                          <span className="text-muted">Tạm tính ({selectedItems.length} mục):</span>
                           <span className="fw-semibold" style={{ whiteSpace: 'nowrap' }}>
-                            {calculateTotal.toLocaleString('vi-VN')} VNĐ
+                            {calculateSelectedTotal.toLocaleString('vi-VN')} VNĐ
                           </span>
-                        </div>
-                        <div className="d-flex justify-content-between mb-3">
-                          <span className="text-muted">Vận chuyển:</span>
-                          <span className="text-success fw-semibold">Miễn phí</span>
                         </div>
                         <hr className="my-3" style={{ borderColor: '#e9ecef' }} />
                         <div className="d-flex justify-content-between mb-4">
                           <strong className="fs-5">Tổng cộng:</strong>
                           <strong className="fs-5 text-primary" style={{ whiteSpace: 'nowrap' }}>
-                            {calculateTotal.toLocaleString('vi-VN')} VNĐ
+                            {calculateSelectedTotal.toLocaleString('vi-VN')} VNĐ
                           </strong>
                         </div>
-                        <button
-                          className="btn btn-primary w-100 py-3 fw-semibold"
-                          onClick={handleCheckout}
-                          style={{ 
-                            borderRadius: '8px',
-                            fontSize: '1rem',
-                            boxShadow: '0 4px 12px rgba(13, 110, 253, 0.3)',
-                            transition: 'all 0.3s ease'
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.transform = 'translateY(-2px)';
-                            e.currentTarget.style.boxShadow = '0 6px 16px rgba(13, 110, 253, 0.4)';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.transform = 'translateY(0)';
-                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(13, 110, 253, 0.3)';
-                          }}
-                        >
-                          Tiến Hành Thanh Toán
-                        </button>
+
+                        {selectedItems.length > 0 ? (
+                          <>
+                            <button
+                              className="btn btn-success w-100 py-3 fw-semibold mb-2"
+                              onClick={handleCheckout}
+                              style={{
+                                borderRadius: '8px',
+                                fontSize: '1rem',
+                                boxShadow: '0 4px 12px rgba(25, 135, 84, 0.3)',
+                                transition: 'all 0.3s ease'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = 'translateY(-2px)';
+                                e.currentTarget.style.boxShadow = '0 6px 16px rgba(25, 135, 84, 0.4)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.boxShadow = '0 4px 12px rgba(25, 135, 84, 0.3)';
+                              }}
+                            >
+                              <i className="bi bi-credit-card me-2"></i>
+                              Tiến Hành Thanh Toán
+                            </button>
+                            <button
+                              className="btn btn-outline-secondary w-100 py-2"
+                              onClick={() => {
+                                setSelectedItems([]);
+                                setSelectAll(false);
+                              }}
+                              style={{ borderRadius: '8px' }}
+                            >
+                              <i className="bi bi-x-circle me-2"></i>
+                              Bỏ chọn tất cả
+                            </button>
+                          </>
+                        ) : (
+                          <div className="alert alert-warning">
+                            <i className="bi bi-exclamation-triangle me-2"></i>
+                            Vui lòng chọn sản phẩm để thanh toán
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

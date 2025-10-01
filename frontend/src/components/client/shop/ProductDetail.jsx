@@ -20,7 +20,7 @@ const ProductDetail = ({ productId, onNavigateTo }) => {
       try {
         setLoading(true);
         setError(null);
-        
+
         // Thử lấy dữ liệu từ API
         const response = await fetch(`http://localhost:5000/api/books/${productId}`, {
           method: 'GET',
@@ -28,16 +28,16 @@ const ProductDetail = ({ productId, onNavigateTo }) => {
             'Content-Type': 'application/json',
           },
         });
-        
+
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const data = await response.json();
         setBook(data);
       } catch (err) {
         console.error('Error fetching book:', err);
-        
+
         // Nếu là lỗi mạng (backend không chạy), sử dụng dữ liệu dự phòng một cách im lặng
         if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
           console.log('Backend not available, using fallback data');
@@ -272,8 +272,118 @@ Chủ đề:
   };
 
   const handleAddToCart = () => {
-    // Logic thêm vào giỏ hàng
-    console.log('Added to cart:', { product, quantity });
+    if (!book) return;
+
+    // Kiểm tra còn hàng không
+    if (book.stock <= 0) {
+      if (window.showToast) {
+        window.showToast('Sản phẩm đã hết hàng!', 'warning');
+      } else {
+        alert('Sản phẩm đã hết hàng!');
+      }
+      return;
+    }
+
+    // Kiểm tra số lượng có vượt quá stock không
+    if (quantity > book.stock) {
+      if (window.showToast) {
+        window.showToast(`Chỉ còn ${book.stock} sản phẩm trong kho!`, 'warning');
+      } else {
+        alert(`Chỉ còn ${book.stock} sản phẩm trong kho!`);
+      }
+      return;
+    }
+
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    const existingItem = cart.find(item => item.book_id === book.book_id);
+
+    if (existingItem) {
+      // Kiểm tra tổng số lượng có vượt quá stock không
+      if (existingItem.quantity + quantity > book.stock) {
+        if (window.showToast) {
+          window.showToast(`Chỉ có thể thêm tối đa ${book.stock - existingItem.quantity} sản phẩm!`, 'warning');
+        } else {
+          alert(`Chỉ có thể thêm tối đa ${book.stock - existingItem.quantity} sản phẩm!`);
+        }
+        return;
+      }
+      existingItem.quantity += quantity;
+
+      // Hiển thị thông báo thành công
+      if (window.showToast) {
+        window.showToast(`Đã thêm ${quantity} "${book.title}" vào giỏ hàng!`, 'success');
+      }
+    } else {
+      cart.push({
+        book_id: book.book_id,
+        title: book.title,
+        price: book.price,
+        cover_image: book.cover_image,
+        quantity: quantity,
+        added_at: new Date().toISOString()
+      });
+
+      // Hiển thị thông báo thành công
+      if (window.showToast) {
+        window.showToast(`Đã thêm ${quantity} "${book.title}" vào giỏ hàng!`, 'success');
+      }
+    }
+
+    localStorage.setItem('cart', JSON.stringify(cart));
+    window.dispatchEvent(new CustomEvent('cartUpdated', {
+      detail: { cart, action: 'add', bookId: book.book_id, quantity }
+    }));
+
+    console.log('Added to cart:', { book, quantity });
+  };
+
+  // Hàm xử lý tiến hành thanh toán
+  const handleProceedToPayment = () => {
+    if (!book) return;
+
+    // Kiểm tra còn hàng không
+    if (book.stock <= 0) {
+      if (window.showToast) {
+        window.showToast('Sản phẩm đã hết hàng!', 'warning');
+      } else {
+        alert('Sản phẩm đã hết hàng!');
+      }
+      return;
+    }
+
+    // Kiểm tra số lượng có vượt quá stock không
+    if (quantity > book.stock) {
+      if (window.showToast) {
+        window.showToast(`Chỉ còn ${book.stock} sản phẩm trong kho!`, 'warning');
+      } else {
+        alert(`Chỉ còn ${book.stock} sản phẩm trong kho!`);
+      }
+      return;
+    }
+
+    // Tạo item thanh toán
+    const checkoutItem = {
+      book_id: book.book_id,
+      title: book.title,
+      price: book.price,
+      cover_image: book.cover_image,
+      quantity: quantity,
+      added_at: new Date().toISOString()
+    };
+
+    // Lưu item vào sessionStorage để checkout
+    sessionStorage.setItem('checkoutItems', JSON.stringify([checkoutItem]));
+
+    // Hiển thị thông báo thành công
+    if (window.showToast) {
+      window.showToast(`Đang chuyển đến thanh toán với ${quantity} "${book.title}"!`, 'success');
+    }
+
+    // Chuyển đến trang thanh toán
+    console.log('Proceeding to payment with:', checkoutItem);
+
+    // Chuyển đến trang thanh toán thực tế
+    onNavigateTo('checkout')();
   };
 
   const handleRatingClick = (selectedRating) => {
@@ -341,7 +451,7 @@ Chủ đề:
           <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
       )}
-      
+
       {/* Product Info Section */}
       <div className="row mb-5">
         <div className="col-lg-6">
@@ -359,7 +469,7 @@ Chủ đề:
 
             <div className="mb-4">
               <span className="h3 text-primary">
-                {typeof product.price === 'number' 
+                {typeof product.price === 'number'
                   ? product.price.toLocaleString('vi-VN') + ' VNĐ'
                   : product.price
                 }
@@ -393,13 +503,50 @@ Chủ đề:
               </div>
             </div>
 
-            {/* Add to Cart Button */}
-            <button
-              className="btn btn-dark btn-lg mb-4"
-              onClick={handleAddToCart}
-            >
-              Add to cart
-            </button>
+            {/* Action Buttons */}
+            <div className="d-flex gap-2 mb-4">
+              {/* Add to Cart Button */}
+              <button
+                className="btn btn-dark flex-fill"
+                onClick={handleAddToCart}
+                style={{
+                  borderRadius: '6px',
+                  fontWeight: '500',
+                  padding: '6px 12px',
+                  fontSize: '13px'
+                }}
+              >
+                <i className="bi bi-cart-plus me-1"></i>
+                Thêm giỏ hàng
+              </button>
+
+              {/* Proceed to Payment Button */}
+              <button
+                className="btn btn-success flex-fill"
+                onClick={handleProceedToPayment}
+                style={{
+                  borderRadius: '6px',
+                  fontWeight: '500',
+                  padding: '6px 12px',
+                  fontSize: '13px',
+                  background: 'linear-gradient(135deg, #28a745 0%, #20c997 100%)',
+                  border: 'none',
+                  boxShadow: '0 2px 8px rgba(40, 167, 69, 0.25)',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.transform = 'translateY(-1px)';
+                  e.target.style.boxShadow = '0 4px 12px rgba(40, 167, 69, 0.35)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = '0 2px 8px rgba(40, 167, 69, 0.25)';
+                }}
+              >
+                <i className="bi bi-credit-card me-1"></i>
+                Thanh toán
+              </button>
+            </div>
 
             {/* Product Details */}
             <div className="row">
@@ -448,14 +595,14 @@ Chủ đề:
           color: '#333',
           transition: 'all 0.3s ease'
         }}
-        onMouseEnter={(e) => {
-          e.target.style.color = '#dc3545';
-          e.target.style.transform = 'translateX(5px)';
-        }}
-        onMouseLeave={(e) => {
-          e.target.style.color = '#333';
-          e.target.style.transform = 'translateX(0)';
-        }}>
+          onMouseEnter={(e) => {
+            e.target.style.color = '#dc3545';
+            e.target.style.transform = 'translateX(5px)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.color = '#333';
+            e.target.style.transform = 'translateX(0)';
+          }}>
           View all 4 reviews <i className="bi bi-arrow-right ms-1"></i>
         </a>
       </div>
@@ -530,14 +677,14 @@ Chủ đề:
             color: '#333',
             transition: 'all 0.3s ease'
           }}
-          onMouseEnter={(e) => {
-            e.target.style.color = '#007bff';
-            e.target.style.transform = 'translateX(5px)';
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.color = '#333';
-            e.target.style.transform = 'translateX(0)';
-          }}>View All <i className="bi bi-arrow-right ms-1"></i></a>
+            onMouseEnter={(e) => {
+              e.target.style.color = '#007bff';
+              e.target.style.transform = 'translateX(5px)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.color = '#333';
+              e.target.style.transform = 'translateX(0)';
+            }}>View All <i className="bi bi-arrow-right ms-1"></i></a>
         </div>
 
         <div className="row g-4">

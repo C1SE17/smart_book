@@ -31,22 +31,21 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
   // Tabs configuration
   const tabs = useMemo(() => [
     { id: 'profile', label: 'Hồ sơ' },
-    { id: 'orders', label: 'Đơn hàng' },
     { id: 'settings', label: 'Cài đặt' },
     { id: 'security', label: 'Bảo mật' }
   ], []);
 
   // Khởi tạo dữ liệu form khi user thay đổi
   useEffect(() => {
-      const newFormData = {
-        name: displayUser.name || '',
-        email: displayUser.email || '',
-        phone: displayUser.phone || '',
-        address: displayUser.address || '',
-        role: displayUser.role || 'customer'
-      };
-      setFormData(newFormData);
-      setUserProfile(displayUser);
+    const newFormData = {
+      name: displayUser.name || '',
+      email: displayUser.email || '',
+      phone: displayUser.phone || '',
+      address: displayUser.address || '',
+      role: displayUser.role || 'customer'
+    };
+    setFormData(newFormData);
+    setUserProfile(displayUser);
   }, [displayUser]);
 
   // Fetch user profile from backend
@@ -55,7 +54,7 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
       setUserProfile(displayUser);
       return;
     }
-    
+
     try {
       setLoading(true);
       // For now, we'll use a placeholder userId since we don't have it in the token
@@ -109,7 +108,7 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
 
     // Listen for URL changes
     window.addEventListener('popstate', handlePopState);
-    
+
     return () => {
       window.removeEventListener('popstate', handlePopState);
     };
@@ -121,7 +120,7 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
       ...prev,
       [name]: value
     }));
-    
+
     // Xóa lỗi khi user bắt đầu gõ
     if (errors[name]) {
       setErrors(prev => ({
@@ -160,7 +159,7 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
 
   const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
 
     if (!user?.token) {
@@ -171,19 +170,19 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
     }
 
     setLoading(true);
-    
+
     try {
       const updatedProfile = await userService.updateProfile(formData, user.token);
       setUserProfile(updatedProfile);
-      
+
       if (onUpdateProfile) {
         onUpdateProfile(updatedProfile);
       }
-      
+
       setSuccessMessage('Cập nhật thông tin thành công!');
       setIsEditing(false);
       setTimeout(() => setSuccessMessage(''), 3000);
-      
+
     } catch (error) {
       console.error('Lỗi cập nhật:', error);
       setErrors({ general: 'Cập nhật thông tin thất bại. Vui lòng thử lại.' });
@@ -209,14 +208,14 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
     if (onTabChange) {
       onTabChange(tabId);
     }
-    
+
     const tabRoutes = {
       'profile': '/profile',
       'orders': '/profile/orders',
       'settings': '/profile/settings',
       'security': '/profile/security'
     };
-    
+
     const newPath = tabRoutes[tabId] || '/profile';
     window.history.pushState({}, '', newPath);
   }, [onTabChange]);
@@ -237,8 +236,8 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
           {!user && (
             <div className="alert alert-info mb-3" role="alert">
               <i className="fas fa-info-circle me-2" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
-              <strong>Chế độ demo:</strong> Bạn đang xem dữ liệu mẫu. 
-              <button 
+              <strong>Chế độ demo:</strong> Bạn đang xem dữ liệu mẫu.
+              <button
                 className="btn btn-link text-primary p-0 ms-2"
                 onClick={() => {
                   window.history.pushState({}, '', '/login');
@@ -247,7 +246,7 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
                 style={{ textDecoration: 'underline' }}
               >
                 Đăng nhập
-              </button> 
+              </button>
               để cập nhật thông tin thực.
             </div>
           )}
@@ -479,164 +478,6 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
                               )}
                             </div>
                           </form>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {activeTab === 'orders' && (
-                  <div className="row g-4">
-                    <div className="col-12">
-                      <div className="card shadow-sm">
-                        <div className="card-body p-4">
-                          <h5 className="card-title mb-4">Đơn Hàng Của Tôi</h5>
-
-                          {/* Order Filter */}
-                          <div className="row mb-4">
-                            <div className="col-md-6">
-                              <select className="form-select">
-                                <option value="">Tất cả trạng thái</option>
-                                <option value="pending">Chờ xử lý</option>
-                                <option value="processing">Đang xử lý</option>
-                                <option value="shipped">Đã giao</option>
-                                <option value="delivered">Hoàn thành</option>
-                                <option value="cancelled">Đã hủy</option>
-                              </select>
-                            </div>
-                            <div className="col-md-6">
-                              <div className="input-group">
-                                <input
-                                  type="text"
-                                  className="form-control"
-                                  placeholder="Tìm kiếm đơn hàng..."
-                                />
-                                <button className="btn btn-outline-secondary" type="button">
-                                  <i className="fas fa-search" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Orders List */}
-                          <div className="table-responsive">
-                            <table className="table table-hover">
-                              <thead className="table-light">
-                                <tr>
-                                  <th>Mã đơn hàng</th>
-                                  <th>Ngày đặt</th>
-                                  <th>Sản phẩm</th>
-                                  <th>Tổng tiền</th>
-                                  <th>Trạng thái</th>
-                                  <th>Thao tác</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {/* Mock Order Data */}
-                                <tr>
-                                  <td>
-                                    <span className="fw-semibold text-primary">#ORD001</span>
-                                  </td>
-                                  <td>15/12/2024</td>
-                                  <td>
-                                    <div className="d-flex align-items-center">
-
-                                      <div>
-                                        <div className="fw-semibold">Doraemon: Nobita's Little Star Wars</div>
-                                        <small className="text-muted">x2</small>
-                                      </div>
-                                    </div>
-                                  </td>
-                                  <td className="fw-semibold">240.000 VNĐ</td>
-                                  <td>
-                                    <span className="badge bg-success">Đã giao</span>
-                                  </td>
-                                  <td>
-                                    <button className="btn btn-sm btn-outline-primary me-1">
-                                      <i className="fas fa-eye" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
-                                    </button>
-                                    <button className="btn btn-sm btn-outline-success">
-                                      <i className="fas fa-redo" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
-                                    </button>
-                                  </td>
-                                </tr>
-                                <tr>
-                                  <td>
-                                    <span className="fw-semibold text-primary">#ORD002</span>
-                                  </td>
-                                  <td>10/12/2024</td>
-                                  <td>
-                                    <div className="d-flex align-items-center">
-
-                                      <div>
-                                        <div className="fw-semibold">WHERE THE CRAWDADS SING</div>
-                                        <small className="text-muted">x1</small>
-                                      </div>
-                                    </div>
-                                  </td>
-                                  <td className="fw-semibold">180.000 VNĐ</td>
-                                  <td>
-                                    <span className="badge bg-warning">Đang xử lý</span>
-                                  </td>
-                                  <td>
-                                    <button className="btn btn-sm btn-outline-primary me-1">
-                                      <i className="fas fa-eye" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
-                                    </button>
-                                    <button className="btn btn-sm btn-outline-danger">
-                                      <i className="fas fa-times" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
-                                    </button>
-                                  </td>
-                                </tr>
-                                <tr>
-                                  <td>
-                                    <span className="fw-semibold text-primary">#ORD003</span>
-                                  </td>
-                                  <td>05/12/2024</td>
-                                  <td>
-                                    <div className="d-flex align-items-center">
-
-                                      <div>
-                                        <div className="fw-semibold">Demon Slayer - Vô hạn thành</div>
-                                        <small className="text-muted">x1</small>
-                                      </div>
-                                    </div>
-                                  </td>
-                                  <td className="fw-semibold">150.000 VNĐ</td>
-                                  <td>
-                                    <span className="badge bg-danger">Đã hủy</span>
-                                  </td>
-                                  <td>
-                                    <button className="btn btn-sm btn-outline-primary me-1">
-                                      <i className="fas fa-eye" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
-                                    </button>
-                                    <button className="btn btn-sm btn-outline-primary">
-                                      <i className="fas fa-shopping-cart" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
-                                    </button>
-                                  </td>
-                                </tr>
-                              </tbody>
-                            </table>
-                          </div>
-
-                          {/* Pagination */}
-                          <div className="d-flex justify-content-between align-items-center mt-4">
-                            <div className="text-muted">
-                              Hiển thị 1-3 của 3 đơn hàng
-                            </div>
-                            <nav>
-                              <ul className="pagination pagination-sm mb-0">
-                                <li className="page-item disabled">
-                                  <span className="page-link">Trước</span>
-                                </li>
-                                <li className="page-item active">
-                                  <span className="page-link">1</span>
-                                </li>
-                                <li className="page-item disabled">
-                                  <span className="page-link">Sau</span>
-                                </li>
-                              </ul>
-                            </nav>
-                          </div>
                         </div>
                       </div>
                     </div>

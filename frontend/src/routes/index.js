@@ -85,6 +85,10 @@ export const handleRoute = (
     if (orderId) {
       setProductId(parseInt(orderId)); // Reuse productId for orderId
     }
+  } else if (path === "/checkout") {
+    setCurrentPage("checkout");
+  } else if (path === "/orders") {
+    setCurrentPage("orders");
   } else {
     // Default to home for unknown routes
     setCurrentPage("home");

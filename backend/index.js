@@ -19,8 +19,8 @@ const port = process.env.PORT || 3306;
 
 // CORS middleware
 app.use(cors({
-  origin: 'http://localhost:5173', // Frontend URL
-  credentials: true
+    origin: 'http://localhost:5173', // Frontend URL
+    credentials: true
 }));
 
 // Phân tích JSON từ body
@@ -59,7 +59,7 @@ app.use('/api/books', bookRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/authors', authorRoutes);
 app.use('/api/publishers', publisherRoutes);
-app.use('/api/cart', cartRoutes); 
+app.use('/api/cart', cartRoutes);
 app.use('/api/order', orderRoutes);
 
 // Error handling middleware
