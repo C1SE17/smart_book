@@ -12,36 +12,21 @@ const Cart = ({ onBackToHome, onNavigateTo }) => {
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
 
     try {
-      // Fetch book details for each item in cart
-      const itemsWithDetails = await Promise.all(
-        cart.map(async (item) => {
-          try {
-            const bookDetails = await bookService.getById(item.book_id);
-            return {
-              ...item,
-              book_title: bookDetails.title || `Book ${item.book_id}`,
-              author: bookDetails.author || 'Unknown Author',
-              price: bookDetails.price || 0,
-              total_price: (bookDetails.price || 0) * item.quantity,
-              image_url: bookDetails.cover_image || './public/images/book1.jpg'
-            };
-          } catch (error) {
-            console.error(`Error fetching book ${item.book_id}:`, error);
-            return {
-              ...item,
-              book_title: `Book ${item.book_id}`,
-              author: 'Unknown Author',
-              price: 0,
-              total_price: 0,
-              image_url: './public/images/book1.jpg'
-            };
-          }
-        })
-      );
+      // Use the data already stored in cart instead of calling API
+      const itemsWithDetails = cart.map((item) => {
+        return {
+          ...item,
+          book_title: item.title || `Book ${item.book_id}`,
+          author: item.author || 'Unknown Author',
+          price: item.price || 0,
+          total_price: (item.price || 0) * item.quantity,
+          image_url: item.cover_image || '/images/book1.jpg'
+        };
+      });
 
       setCartItems(itemsWithDetails);
     } catch (error) {
-      console.error('Error fetching cart items:', error);
+      console.error('Error processing cart items:', error);
       setCartItems([]);
     } finally {
       setLoading(false);
@@ -377,7 +362,7 @@ const Cart = ({ onBackToHome, onNavigateTo }) => {
                                 </button>
                               </div>
                               <p className="text-muted small mb-0" style={{ fontSize: '0.85rem' }}>
-                                Tổng: <span className="fw-semibold text-primary">{item.total_price.toLocaleString('vi-VN')} VNĐ</span>
+                                Tổng: <span className="fw-semibold text-dark">{item.total_price.toLocaleString('vi-VN')} VNĐ</span>
                               </p>
                             </div>
                             <div className="col-md-2">

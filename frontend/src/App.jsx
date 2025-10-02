@@ -6,15 +6,19 @@ import Notification from './components/client/notification/Notification'
 import Slide from './components/layouts/Slide'
 import MenuClient from './components/layouts/Menu'
 import OrderDetail from './components/client/orders/OrderDetail'
-import ProductDetail from './components/client/shop/ProductDetail'
+import ProductDetail from './components/client/product/ProductDetail.jsx'
 import CategoriesPage from './components/client/shop/CategoriesPage'
 import Checkout from './components/client/orders/Checkout'
 import ListOrders from './components/client/orders/ListOrders'
 import Home from './components/Home'
 import BlogPage from './components/client/blog/BlogPage'
 import BlogDetail from './components/client/blog/BlogDetail'
+import Contact from './components/client/contact/Contact.jsx'
+import AboutUs from './components/client/about/AboutUs.jsx'
+import { AuthorPage, AuthorDetail } from './components/client/author'
 import UserProfile from './components/user/UserProfile'
 import Auth from './features/auth/Auth'
+import ErrorBoundary from './components/common/ErrorBoundary/ErrorBoundary'
 import { handleRoute, navigateTo } from './routes'
 import { getToken, removeToken, getUserFromToken } from './utils'
 import './App.css'
@@ -24,6 +28,8 @@ function App() {
 
   const [searchQuery, setSearchQuery] = useState(''); // State tìm kiếm toàn cục
   const [productId, setProductId] = useState(null); // ID sản phẩm cho trang chi tiết
+  const [blogId, setBlogId] = useState(null);
+  const [authorId, setAuthorId] = useState(null); // ID blog cho trang chi tiết blog
   const [user, setUser] = useState(null); // State xác thực người dùng
   const [profileTab, setProfileTab] = useState('profile'); // State tab profile
 
@@ -38,7 +44,7 @@ function App() {
   // Xử lý định tuyến URL
   useEffect(() => {
     const handlePopState = () => {
-      handleRoute(window.location.pathname, setCurrentPage, setProductId, setSearchQuery, setProfileTab);
+      handleRoute(window.location.pathname, setCurrentPage, setProductId, setSearchQuery, setProfileTab, setBlogId, setAuthorId);
     };
 
     // Xử lý route ban đầu
@@ -108,7 +114,11 @@ function App() {
       'blog': '/blog',
       'blog-detail': '/blog-detail',
       'checkout': '/checkout',
-      'orders': '/orders'
+      'orders': '/orders',
+      'contact': '/contact',
+      'about': '/about',
+      'author': '/author',
+      'author-detail': '/author-detail'
     };
 
     const path = routeMap[page] || '/';
@@ -124,7 +134,26 @@ function App() {
     window.scrollTo(0, 0);
   }, []);
 
+  // Handler chuyển đến trang chi tiết blog
+  const handleNavigateToBlogDetail = useCallback((id) => {
+    setBlogId(id);
+    navigateTo('/blog-detail', { id });
+    window.scrollTo(0, 0);
+  }, []);
 
+  // Handler chuyển đến trang chi tiết sản phẩm
+  const handleNavigateToProduct = useCallback((id) => {
+    setProductId(id);
+    navigateTo('/product', { id });
+    window.scrollTo(0, 0);
+  }, []);
+
+  // Handler chuyển đến trang chi tiết tác giả
+  const handleNavigateToAuthorDetail = useCallback((id) => {
+    setAuthorId(id);
+    navigateTo('/author-detail', { id });
+    window.scrollTo(0, 0);
+  }, []);
 
   // Các component trang được memoize để tránh tạo lại
   const pageComponents = useMemo(() => ({
@@ -178,15 +207,19 @@ function App() {
         />
       )}
       {currentPage === 'orders' && (
-        <ListOrders
-          onNavigateTo={handleNavigateTo}
-        />
+        <ErrorBoundary>
+          <ListOrders
+            onNavigateTo={handleNavigateTo}
+          />
+        </ErrorBoundary>
       )}
       {currentPage === 'blog' && (
         <BlogPage onNavigateTo={handleNavigateTo} />
       )}
       {currentPage === 'blog-detail' && (
-        <BlogDetail onNavigateTo={handleNavigateTo} blogId={productId} />
+        <ErrorBoundary>
+          <BlogDetail onNavigateTo={handleNavigateTo} blogId={blogId} />
+        </ErrorBoundary>
       )}
       {currentPage === 'books' && (
         <CategoriesPage onNavigateTo={handleNavigateTo} />
@@ -195,15 +228,35 @@ function App() {
         <CategoriesPage onNavigateTo={handleNavigateTo} />
       )}
       {currentPage === 'product' && (
-        <ProductDetail productId={productId} onNavigateTo={handleNavigateTo} user={user} />
+        <ProductDetail productId={productId} onNavigateTo={handleNavigateTo} onNavigateToProduct={handleNavigateToProduct} user={user} />
       )}
       {currentPage === 'home' && (
         <>
           {/* Slide Section */}
-          <Slide />
+          <Slide onNavigateTo={handleNavigateTo} />
           {/* Home Page Content */}
           <Home onNavigateTo={handleNavigateTo} />
         </>
+      )}
+      {currentPage === 'contact' && (
+        <ErrorBoundary>
+          <Contact onBackToHome={handleBackToHome} onNavigateTo={handleNavigateTo} />
+        </ErrorBoundary>
+      )}
+      {currentPage === 'about' && (
+        <ErrorBoundary>
+          <AboutUs onBackToHome={handleBackToHome} onNavigateTo={handleNavigateTo} />
+        </ErrorBoundary>
+      )}
+      {currentPage === 'author' && (
+        <ErrorBoundary>
+          <AuthorPage onNavigateTo={handleNavigateTo} onNavigateToAuthorDetail={handleNavigateToAuthorDetail} />
+        </ErrorBoundary>
+      )}
+      {currentPage === 'author-detail' && (
+        <ErrorBoundary>
+          <AuthorDetail onNavigateTo={handleNavigateTo} authorId={authorId} />
+        </ErrorBoundary>
       )}
 
 
@@ -250,7 +303,13 @@ function App() {
             <div className="col-lg-2 col-md-4 col-sm-6 mb-4">
               <h5 className="fw-bold text-dark mb-3">Get in touch</h5>
               <div className="text-dark">
-                <a href="#" className="text-decoration-none text-dark d-block mb-2">Contact Us</a>
+                <a 
+                  href="#" 
+                  className="text-decoration-none text-dark d-block mb-2"
+                  onClick={(e) => { e.preventDefault(); onNavigateTo('contact')(); }}
+                >
+                  Contact Us
+                </a>
                 <a href="#" className="text-decoration-none text-dark d-block mb-2">Help Center</a>
                 <a href="#" className="text-decoration-none text-dark d-block mb-2">Feedback</a>
                 <a href="#" className="text-decoration-none text-dark d-block mb-2">Partnership</a>

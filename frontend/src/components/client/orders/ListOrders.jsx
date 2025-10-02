@@ -306,7 +306,7 @@ const ListOrders = ({ onNavigateTo }) => {
     // Filter orders based on status
     const filteredOrders = orders.filter(order => {
         if (filter === 'all') return true;
-        return order.status === filter;
+        return order?.status === filter;
     });
 
 
@@ -395,9 +395,9 @@ const ListOrders = ({ onNavigateTo }) => {
     // Generate tracking info based on order status
     const getTrackingInfo = (order) => {
         const now = new Date();
-        const orderDate = new Date(order.createdAt);
+        const orderDate = new Date(order?.createdAt || now);
 
-        switch (order.status) {
+        switch (order?.status) {
             case 'pending':
                 return {
                     status: 'Chờ xác nhận',
@@ -683,16 +683,16 @@ const ListOrders = ({ onNavigateTo }) => {
                                             </h5>
                                             <small className="text-white-50" style={{ fontSize: '0.9rem' }}>
                                                 <i className="bi bi-calendar3 me-1"></i>
-                                                Đặt ngày: {formatDate(order.createdAt)}
+                                                Đặt ngày: {formatDate(order?.createdAt || new Date())}
                                             </small>
                                         </div>
                                         <div className="col-md-6 text-md-end">
-                                            <span className={`badge ${getStatusBadgeClass(order.status)} fs-6 px-3 py-2`} style={{
+                                            <span className={`badge ${getStatusBadgeClass(order?.status)} fs-6 px-3 py-2`} style={{
                                                 borderRadius: '25px',
                                                 fontWeight: '600',
                                                 textShadow: '1px 1px 2px rgba(0,0,0,0.2)'
                                             }}>
-                                                {getStatusText(order.status)}
+                                                {getStatusText(order?.status)}
                                             </span>
                                         </div>
                                     </div>
@@ -702,7 +702,7 @@ const ListOrders = ({ onNavigateTo }) => {
                                     {/* Order Items */}
                                     <div className="mb-3">
                                         <h6 className="mb-2">Sản phẩm đã đặt:</h6>
-                                        {order.items.map((item, index) => (
+                                        {(order?.items || []).map((item, index) => (
                                             <div key={index} className="d-flex align-items-center mb-2">
                                                 <img
                                                     src={item.cover_image || '/images/book1.jpg'}
@@ -731,17 +731,20 @@ const ListOrders = ({ onNavigateTo }) => {
                                         <div className="row">
                                             <div className="col-md-6">
                                                 <small className="text-muted d-block">Người nhận:</small>
-                                                <div className="fw-medium">{order.shippingInfo.fullName}</div>
+                                                <div className="fw-medium">{order.shippingInfo?.fullName || 'Chưa cập nhật'}</div>
                                             </div>
                                             <div className="col-md-6">
                                                 <small className="text-muted d-block">Số điện thoại:</small>
-                                                <div className="fw-medium">{order.shippingInfo.phone}</div>
+                                                <div className="fw-medium">{order.shippingInfo?.phone || 'Chưa cập nhật'}</div>
                                             </div>
                                         </div>
                                         <div className="mt-2">
                                             <small className="text-muted d-block">Địa chỉ:</small>
                                             <div className="fw-medium">
-                                                {order.shippingInfo.address}, {order.shippingInfo.ward}, {order.shippingInfo.district}, {order.shippingInfo.city}
+                                                {order.shippingInfo ? 
+                                                    `${order.shippingInfo.address || ''}, ${order.shippingInfo.ward || ''}, ${order.shippingInfo.district || ''}, ${order.shippingInfo.city || ''}`.replace(/,\s*,/g, ',').replace(/^,\s*|,\s*$/g, '') || 'Chưa cập nhật'
+                                                    : 'Chưa cập nhật'
+                                                }
                                             </div>
                                         </div>
                                     </div>
@@ -752,7 +755,7 @@ const ListOrders = ({ onNavigateTo }) => {
                                             <div className="d-flex align-items-center">
                                                 <i className="bi bi-box me-2"></i>
                                                 <span className="text-muted">
-                                                    {calculateTotalItems(order.items)} sản phẩm
+                                                    {calculateTotalItems(order?.items || [])} sản phẩm
                                                 </span>
                                             </div>
                                         </div>
@@ -760,7 +763,7 @@ const ListOrders = ({ onNavigateTo }) => {
                                             <div className="d-flex align-items-center justify-content-md-end">
                                                 <span className="text-muted me-2">Tổng cộng:</span>
                                                 <span className="h5 mb-0 text-success">
-                                                    {order.total.toLocaleString()} VNĐ
+                                                    {(order?.total || 0).toLocaleString()} VNĐ
                                                 </span>
                                             </div>
                                         </div>
@@ -777,11 +780,11 @@ const ListOrders = ({ onNavigateTo }) => {
                                         <div>
                                             <small className="text-muted" style={{ fontSize: '0.9rem', fontWeight: '500' }}>
                                                 <i className="bi bi-credit-card me-1"></i>
-                                                Thanh toán: {order.paymentMethod === 'cod' ? 'Khi nhận hàng' : 'Online'}
+                                                Thanh toán: {order?.paymentMethod === 'cod' ? 'Khi nhận hàng' : 'Online'}
                                             </small>
                                         </div>
                                         <div>
-                                            {order.status === 'pending' && (
+                                            {order?.status === 'pending' && (
                                                 <button
                                                     className="btn btn-outline-danger btn-sm me-3 px-4 py-2"
                                                     onClick={() => handleCancelOrder(order.id)}
@@ -870,7 +873,7 @@ const ListOrders = ({ onNavigateTo }) => {
                                             return (
                                                 <div>
                                                     <div className="d-flex align-items-center mb-3">
-                                                        <span className={`badge fs-6 ${getStatusBadgeClass(selectedOrder.status)}`}>
+                                                        <span className={`badge fs-6 ${getStatusBadgeClass(selectedOrder?.status)}`}>
                                                             {tracking.status}
                                                         </span>
                                                     </div>
@@ -904,7 +907,7 @@ const ListOrders = ({ onNavigateTo }) => {
                                         </h6>
                                     </div>
                                     <div className="card-body">
-                                        {selectedOrder.items.map((item, index) => (
+                                        {(selectedOrder?.items || []).map((item, index) => (
                                             <div key={index} className="d-flex align-items-center mb-3">
                                                 <img
                                                     src={item.cover_image || '/images/book1.jpg'}
@@ -941,14 +944,17 @@ const ListOrders = ({ onNavigateTo }) => {
                                     <div className="card-body">
                                         <div className="row">
                                             <div className="col-md-6">
-                                                <p><strong>Người nhận:</strong> {selectedOrder.shippingInfo.fullName}</p>
-                                                <p><strong>Số điện thoại:</strong> {selectedOrder.shippingInfo.phone}</p>
+                                                <p><strong>Người nhận:</strong> {selectedOrder.shippingInfo?.fullName || 'Chưa cập nhật'}</p>
+                                                <p><strong>Số điện thoại:</strong> {selectedOrder.shippingInfo?.phone || 'Chưa cập nhật'}</p>
                                             </div>
                                             <div className="col-md-6">
-                                                <p><strong>Email:</strong> {selectedOrder.shippingInfo.email}</p>
+                                                <p><strong>Email:</strong> {selectedOrder.shippingInfo?.email || 'Chưa cập nhật'}</p>
                                             </div>
                                         </div>
-                                        <p><strong>Địa chỉ:</strong> {selectedOrder.shippingInfo.address}, {selectedOrder.shippingInfo.ward}, {selectedOrder.shippingInfo.district}, {selectedOrder.shippingInfo.city}</p>
+                                        <p><strong>Địa chỉ:</strong> {selectedOrder.shippingInfo ? 
+                                            `${selectedOrder.shippingInfo.address || ''}, ${selectedOrder.shippingInfo.ward || ''}, ${selectedOrder.shippingInfo.district || ''}, ${selectedOrder.shippingInfo.city || ''}`.replace(/,\s*,/g, ',').replace(/^,\s*|,\s*$/g, '') || 'Chưa cập nhật'
+                                            : 'Chưa cập nhật'
+                                        }</p>
                                     </div>
                                 </div>
 
@@ -963,12 +969,12 @@ const ListOrders = ({ onNavigateTo }) => {
                                     <div className="card-body">
                                         <div className="row">
                                             <div className="col-md-6">
-                                                <p><strong>Số sản phẩm:</strong> {calculateTotalItems(selectedOrder.items)}</p>
-                                                <p><strong>Phương thức thanh toán:</strong> {selectedOrder.paymentMethod === 'cod' ? 'Khi nhận hàng' : 'Online'}</p>
+                                                <p><strong>Số sản phẩm:</strong> {calculateTotalItems(selectedOrder?.items || [])}</p>
+                                                <p><strong>Phương thức thanh toán:</strong> {selectedOrder?.paymentMethod === 'cod' ? 'Khi nhận hàng' : 'Online'}</p>
                                             </div>
                                             <div className="col-md-6 text-md-end">
                                                 <h5 className="text-success mb-0">
-                                                    Tổng cộng: {selectedOrder.total.toLocaleString()} VNĐ
+                                                    Tổng cộng: {(selectedOrder?.total || 0).toLocaleString()} VNĐ
                                                 </h5>
                                             </div>
                                         </div>
@@ -983,7 +989,7 @@ const ListOrders = ({ onNavigateTo }) => {
                                 >
                                     Đóng
                                 </button>
-                                {selectedOrder.status === 'pending' && (
+                                {selectedOrder?.status === 'pending' && (
                                     <button
                                         type="button"
                                         className="btn btn-danger"

@@ -10,6 +10,43 @@ const CategoriesPage = ({ onNavigateTo }) => {
   const [selectedAuthor, setSelectedAuthor] = useState('');
   const [priceRange, setPriceRange] = useState({ min: 0, max: 1000000 });
   const [sortBy, setSortBy] = useState('default');
+  const [showCategoryCards, setShowCategoryCards] = useState(true);
+
+  // Dữ liệu danh mục sản phẩm
+  const categoryCards = [
+    {
+      id: 1,
+      name: "Sách Theo Tác Giả",
+      description: "Danh mục sách theo tác giả",
+      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=200&fit=crop",
+      bookCount: 15,
+      category: "Sách Theo Tác Giả"
+    },
+    {
+      id: 2,
+      name: "Truyện Tranh",
+      description: "Truyện Manga, comic",
+      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=200&fit=crop",
+      bookCount: 25,
+      category: "Truyện Tranh"
+    },
+    {
+      id: 3,
+      name: "Tiểu Thuyết",
+      description: "Tiểu thuyết các thể loại",
+      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=200&fit=crop",
+      bookCount: 10,
+      category: "Tiểu Thuyết"
+    },
+    {
+      id: 4,
+      name: "Đồ Chơi",
+      description: "Đồ chơi trẻ em",
+      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=200&fit=crop",
+      bookCount: 20,
+      category: "Đồ Chơi"
+    }
+  ];
 
   // Xử lý query parameter từ URL
   useEffect(() => {
@@ -17,6 +54,7 @@ const CategoriesPage = ({ onNavigateTo }) => {
     const categoryParam = urlParams.get('category');
     if (categoryParam) {
       setSelectedCategory(decodeURIComponent(categoryParam));
+      setShowCategoryCards(false);
     }
   }, []);
 
@@ -646,7 +684,7 @@ const CategoriesPage = ({ onNavigateTo }) => {
                         <span className="text-muted small ms-1">({product.reviewCount})</span>
                       </div>
                       <div className="mt-auto">
-                        <span className="fw-bold text-primary">{formatPrice(product.price)}</span>
+                        <span className="fw-bold text-dark">{formatPrice(product.price)}</span>
                       </div>
                     </div>
                   </div>

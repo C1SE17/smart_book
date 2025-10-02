@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { validateEmail } from '../../utils';
 import { userService } from '../../services';
+import ListOrders from '../client/orders/ListOrders';
+import ErrorBoundary from '../common/ErrorBoundary/ErrorBoundary';
 
 const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiveTab, onTabChange }) => {
   const [activeTab, setActiveTab] = useState(propActiveTab || 'profile');
@@ -31,6 +33,7 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
   // Tabs configuration
   const tabs = useMemo(() => [
     { id: 'profile', label: 'Hồ sơ' },
+    { id: 'orders', label: 'Đơn hàng' },
     { id: 'settings', label: 'Cài đặt' },
     { id: 'security', label: 'Bảo mật' }
   ], []);
@@ -478,6 +481,21 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
                               )}
                             </div>
                           </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === 'orders' && (
+                  <div className="row g-4">
+                    <div className="col-12">
+                      <div className="card shadow-sm">
+                        <div className="card-body p-4">
+                          <h5 className="card-title mb-4">Đơn Hàng Của Tôi</h5>
+                          <ErrorBoundary>
+                            <ListOrders onNavigateTo={onBackToHome} />
+                          </ErrorBoundary>
                         </div>
                       </div>
                     </div>

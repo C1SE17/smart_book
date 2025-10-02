@@ -16,6 +16,10 @@ export const routes = {
   notification: "/notification",
   blog: "/blog",
   blogDetail: "/blog-detail",
+  contact: "/contact",
+  about: "/about",
+  author: "/author",
+  "author-detail": "/author-detail",
 };
 
 // Route handlers
@@ -24,7 +28,9 @@ export const handleRoute = (
   setCurrentPage,
   setProductId,
   setSearchQuery,
-  setProfileTab
+  setProfileTab,
+  setBlogId,
+  setAuthorId
 ) => {
   const path = pathname.toLowerCase();
 
@@ -76,7 +82,7 @@ export const handleRoute = (
     const urlParams = new URLSearchParams(window.location.search);
     const id = urlParams.get("id");
     if (id) {
-      setProductId(parseInt(id)); // Reuse productId for blogId
+      setBlogId(parseInt(id));
     }
   } else if (path.startsWith("/order/")) {
     setCurrentPage("order-detail");
@@ -89,6 +95,19 @@ export const handleRoute = (
     setCurrentPage("checkout");
   } else if (path === "/orders") {
     setCurrentPage("orders");
+  } else if (path === "/contact") {
+    setCurrentPage("contact");
+  } else if (path === "/about") {
+    setCurrentPage("about");
+  } else if (path === "/author") {
+    setCurrentPage("author");
+  } else if (path.startsWith("/author-detail")) {
+    setCurrentPage("author-detail");
+    const urlParams = new URLSearchParams(window.location.search);
+    const id = urlParams.get("id");
+    if (id) {
+      setAuthorId(parseInt(id));
+    }
   } else {
     // Default to home for unknown routes
     setCurrentPage("home");

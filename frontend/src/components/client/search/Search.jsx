@@ -8,29 +8,74 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch 
   const [loading, setLoading] = useState(false);
   const [user] = useLocalStorage('user', null);
 
-  const addToCart = useCallback(async (bookId) => {
-    if (!user) {
-      alert('Please login to add items to cart');
+  const addToCart = useCallback((book) => {
+    // Kiểm tra còn hàng không
+    if (book.stock <= 0) {
+      if (window.showToast) {
+        window.showToast('Sản phẩm đã hết hàng!', 'warning');
+      } else {
+        alert('Sản phẩm đã hết hàng!');
+      }
       return;
     }
 
-    try {
-      const token = localStorage.getItem('token');
-      await cartService.addItem(bookId, 1, token);
-      alert('Item added to cart successfully!');
-    } catch (error) {
-      console.error('Error adding item to cart:', error);
-      alert('Failed to add item to cart. Please try again.');
-    }
-  }, [user]);
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    const existingItem = cart.find(item => item.book_id === book.book_id);
 
-  // Search function
+    if (existingItem) {
+      // Kiểm tra số lượng trong giỏ có vượt quá stock không
+      if (existingItem.quantity >= book.stock) {
+        if (window.showToast) {
+          window.showToast(`Chỉ còn ${book.stock} sản phẩm trong kho!`, 'warning');
+        } else {
+          alert(`Chỉ còn ${book.stock} sản phẩm trong kho!`);
+        }
+        return;
+      }
+      existingItem.quantity += 1;
+
+      // Hiển thị thông báo thành công
+      if (window.showToast) {
+        window.showToast(`Đã tăng số lượng "${book.title}" trong giỏ hàng!`, 'success');
+      }
+    } else {
+      cart.push({
+        book_id: book.book_id,
+        title: book.title,
+        author: book.author || 'Unknown Author',
+        price: book.price,
+        cover_image: book.cover_image,
+        quantity: 1,
+        added_at: new Date().toISOString()
+      });
+
+      // Hiển thị thông báo thành công
+      if (window.showToast) {
+        window.showToast(`✅ Thêm thành công! Đã thêm "${book.title}" vào giỏ hàng!`, 'success');
+      }
+    }
+
+    localStorage.setItem('cart', JSON.stringify(cart));
+    window.dispatchEvent(new CustomEvent('cartUpdated', {
+      detail: { cart, action: 'add', bookId: book.book_id }
+    }));
+  }, []);
+
+  // Search function - using mock data
   const performSearch = useCallback(async (query) => {
     setLoading(true);
     try {
-      // Use bookService.getAll with search parameter
-      const data = await bookService.getAll({ search: query });
-      setSearchResults(data);
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Filter mock books by title, description, or author
+      const filteredBooks = mockBooks.filter(book => 
+        book.title.toLowerCase().includes(query.toLowerCase()) ||
+        book.description.toLowerCase().includes(query.toLowerCase()) ||
+        (book.author && book.author.toLowerCase().includes(query.toLowerCase()))
+      );
+      
+      setSearchResults(filteredBooks);
     } catch (error) {
       console.error('Search error:', error);
       setSearchResults([]);
@@ -52,62 +97,67 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch 
       book_id: 1,
       title: "WHERE THE CRAWDADS SING",
       description: "A mystery novel about a girl who grows up alone in the marshes of North Carolina.",
-      price: 25.99,
+      price: 105000,
       stock: 10,
       category_id: 1,
       author_id: 1,
+      author: "Delia Owens",
       publisher_id: 1,
       published_date: "2020-01-01",
-      cover_image: "./public/images/book1.jpg",
+      cover_image: "/images/book1.jpg",
       slug: "where-the-crawdads-sing"
     },
     {
       book_id: 2,
-      title: "Doraemon: Nobita's Little Star Wars",
-      description: "A classic manga series featuring the beloved robot cat Doraemon.",
-      price: 19.99,
+      title: "Doraemon: Nobita và Cuộc Chiến Vũ Trụ",
+      description: "Cuộc phiêu lưu của Nobita và Doraemon trong không gian",
+      price: 248000,
       stock: 15,
       category_id: 2,
       author_id: 2,
+      author: "Fujiko Fujio",
       publisher_id: 2,
       published_date: "2020-01-01",
-      cover_image: "./public/images/book2.jpg",
+      cover_image: "/images/book2.jpg",
       slug: "doraemon-nobita-little-star-wars"
     },
     {
       book_id: 3,
       title: "Demon Slayer - Vô hạn thành",
-      description: "An epic tale of a young demon slayer's journey to save his sister.",
-      price: 22.99,
+      description: "Câu chuyện về chàng trai trẻ trở thành thợ săn quỷ để cứu em gái",
+      price: 220000,
       stock: 8,
       category_id: 2,
       author_id: 3,
+      author: "Koyoharu Gotouge",
       publisher_id: 2,
       published_date: "2020-01-01",
-      cover_image: "./public/images/book3.jpg",
+      cover_image: "/images/book3.jpg",
       slug: "demon-slayer-vo-han-thanh"
     },
     {
       book_id: 4,
       title: "Conan - Vụ Án Nữ Hoàng 450",
-      description: "A thrilling mystery featuring the famous detective Conan Edogawa.",
-      price: 21.99,
+      description: "Một vụ án bí ẩn với thám tử nổi tiếng Conan Edogawa",
+      price: 180000,
       stock: 12,
       category_id: 3,
       author_id: 4,
+      author: "Gosho Aoyama",
       publisher_id: 2,
       published_date: "2020-01-01",
-      cover_image: "./public/images/book4.jpg",
+      cover_image: "/images/book4.jpg",
       slug: "conan-vu-an-nu-hoang-450"
     },
     {
       book_id: 5,
       title: "The Great Gatsby",
-      description: "A classic American novel set in the Jazz Age.",
-      price: 16.99,
+      description: "Tiểu thuyết kinh điển Mỹ trong thời đại Jazz",
+      price: 120000,
       stock: 20,
       category_id: 4,
       author_id: 5,
+      author: "F. Scott Fitzgerald",
       publisher_id: 3,
       published_date: "2020-01-01",
       cover_image: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=300&h=200&fit=crop",
@@ -115,16 +165,45 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch 
     },
     {
       book_id: 6,
-      title: "Harry Potter and the Sorcerer's Stone",
-      description: "The first book in the magical Harry Potter series.",
-      price: 18.99,
+      title: "Harry Potter và Hòn Đá Phù Thủy",
+      description: "Cuốn sách đầu tiên trong series phép thuật Harry Potter",
+      price: 150000,
       stock: 25,
       category_id: 5,
       author_id: 6,
+      author: "J.K. Rowling",
       publisher_id: 3,
       published_date: "2020-01-01",
       cover_image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300&h=200&fit=crop",
       slug: "harry-potter-sorcerers-stone"
+    },
+    {
+      book_id: 7,
+      title: "Norwegian Wood",
+      description: "Tiểu thuyết tình cảm sâu sắc của Haruki Murakami",
+      price: 130000,
+      stock: 15,
+      category_id: 4,
+      author_id: 7,
+      author: "Haruki Murakami",
+      publisher_id: 3,
+      published_date: "2020-01-01",
+      cover_image: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=300&h=200&fit=crop",
+      slug: "norwegian-wood"
+    },
+    {
+      book_id: 8,
+      title: "Romance Novel Collection",
+      description: "Tuyển tập những tiểu thuyết lãng mạn hay nhất",
+      price: 95000,
+      stock: 30,
+      category_id: 6,
+      author_id: 8,
+      author: "Various Authors",
+      publisher_id: 4,
+      published_date: "2020-01-01",
+      cover_image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=200&fit=crop",
+      slug: "romance-novel-collection"
     }
   ], []);
 
@@ -173,14 +252,14 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch 
                         boxShadow: 'none'
                       }}
                     >
-                      <i className="bi bi-arrow-left me-1"></i>
-                      Home/
-                      <span className="fw-bold" style={{ fontSize: '16px' }}> Search</span>
+                      <i className="fas fa-arrow-left me-2"></i>
+                      Trang Chủ/
+                      <span className="fw-bold ms-1" style={{ fontSize: '16px' }}> Tìm Kiếm</span>
                     </button>
                   </div>
                   <div className="d-flex align-items-center">
                     <span className="text-muted">
-                      {searchResults.length} results found
+                      Tìm thấy {searchResults.length} kết quả
                     </span>
                   </div>
                 </div>
@@ -191,7 +270,7 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch 
                     <input
                       type="text"
                       className="form-control form-control-lg"
-                      placeholder="Search books, authors, or keywords..."
+                      placeholder="Tìm kiếm sách, tác giả hoặc từ khóa..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       onKeyPress={handleKeyPress}
@@ -224,9 +303,9 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch 
                 {/* Popular Searches */}
                 {!searchQuery && (
                   <div>
-                    <h5 className="fw-bold mb-3">Popular Searches</h5>
+                    <h5 className="fw-bold mb-3">Tìm kiếm phổ biến</h5>
                     <div className="d-flex flex-wrap gap-2">
-                      {['Doraemon', 'Harry Potter', 'The Great Gatsby', 'Demon Slayer', 'Conan', 'Romance', 'Science Fiction', 'Biography'].map((term) => (
+                      {['Doraemon', 'Harry Potter', 'The Great Gatsby', 'Demon Slayer', 'Conan', 'Romance', 'Murakami', 'Fujiko'].map((term) => (
                         <button
                           key={term}
                           className="btn btn-outline-secondary btn-sm"
@@ -256,7 +335,7 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch 
                   <div className="spinner-border text-primary" role="status">
                     <span className="visually-hidden">Searching...</span>
                   </div>
-                  <p className="mt-3 text-muted">Searching for books...</p>
+                  <p className="mt-3 text-muted">Đang tìm kiếm sách...</p>
                 </div>
               ) : searchResults.length > 0 ? (
                 <div className="row g-4">
@@ -282,28 +361,44 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch 
                           style={{ height: '250px', objectFit: 'contain', backgroundColor: '#f8f9fa' }}
                         />
                         <div className="card-body d-flex flex-column">
-                          <h6 className="card-title fw-bold text-dark mb-1">{book.title}</h6>
-                          <p className="card-text text-muted small mb-2">Stock: {book.stock}</p>
+                          <h6 className="card-title fw-bold text-dark mb-1" style={{ fontSize: '14px', lineHeight: '1.3' }}>
+                            {book.title}
+                          </h6>
+                          
+                          {book.author && (
+                            <p className="card-text text-muted small mb-2" style={{ fontSize: '12px' }}>
+                              <i className="fas fa-user me-1"></i>
+                              {book.author}
+                            </p>
+                          )}
 
-                          <p className="card-text text-muted small mb-2 flex-grow-1">
-                            {book.description}
+                          <p className="card-text text-muted small mb-2 flex-grow-1" style={{ fontSize: '11px', lineHeight: '1.4' }}>
+                            {book.description.length > 80 ? book.description.substring(0, 80) + '...' : book.description}
                           </p>
 
-                          <div className="d-flex justify-content-between align-items-center mt-auto">
-                            <span className="fw-bold text-primary">{(book.price || 0).toLocaleString('vi-VN')} VNĐ</span>
+                          <div className="d-flex justify-content-between align-items-center mt-auto mb-2">
+                            <span className="fw-bold text-dark" style={{ fontSize: '14px' }}>
+                              {(book.price || 0).toLocaleString('vi-VN')} VNĐ
+                            </span>
+                            <span className="badge bg-light text-dark" style={{ fontSize: '10px' }}>
+                              Còn {book.stock}
+                            </span>
                           </div>
 
                           <button
-                            className="btn btn-dark btn-sm mt-3"
+                            className="btn btn-dark btn-sm"
                             style={{
-                              transition: 'all 0.3s ease'
+                              transition: 'all 0.3s ease',
+                              fontSize: '12px',
+                              padding: '6px 12px'
                             }}
                             onClick={(e) => {
                               e.stopPropagation(); // Prevent card click when clicking button
-                              addToCart(book.book_id);
+                              addToCart(book);
                             }}
                           >
-                            Add to Cart
+                            <i className="fas fa-cart-plus me-1"></i>
+                            Thêm vào giỏ
                           </button>
                         </div>
                       </div>
@@ -313,8 +408,8 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch 
               ) : (
                 <div className="text-center py-5">
                   <i className="bi bi-search display-1 text-muted mb-3"></i>
-                  <h5 className="text-muted">No books found</h5>
-                  <p className="text-muted">Try adjusting your search terms or filters</p>
+                  <h5 className="text-muted">Không tìm thấy sách nào</h5>
+                  <p className="text-muted">Hãy thử điều chỉnh từ khóa tìm kiếm</p>
                 </div>
               )}
             </div>

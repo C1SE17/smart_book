@@ -1,58 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import ReviewSection from './ReviewSection';
+import ReviewSection from '../shop/ReviewSection';
 import ProductRating from './ProductRating';
 
-const ProductDetail = ({ productId, onNavigateTo, user = null }) => {
+const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = null }) => {
   const [quantity, setQuantity] = useState(1);
-  const [book, setBook] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  // Lấy dữ liệu sách từ API
-  useEffect(() => {
-    const fetchBook = async () => {
-      if (!productId) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        setLoading(true);
-        setError(null);
-
-        // Thử lấy dữ liệu từ API
-        const response = await fetch(`http://localhost:5000/api/books/${productId}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        setBook(data);
-      } catch (err) {
-        console.error('Error fetching book:', err);
-
-        // Nếu là lỗi mạng (backend không chạy), sử dụng dữ liệu dự phòng một cách im lặng
-        if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
-          console.log('Backend not available, using fallback data');
-          setBook(getProductData(productId));
-          setError(null); // Không hiển thị lỗi cho dữ liệu dự phòng
-        } else {
-          setError(`Lỗi: ${err.message}`);
-          setBook(getProductData(productId)); // Vẫn sử dụng dữ liệu dự phòng
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchBook();
-  }, [productId]);
 
   // Dữ liệu sản phẩm mẫu - dữ liệu dự phòng
   const getProductData = (id) => {
@@ -205,18 +156,31 @@ Chủ đề:
     return products[id] || products[1]; // Mặc định là sản phẩm đầu tiên nếu không tìm thấy
   };
 
-  // Sử dụng dữ liệu API nếu có, nếu không thì dùng dữ liệu dự phòng
-  const product = book ? {
-    id: book.book_id,
-    title: book.title,
-    price: book.price,
-    image: book.image_url || "/images/book1.jpg",
-    author: book.author_name || "Unknown Author",
-    company: book.publisher_name || "Unknown Publisher",
-    tags: book.categories ? book.categories.split(',').map(cat => cat.trim()) : ["book"],
-    description: book.description || "Không có mô tả",
-    fullDescription: book.description || "Không có mô tả chi tiết"
-  } : getProductData(productId);
+  // Sử dụng dữ liệu mẫu cố định cho demo
+  const product = {
+    id: productId || 1,
+    title: "Thanh Gươm Diệt Quỷ - Tập 1",
+    price: 815000,
+    image: "/images/book1.jpg",
+    author: "Koyoharu Gotouge",
+    company: "Shueisha",
+    tags: ["manga", "anime", "action"],
+    description: "Câu chuyện về Tanjiro Kamado, một cậu bé trở thành thợ săn quỷ để cứu em gái mình khỏi lời nguyền biến thành quỷ.",
+    fullDescription: `Thanh Gươm Diệt Quỷ - Tập 1 là phần mở đầu của bộ manga nổi tiếng về thế giới thợ săn quỷ.
+
+Cốt truyện chính:
+Tanjiro Kamado là một cậu bé sống cùng gia đình trên núi. Một ngày nọ, khi trở về nhà, cậu phát hiện gia đình bị quỷ tàn sát, chỉ còn em gái Nezuko sống sót nhưng đã biến thành quỷ.
+
+Chủ đề:
+• Tình anh em: Mối quan hệ sâu sắc giữa Tanjiro và Nezuko
+• Lòng dũng cảm: Tanjiro quyết tâm trở thành thợ săn quỷ để cứu em gái
+• Sự hy sinh: Các nhân vật sẵn sàng hy sinh để bảo vệ người thân
+
+Điểm nổi bật:
+• Được đánh giá là một trong những manga hay nhất về chủ đề gia đình và tình anh em
+• Nghệ thuật vẽ đẹp mắt với những cảnh chiến đấu ấn tượng
+• Cốt truyện cảm động và có ý nghĩa sâu sắc`
+  };
 
 
   const recommendations = [
@@ -307,6 +271,7 @@ Chủ đề:
       cart.push({
         book_id: book.book_id,
         title: book.title,
+        author: book.author_name || 'Unknown Author',
         price: book.price,
         cover_image: book.cover_image,
         quantity: quantity,
@@ -387,25 +352,12 @@ Chủ đề:
   };
 
 
-  if (loading) {
-    return (
-      <div className="container py-4">
-        <div className="text-center py-5">
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-          <p className="mt-2">Đang tải thông tin sản phẩm...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error && !book) {
+  if (!product) {
     return (
       <div className="container py-4">
         <div className="alert alert-warning" role="alert">
           <i className="bi bi-exclamation-triangle me-2"></i>
-          {error}
+          Không tìm thấy sản phẩm
         </div>
       </div>
     );
@@ -413,14 +365,6 @@ Chủ đề:
 
   return (
     <div className="container py-4">
-      {/* Backend Status Notice */}
-      {!book && getProductData(productId) && (
-        <div className="alert alert-info alert-dismissible fade show" role="alert">
-          <i className="bi bi-info-circle me-2"></i>
-          <strong>Thông báo:</strong> Đang sử dụng dữ liệu mẫu. Backend có thể chưa được khởi động.
-          <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-      )}
 
       {/* Product Info Section */}
       <div className="row mb-5">
@@ -447,7 +391,7 @@ Chủ đề:
             </div>
 
             <div className="mb-4">
-              <span className="h3 text-primary">
+              <span className="h3 text-dark">
                 {typeof product.price === 'number'
                   ? product.price.toLocaleString('vi-VN') + ' VNĐ'
                   : product.price
@@ -457,7 +401,7 @@ Chủ đề:
 
             {/* Quantity Selector */}
             <div className="mb-4">
-              <label className="form-label fw-bold">Quantity:</label>
+              <label className="form-label fw-bold">Số lượng:</label>
               <div className="d-flex align-items-center">
                 <button
                   className="btn btn-outline-secondary"
@@ -530,9 +474,9 @@ Chủ đề:
             {/* Product Details */}
             <div className="row">
               <div className="col-6">
-                <p className="mb-2"><strong>Author:</strong> {product.author}</p>
-                <p className="mb-2"><strong>Company:</strong> {product.company}</p>
-                <p className="mb-0"><strong>Tags:</strong> {product.tags.join(', ')}</p>
+                <p className="mb-2"><strong>Tác giả:</strong> {product.author}</p>
+                <p className="mb-2"><strong>Nhà xuất bản:</strong> {product.company}</p>
+                <p className="mb-0"><strong>Thể loại:</strong> {product.tags.join(', ')}</p>
               </div>
             </div>
           </div>
@@ -541,7 +485,7 @@ Chủ đề:
 
       {/* Description Section */}
       <div className="mb-5">
-        <h3 className="mb-3">Description</h3>
+        <h3 className="mb-3">Mô tả chi tiết</h3>
         <div className="bg-light p-4 rounded">
           <pre className="mb-0" style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit' }}>
             {product.fullDescription}
@@ -558,12 +502,22 @@ Chủ đề:
       <div className="mb-5">
         <div className="d-flex justify-content-between align-items-center mb-3">
           <h3>Recommendations</h3>
-          <a href="#" className="text-decoration-none" style={{
-            fontSize: '14px',
-            fontWeight: '500',
-            color: '#333',
-            transition: 'all 0.3s ease'
-          }}
+          <a 
+            href="#" 
+            className="text-decoration-none" 
+            style={{
+              fontSize: '14px',
+              fontWeight: '500',
+              color: '#333',
+              transition: 'all 0.3s ease',
+              cursor: 'pointer'
+            }}
+            onClick={(e) => {
+              e.preventDefault();
+              if (onNavigateTo) {
+                onNavigateTo('books')();
+              }
+            }}
             onMouseEnter={(e) => {
               e.target.style.color = '#007bff';
               e.target.style.transform = 'translateX(5px)';
@@ -571,13 +525,32 @@ Chủ đề:
             onMouseLeave={(e) => {
               e.target.style.color = '#333';
               e.target.style.transform = 'translateX(0)';
-            }}>View All <i className="bi bi-arrow-right ms-1"></i></a>
+            }}
+          >
+            View All <i className="bi bi-arrow-right ms-1"></i>
+          </a>
         </div>
 
         <div className="row g-4">
           {recommendations.map(rec => (
             <div key={rec.id} className="col-lg-3 col-md-4 col-sm-6">
-              <div className="card h-100 border-0 shadow-sm">
+              <div 
+                className="card h-100 border-0 shadow-sm"
+                style={{ cursor: 'pointer', transition: 'transform 0.3s ease, box-shadow 0.3s ease' }}
+                onClick={() => {
+                  if (onNavigateToProduct) {
+                    onNavigateToProduct(rec.id);
+                  }
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-5px)';
+                  e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,0,0,0.2)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+                }}
+              >
                 <img
                   src={rec.image}
                   className="card-img-top"
@@ -593,7 +566,7 @@ Chủ đề:
                     {renderStars(rec.rating)}
                   </div>
                   <div className="mt-auto">
-                    <span className="fw-bold text-primary">{rec.price}</span>
+                    <span className="fw-bold text-dark">{rec.price}</span>
                   </div>
                 </div>
               </div>

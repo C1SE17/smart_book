@@ -4,6 +4,7 @@ const NotificationDropdown = ({ onViewAllNotifications }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const dropdownRef = useRef(null);
+  const hoverTimeoutRef = useRef(null);
 
   // Mock notification data - memoized to prevent recreation
   const notifications = useMemo(() => [
@@ -69,23 +70,28 @@ const NotificationDropdown = ({ onViewAllNotifications }) => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
+      }
     };
   }, []);
 
   const handleMouseEnter = useCallback(() => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+      hoverTimeoutRef.current = null;
+    }
     setIsHovered(true);
     setIsOpen(true);
   }, []);
 
   const handleMouseLeave = useCallback(() => {
     setIsHovered(false);
-    // Delay closing to allow user to move mouse to dropdown
-    setTimeout(() => {
-      if (!isHovered) {
-        setIsOpen(false);
-      }
+    // Delay closing to allow user to move mouse to dropdown content
+    hoverTimeoutRef.current = setTimeout(() => {
+      setIsOpen(false);
     }, 300);
-  }, [isHovered]);
+  }, []);
 
   const handleNotificationClick = useCallback((notification) => {
     console.log('Notification clicked:', notification);
@@ -112,7 +118,7 @@ const NotificationDropdown = ({ onViewAllNotifications }) => {
         style={{ cursor: 'pointer' }}
       >
         <i 
-          className="bi bi-bell fs-5 text-dark"
+          className="bi bi-bell fs-5 text-white"
           style={{ 
             transition: 'all 0.3s ease',
             transform: isHovered ? 'scale(1.1)' : 'scale(1)'
@@ -132,6 +138,8 @@ const NotificationDropdown = ({ onViewAllNotifications }) => {
       {isOpen && (
         <div 
           className="position-absolute end-0 mt-2"
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
           style={{
             width: '380px',
             maxHeight: '500px',

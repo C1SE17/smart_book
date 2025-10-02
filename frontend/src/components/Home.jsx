@@ -266,6 +266,7 @@ const Home = ({ onNavigateTo }) => {
       cart.push({
         book_id: book.book_id,
         title: book.title,
+        author: book.author || 'Unknown Author',
         price: book.price,
         cover_image: book.cover_image,
         quantity: 1,
@@ -433,7 +434,7 @@ const Home = ({ onNavigateTo }) => {
           <div className="row g-4">
             {loading ? (
               <div className="col-12 text-center py-5">
-                <div className="spinner-border text-primary" role="status">
+                <div className="spinner-border text-dark" role="status">
                   <span className="visually-hidden">Loading...</span>
                 </div>
                 <p className="mt-2">Đang tải dữ liệu...</p>
@@ -544,7 +545,7 @@ const Home = ({ onNavigateTo }) => {
                     </div>
 
                     <div className="mt-auto">
-                      <p className="card-text fw-bold text-primary mb-0" style={{ fontSize: '1.1rem' }}>
+                      <p className="card-text fw-bold text-dark mb-0" style={{ fontSize: '1.1rem' }}>
                         {(book.price || 0).toLocaleString('vi-VN')} VNĐ
                       </p>
                     </div>
@@ -586,7 +587,7 @@ const Home = ({ onNavigateTo }) => {
           <div className="row g-4">
             {loading ? (
               <div className="col-12 text-center py-5">
-                <div className="spinner-border text-primary" role="status">
+                <div className="spinner-border text-dark" role="status">
                   <span className="visually-hidden">Loading...</span>
                 </div>
                 <p className="mt-2">Đang tải dữ liệu...</p>
@@ -697,7 +698,7 @@ const Home = ({ onNavigateTo }) => {
                     </div>
 
                     <div className="mt-auto">
-                      <p className="card-text fw-bold text-primary mb-0" style={{ fontSize: '1.1rem' }}>
+                      <p className="card-text fw-bold text-dark mb-0" style={{ fontSize: '1.1rem' }}>
                         {(book.price || 0).toLocaleString('vi-VN')} VNĐ
                       </p>
                     </div>
@@ -739,7 +740,7 @@ const Home = ({ onNavigateTo }) => {
           <div className="row g-4">
             {loading ? (
               <div className="col-12 text-center py-5">
-                <div className="spinner-border text-primary" role="status">
+                <div className="spinner-border text-dark" role="status">
                   <span className="visually-hidden">Loading...</span>
                 </div>
                 <p className="mt-2">Đang tải dữ liệu...</p>
@@ -850,7 +851,7 @@ const Home = ({ onNavigateTo }) => {
                     </div>
 
                     <div className="mt-auto">
-                      <p className="card-text fw-bold text-primary mb-0" style={{ fontSize: '1.1rem' }}>
+                      <p className="card-text fw-bold text-dark mb-0" style={{ fontSize: '1.1rem' }}>
                         {(book.price || 0).toLocaleString('vi-VN')} VNĐ
                       </p>
                     </div>
@@ -870,12 +871,19 @@ const Home = ({ onNavigateTo }) => {
               <h2 className="fw-bold text-dark">Tác Giả Yêu Thích</h2>
             </div>
             <div className="col-auto">
-              <a href="#" className="text-decoration-none" style={{
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#333',
-                transition: 'all 0.3s ease'
-              }}
+              <a 
+                href="#" 
+                className="text-decoration-none" 
+                style={{
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  color: '#333',
+                  transition: 'all 0.3s ease'
+                }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  onNavigateTo('author')();
+                }}
                 onMouseEnter={(e) => {
                   e.target.style.color = '#007bff';
                   e.target.style.transform = 'translateX(5px)';
@@ -883,7 +891,8 @@ const Home = ({ onNavigateTo }) => {
                 onMouseLeave={(e) => {
                   e.target.style.color = '#333';
                   e.target.style.transform = 'translateX(0)';
-                }}>
+                }}
+              >
                 Xem Tất Cả <i className="bi bi-arrow-right ms-1"></i>
               </a>
             </div>

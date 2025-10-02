@@ -25,11 +25,11 @@ const MenuClient = ({ onNavigateTo, onBackToHome, user, onLogout, onViewAllNotif
   }, [updateCartCount]);
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-light bg-white fixed-top" style={{ borderTop: '3px solid #8B5CF6', zIndex: 1040 }}>
+    <nav className="navbar navbar-expand-lg navbar-dark bg-dark fixed-top" style={{ borderTop: '3px solid #8B5CF6', zIndex: 1040 }}>
       <div className="container">
         {/* Brand Name */}
         <span
-          className="navbar-brand fw-bold text-dark"
+          className="navbar-brand fw-bold text-white"
           onClick={onBackToHome}
           style={{
             fontSize: '1.5rem',
@@ -49,6 +49,7 @@ const MenuClient = ({ onNavigateTo, onBackToHome, user, onLogout, onViewAllNotif
           type="button"
           data-bs-toggle="collapse"
           data-bs-target="#navbarNav"
+          style={{ borderColor: 'rgba(255,255,255,0.5)' }}
         >
           <span className="navbar-toggler-icon"></span>
         </button>
@@ -58,19 +59,19 @@ const MenuClient = ({ onNavigateTo, onBackToHome, user, onLogout, onViewAllNotif
           <ul className="navbar-nav mx-auto">
             <li className="nav-item">
               <a
-                className="nav-link text-dark fw-normal"
+                className="nav-link text-white fw-normal"
                 href="#"
                 onClick={(e) => { e.preventDefault(); onBackToHome(); }}
                 style={{ fontSize: '1rem', fontFamily: 'sans-serif' }}
               >
-                Home
+                Trang Chủ
               </a>
             </li>
 
             {/* Shop Link */}
             <li className="nav-item">
               <a
-                className="nav-link text-dark fw-normal"
+                className="nav-link text-white fw-normal"
                 href="#"
                 onClick={(e) => { e.preventDefault(); onNavigateTo('books')(); }}
                 style={{ fontSize: '1rem', fontFamily: 'sans-serif' }}
@@ -80,33 +81,46 @@ const MenuClient = ({ onNavigateTo, onBackToHome, user, onLogout, onViewAllNotif
             </li>
 
 
+        <li className="nav-item">
+          <a
+            className="nav-link text-white fw-normal"
+            href="#"
+            onClick={(e) => { e.preventDefault(); onNavigateTo('blog')(); }}
+            style={{ fontSize: '1rem', fontFamily: 'sans-serif' }}
+          >
+            Blog
+          </a>
+        </li>
+        <li className="nav-item">
+          <a
+            className="nav-link text-white fw-normal"
+            href="#"
+            onClick={(e) => { e.preventDefault(); onNavigateTo('author')(); }}
+            style={{ fontSize: '1rem', fontFamily: 'sans-serif' }}
+          >
+            Tác Giả
+          </a>
+        </li>
+
             <li className="nav-item">
               <a
-                className="nav-link text-dark fw-normal"
+                className="nav-link text-white fw-normal"
                 href="#"
+                onClick={(e) => { e.preventDefault(); onNavigateTo('about')(); }}
                 style={{ fontSize: '1rem', fontFamily: 'sans-serif' }}
               >
-                Blog
+                Về Chúng Tôi
               </a>
             </li>
 
             <li className="nav-item">
               <a
-                className="nav-link text-dark fw-normal"
+                className="nav-link text-white fw-normal"
                 href="#"
+                onClick={(e) => { e.preventDefault(); onNavigateTo('contact')(); }}
                 style={{ fontSize: '1rem', fontFamily: 'sans-serif' }}
               >
-                Pages
-              </a>
-            </li>
-
-            <li className="nav-item">
-              <a
-                className="nav-link text-dark fw-normal"
-                href="#"
-                style={{ fontSize: '1rem', fontFamily: 'sans-serif' }}
-              >
-                Contact
+                Liên Hệ
               </a>
             </li>
           </ul>
@@ -124,7 +138,7 @@ const MenuClient = ({ onNavigateTo, onBackToHome, user, onLogout, onViewAllNotif
                 className="nav-link"
                 href="#"
                 onClick={(e) => { e.preventDefault(); onNavigateTo('search')(); }}
-                style={{ color: '#333' }}
+                style={{ color: '#fff' }}
               >
                 <i className="fas fa-search" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
               </a>
@@ -136,7 +150,7 @@ const MenuClient = ({ onNavigateTo, onBackToHome, user, onLogout, onViewAllNotif
                 className="nav-link position-relative"
                 href="#"
                 onClick={(e) => { e.preventDefault(); onNavigateTo('cart')(); }}
-                style={{ color: '#333' }}
+                style={{ color: '#fff' }}
               >
                 <i className="fas fa-shopping-cart" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
                 {cartItemCount > 0 && (
@@ -167,7 +181,7 @@ const MenuClient = ({ onNavigateTo, onBackToHome, user, onLogout, onViewAllNotif
                     role="button"
                     data-bs-toggle="dropdown"
                     aria-expanded="false"
-                    style={{ color: '#333' }}
+                    style={{ color: '#fff' }}
                   >
                     <i className="fas fa-user me-2" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
                     <span className="fw-medium">{user.name || user.email || 'User'}</span>
@@ -196,7 +210,7 @@ const MenuClient = ({ onNavigateTo, onBackToHome, user, onLogout, onViewAllNotif
                         }}
                       >
                         <i className="fas fa-shopping-bag me-2"></i>
-                        Đơn hàng
+                        Đơn Hàng
                       </a>
                     </li>
                     <li><hr className="dropdown-divider" /></li>
@@ -219,7 +233,7 @@ const MenuClient = ({ onNavigateTo, onBackToHome, user, onLogout, onViewAllNotif
                   className="nav-link"
                   href="#"
                   onClick={(e) => { e.preventDefault(); onNavigateTo('auth')(); }}
-                  style={{ color: '#333' }}
+                  style={{ color: '#fff' }}
                 >
                   <i className="fas fa-user" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
                 </a>

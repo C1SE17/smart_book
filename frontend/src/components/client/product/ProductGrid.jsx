@@ -230,7 +230,7 @@ const ProductGrid = ({ onNavigateTo }) => {
                   <span className="text-muted small ms-1">({product.reviewCount})</span>
                 </div>
                 <div className="mt-auto">
-                  <span className="fw-bold text-primary">{formatPrice(product.price)}</span>
+                  <span className="fw-bold text-dark">{formatPrice(product.price)}</span>
                 </div>
               </div>
             </div>

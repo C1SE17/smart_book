@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 
-const Slide = () => {
+const Slide = ({ onNavigateTo }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   // Dữ liệu slide - được memoize để tránh tạo lại
@@ -11,7 +11,9 @@ const Slide = () => {
       description: "Khám phá những cuốn sách hay nhất mọi thời đại được các chuyên gia của chúng tôi tuyển chọn kỹ lưỡng.",
       image: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=600&h=400&fit=crop",
       buttonText: "Xem thêm",
-      backgroundColor: "#ffc0cb"
+      backgroundColor: "#ffc0cb",
+      navigationType: "product", // Chuyển đến trang sản phẩm
+      productId: 1
     },
     {
       id: 2,
@@ -19,7 +21,9 @@ const Slide = () => {
       description: "Hãy xem bộ sưu tập sách mới nhất của chúng tôi từ khắp nơi trên thế giới.",
       image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=400&fit=crop",
       buttonText: "Mua ngay",
-      backgroundColor: "#e3f2fd"
+      backgroundColor: "#e3f2fd",
+      navigationType: "product", // Chuyển đến trang sản phẩm
+      productId: 2
     },
     {
       id: 3,
@@ -27,7 +31,9 @@ const Slide = () => {
       description: "Những cuốn sách phổ biến nhất mà mọi người đang bàn tán.",
       image: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=600&h=400&fit=crop",
       buttonText: "Xem tất cả",
-      backgroundColor: "#f3e5f5"
+      backgroundColor: "#f3e5f5",
+      navigationType: "books", // Chuyển đến trang danh mục sản phẩm
+      productId: null
     }
   ], []);
 
@@ -89,55 +95,165 @@ const Slide = () => {
 
   return (
     <section 
-      className="py-5 position-relative" 
-      style={{backgroundColor: currentSlideData.backgroundColor}}
+      className="pb-5 position-relative overflow-hidden" 
+      style={{
+        background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
+        paddingTop: '0', 
+        marginTop: '-20px',
+        minHeight: '500px'
+      }}
     >
-      <div className="container">
-        <div className="row align-items-center">
+      {/* Background Pattern */}
+      <div 
+        className="position-absolute top-0 start-0 w-100 h-100"
+        style={{
+          backgroundImage: 'radial-gradient(circle at 20% 80%, rgba(0,0,0,0.05) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(0,0,0,0.05) 0%, transparent 50%)',
+          zIndex: 1
+        }}
+      ></div>
+      
+      <div className="container position-relative" style={{ paddingTop: '3rem', zIndex: 2 }}>
+        <div className="row align-items-center min-vh-50">
           <div className="col-lg-6">
-            <h1 className="display-4 fw-bold text-dark mb-4" style={{ lineHeight: '1.2' }}>
-              {currentSlideData.title}
-            </h1>
-            <p className="lead text-dark mb-4">
-              {currentSlideData.description}
-            </p>
-            <a 
-              href="#"
-              className="text-decoration-none" 
-              style={{
-                fontSize: '16px',
-                fontWeight: '500',
-                color: '#333',
-                transition: 'all 0.3s ease',
-                display: 'inline-block'
-              }}
-              onMouseEnter={(e) => handleButtonHover(e, true)}
-              onMouseLeave={(e) => handleButtonHover(e, false)}
-            >
-              {currentSlideData.buttonText} <i className="bi bi-arrow-right ms-2"></i>
-            </a>
+            <div className="slide-content" style={{ animation: 'slideInLeft 0.8s ease-out' }}>
+              <h1 
+                className="display-3 fw-bold text-dark mb-4" 
+                style={{ 
+                  lineHeight: '1.1',
+                  color: '#2c3e50',
+                  textShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                }}
+              >
+                {currentSlideData.title}
+              </h1>
+              <p 
+                className="lead text-dark mb-4" 
+                style={{ 
+                  fontSize: '1.2rem',
+                  lineHeight: '1.6',
+                  fontWeight: '400',
+                  color: '#6c757d'
+                }}
+              >
+                {currentSlideData.description}
+              </p>
+              <a 
+                href="#"
+                className="text-decoration-none position-relative" 
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  padding: '12px 24px',
+                  backgroundColor: 'transparent',
+                  border: '2px solid #2c3e50',
+                  borderRadius: '8px',
+                  color: '#2c3e50',
+                  fontWeight: '600',
+                  fontSize: '16px',
+                  transition: 'all 0.3s ease',
+                  textDecoration: 'none',
+                  position: 'relative',
+                  overflow: 'hidden'
+                }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (onNavigateTo) {
+                    if (currentSlideData.navigationType === 'product') {
+                      onNavigateTo('product')(currentSlideData.productId);
+                    } else if (currentSlideData.navigationType === 'books') {
+                      onNavigateTo('books')();
+                    }
+                  }
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.backgroundColor = '#2c3e50';
+                  e.target.style.color = 'white';
+                  e.target.style.transform = 'translateY(-2px)';
+                  e.target.style.boxShadow = '0 8px 25px rgba(44, 62, 80, 0.3)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.backgroundColor = 'transparent';
+                  e.target.style.color = '#2c3e50';
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = 'none';
+                }}
+              >
+                <span>{currentSlideData.buttonText}</span>
+                <i className="fas fa-arrow-right" style={{ fontSize: '14px' }}></i>
+              </a>
+            </div>
           </div>
           <div className="col-lg-6">
             <div 
-              className="text-center"
-              style={{
-                borderRadius: '12px',
-                overflow: 'hidden',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
-                transform: 'translateY(-10px)'
-              }}
+              className="text-center position-relative"
+              style={{ animation: 'slideInRight 0.8s ease-out 0.2s both' }}
             >
-              <img 
-                src={currentSlideData.image}
-                alt={currentSlideData.title}
-                className="img-fluid"
+              <div
+                className="position-relative"
                 style={{
-                  width: '100%',
-                  height: '400px',
-                  objectFit: 'cover',
-                  borderRadius: '12px'
+                  borderRadius: '20px',
+                  overflow: 'hidden',
+                  boxShadow: '0 20px 60px rgba(0,0,0,0.1)',
+                  transform: 'perspective(1000px) rotateY(-5deg) rotateX(5deg)',
+                  transition: 'transform 0.3s ease',
+                  border: '1px solid rgba(0,0,0,0.1)'
                 }}
-              />
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'perspective(1000px) rotateY(0deg) rotateX(0deg) scale(1.05)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'perspective(1000px) rotateY(-5deg) rotateX(5deg) scale(1)';
+                }}
+              >
+                <img 
+                  src={currentSlideData.image}
+                  alt={currentSlideData.title}
+                  className="img-fluid"
+                  style={{
+                    width: '100%',
+                    height: '450px',
+                    objectFit: 'cover',
+                    borderRadius: '20px'
+                  }}
+                />
+                {/* Overlay gradient */}
+                <div 
+                  className="position-absolute top-0 start-0 w-100 h-100"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0) 50%, rgba(0,0,0,0.05) 100%)',
+                  borderRadius: '20px'
+                }}
+                ></div>
+              </div>
+              
+              {/* Floating elements */}
+              <div 
+                className="position-absolute"
+                style={{
+                  top: '20%',
+                  right: '-10%',
+                  width: '60px',
+                  height: '60px',
+                  background: 'linear-gradient(135deg, #6c757d, #495057)',
+                  borderRadius: '50%',
+                  opacity: '0.3',
+                  animation: 'float 3s ease-in-out infinite'
+                }}
+              ></div>
+              <div 
+                className="position-absolute"
+                style={{
+                  bottom: '30%',
+                  left: '-15%',
+                  width: '40px',
+                  height: '40px',
+                  background: 'linear-gradient(135deg, #adb5bd, #6c757d)',
+                  borderRadius: '50%',
+                  opacity: '0.2',
+                  animation: 'float 3s ease-in-out infinite 1.5s'
+                }}
+              ></div>
             </div>
           </div>
         </div>
@@ -244,6 +360,7 @@ const Slide = () => {
           ))}
         </div>
       </div>
+      
     </section>
   );
 };
