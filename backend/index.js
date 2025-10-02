@@ -1,5 +1,6 @@
 // Nhập thư viện
 const express = require('express');
+const cors = require('cors');
 const dotenv = require('dotenv');
 const userRoutes = require('./routes/userRoutes');
 const bookRoutes = require('./routes/bookRoutes');
@@ -17,6 +18,14 @@ dotenv.config();
 // Khởi tạo ứng dụng Express
 const app = express(); // Đảm bảo app được khai báo trước khi sử dụng
 const port = process.env.PORT || 3306;
+
+// Cấu hình CORS
+app.use(cors({
+    origin: ['http://localhost:5173', 'http://localhost:3000'], // Frontend và Admin
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 // Phân tích JSON từ body
 app.use(express.json());
