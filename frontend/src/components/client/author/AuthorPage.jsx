@@ -12,7 +12,7 @@ const AuthorPage = ({ onNavigateTo, onNavigateToAuthorDetail }) => {
       slug: "koyoharu-gotouge",
       created_at: "2020-01-15T10:30:00Z",
       updated_at: "2024-01-15T10:30:00Z",
-      image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&h=200&fit=crop&crop=face",
+      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop&crop=face",
       book_count: 23,
       rating: 4.9
     },
@@ -23,7 +23,7 @@ const AuthorPage = ({ onNavigateTo, onNavigateToAuthorDetail }) => {
       slug: "fujiko-f-fujio",
       created_at: "2020-01-15T10:30:00Z",
       updated_at: "2024-01-15T10:30:00Z",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face",
+      image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&h=200&fit=crop&crop=face",
       book_count: 45,
       rating: 4.8
     },
@@ -67,7 +67,7 @@ const AuthorPage = ({ onNavigateTo, onNavigateToAuthorDetail }) => {
       slug: "hajime-isayama",
       created_at: "2020-01-15T10:30:00Z",
       updated_at: "2024-01-15T10:30:00Z",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face",
+      image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&h=200&fit=crop&crop=face",
       book_count: 34,
       rating: 4.8
     },
@@ -195,6 +195,9 @@ const AuthorPage = ({ onNavigateTo, onNavigateToAuthorDetail }) => {
                         objectFit: 'cover',
                         border: '3px solid #f8f9fa',
                         display: 'block'
+                      }}
+                      onError={(e) => {
+                        e.target.src = 'https://via.placeholder.com/100x100/6c757d/ffffff?text=' + encodeURIComponent(author.name.charAt(0));
                       }}
                     />
                   </div>

@@ -11,7 +11,7 @@ const AuthorDetail = ({ onNavigateTo, authorId }) => {
         slug: "koyoharu-gotouge",
         created_at: "2020-01-15T10:30:00Z",
         updated_at: "2024-01-15T10:30:00Z",
-        image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=300&h=300&fit=crop&crop=face",
+        image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=300&fit=crop&crop=face",
         book_count: 23,
         rating: 4.9,
         birth_year: 1989,
@@ -49,7 +49,7 @@ const AuthorDetail = ({ onNavigateTo, authorId }) => {
         slug: "fujiko-f-fujio",
         created_at: "2020-01-15T10:30:00Z",
         updated_at: "2024-01-15T10:30:00Z",
-        image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face",
+        image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=300&fit=crop&crop=face",
         book_count: 45,
         rating: 4.8,
         birth_year: 1933,
@@ -116,13 +116,16 @@ const AuthorDetail = ({ onNavigateTo, authorId }) => {
               <img
                 src={author.image}
                 alt={author.name}
-                className="rounded-circle mb-4"
+                className="rounded-circle mb-4 mx-auto"
                 style={{ 
                   width: '200px', 
                   height: '200px', 
                   objectFit: 'cover',
                   border: '4px solid #f8f9fa',
                   display: 'block'
+                }}
+                onError={(e) => {
+                  e.target.src = 'https://via.placeholder.com/300x300/6c757d/ffffff?text=' + encodeURIComponent(author.name.charAt(0));
                 }}
               />
               
