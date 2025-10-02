@@ -46,6 +46,8 @@ function App() {
           console.error('Error parsing user data:', error);
           localStorage.removeItem('user');
         }
+      } else {
+        setUser(null);
       }
     };
     
@@ -54,8 +56,15 @@ function App() {
     // Listen for storage changes (when user logs in from another tab)
     window.addEventListener('storage', loadUser);
     
+    // Listen for logout all devices event
+    const handleUserLoggedOut = () => {
+      setUser(null);
+    };
+    window.addEventListener('userLoggedOut', handleUserLoggedOut);
+    
     return () => {
       window.removeEventListener('storage', loadUser);
+      window.removeEventListener('userLoggedOut', handleUserLoggedOut);
     };
   }, []);
 
@@ -128,7 +137,7 @@ function App() {
   }, []);
 
   // Các handler điều hướng
-  const handleNavigateTo = useCallback((page) => () => {
+  const handleNavigateTo = useCallback((page, params = {}) => {
     const routeMap = {
       'home': '/',
       'books': '/books',
@@ -150,7 +159,15 @@ function App() {
     };
 
     const path = routeMap[page] || '/';
-    navigateTo(path);
+    
+    // Handle product page with productId
+    if (page === 'product' && params.productId) {
+      setProductId(params.productId);
+      navigateTo(path, { id: params.productId });
+    } else {
+      navigateTo(path);
+    }
+    
     window.scrollTo(0, 0);
   }, []);
 

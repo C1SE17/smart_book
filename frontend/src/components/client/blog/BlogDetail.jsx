@@ -80,7 +80,7 @@ const BlogDetail = ({ onNavigateTo, blogId }) => {
         <div className="mb-4">
           <button
             className="btn btn-link text-dark p-0 no-hover"
-            onClick={() => onNavigateTo('blog')()}
+            onClick={() => onNavigateTo('blog')}
             style={{
               border: 'none',
               background: 'none',
@@ -238,7 +238,7 @@ const BlogDetail = ({ onNavigateTo, blogId }) => {
                 <div className="text-center mt-5">
                   <button
                     className="btn btn-primary"
-                    onClick={() => onNavigateTo('blog')()}
+                    onClick={() => onNavigateTo('blog')}
                     style={{ borderRadius: '25px', padding: '10px 30px' }}
                   >
                     <i className="fas fa-arrow-left me-2"></i>

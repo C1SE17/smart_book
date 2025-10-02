@@ -246,6 +246,26 @@ const users = [
     role: "customer",
     created_at: "2024-01-01T00:00:00Z",
     updated_at: "2024-01-01T00:00:00Z"
+  },
+  {
+    user_id: 3,
+    name: "Vo Dinh Trung",
+    email: "123@gmail.com",
+    phone: "",
+    address: "",
+    role: "customer",
+    created_at: "2024-01-01T00:00:00Z",
+    updated_at: "2024-01-01T00:00:00Z"
+  },
+  {
+    user_id: 4,
+    name: "Nguyen Van B",
+    email: "test@gmail.com",
+    phone: "0909000333",
+    address: "Da Nang",
+    role: "customer",
+    created_at: "2024-01-01T00:00:00Z",
+    updated_at: "2024-01-01T00:00:00Z"
   }
 ];
 
@@ -266,6 +286,38 @@ const reviews = [
     rating: 4,
     review_text: "Câu chuyện thú vị, phù hợp cho trẻ em.",
     created_at: "2024-01-01T00:00:00Z"
+  },
+  {
+    review_id: 3,
+    user_id: 3,
+    book_id: 1,
+    rating: 5,
+    review_text: "aaaaaaaaaaaaa",
+    created_at: "2024-01-03T00:00:00Z"
+  },
+  {
+    review_id: 4,
+    user_id: 4,
+    book_id: 1,
+    rating: 3,
+    review_text: "Sách tạm ổn, có thể đọc được.",
+    created_at: "2024-01-04T00:00:00Z"
+  },
+  {
+    review_id: 5,
+    user_id: 2,
+    book_id: 1,
+    rating: 2,
+    review_text: "Không hay lắm, hơi nhàm chán.",
+    created_at: "2024-01-05T00:00:00Z"
+  },
+  {
+    review_id: 6,
+    user_id: 4,
+    book_id: 1,
+    rating: 4,
+    review_text: "Đánh giá từ tài khoản test khác.",
+    created_at: "2024-01-06T00:00:00Z"
   }
 ];
 
@@ -362,12 +414,14 @@ export const mockApi = {
       filteredBooks = filteredBooks.filter(book => book.author_id === parseInt(author_id));
     }
     
-    // Search by title or description
+    // Search by title only (exact match or contains)
     if (search) {
       const searchLower = search.toLowerCase();
       filteredBooks = filteredBooks.filter(book => 
-        book.title.toLowerCase().includes(searchLower) || 
-        book.description.toLowerCase().includes(searchLower)
+        // Search by exact title match (priority)
+        book.title.toLowerCase() === searchLower ||
+        // Search by title contains
+        book.title.toLowerCase().includes(searchLower)
       );
     }
     
@@ -421,6 +475,47 @@ export const mockApi = {
   // Categories API
   getCategories: async () => {
     return categories;
+  },
+
+  // Search suggestions API - Only book titles
+  getSearchSuggestions: async (query) => {
+    if (!query || query.length < 2) return [];
+    
+    const searchLower = query.toLowerCase();
+    const suggestions = [];
+    
+    // Search in books only
+    books.forEach(book => {
+      if (book.title.toLowerCase().includes(searchLower)) {
+        suggestions.push({
+          type: 'book',
+          title: book.title,
+          subtitle: `Sách - ${authors.find(a => a.author_id === book.author_id)?.name || 'Unknown'}`,
+          id: book.book_id
+        });
+      }
+    });
+    
+    // Remove duplicates and limit results
+    const uniqueSuggestions = suggestions.filter((suggestion, index, self) => 
+      index === self.findIndex(s => s.title === suggestion.title)
+    );
+    
+    return uniqueSuggestions.slice(0, 8);
+  },
+
+  // Get popular search keywords
+  getPopularKeywords: async () => {
+    return [
+      'One Piece',
+      'Doraemon', 
+      'Demon Slayer',
+      'Detective Conan',
+      'Manga',
+      'Truyện tranh',
+      'Sách văn học',
+      'Tiểu thuyết'
+    ];
   },
 
   getCategoryById: async (id) => {
@@ -610,9 +705,12 @@ export const mockApi = {
       return Promise.reject(new Error('Email đã được sử dụng'));
     }
     
+    // Get next user_id (find max user_id and add 1)
+    const maxUserId = users.length > 0 ? Math.max(...users.map(u => u.user_id)) : 0;
+    
     // Create new user
     const newUser = {
-      user_id: users.length + 1,
+      user_id: maxUserId + 1,
       name: name,
       email: email,
       phone: phone || '',
@@ -626,6 +724,7 @@ export const mockApi = {
     
     // Generate mock token
     const token = `mock_token_${newUser.user_id}_${Date.now()}`;
+    
     
     return {
       user: newUser,
@@ -663,9 +762,15 @@ export const mockApi = {
     return users.find(u => u.user_id === parseInt(id));
   },
 
-  updateUser: async (id, userData) => {
+  updateUser: async (id, userData, currentUser = null) => {
     const userIndex = users.findIndex(u => u.user_id === parseInt(id));
     if (userIndex > -1) {
+      // Kiểm tra quyền thay đổi role
+      if (userData.role && currentUser && currentUser.role !== 'admin') {
+        // Nếu không phải admin, không cho phép thay đổi role
+        delete userData.role;
+      }
+      
       users[userIndex] = {
         ...users[userIndex],
         ...userData,
@@ -674,6 +779,93 @@ export const mockApi = {
       return users[userIndex];
     }
     return null;
+  },
+
+  // Đăng xuất tất cả thiết bị (bao gồm thiết bị hiện tại)
+  logoutAllDevices: async (userId) => {
+    // Trong thực tế, bạn sẽ:
+    // 1. Lưu thời gian đăng xuất tất cả thiết bị
+    // 2. Invalidate tất cả tokens (bao gồm token hiện tại)
+    // 3. Gửi email thông báo
+    // 4. Log hoạt động bảo mật
+    
+    const userIndex = users.findIndex(u => u.user_id === parseInt(userId));
+    
+    if (userIndex > -1) {
+      users[userIndex] = {
+        ...users[userIndex],
+        last_logout_all: new Date().toISOString(),
+        // Invalidate tất cả tokens bằng cách thêm timestamp
+        token_invalidated_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      
+      return {
+        success: true,
+        message: 'Đã đăng xuất tất cả thiết bị thành công',
+        last_logout_all: users[userIndex].last_logout_all,
+        token_invalidated_at: users[userIndex].token_invalidated_at
+      };
+    }
+    
+    return {
+      success: false,
+      message: 'Không tìm thấy người dùng'
+    };
+  },
+
+  // Đổi mật khẩu
+  changePassword: async (userId, passwordData) => {
+    const { currentPassword, newPassword } = passwordData;
+    
+    const userIndex = users.findIndex(u => u.user_id === parseInt(userId));
+    if (userIndex === -1) {
+      return {
+        success: false,
+        message: 'Không tìm thấy người dùng'
+      };
+    }
+
+    // Trong thực tế, bạn sẽ:
+    // 1. Hash mật khẩu hiện tại và so sánh với database
+    // 2. Hash mật khẩu mới trước khi lưu
+    // 3. Kiểm tra độ mạnh của mật khẩu mới
+    
+    // Mock validation - trong thực tế sẽ hash và so sánh
+    if (!currentPassword) {
+      return {
+        success: false,
+        message: 'Vui lòng nhập mật khẩu hiện tại'
+      };
+    }
+
+    if (!newPassword || newPassword.length < 6) {
+      return {
+        success: false,
+        message: 'Mật khẩu mới phải có ít nhất 6 ký tự'
+      };
+    }
+
+    if (currentPassword === newPassword) {
+      return {
+        success: false,
+        message: 'Mật khẩu mới phải khác mật khẩu hiện tại'
+      };
+    }
+
+    // Cập nhật mật khẩu (trong thực tế sẽ hash)
+    users[userIndex] = {
+      ...users[userIndex],
+      password: newPassword, // Trong thực tế sẽ là hash
+      password_changed_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    return {
+      success: true,
+      message: 'Đổi mật khẩu thành công',
+      password_changed_at: users[userIndex].password_changed_at
+    };
   }
 };
 

@@ -80,11 +80,11 @@ const AuthorDetail = ({ onNavigateTo, authorId }) => {
   const author = getAuthorData(authorId || 1);
 
   const handleBackToAuthors = () => {
-    onNavigateTo('author')();
+    onNavigateTo('author');
   };
 
   const handleBookClick = (bookId) => {
-    onNavigateTo('product')(bookId);
+    onNavigateTo('product', { productId: bookId });
   };
 
   return (

@@ -162,7 +162,7 @@ const Slide = ({ onNavigateTo }) => {
                     if (currentSlideData.navigationType === 'product') {
                       onNavigateTo('product')(currentSlideData.productId);
                     } else if (currentSlideData.navigationType === 'books') {
-                      onNavigateTo('books')();
+                      onNavigateTo('books');
                     }
                   }
                 }}

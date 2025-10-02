@@ -186,7 +186,7 @@ const Cart = ({ onBackToHome, onNavigateTo }) => {
   }, [selectedItems, fetchCartItems]);
 
   // Xóa tất cả sản phẩm trong giỏ hàng
-  const removeAllItems = useCallback(() => {
+  const removeAllItems = useCallback(async () => {
     if (cartItems.length === 0) {
       alert('Giỏ hàng đã trống!');
       return;
@@ -194,7 +194,18 @@ const Cart = ({ onBackToHome, onNavigateTo }) => {
 
     if (window.confirm(`Bạn có chắc chắn muốn xóa tất cả ${cartItems.length} sản phẩm khỏi giỏ hàng?`)) {
       try {
-        localStorage.setItem('cart', JSON.stringify([]));
+        const user = JSON.parse(localStorage.getItem('user') || 'null');
+        if (!user) {
+          alert('Vui lòng đăng nhập để thực hiện thao tác này!');
+          return;
+        }
+
+        const { mockApi } = await import('../../../services/mockApi');
+        
+        // Xóa từng sản phẩm trong giỏ hàng
+        for (const item of cartItems) {
+          await mockApi.removeFromCart(user.user_id, item.book_id);
+        }
         
         setSelectedItems([]);
         setSelectAll(false);
@@ -206,7 +217,7 @@ const Cart = ({ onBackToHome, onNavigateTo }) => {
         }
 
         window.dispatchEvent(new CustomEvent('cartUpdated', {
-          detail: { cart: [], action: 'remove_all', count: cartItems.length }
+          detail: { action: 'remove_all', count: cartItems.length }
         }));
       } catch (error) {
         console.error('Error removing all items:', error);
@@ -234,7 +245,7 @@ const Cart = ({ onBackToHome, onNavigateTo }) => {
 
     // Chuyển đến trang thanh toán
     console.log('Proceeding to checkout with selected items:', selectedCartItems);
-    onNavigateTo('checkout')();
+    onNavigateTo('checkout');
   }, [selectedItems, cartItems, onNavigateTo]);
 
   if (loading) {

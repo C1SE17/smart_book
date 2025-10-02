@@ -479,7 +479,7 @@ const ListOrders = ({ onNavigateTo }) => {
                         </div>
                         <button
                             className="btn btn-light btn-lg px-4 py-3"
-                            onClick={() => onNavigateTo('home')()}
+                            onClick={() => onNavigateTo('home')}
                             style={{
                                 borderRadius: '50px',
                                 fontWeight: '600',
@@ -628,7 +628,7 @@ const ListOrders = ({ onNavigateTo }) => {
                                 </p>
                                 <button
                                     className="btn btn-primary btn-lg px-5 py-3"
-                                    onClick={() => onNavigateTo('home')()}
+                                    onClick={() => onNavigateTo('home')}
                                     style={{
                                         borderRadius: '50px',
                                         fontWeight: '600',

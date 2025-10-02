@@ -172,7 +172,7 @@ const ProductGrid = ({ onNavigateTo }) => {
   };
 
   const handleProductClick = (productId) => {
-    onNavigateTo('product')();
+    onNavigateTo('product', { productId: bookId });
     // Pass productId to the product detail page via URL
     window.history.pushState({}, '', `/product?id=${productId}`);
     window.dispatchEvent(new PopStateEvent('popstate'));

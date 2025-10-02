@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faFilter, faSort, faStar, faShoppingCart, faHeart } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faFilter, faSort, faStar, faShoppingCart, faHeart, faTimes } from '@fortawesome/free-solid-svg-icons';
 
 const CategoriesPage = ({ onNavigateTo }) => {
   const [selectedCategory, setSelectedCategory] = useState('');
-  const [showCategoryCards, setShowCategoryCards] = useState(true);
+  const [selectedAuthor, setSelectedAuthor] = useState('');
+  const [showCategoryCards, setShowCategoryCards] = useState(false);
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [authors, setAuthors] = useState([]);
   const [loading, setLoading] = useState(false);
   const [sortBy, setSortBy] = useState('created_at');
   const [sortOrder, setSortOrder] = useState('desc');
@@ -20,13 +22,15 @@ const CategoriesPage = ({ onNavigateTo }) => {
       try {
         const { mockApi } = await import('../../../services/mockApi');
         
-        const [categoriesData, productsResponse] = await Promise.all([
+        const [categoriesData, productsResponse, authorsData] = await Promise.all([
           mockApi.getCategories(),
-          mockApi.getBooks({ limit: 50 })
+          mockApi.getBooks({ limit: 50 }),
+          mockApi.getAuthors()
         ]);
         
         setCategories(categoriesData);
         setProducts(productsResponse.data);
+        setAuthors(authorsData);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -46,6 +50,14 @@ const CategoriesPage = ({ onNavigateTo }) => {
       const category = categories.find(c => c.name === selectedCategory);
       if (category) {
         filtered = filtered.filter(product => product.category_id === category.category_id);
+      }
+    }
+
+    // Filter by author
+    if (selectedAuthor) {
+      const author = authors.find(a => a.name === selectedAuthor);
+      if (author) {
+        filtered = filtered.filter(product => product.author_id === author.author_id);
       }
     }
 
@@ -96,7 +108,7 @@ const CategoriesPage = ({ onNavigateTo }) => {
     });
 
     return filtered;
-  }, [products, selectedCategory, searchQuery, priceRange, sortBy, sortOrder, categories]);
+  }, [products, selectedCategory, selectedAuthor, searchQuery, priceRange, sortBy, sortOrder, categories, authors]);
 
   // Handle category selection
   const handleCategorySelect = (categoryName) => {
@@ -104,29 +116,65 @@ const CategoriesPage = ({ onNavigateTo }) => {
     setShowCategoryCards(false);
   };
 
+  // Handle author selection
+  const handleAuthorSelect = (authorName) => {
+    setSelectedAuthor(authorName);
+    setShowCategoryCards(false);
+  };
+
   // Handle back to categories
   const handleBackToCategories = () => {
     setSelectedCategory('');
+    setSelectedAuthor('');
     setShowCategoryCards(true);
     setSearchQuery('');
   };
 
+  // Reset all filters
+  const handleResetFilters = () => {
+    setSelectedCategory('');
+    setSelectedAuthor('');
+    setSearchQuery('');
+    setPriceRange({ min: 0, max: 1000000 });
+    setSortBy('created_at');
+    setSortOrder('desc');
+  };
+
   // Handle product click
   const handleProductClick = (bookId) => {
-    onNavigateTo('product')();
-    window.history.pushState({}, '', `/product?id=${bookId}`);
+    onNavigateTo('product', { productId: bookId });
   };
 
   // Handle add to cart
-  const handleAddToCart = (e, bookId) => {
+  const handleAddToCart = async (e, bookId) => {
     e.stopPropagation();
-    console.log('Add to cart:', bookId);
+    
+    try {
+      const { mockApi } = await import('../../../services/mockApi');
+      const user = JSON.parse(localStorage.getItem('user'));
+      
+      if (!user) {
+        alert('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng!');
+        return;
+      }
+
+      await mockApi.addToCart(user.user_id, bookId, 1);
+      
+      // Dispatch cart updated event
+      window.dispatchEvent(new CustomEvent('cartUpdated'));
+      
+      alert('Đã thêm sản phẩm vào giỏ hàng!');
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      alert('Có lỗi xảy ra khi thêm sản phẩm vào giỏ hàng!');
+    }
   };
 
   // Handle add to wishlist
   const handleAddToWishlist = (e, bookId) => {
     e.stopPropagation();
-    console.log('Add to wishlist:', bookId);
+    // TODO: Implement wishlist functionality
+    alert('Tính năng yêu thích sẽ được thêm sớm!');
   };
 
   // Format price
@@ -137,7 +185,7 @@ const CategoriesPage = ({ onNavigateTo }) => {
     }).format(price);
   };
 
-  // Render star rating
+  // Render stars
   const renderStars = (rating) => {
     const stars = [];
     const fullStars = Math.floor(rating);
@@ -165,34 +213,21 @@ const CategoriesPage = ({ onNavigateTo }) => {
     return stars;
   };
 
-  // Category cards data
-  const categoryCards = [
-    { name: "Sách truyện", bookCount: 15, category: "Sách truyện" },
-    { name: "Sách ngoại văn", bookCount: 8, category: "Sách ngoại văn" },
-    { name: "Sách Sale theo chủ đề", bookCount: 12, category: "Sách Sale theo chủ đề" },
-    { name: "Sách theo tác giả", bookCount: 6, category: "Sách theo tác giả" },
-    { name: "Sách theo nhà cung cấp", bookCount: 10, category: "Sách theo nhà cung cấp" },
-    { name: "Văn phòng phẩm", bookCount: 5, category: "Văn phòng phẩm" },
-    { name: "Quà tặng", bookCount: 3, category: "Quà tặng" },
-    { name: "Đồ chơi", bookCount: 7, category: "Đồ chơi" }
-  ];
-
   if (loading) {
     return (
       <div className="container-fluid py-4">
-        <div className="text-center py-5">
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Đang tải...</span>
+        <div className="text-center">
+          <div className="spinner-border" role="status">
+            <span className="visually-hidden">Loading...</span>
           </div>
-          <p className="mt-3">Đang tải dữ liệu...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container-fluid py-4">
-        <div className="row">
+    <div className="container py-4" style={{ maxWidth: '1200px' }}>
+      <div className="row justify-content-center">
         {/* Sidebar */}
           <div className="col-lg-3 col-md-4">
           <div className="card">
@@ -205,161 +240,266 @@ const CategoriesPage = ({ onNavigateTo }) => {
             <div className="card-body">
             {/* Search */}
               <div className="mb-3">
-                <label className="form-label">Tìm kiếm</label>
-                <div className="input-group">
-              <input
-                type="text"
-                className="form-control"
-                    placeholder="Nhập từ khóa..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-                  <button className="btn btn-outline-secondary" type="button">
+                <label className="form-label fw-bold mb-2" style={{ fontSize: '0.9rem' }}>Tìm kiếm</label>
+                <div className="input-group input-group-sm">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Tìm sách hoặc tác giả..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    style={{ fontSize: '0.85rem' }}
+                  />
+                  <button className="btn btn-outline-secondary" type="button" style={{ fontSize: '0.8rem' }}>
                     <FontAwesomeIcon icon={faSearch} />
-                    </button>
+                  </button>
+                </div>
               </div>
-            </div>
 
-              {/* Categories */}
+            {/* Categories */}
               <div className="mb-3">
-                <label className="form-label">Danh mục</label>
-                <div className="list-group list-group-flush">
-                <button
-                    className={`list-group-item list-group-item-action ${!selectedCategory ? 'active' : ''}`}
-                    onClick={handleBackToCategories}
-                >
-                    Tất cả danh mục
-                </button>
-                  {categories.slice(0, 8).map((category) => (
-                    <button
-                      key={category.category_id}
-                      className={`list-group-item list-group-item-action ${selectedCategory === category.name ? 'active' : ''}`}
-                      onClick={() => handleCategorySelect(category.name)}
-                    >
-                      {category.name}
-                    </button>
-                  ))}
+                <label className="form-label fw-bold mb-2" style={{ fontSize: '0.9rem' }}>Danh mục</label>
+                <div className="list-group list-group-flush" style={{ maxHeight: '250px', overflowY: 'auto' }}>
+                  <a
+                    href="#"
+                    className={`list-group-item list-group-item-action border-0 py-1 ${!selectedCategory ? 'active bg-primary text-white' : ''}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleBackToCategories();
+                    }}
+                    style={{ fontSize: '0.85rem', textDecoration: 'none' }}
+                  >
+                    Tất Cả ({products.length})
+                  </a>
+                  {categories.map((category) => {
+                    const count = products.filter(p => p.category_id === category.category_id).length;
+                    return (
+                      <a
+                        key={category.category_id}
+                        href="#"
+                        className={`list-group-item list-group-item-action border-0 py-1 ${selectedCategory === category.name ? 'active bg-primary text-white' : ''}`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleCategorySelect(category.name);
+                        }}
+                        style={{ fontSize: '0.85rem', textDecoration: 'none' }}
+                      >
+                        {category.name} ({count})
+                      </a>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+
+            {/* Authors */}
+              <div className="mb-3">
+                <label className="form-label fw-bold mb-2" style={{ fontSize: '0.9rem' }}>Tác Giả</label>
+                <div className="list-group list-group-flush" style={{ maxHeight: '250px', overflowY: 'auto' }}>
+                  <a
+                    href="#"
+                    className={`list-group-item list-group-item-action border-0 py-1 ${!selectedAuthor ? 'active bg-primary text-white' : ''}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setSelectedAuthor('');
+                    }}
+                    style={{ fontSize: '0.85rem', textDecoration: 'none' }}
+                  >
+                    Tất Cả ({products.length})
+                  </a>
+                  {authors.map((author) => {
+                    const count = products.filter(p => p.author_id === author.author_id).length;
+                    return (
+                      <a
+                        key={author.author_id}
+                        href="#"
+                        className={`list-group-item list-group-item-action border-0 py-1 ${selectedAuthor === author.name ? 'active bg-primary text-white' : ''}`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleAuthorSelect(author.name);
+                        }}
+                        style={{ fontSize: '0.85rem', textDecoration: 'none' }}
+                      >
+                        {author.name} ({count})
+                      </a>
+                    );
+                  })}
+                </div>
+              </div>
 
             {/* Price Range */}
               <div className="mb-3">
-                <label className="form-label">Khoảng giá</label>
-                <div className="row">
-                <div className="col-6">
+                <label className="form-label fw-bold mb-2" style={{ fontSize: '0.9rem' }}>Khoảng Giá</label>
+                <div className="row g-2">
+                  <div className="col-6">
+                    <input
+                      type="text"
+                      className="form-control form-control-sm"
+                      placeholder="0"
+                      value={priceRange.min.toLocaleString('vi-VN')}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\./g, '');
+                        setPriceRange(prev => ({ ...prev, min: parseInt(value) || 0 }));
+                      }}
+                      style={{ fontSize: '0.8rem' }}
+                    />
+                  </div>
+                  <div className="col-6">
+                    <input
+                      type="text"
+                      className="form-control form-control-sm"
+                      placeholder="1.000.000"
+                      value={priceRange.max.toLocaleString('vi-VN')}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\./g, '');
+                        setPriceRange(prev => ({ ...prev, max: parseInt(value) || 1000000 }));
+                      }}
+                      style={{ fontSize: '0.8rem' }}
+                    />
+                  </div>
+                </div>
+                <div className="mt-2">
                   <input
-                      type="number"
-                    className="form-control form-control-sm"
-                      placeholder="Từ"
-                      value={priceRange.min}
-                      onChange={(e) => setPriceRange(prev => ({ ...prev, min: parseInt(e.target.value) || 0 }))}
+                    type="range"
+                    className="form-range"
+                    min="0"
+                    max="1000000"
+                    value={priceRange.max}
+                    onChange={(e) => setPriceRange(prev => ({ ...prev, max: parseInt(e.target.value) }))}
+                    style={{ height: '4px' }}
                   />
                 </div>
-                <div className="col-6">
-                  <input
-                      type="number"
-                    className="form-control form-control-sm"
-                      placeholder="Đến"
-                      value={priceRange.max}
-                      onChange={(e) => setPriceRange(prev => ({ ...prev, max: parseInt(e.target.value) || 1000000 }))}
-                  />
-                </div>
-              </div>
               </div>
 
-              {/* Sort */}
-              <div className="mb-3">
-                <label className="form-label">Sắp xếp theo</label>
-                <select
-                  className="form-select"
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
+              {/* Reset Filter Button */}
+              <div className="d-grid">
+                <button 
+                  className="btn btn-outline-secondary btn-sm"
+                  onClick={handleResetFilters}
+                  style={{ fontSize: '0.8rem' }}
                 >
-                  <option value="created_at">Mới nhất</option>
-                  <option value="price">Giá</option>
-                  <option value="title">Tên sách</option>
-                  <option value="rating">Đánh giá</option>
-                </select>
-                <select
-                  className="form-select mt-2"
-                  value={sortOrder}
-                  onChange={(e) => setSortOrder(e.target.value)}
-                >
-                  <option value="desc">Giảm dần</option>
-                  <option value="asc">Tăng dần</option>
-                </select>
-              </div>
-              </div>
+                  <FontAwesomeIcon icon={faTimes} className="me-1" />
+                  Đặt Lại
+                </button>
               </div>
             </div>
+          </div>
+        </div>
 
         {/* Main Content */}
         <div className="col-lg-9 col-md-8">
+          {/* Header with results count and sort */}
+          <div className="d-flex justify-content-between align-items-center mb-4">
+            <div>
+              <h6 className="mb-0">Hiển thị {filteredProducts.length} kết quả</h6>
+            </div>
+            <div className="d-flex align-items-center">
+              <label className="form-label me-2 mb-0">Sắp xếp theo:</label>
+              <select
+                className="form-select form-select-sm"
+                style={{ width: 'auto' }}
+                value={`${sortBy}-${sortOrder}`}
+                onChange={(e) => {
+                  const [newSortBy, newSortOrder] = e.target.value.split('-');
+                  setSortBy(newSortBy);
+                  setSortOrder(newSortOrder);
+                }}
+              >
+                <option value="created_at-desc">Mặc định</option>
+                <option value="price-asc">Giá: Thấp đến Cao</option>
+                <option value="price-desc">Giá: Cao đến Thấp</option>
+                <option value="title-asc">Tên: A-Z</option>
+                <option value="title-desc">Tên: Z-A</option>
+                <option value="rating-desc">Đánh giá: Cao nhất</option>
+                <option value="rating-asc">Đánh giá: Thấp nhất</option>
+              </select>
+            </div>
+          </div>
+
           {showCategoryCards ? (
             // Category Cards View
             <div>
-              <div className="d-flex justify-content-between align-items-center mb-4">
+            <div className="d-flex justify-content-between align-items-center mb-4">
                 <h2>Danh mục sách</h2>
               </div>
               
               <div className="row">
-                {categoryCards.map((card, index) => (
-                  <div key={index} className="col-lg-3 col-md-4 col-sm-6 mb-4">
-                    <div 
-                      className="card h-100 shadow-sm category-card"
-                      style={{ cursor: 'pointer' }}
-                      onClick={() => handleCategorySelect(card.category)}
-                    >
-                      <div className="card-body text-center">
-                        <h5 className="card-title">{card.name}</h5>
-                        <p className="card-text text-muted">
-                          {card.bookCount} sách
-                        </p>
+                {categories.map((category) => {
+                  const bookCount = products.filter(p => p.category_id === category.category_id).length;
+                  return (
+                    <div key={category.category_id} className="col-lg-3 col-md-4 col-sm-6 mb-4">
+                      <div 
+                        className="card h-100 shadow-sm category-card"
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => handleCategorySelect(category.name)}
+                      >
+                        <div className="card-body text-center">
+                          <h5 className="card-title">{category.name}</h5>
+                          <p className="card-text text-muted">
+                            {bookCount} sách
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           ) : (
-            // Products View
+            // Products Grid View
             <div>
-              <div className="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                  <h2>{selectedCategory || 'Tất cả sách'}</h2>
-                  <p className="text-muted mb-0">
-                    {filteredProducts.length} sách được tìm thấy
-                  </p>
-                </div>
-            <button
-                  className="btn btn-outline-secondary"
-                  onClick={handleBackToCategories}
-            >
-                  <FontAwesomeIcon icon={faSort} className="me-2" />
-                  Quay lại danh mục
-            </button>
-          </div>
-
               {filteredProducts.length > 0 ? (
                 <div className="row">
               {filteredProducts.map((product) => (
-                    <div key={product.book_id} className="col-lg-3 col-md-4 col-sm-6 mb-4">
-                  <div
-                        className="card h-100 shadow-sm product-card"
-                    style={{ cursor: 'pointer' }}
+                    <div key={product.book_id} className="col-lg-3 col-md-6 mb-4">
+                      <div
+                        className="card h-100 border-0 shadow-sm product-card"
+                        style={{ 
+                          cursor: 'pointer',
+                          borderRadius: '8px',
+                          height: '350px',
+                          backgroundColor: 'white',
+                          transition: 'all 0.3s ease'
+                        }}
                         onClick={() => handleProductClick(product.book_id)}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.transform = 'translateY(-8px)';
+                          e.currentTarget.style.boxShadow = '0 15px 35px rgba(0,0,0,0.15)';
+                          // Hiển thị nút thêm vào giỏ hàng nếu còn hàng
+                          const addToCartBtn = e.currentTarget.querySelector('.add-to-cart-btn');
+                          if (addToCartBtn && product.stock > 0) {
+                            addToCartBtn.style.opacity = '1';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                          // Ẩn nút thêm vào giỏ hàng
+                          const addToCartBtn = e.currentTarget.querySelector('.add-to-cart-btn');
+                          if (addToCartBtn) {
+                            addToCartBtn.style.opacity = '0';
+                          }
+                        }}
                   >
                     <div className="position-relative">
                       <img
                             src={product.cover_image}
                         className="card-img-top"
                         alt={product.title}
-                            style={{ height: '250px', objectFit: 'cover' }}
+                            style={{ 
+                              height: '220px', 
+                              objectFit: 'contain',
+                              width: '100%',
+                              backgroundColor: '#f8f9fa'
+                            }}
                             onError={(e) => {
                               e.target.src = '/images/book1.jpg';
                             }}
                           />
-                          <div className="position-absolute top-0 end-0 p-2">
+                          {/* Sale Tag */}
+                          <div className="position-absolute top-0 end-0 p-1">
+                            <span className="badge bg-dark">Sale</span>
+                          </div>
+                          <div className="position-absolute top-0 start-0 p-2">
                             <button
                               className="btn btn-sm btn-light rounded-circle"
                               onClick={(e) => handleAddToWishlist(e, product.book_id)}
@@ -367,43 +507,74 @@ const CategoriesPage = ({ onNavigateTo }) => {
                             >
                               <FontAwesomeIcon icon={faHeart} />
                             </button>
+                          </div>
+                          {/* Nút Thêm Vào Giỏ Hàng - xuất hiện khi hover và còn hàng */}
+                          {product.stock > 0 && (
+                            <div
+                              className="position-absolute top-0 end-0 p-2 add-to-cart-btn"
+                              style={{
+                                opacity: 0,
+                                transition: 'opacity 0.3s ease'
+                              }}
+                            >
+                              <button
+                                className="btn btn-primary btn-sm rounded-circle"
+                                onClick={(e) => handleAddToCart(e, product.book_id)}
+                                title="Thêm vào giỏ hàng"
+                                style={{
+                                  width: '40px',
+                                  height: '40px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center'
+                                }}
+                              >
+                                <FontAwesomeIcon icon={faShoppingCart} />
+                              </button>
                       </div>
+                          )}
                     </div>
                         
-                    <div className="card-body d-flex flex-column">
-                          <h6 className="card-title text-truncate" title={product.title}>
+                        <div className="card-body p-3 d-flex flex-column">
+                          <h6 className="card-title fw-bold mb-2" style={{
+                            fontSize: '1rem',
+                            lineHeight: '1.3',
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                            minHeight: '2.6rem'
+                          }}>
                         {product.title}
                       </h6>
-                          
-                          <p className="text-muted small mb-2">
-                            Tác giả: {product.author}
+                          <p className="card-text text-muted mb-2" style={{ fontSize: '0.9rem' }}>
+                            {product.author}
                           </p>
-                          
                       <div className="d-flex align-items-center mb-2">
                             <div className="me-2">
-                              {renderStars(product.rating || 0)}
+                              {Array.from({ length: 5 }, (_, i) => (
+                                <FontAwesomeIcon
+                                  key={i}
+                                  icon={faStar}
+                                  className={i < (product.rating || 0) ? 'text-warning' : 'text-muted'}
+                                  size="sm"
+                                />
+                              ))}
                             </div>
-                            <small className="text-muted">
-                              ({product.reviewCount || 0} đánh giá)
-                            </small>
+                            <small className="text-muted">({product.reviewCount || 0})</small>
                       </div>
-                          
                       <div className="mt-auto">
-                            <div className="d-flex justify-content-between align-items-center mb-2">
-                              <span className="h5 text-primary mb-0">
-                                {formatPrice(product.price)}
-                              </span>
-                              <small className="text-muted">
-                                Còn {product.stock} cuốn
-                              </small>
-                            </div>
-                            
+                            <p className="card-text fw-bold text-dark mb-2" style={{ fontSize: '1.1rem' }}>
+                              {formatPrice(product.price)}
+                            </p>
                             <button
-                              className="btn btn-primary w-100"
-                              onClick={(e) => handleAddToCart(e, product.book_id)}
+                              className="btn btn-outline-primary btn-sm w-100"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleProductClick(product.book_id);
+                              }}
                             >
-                              <FontAwesomeIcon icon={faShoppingCart} className="me-2" />
-                              Thêm vào giỏ
+                              Xem chi tiết
                             </button>
                       </div>
                     </div>
@@ -418,10 +589,10 @@ const CategoriesPage = ({ onNavigateTo }) => {
                   <p className="text-muted">
                     Không có sách nào phù hợp với bộ lọc của bạn.
                   </p>
-                </div>
-              )}
               </div>
             )}
+          </div>
+          )}
         </div>
       </div>
     </div>

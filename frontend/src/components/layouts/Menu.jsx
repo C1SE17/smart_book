@@ -97,7 +97,7 @@ const MenuClient = ({ onNavigateTo, onBackToHome, user, onLogout, onViewAllNotif
               <a
                 className="nav-link text-white fw-normal"
                 href="#"
-                onClick={(e) => { e.preventDefault(); onNavigateTo('books')(); }}
+                onClick={(e) => { e.preventDefault(); onNavigateTo('books'); }}
                 style={{ fontSize: '1rem', fontFamily: 'sans-serif' }}
               >
                 Shop
@@ -109,7 +109,7 @@ const MenuClient = ({ onNavigateTo, onBackToHome, user, onLogout, onViewAllNotif
           <a
             className="nav-link text-white fw-normal"
             href="#"
-            onClick={(e) => { e.preventDefault(); onNavigateTo('blog')(); }}
+            onClick={(e) => { e.preventDefault(); onNavigateTo('blog'); }}
             style={{ fontSize: '1rem', fontFamily: 'sans-serif' }}
           >
             Blog
@@ -119,7 +119,7 @@ const MenuClient = ({ onNavigateTo, onBackToHome, user, onLogout, onViewAllNotif
           <a
             className="nav-link text-white fw-normal"
             href="#"
-            onClick={(e) => { e.preventDefault(); onNavigateTo('author')(); }}
+            onClick={(e) => { e.preventDefault(); onNavigateTo('author'); }}
             style={{ fontSize: '1rem', fontFamily: 'sans-serif' }}
           >
             Tác Giả
@@ -130,7 +130,7 @@ const MenuClient = ({ onNavigateTo, onBackToHome, user, onLogout, onViewAllNotif
               <a
                 className="nav-link text-white fw-normal"
                 href="#"
-                onClick={(e) => { e.preventDefault(); onNavigateTo('about')(); }}
+                onClick={(e) => { e.preventDefault(); onNavigateTo('about'); }}
                 style={{ fontSize: '1rem', fontFamily: 'sans-serif' }}
               >
                 Về Chúng Tôi
@@ -141,7 +141,7 @@ const MenuClient = ({ onNavigateTo, onBackToHome, user, onLogout, onViewAllNotif
               <a
                 className="nav-link text-white fw-normal"
                 href="#"
-                onClick={(e) => { e.preventDefault(); onNavigateTo('contact')(); }}
+                onClick={(e) => { e.preventDefault(); onNavigateTo('contact'); }}
                 style={{ fontSize: '1rem', fontFamily: 'sans-serif' }}
               >
                 Liên Hệ
@@ -161,7 +161,7 @@ const MenuClient = ({ onNavigateTo, onBackToHome, user, onLogout, onViewAllNotif
               <a
                 className="nav-link"
                 href="#"
-                onClick={(e) => { e.preventDefault(); onNavigateTo('search')(); }}
+                onClick={(e) => { e.preventDefault(); onNavigateTo('search'); }}
                 style={{ color: '#fff' }}
               >
                 <i className="fas fa-search" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
@@ -173,7 +173,7 @@ const MenuClient = ({ onNavigateTo, onBackToHome, user, onLogout, onViewAllNotif
               <a
                 className="nav-link position-relative"
                 href="#"
-                onClick={(e) => { e.preventDefault(); onNavigateTo('cart')(); }}
+                onClick={(e) => { e.preventDefault(); onNavigateTo('cart'); }}
                 style={{ color: '#fff' }}
               >
                 <i className="fas fa-shopping-cart" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
@@ -217,7 +217,7 @@ const MenuClient = ({ onNavigateTo, onBackToHome, user, onLogout, onViewAllNotif
                         href="#"
                         onClick={(e) => {
                           e.preventDefault();
-                          onNavigateTo('profile')();
+                          onNavigateTo('profile');
                         }}
                       >
                         <i className="fas fa-user me-2"></i>
@@ -230,7 +230,7 @@ const MenuClient = ({ onNavigateTo, onBackToHome, user, onLogout, onViewAllNotif
                         href="#"
                         onClick={(e) => {
                           e.preventDefault();
-                          onNavigateTo('orders')();
+                          onNavigateTo('orders');
                         }}
                       >
                         <i className="fas fa-shopping-bag me-2"></i>
@@ -256,7 +256,7 @@ const MenuClient = ({ onNavigateTo, onBackToHome, user, onLogout, onViewAllNotif
                 <a
                   className="nav-link"
                   href="#"
-                  onClick={(e) => { e.preventDefault(); onNavigateTo('auth')(); }}
+                  onClick={(e) => { e.preventDefault(); onNavigateTo('auth'); }}
                   style={{ color: '#fff' }}
                 >
                   <i className="fas fa-user" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>

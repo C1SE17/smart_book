@@ -102,7 +102,7 @@ const AuthorPage = ({ onNavigateTo, onNavigateToAuthorDetail }) => {
   );
 
   const handleBackToHome = () => {
-    onNavigateTo('home')();
+    onNavigateTo('home');
   };
 
   const handleAuthorClick = (authorId) => {

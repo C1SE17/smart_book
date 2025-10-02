@@ -51,10 +51,7 @@ const Home = ({ onNavigateTo }) => {
   // Ghi nhớ các event handlers
   const handleBookClick = useCallback((bookId) => {
     // Chuyển đến trang chi tiết sản phẩm khi click vào sách
-    onNavigateTo('product')();
-    // Truyền bookId đến trang chi tiết sản phẩm qua URL
-    window.history.pushState({}, '', `/product?id=${bookId}`);
-    window.dispatchEvent(new PopStateEvent('popstate'));
+    onNavigateTo('product', { productId: bookId });
   }, [onNavigateTo]);
 
   // Xử lý thêm vào giỏ hàng - sử dụng mockApi
@@ -69,7 +66,7 @@ const Home = ({ onNavigateTo }) => {
       } else {
         alert('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng!');
       }
-      onNavigateTo('auth')();
+      onNavigateTo('auth');
       return;
     }
 
@@ -208,8 +205,10 @@ const Home = ({ onNavigateTo }) => {
                 <div className="card h-100 border-0 shadow-sm" style={{
                   transition: 'all 0.3s ease',
                   cursor: 'pointer',
-                  borderRadius: '12px',
-                  overflow: 'hidden'
+                  borderRadius: '8px',
+                  overflow: 'hidden',
+                  height: '350px',
+                  backgroundColor: 'white'
                 }}
                   onClick={() => {
                     // Chuyển đến trang categories với filter theo danh mục
@@ -231,7 +230,7 @@ const Home = ({ onNavigateTo }) => {
                       alt={category.name}
                       style={{
                         height: '200px',
-                        objectFit: 'cover',
+                        objectFit: 'contain',
                         width: '100%'
                       }}
                     />
@@ -304,8 +303,10 @@ const Home = ({ onNavigateTo }) => {
                 <div className="card h-100 border-0 shadow-sm" style={{
                   transition: 'all 0.3s ease',
                   cursor: 'pointer',
-                  borderRadius: '12px',
-                  overflow: 'hidden'
+                  borderRadius: '8px',
+                  overflow: 'hidden',
+                  height: '350px',
+                  backgroundColor: 'white'
                 }}
                   onClick={() => handleBookClick(book.book_id)}
                   onMouseEnter={(e) => {
@@ -332,11 +333,10 @@ const Home = ({ onNavigateTo }) => {
                       className="card-img-top"
                       alt={book.title}
                       style={{
-                        height: '280px',
+                        height: '220px',
                         objectFit: 'contain',
                         width: '100%',
-                        backgroundColor: '#f8f9fa',
-                        padding: '10px'
+                        backgroundColor: '#f8f9fa'
                       }}
                     />
                     {/* Nút Thêm Vào Giỏ Hàng - xuất hiện khi hover và còn hàng */}
@@ -457,8 +457,10 @@ const Home = ({ onNavigateTo }) => {
                 <div className="card h-100 border-0 shadow-sm" style={{
                   transition: 'all 0.3s ease',
                   cursor: 'pointer',
-                  borderRadius: '12px',
-                  overflow: 'hidden'
+                  borderRadius: '8px',
+                  overflow: 'hidden',
+                  height: '350px',
+                  backgroundColor: 'white'
                 }}
                   onClick={() => handleBookClick(book.book_id)}
                   onMouseEnter={(e) => {
@@ -485,11 +487,10 @@ const Home = ({ onNavigateTo }) => {
                       className="card-img-top"
                       alt={book.title}
                       style={{
-                        height: '280px',
+                        height: '220px',
                         objectFit: 'contain',
                         width: '100%',
-                        backgroundColor: '#f8f9fa',
-                        padding: '10px'
+                        backgroundColor: '#f8f9fa'
                       }}
                     />
                     {/* Nút Thêm Vào Giỏ Hàng - xuất hiện khi hover và còn hàng */}
@@ -610,8 +611,10 @@ const Home = ({ onNavigateTo }) => {
                 <div className="card h-100 border-0 shadow-sm" style={{
                   transition: 'all 0.3s ease',
                   cursor: 'pointer',
-                  borderRadius: '12px',
-                  overflow: 'hidden'
+                  borderRadius: '8px',
+                  overflow: 'hidden',
+                  height: '350px',
+                  backgroundColor: 'white'
                 }}
                   onClick={() => handleBookClick(book.book_id)}
                   onMouseEnter={(e) => {
@@ -638,11 +641,10 @@ const Home = ({ onNavigateTo }) => {
                       className="card-img-top"
                       alt={book.title}
                       style={{
-                        height: '280px',
+                        height: '220px',
                         objectFit: 'contain',
                         width: '100%',
-                        backgroundColor: '#f8f9fa',
-                        padding: '10px'
+                        backgroundColor: '#f8f9fa'
                       }}
                     />
                     {/* Nút Thêm Vào Giỏ Hàng - xuất hiện khi hover và còn hàng */}
@@ -735,7 +737,7 @@ const Home = ({ onNavigateTo }) => {
                 }}
                 onClick={(e) => {
                   e.preventDefault();
-                  onNavigateTo('author')();
+                  onNavigateTo('author');
                 }}
                 onMouseEnter={(e) => {
                   e.target.style.color = '#007bff';
@@ -788,7 +790,7 @@ const Home = ({ onNavigateTo }) => {
                 className="btn btn-outline-primary"
                 onClick={() => {
                   console.log('Blog button clicked');
-                  onNavigateTo('blog')();
+                  onNavigateTo('blog');
                 }}
               >
                 Xem Tất Cả <i className="bi bi-arrow-right ms-1"></i>
@@ -806,7 +808,7 @@ const Home = ({ onNavigateTo }) => {
                 <div
                   className="card h-100 shadow-sm"
                   style={{ cursor: 'pointer' }}
-                  onClick={() => onNavigateTo('blog-detail')()}
+                  onClick={() => onNavigateTo('blog-detail')}
                 >
                   <img
                     src={post.image}

@@ -59,23 +59,23 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
   }, []);
 
   // Fetch reviews
-  useEffect(() => {
-    const fetchReviews = async () => {
-      if (!productId) return;
-      
-      setReviewsLoading(true);
-      try {
-        const { mockApi } = await import('../../../services/mockApi');
-        const reviewsData = await mockApi.getReviewsByBookId(productId);
-        setReviews(reviewsData);
-      } catch (error) {
-        console.error('Error fetching reviews:', error);
-        setReviews([]);
-      } finally {
-        setReviewsLoading(false);
-      }
-    };
+  const fetchReviews = async () => {
+    if (!productId) return;
+    
+    setReviewsLoading(true);
+    try {
+      const { mockApi } = await import('../../../services/mockApi');
+      const reviewsData = await mockApi.getReviewsByBookId(productId);
+      setReviews(reviewsData);
+    } catch (error) {
+      console.error('Error fetching reviews:', error);
+      setReviews([]);
+    } finally {
+      setReviewsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchReviews();
   }, [productId]);
 
@@ -95,7 +95,7 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
     if (!user) {
       console.log('User not logged in');
       showToast('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng.', 'error');
-      onNavigateTo('auth')();
+      onNavigateTo('auth');
       return;
     }
     if (!product) {
@@ -125,7 +125,7 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
       console.log('Add to wishlist:', productId);
       } else {
       // Redirect to login
-      onNavigateTo('auth')();
+      onNavigateTo('auth');
     }
   };
 
@@ -133,7 +133,7 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
   const handleCheckout = async () => {
     if (!user) {
       showToast('Vui lòng đăng nhập để thanh toán.', 'error');
-      onNavigateTo('auth')();
+      onNavigateTo('auth');
       return;
     }
     if (!product) return;
@@ -142,7 +142,7 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
       // Add to cart first, then redirect to checkout
       await handleAddToCart();
       // Navigate to checkout page
-      onNavigateTo('checkout')();
+      onNavigateTo('checkout');
     } catch (error) {
       console.error('Error in checkout:', error);
     }
@@ -231,7 +231,7 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
           <p className="text-muted">Không tìm thấy sản phẩm với ID này.</p>
           <button 
             className="btn btn-primary"
-            onClick={() => onNavigateTo('home')()}
+            onClick={() => onNavigateTo('home')}
           >
             <FontAwesomeIcon icon={faArrowLeft} className="me-2" />
             Quay về trang chủ
@@ -249,7 +249,7 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
           <li className="breadcrumb-item">
             <button 
               className="btn btn-link p-0 text-decoration-none"
-              onClick={() => onNavigateTo('home')()}
+              onClick={() => onNavigateTo('home')}
             >
               Trang chủ
             </button>
@@ -257,7 +257,7 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
           <li className="breadcrumb-item">
             <button 
               className="btn btn-link p-0 text-decoration-none"
-              onClick={() => onNavigateTo('books')()}
+              onClick={() => onNavigateTo('books')}
             >
               Sách
             </button>
@@ -276,7 +276,7 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
               src={product.cover_image}
               className="img-fluid rounded shadow"
             alt={product.title}
-              style={{ width: '100%', maxHeight: '350px', objectFit: 'cover' }}
+              style={{ width: '100%', maxHeight: '500px', objectFit: 'contain' }}
               onError={(e) => {
                 e.target.src = '/images/book1.jpg';
               }}
@@ -321,7 +321,7 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
             {/* Quantity Selector */}
             <div className="quantity-selector mb-3">
               <div className="d-flex align-items-center" style={{ maxWidth: '180px' }}>
-                <button 
+                <button
                   className="btn btn-outline-secondary btn-sm"
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
                   style={{ width: '35px', height: '35px' }}
@@ -336,7 +336,7 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
                   onChange={handleQuantityChange}
                   style={{ width: '50px', height: '35px', fontSize: '0.9rem' }}
                 />
-                <button 
+                <button
                   className="btn btn-outline-secondary btn-sm"
                   onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
                   style={{ width: '35px', height: '35px' }}
@@ -498,112 +498,139 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
               aria-labelledby="reviews-tab"
             >
               <div className="p-4">
-                {/* Overall Rating Summary */}
-                <div className="rating-summary mb-4">
-                  <div className="row">
-                    <div className="col-md-4">
-                      <div className="text-center">
-                        <div className="display-4 text-info mb-2 fw-bold">
-                          {product.rating || 0}
-                        </div>
-                        <div className="mb-2">
-                          {renderStars(product.rating || 0)}
-                        </div>
-                        <p className="text-muted mb-0">
-                          ({product.reviewCount || 0} đánh giá)
-                        </p>
-                      </div>
-                    </div>
-                    <div className="col-md-8">
-                      <div className="star-distribution">
-                        {[5, 4, 3, 2, 1].map(star => {
-                          const count = reviews.filter(r => r.rating === star).length;
-                          const percentage = reviews.length > 0 ? (count / reviews.length) * 100 : 0;
-                          return (
-                            <div key={star} className="d-flex align-items-center mb-2">
-                              <div className="me-2">
-                                {renderStars(star)}
-                              </div>
-                              <div className="progress flex-grow-1 me-2" style={{ height: '8px' }}>
-                                <div 
-                                  className="progress-bar bg-warning" 
-                                  style={{ width: `${percentage}%` }}
-                                ></div>
-                              </div>
-                              <small className="text-muted">{count}</small>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
                 <ReviewSection 
                   productId={productId}
                   reviews={reviews}
                   loading={reviewsLoading}
                   user={user}
+                  onAddReview={fetchReviews}
                 />
-                  </div>
-                </div>
               </div>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Recommendations Section */}
-      <div className="recommendations-section mt-4">
+      <div className="recommendations-section mt-5">
         <div className="container-fluid">
-          <div className="d-flex justify-content-between align-items-center mb-3">
-            <h5 className="fw-bold mb-0">Recommendations</h5>
-            <a href="#" className="text-decoration-none text-dark">
-              View All <span className="ms-1">→</span>
+        <div className="d-flex justify-content-between align-items-center mb-4">
+            <h4 className="fw-bold mb-0">Sách gợi ý</h4>
+            <a href="#" className="text-decoration-none text-dark fw-medium">
+              Xem tất cả <span className="ms-1">→</span>
             </a>
-          </div>
-          
+        </div>
+
           <div className="row">
             {recommendations.map((book) => (
-              <div key={book.book_id} className="col-lg-3 col-md-4 col-sm-6 mb-4">
-                <div className="card h-100 border-0 shadow-sm">
-                  <div className="card-img-top position-relative">
+              <div key={book.book_id} className="col-lg-3 col-md-6 mb-4">
+                <div className="card h-100 border-0 shadow-sm" style={{
+                  transition: 'all 0.3s ease',
+                  cursor: 'pointer',
+                  borderRadius: '8px',
+                  overflow: 'hidden',
+                  height: '350px',
+                  backgroundColor: 'white'
+                }}
+                  onClick={() => handleBookClick(book.book_id)}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-8px)';
+                    e.currentTarget.style.boxShadow = '0 15px 35px rgba(0,0,0,0.15)';
+                    // Hiển thị nút thêm vào giỏ hàng nếu còn hàng
+                    const addToCartBtn = e.currentTarget.querySelector('.add-to-cart-btn');
+                    if (addToCartBtn && book.stock > 0) {
+                      addToCartBtn.style.opacity = '1';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                    // Ẩn nút thêm vào giỏ hàng
+                    const addToCartBtn = e.currentTarget.querySelector('.add-to-cart-btn');
+                    if (addToCartBtn) {
+                      addToCartBtn.style.opacity = '0';
+                    }
+                  }}>
+                  <div className="position-relative">
                     <img
-                      src={book.cover_image}
-                      className="img-fluid"
+                      src={book.cover_image || '/images/book1.jpg'}
+                      className="card-img-top"
                       alt={book.title}
-                      style={{ height: '200px', objectFit: 'cover', width: '100%' }}
+                      style={{
+                        height: '220px',
+                        objectFit: 'contain',
+                        width: '100%',
+                        backgroundColor: '#f8f9fa'
+                      }}
                       onError={(e) => {
                         e.target.src = '/images/book1.jpg';
                       }}
                     />
+                    {/* Nút Thêm Vào Giỏ Hàng - xuất hiện khi hover và còn hàng */}
+                    {book.stock > 0 && (
+                      <div
+                        className="position-absolute top-0 end-0 p-2 add-to-cart-btn"
+                        style={{
+                          opacity: 0,
+                          transition: 'opacity 0.3s ease'
+                        }}
+                      >
+                        <button
+                          className="btn btn-sm btn-light rounded-circle"
+                          style={{
+                            width: '40px',
+                            height: '40px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                          onClick={(e) => handleAddToCart(book, e)}
+                        >
+                          <FontAwesomeIcon icon={faShoppingCart} />
+                        </button>
+                      </div>
+                    )}
                   </div>
-                  <div className="card-body d-flex flex-column">
-                    <h6 className="card-title fw-bold mb-2" style={{ fontSize: '0.9rem' }}>
+                  <div className="card-body p-3 d-flex flex-column">
+                    <h6 className="card-title fw-bold mb-2" style={{
+                      fontSize: '1rem',
+                      lineHeight: '1.3',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                      minHeight: '2.6rem'
+                    }}>
                       {book.title}
                     </h6>
-                    <p className="text-muted small mb-2">{book.author}</p>
+                    <p className="card-text text-muted mb-2" style={{ fontSize: '0.9rem' }}>
+                      {book.author}
+                    </p>
                     <div className="d-flex align-items-center mb-2">
-                      <div className="me-1">
+                      <div className="me-2">
                         {renderStars(book.rating || 0)}
                       </div>
+                      <small className="text-muted">({book.reviewCount || 0})</small>
                     </div>
                     <div className="mt-auto">
-                      <div className="fw-bold text-dark">
+                      <p className="card-text fw-bold text-primary mb-2" style={{ fontSize: '1.1rem' }}>
                         {formatPrice(book.price)}
-                      </div>
+                      </p>
+                      <button
+                        className="btn btn-outline-primary btn-sm w-100"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleBookClick(book.book_id);
+                        }}
+                      >
+                        Xem chi tiết
+                      </button>
                     </div>
-                  </div>
-                  <div className="card-footer bg-transparent border-0 p-3">
-                    <button
-                      className="btn btn-outline-primary btn-sm w-100"
-                      onClick={() => handleBookClick(book.book_id)}
-                    >
-                      Xem chi tiết
-                    </button>
                   </div>
                 </div>
               </div>
             ))}
-          </div>
+            </div>
         </div>
       </div>
 

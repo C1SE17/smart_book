@@ -124,7 +124,7 @@ const Checkout = ({ onBackToHome, onNavigateTo }) => {
 
             // Navigate to orders page
             setTimeout(() => {
-                onNavigateTo('orders')();
+                onNavigateTo('orders');
             }, 1500);
 
         } catch (error) {

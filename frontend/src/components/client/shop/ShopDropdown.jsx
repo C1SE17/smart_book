@@ -22,11 +22,11 @@ const ShopDropdown = ({ onNavigateTo }) => {
   const handleItemClick = (item) => {
     setIsOpen(false);
     if (item === 'Shop') {
-      onNavigateTo('books')();
+      onNavigateTo('books');
     } else if (item === 'Cart') {
-      onNavigateTo('cart')();
+      onNavigateTo('cart');
     } else if (item === 'My account') {
-      onNavigateTo('profile')();
+      onNavigateTo('profile');
     }
   };
 

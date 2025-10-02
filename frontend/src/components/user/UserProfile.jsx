@@ -18,6 +18,15 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
   const [isEditing, setIsEditing] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [userProfile, setUserProfile] = useState(null);
+  
+  // State cho form đổi mật khẩu
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [passwordErrors, setPasswordErrors] = useState({});
+  const [passwordLoading, setPasswordLoading] = useState(false);
 
   // Mock data for demo mode
   const displayUser = user || {
@@ -175,11 +184,21 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
     setLoading(true);
 
     try {
-      const updatedProfile = await userService.updateProfile(formData, user.token);
+      // Sử dụng mockApi thay vì userService
+      const { mockApi } = await import('../../services/mockApi');
+      const updatedProfile = await mockApi.updateUser(user.user_id, formData, user);
+      
+      // Cập nhật user trong localStorage
+      const updatedUser = {
+        ...user,
+        ...updatedProfile
+      };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      
       setUserProfile(updatedProfile);
 
       if (onUpdateProfile) {
-        onUpdateProfile(updatedProfile);
+        onUpdateProfile(updatedUser);
       }
 
       setSuccessMessage('Cập nhật thông tin thành công!');
@@ -205,6 +224,144 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
     setErrors({});
     setIsEditing(false);
   }, [userProfile]);
+
+  // Xử lý đăng xuất tất cả thiết bị
+  const handleLogoutAllDevices = useCallback(async () => {
+    if (window.confirm('Bạn có chắc chắn muốn đăng xuất tất cả thiết bị? Bạn sẽ cần đăng nhập lại trên thiết bị này.')) {
+      try {
+        const { mockApi } = await import('../../services/mockApi');
+        const result = await mockApi.logoutAllDevices(user.user_id);
+        
+        if (result.success) {
+          // Xóa tất cả dữ liệu user khỏi localStorage
+          localStorage.removeItem('user');
+          localStorage.removeItem('userToken');
+          localStorage.removeItem('userEmail');
+          
+          // Dispatch event để App.jsx biết user đã đăng xuất
+          window.dispatchEvent(new CustomEvent('userLoggedOut'));
+          
+          if (window.showToast) {
+            window.showToast('Đã đăng xuất tất cả thiết bị! Vui lòng đăng nhập lại.', 'success');
+          } else {
+            alert('Đã đăng xuất tất cả thiết bị! Vui lòng đăng nhập lại.');
+          }
+          
+          // Redirect về trang chủ sau 2 giây
+          setTimeout(() => {
+            if (onBackToHome) {
+              onBackToHome();
+            } else {
+              window.location.href = '/';
+            }
+          }, 2000);
+          
+        } else {
+          if (window.showToast) {
+            window.showToast(result.message, 'error');
+          } else {
+            alert(result.message);
+          }
+        }
+        
+      } catch (error) {
+        console.error('Error logging out all devices:', error);
+        if (window.showToast) {
+          window.showToast('Có lỗi xảy ra khi đăng xuất tất cả thiết bị!', 'error');
+        } else {
+          alert('Có lỗi xảy ra khi đăng xuất tất cả thiết bị!');
+        }
+      }
+    }
+  }, [user, onBackToHome]);
+
+  // Xử lý đổi mật khẩu
+  const handlePasswordChange = useCallback((e) => {
+    const { name, value } = e.target;
+    setPasswordForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    
+    // Clear error khi user nhập
+    if (passwordErrors[name]) {
+      setPasswordErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
+  }, [passwordErrors]);
+
+  // Validate form đổi mật khẩu
+  const validatePasswordForm = useCallback(() => {
+    const newErrors = {};
+
+    if (!passwordForm.currentPassword.trim()) {
+      newErrors.currentPassword = 'Vui lòng nhập mật khẩu hiện tại';
+    }
+
+    if (!passwordForm.newPassword.trim()) {
+      newErrors.newPassword = 'Vui lòng nhập mật khẩu mới';
+    } else if (passwordForm.newPassword.length < 6) {
+      newErrors.newPassword = 'Mật khẩu mới phải có ít nhất 6 ký tự';
+    }
+
+    if (!passwordForm.confirmPassword.trim()) {
+      newErrors.confirmPassword = 'Vui lòng xác nhận mật khẩu mới';
+    } else if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      newErrors.confirmPassword = 'Mật khẩu xác nhận không khớp';
+    }
+
+    if (passwordForm.currentPassword === passwordForm.newPassword) {
+      newErrors.newPassword = 'Mật khẩu mới phải khác mật khẩu hiện tại';
+    }
+
+    setPasswordErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }, [passwordForm]);
+
+  // Submit đổi mật khẩu
+  const handlePasswordSubmit = useCallback(async (e) => {
+    e.preventDefault();
+    
+    if (!validatePasswordForm()) {
+      return;
+    }
+
+    setPasswordLoading(true);
+
+    try {
+      const { mockApi } = await import('../../services/mockApi');
+      const result = await mockApi.changePassword(user.user_id, {
+        currentPassword: passwordForm.currentPassword,
+        newPassword: passwordForm.newPassword
+      });
+
+      if (result.success) {
+        // Reset form
+        setPasswordForm({
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: ''
+        });
+        setPasswordErrors({});
+
+        if (window.showToast) {
+          window.showToast('Đổi mật khẩu thành công!', 'success');
+        } else {
+          alert('Đổi mật khẩu thành công!');
+        }
+      } else {
+        setPasswordErrors({ general: result.message });
+      }
+
+    } catch (error) {
+      console.error('Error changing password:', error);
+      setPasswordErrors({ general: 'Có lỗi xảy ra khi đổi mật khẩu. Vui lòng thử lại.' });
+    } finally {
+      setPasswordLoading(false);
+    }
+  }, [passwordForm, validatePasswordForm, user]);
 
   const handleTabChange = useCallback((tabId) => {
     setActiveTab(tabId);
@@ -417,11 +574,21 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
                                   name="role"
                                   value={currentFormData.role}
                                   onChange={handleChange}
-                                  disabled={!isEditing}
+                                  disabled={!isEditing || user?.role !== 'admin'}
+                                  style={{
+                                    backgroundColor: user?.role !== 'admin' ? '#f8f9fa' : '',
+                                    cursor: user?.role !== 'admin' ? 'not-allowed' : 'pointer'
+                                  }}
                                 >
                                   <option value="customer">Khách hàng</option>
                                   <option value="admin">Quản trị viên</option>
                                 </select>
+                                {user?.role !== 'admin' && (
+                                  <small className="text-muted">
+                                    <i className="fas fa-lock me-1"></i>
+                                    Chỉ quản trị viên mới có thể thay đổi vai trò
+                                  </small>
+                                )}
                               </div>
 
                               {/* Address Field */}
@@ -640,45 +807,98 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
                           {/* Change Password Section */}
                           <div className="mb-4">
                             <h6 className="text-muted mb-3">Đổi Mật Khẩu</h6>
-                            <form>
+                            
+                            {passwordErrors.general && (
+                              <div className="alert alert-danger alert-dismissible fade show" role="alert">
+                                <i className="fas fa-exclamation-circle me-2"></i>
+                                {passwordErrors.general}
+                                <button
+                                  type="button"
+                                  className="btn-close"
+                                  onClick={() => setPasswordErrors(prev => ({ ...prev, general: '' }))}
+                                ></button>
+                              </div>
+                            )}
+
+                            <form onSubmit={handlePasswordSubmit}>
                               <div className="row g-3">
                                 <div className="col-md-6">
                                   <label htmlFor="currentPassword" className="form-label">
-                                    Mật khẩu hiện tại
+                                    Mật khẩu hiện tại <span className="text-danger">*</span>
                                   </label>
                                   <input
                                     type="password"
-                                    className="form-control"
+                                    className={`form-control ${passwordErrors.currentPassword ? 'is-invalid' : ''}`}
                                     id="currentPassword"
+                                    name="currentPassword"
                                     placeholder="Nhập mật khẩu hiện tại"
+                                    value={passwordForm.currentPassword}
+                                    onChange={handlePasswordChange}
+                                    disabled={passwordLoading}
                                   />
+                                  {passwordErrors.currentPassword && (
+                                    <div className="invalid-feedback">
+                                      {passwordErrors.currentPassword}
+                                    </div>
+                                  )}
                                 </div>
                                 <div className="col-md-6">
                                   <label htmlFor="newPassword" className="form-label">
-                                    Mật khẩu mới
+                                    Mật khẩu mới <span className="text-danger">*</span>
                                   </label>
                                   <input
                                     type="password"
-                                    className="form-control"
+                                    className={`form-control ${passwordErrors.newPassword ? 'is-invalid' : ''}`}
                                     id="newPassword"
+                                    name="newPassword"
                                     placeholder="Nhập mật khẩu mới"
+                                    value={passwordForm.newPassword}
+                                    onChange={handlePasswordChange}
+                                    disabled={passwordLoading}
                                   />
+                                  {passwordErrors.newPassword && (
+                                    <div className="invalid-feedback">
+                                      {passwordErrors.newPassword}
+                                    </div>
+                                  )}
                                 </div>
                                 <div className="col-md-6">
                                   <label htmlFor="confirmPassword" className="form-label">
-                                    Xác nhận mật khẩu mới
+                                    Xác nhận mật khẩu mới <span className="text-danger">*</span>
                                   </label>
                                   <input
                                     type="password"
-                                    className="form-control"
+                                    className={`form-control ${passwordErrors.confirmPassword ? 'is-invalid' : ''}`}
                                     id="confirmPassword"
+                                    name="confirmPassword"
                                     placeholder="Nhập lại mật khẩu mới"
+                                    value={passwordForm.confirmPassword}
+                                    onChange={handlePasswordChange}
+                                    disabled={passwordLoading}
                                   />
+                                  {passwordErrors.confirmPassword && (
+                                    <div className="invalid-feedback">
+                                      {passwordErrors.confirmPassword}
+                                    </div>
+                                  )}
                                 </div>
                                 <div className="col-12">
-                                  <button type="submit" className="btn btn-primary">
-                                    <i className="fas fa-key me-2" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
-                                    Đổi Mật Khẩu
+                                  <button 
+                                    type="submit" 
+                                    className="btn btn-primary"
+                                    disabled={passwordLoading}
+                                  >
+                                    {passwordLoading ? (
+                                      <>
+                                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                        Đang xử lý...
+                                      </>
+                                    ) : (
+                                      <>
+                                        <i className="fas fa-key me-2" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
+                                        Đổi Mật Khẩu
+                                      </>
+                                    )}
                                   </button>
                                 </div>
                               </div>
@@ -722,13 +942,12 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
                               <strong>Cảnh báo:</strong> Các hành động dưới đây có thể ảnh hưởng đến tài khoản của bạn.
                             </div>
                             <div className="d-flex gap-2">
-                              <button className="btn btn-outline-danger">
+                              <button 
+                                className="btn btn-outline-danger"
+                                onClick={handleLogoutAllDevices}
+                              >
                                 <i className="fas fa-sign-out-alt me-2" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
                                 Đăng xuất tất cả thiết bị
-                              </button>
-                              <button className="btn btn-outline-danger">
-                                <i className="fas fa-trash me-2" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
-                                Xóa tài khoản
                               </button>
                             </div>
                           </div>

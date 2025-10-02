@@ -83,7 +83,7 @@ const BlogPage = ({ onNavigateTo }) => {
   ];
 
   const handleBackToHome = () => {
-    onNavigateTo('home')();
+    onNavigateTo('home');
   };
 
   const handleBlogClick = (blogId) => {
