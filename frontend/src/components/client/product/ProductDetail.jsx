@@ -1,363 +1,166 @@
 import React, { useState, useEffect } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faStar, faShoppingCart, faHeart, faShare, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import ReviewSection from '../shop/ReviewSection';
 import ProductRating from './ProductRating';
 
 const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = null }) => {
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
+  const [reviews, setReviews] = useState([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
 
-  // Dữ liệu sản phẩm mẫu - dữ liệu dự phòng
-  const getProductData = (id) => {
-    const products = {
-      1: {
-        id: 1,
-        title: "Thanh Gươm Diệt Quỷ - Tập 1",
-        price: 815000,
-        image: "/images/book1.jpg",
-        author: "Koyoharu Gotouge",
-        company: "Shueisha",
-        tags: ["manga", "anime", "action"],
-        description: `Câu chuyện về Tanjiro Kamado, một cậu bé trở thành thợ săn quỷ để cứu em gái mình khỏi lời nguyền biến thành quỷ.`,
-        fullDescription: `Thanh Gươm Diệt Quỷ - Tập 1 là phần mở đầu của bộ manga nổi tiếng về thế giới thợ săn quỷ.
-
-Cốt truyện chính:
-Tanjiro Kamado là một cậu bé sống cùng gia đình trên núi. Một ngày nọ, khi trở về nhà, cậu phát hiện gia đình bị quỷ tàn sát, chỉ còn em gái Nezuko sống sót nhưng đã biến thành quỷ.
-
-Chủ đề:
-• Tình anh em: Mối quan hệ sâu sắc giữa Tanjiro và Nezuko
-• Lòng dũng cảm: Tanjiro quyết tâm trở thành thợ săn quỷ để cứu em gái
-• Sự hy sinh: Các nhân vật sẵn sàng hy sinh để bảo vệ người thân
-
-Điểm nổi bật:
-• Được đánh giá là một trong những manga hay nhất về chủ đề gia đình và tình anh em
-• Nghệ thuật vẽ đẹp mắt với những cảnh chiến đấu ấn tượng
-• Cốt truyện cảm động và có ý nghĩa sâu sắc`
-      },
-      2: {
-        id: 2,
-        title: "Doraemon: Nobita và Cuộc Chiến Vũ Trụ",
-        price: 248000,
-        image: "/images/book2.jpg",
-        author: "Fujiko F. Fujio",
-        company: "Shogakukan",
-        tags: ["manga", "anime", "adventure"],
-        description: `Một trong những bộ phim Doraemon nổi tiếng nhất. Được phát hành lần đầu vào năm 1985 và sau đó được làm lại vào năm 2021.`,
-        fullDescription: `Doraemon: Nobita và Cuộc Chiến Vũ Trụ là một trong những bộ phim Doraemon nổi tiếng nhất. Được phát hành lần đầu vào năm 1985 và sau đó được làm lại vào năm 2021.
-
-Cốt truyện chính:
-Nobita tìm thấy một phi thuyền đồ chơi thuộc về Papi, tổng thống hành tinh Pirika. Papi đang chạy trốn khỏi lực lượng quân sự đối lập. Nobita, Doraemon và bạn bè quyết định giúp Papi bằng cách sử dụng "Đèn thu nhỏ" của Doraemon.
-
-Chủ đề:
-• Tình bạn và lòng dũng cảm: Các bạn nhỏ thể hiện lòng dũng cảm, tình bạn và sự đoàn kết để giải phóng người dân khỏi sự chuyên chế.
-• Công lý và tự do: Câu chuyện nhấn mạnh sự kháng cự chống lại chế độ độc tài và theo đuổi hòa bình.
-• Sự hy sinh và lòng trung thành: Các nhân vật sẵn sàng đặt mình vào nguy hiểm để bảo vệ bạn bè và chiến đấu vì công lý.
-
-Điểm nổi bật:
-• Được coi là một trong những bộ phim Doraemon được đánh giá cao nhất về thông điệp ý nghĩa và cốt truyện cảm động.
-• Bản làm lại năm 2021 sử dụng kỹ thuật hoạt hình hiện đại, giữ nguyên cốt truyện gốc nhưng thêm các hình ảnh, chi tiết mới để thu hút khán giả hiện đại hơn.`
-      },
-      3: {
-        id: 3,
-        title: "Harry Potter và Hòn Đá Phù Thủy",
-        price: 200000,
-        image: "/images/book3.jpg",
-        author: "J.K. Rowling",
-        company: "Bloomsbury",
-        tags: ["fantasy", "magic", "adventure"],
-        description: `Câu chuyện về cậu bé Harry Potter phát hiện mình là phù thủy và bắt đầu cuộc phiêu lưu tại trường Hogwarts.`,
-        fullDescription: `Harry Potter và Hòn Đá Phù Thủy là cuốn sách đầu tiên trong bộ truyện nổi tiếng về thế giới phù thủy.
-
-Cốt truyện chính:
-Harry Potter, một cậu bé 11 tuổi, phát hiện mình là phù thủy và được nhận vào trường Hogwarts. Tại đây, cậu kết bạn với Ron Weasley và Hermione Granger, đồng thời khám phá bí mật về quá khứ của mình.
-
-Chủ đề:
-• Tình bạn: Mối quan hệ sâu sắc giữa Harry, Ron và Hermione
-• Lòng dũng cảm: Harry đối mặt với những thử thách nguy hiểm
-• Sự hy sinh: Các nhân vật sẵn sàng hy sinh để bảo vệ những người thân yêu
-
-Điểm nổi bật:
-• Tạo ra một thế giới phù thủy phong phú và chi tiết
-• Cốt truyện hấp dẫn với nhiều tình tiết bất ngờ
-• Thông điệp tích cực về tình bạn, lòng dũng cảm và sự hy sinh`
-      },
-      4: {
-        id: 4,
-        title: "Conan - Vụ Án Nữ Hoàng 450",
-        price: 863000,
-        image: "/images/book4.jpg",
-        author: "Gosho Aoyama",
-        company: "Shogakukan",
-        tags: ["manga", "mystery", "detective"],
-        description: `Câu chuyện về thám tử Conan Edogawa giải quyết những vụ án phức tạp và bí ẩn.`,
-        fullDescription: `Conan - Vụ Án Nữ Hoàng 450 là một trong những tập manga Detective Conan nổi tiếng.
-
-Cốt truyện chính:
-Conan Edogawa, thám tử tài ba bị biến thành trẻ con, tiếp tục giải quyết những vụ án phức tạp. Trong tập này, cậu phải đối mặt với một vụ án liên quan đến nữ hoàng và những bí mật cung đình.
-
-Chủ đề:
-• Trí tuệ và khả năng suy luận: Conan sử dụng trí thông minh để giải quyết vụ án
-• Công lý: Cậu luôn tìm cách đưa sự thật ra ánh sáng
-• Tình bạn: Mối quan hệ với các bạn cùng lớp và đồng nghiệp
-
-Điểm nổi bật:
-• Cốt truyện trinh thám hấp dẫn với nhiều tình tiết bất ngờ
-• Nhân vật Conan thông minh và dũng cảm
-• Nghệ thuật vẽ chi tiết và sinh động`
-      },
-      5: {
-        id: 5,
-        title: "One Piece - Tập 100",
-        price: 220000,
-        image: "/images/book1.jpg",
-        author: "Eiichiro Oda",
-        company: "Shueisha",
-        tags: ["manga", "adventure", "action"],
-        description: `Cuộc phiêu lưu của Monkey D. Luffy và băng hải tặc Mũ Rơm tìm kiếm kho báu One Piece.`,
-        fullDescription: `One Piece - Tập 100 là một trong những tập manga One Piece nổi tiếng.
-
-Cốt truyện chính:
-Monkey D. Luffy, một cậu bé có khả năng co giãn như cao su, mơ ước trở thành Vua Hải Tặc. Cậu cùng băng hải tặc Mũ Rơm của mình phiêu lưu trên biển cả để tìm kiếm kho báu One Piece.
-
-Chủ đề:
-• Tình bạn: Mối quan hệ sâu sắc giữa các thành viên băng hải tặc
-• Ước mơ: Mỗi nhân vật đều có ước mơ riêng và quyết tâm thực hiện
-• Tự do: Khát khao được tự do trên biển cả
-
-Điểm nổi bật:
-• Cốt truyện phiêu lưu hấp dẫn với nhiều nhân vật thú vị
-• Thế giới quan phong phú và chi tiết
-• Thông điệp tích cực về tình bạn và ước mơ`
-      },
-      6: {
-        id: 6,
-        title: "Attack on Titan - Tập 30",
-        price: 195000,
-        image: "/images/book2.jpg",
-        author: "Hajime Isayama",
-        company: "Kodansha",
-        tags: ["manga", "action", "drama"],
-        description: `Câu chuyện về cuộc chiến của nhân loại chống lại những Titan khổng lồ.`,
-        fullDescription: `Attack on Titan - Tập 30 là một trong những tập manga Attack on Titan nổi tiếng.
-
-Cốt truyện chính:
-Nhân loại bị đe dọa bởi những Titan khổng lồ. Eren Yeager và những người bạn của mình gia nhập Quân đoàn Tình báo để chiến đấu chống lại Titan và khám phá bí mật về nguồn gốc của chúng.
-
-Chủ đề:
-• Sự sống còn: Cuộc chiến để bảo vệ nhân loại
-• Sự thật: Khám phá những bí mật bị che giấu
-• Hy sinh: Các nhân vật sẵn sàng hy sinh vì lý tưởng
-
-Điểm nổi bật:
-• Cốt truyện căng thẳng và kịch tính
-• Nhân vật phức tạp với động cơ sâu sắc
-• Nghệ thuật vẽ ấn tượng với những cảnh chiến đấu hoành tráng`
+  // Fetch product data
+  useEffect(() => {
+    const fetchProduct = async () => {
+      if (!productId) return;
+      
+      setLoading(true);
+      try {
+        const { mockApi } = await import('../../../services/mockApi');
+        const productData = await mockApi.getBookById(productId);
+        setProduct(productData);
+      } catch (error) {
+        console.error('Error fetching product:', error);
+        setProduct(null);
+      } finally {
+        setLoading(false);
       }
     };
 
-    return products[id] || products[1]; // Mặc định là sản phẩm đầu tiên nếu không tìm thấy
-  };
+    fetchProduct();
+  }, [productId]);
 
-  // Sử dụng dữ liệu mẫu cố định cho demo
-  const product = {
-    id: productId || 1,
-    title: "Thanh Gươm Diệt Quỷ - Tập 1",
-    price: 815000,
-    image: "/images/book1.jpg",
-    author: "Koyoharu Gotouge",
-    company: "Shueisha",
-    tags: ["manga", "anime", "action"],
-    description: "Câu chuyện về Tanjiro Kamado, một cậu bé trở thành thợ săn quỷ để cứu em gái mình khỏi lời nguyền biến thành quỷ.",
-    fullDescription: `Thanh Gươm Diệt Quỷ - Tập 1 là phần mở đầu của bộ manga nổi tiếng về thế giới thợ săn quỷ.
+  // Fetch reviews
+  useEffect(() => {
+    const fetchReviews = async () => {
+      if (!productId) return;
+      
+      setReviewsLoading(true);
+      try {
+        const { mockApi } = await import('../../../services/mockApi');
+        const reviewsData = await mockApi.getReviewsByBookId(productId);
+        setReviews(reviewsData);
+      } catch (error) {
+        console.error('Error fetching reviews:', error);
+        setReviews([]);
+      } finally {
+        setReviewsLoading(false);
+      }
+    };
 
-Cốt truyện chính:
-Tanjiro Kamado là một cậu bé sống cùng gia đình trên núi. Một ngày nọ, khi trở về nhà, cậu phát hiện gia đình bị quỷ tàn sát, chỉ còn em gái Nezuko sống sót nhưng đã biến thành quỷ.
+    fetchReviews();
+  }, [productId]);
 
-Chủ đề:
-• Tình anh em: Mối quan hệ sâu sắc giữa Tanjiro và Nezuko
-• Lòng dũng cảm: Tanjiro quyết tâm trở thành thợ săn quỷ để cứu em gái
-• Sự hy sinh: Các nhân vật sẵn sàng hy sinh để bảo vệ người thân
-
-Điểm nổi bật:
-• Được đánh giá là một trong những manga hay nhất về chủ đề gia đình và tình anh em
-• Nghệ thuật vẽ đẹp mắt với những cảnh chiến đấu ấn tượng
-• Cốt truyện cảm động và có ý nghĩa sâu sắc`
-  };
-
-
-  const recommendations = [
-    {
-      id: 1,
-      title: "WHERE THE CRAWDADS SING",
-      author: "Delia Owens",
-      price: "350.000 VNĐ",
-      image: "/images/book2.jpg",
-      rating: 5
-    },
-    {
-      id: 2,
-      title: "Doraemon: Nobita's Little Star Wars",
-      author: "Fujiko F. Fujio",
-      price: "280.000 VNĐ",
-      image: "/images/book1.jpg",
-      rating: 5
-    },
-    {
-      id: 3,
-      title: "Demon Slayer - Kimetsu No Yaiba",
-      author: "Koyoharu Gotouge",
-      price: "150.000 VNĐ",
-      image: "/images/book3.jpg",
-      rating: 5
-    },
-    {
-      id: 4,
-      title: "Conan - Fu Jin Nobunaga 450",
-      author: "Gosho Aoyama",
-      price: "180.000 VNĐ",
-      image: "/images/book4.jpg",
-      rating: 5
-    }
-  ];
-
-  const handleQuantityChange = (change) => {
-    const newQuantity = quantity + change;
-    if (newQuantity >= 1) {
-      setQuantity(newQuantity);
+  // Handle quantity change
+  const handleQuantityChange = (e) => {
+    const value = parseInt(e.target.value);
+    if (value > 0 && value <= (product?.stock || 0)) {
+      setQuantity(value);
     }
   };
 
+  // Handle add to cart
   const handleAddToCart = () => {
-    if (!book) return;
-
-    // Kiểm tra còn hàng không
-    if (book.stock <= 0) {
-      if (window.showToast) {
-        window.showToast('Sản phẩm đã hết hàng!', 'warning');
-      } else {
-        alert('Sản phẩm đã hết hàng!');
-      }
-      return;
-    }
-
-    // Kiểm tra số lượng có vượt quá stock không
-    if (quantity > book.stock) {
-      if (window.showToast) {
-        window.showToast(`Chỉ còn ${book.stock} sản phẩm trong kho!`, 'warning');
-      } else {
-        alert(`Chỉ còn ${book.stock} sản phẩm trong kho!`);
-      }
-      return;
-    }
-
-    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    const existingItem = cart.find(item => item.book_id === book.book_id);
-
-    if (existingItem) {
-      // Kiểm tra tổng số lượng có vượt quá stock không
-      if (existingItem.quantity + quantity > book.stock) {
-        if (window.showToast) {
-          window.showToast(`Chỉ có thể thêm tối đa ${book.stock - existingItem.quantity} sản phẩm!`, 'warning');
-        } else {
-          alert(`Chỉ có thể thêm tối đa ${book.stock - existingItem.quantity} sản phẩm!`);
-        }
-        return;
-      }
-      existingItem.quantity += quantity;
-
-    // Hiển thị thông báo thành công
-    if (window.showToast) {
-      window.showToast(`Thêm thành công! Đã thêm ${quantity} "${book.title}" vào giỏ hàng!`, 'success');
-    }
+    if (user) {
+      // TODO: Implement add to cart with user authentication
+      console.log('Add to cart:', productId, quantity);
     } else {
-      cart.push({
-        book_id: book.book_id,
-        title: book.title,
-        author: book.author_name || 'Unknown Author',
-        price: book.price,
-        cover_image: book.cover_image,
-        quantity: quantity,
-        added_at: new Date().toISOString()
+      // Redirect to login
+      onNavigateTo('auth')();
+    }
+  };
+
+  // Handle add to wishlist
+  const handleAddToWishlist = () => {
+    if (user) {
+      // TODO: Implement add to wishlist
+      console.log('Add to wishlist:', productId);
+    } else {
+      // Redirect to login
+      onNavigateTo('auth')();
+    }
+  };
+
+  // Handle share
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: product?.title,
+        text: product?.description,
+        url: window.location.href
       });
-
-    // Hiển thị thông báo thành công
-    if (window.showToast) {
-      window.showToast(`Thêm thành công! Đã thêm ${quantity} "${book.title}" vào giỏ hàng!`, 'success');
+    } else {
+      // Fallback: copy to clipboard
+      navigator.clipboard.writeText(window.location.href);
+      alert('Link đã được sao chép!');
     }
-    }
-
-    localStorage.setItem('cart', JSON.stringify(cart));
-    window.dispatchEvent(new CustomEvent('cartUpdated', {
-      detail: { cart, action: 'add', bookId: book.book_id, quantity }
-    }));
-
-    console.log('Added to cart:', { book, quantity });
   };
 
-  // Hàm xử lý tiến hành thanh toán
-  const handleProceedToPayment = () => {
-    if (!book) return;
-
-    // Kiểm tra còn hàng không
-    if (book.stock <= 0) {
-      if (window.showToast) {
-        window.showToast('Sản phẩm đã hết hàng!', 'warning');
-      } else {
-        alert('Sản phẩm đã hết hàng!');
-      }
-      return;
-    }
-
-    // Kiểm tra số lượng có vượt quá stock không
-    if (quantity > book.stock) {
-      if (window.showToast) {
-        window.showToast(`Chỉ còn ${book.stock} sản phẩm trong kho!`, 'warning');
-      } else {
-        alert(`Chỉ còn ${book.stock} sản phẩm trong kho!`);
-      }
-      return;
-    }
-
-    // Tạo item thanh toán
-    const checkoutItem = {
-      book_id: book.book_id,
-      title: book.title,
-      price: book.price,
-      cover_image: book.cover_image,
-      quantity: quantity,
-      added_at: new Date().toISOString()
-    };
-
-    // Lưu item vào sessionStorage để checkout
-    sessionStorage.setItem('checkoutItems', JSON.stringify([checkoutItem]));
-
-    // Hiển thị thông báo thành công
-    if (window.showToast) {
-      window.showToast(`Đang chuyển đến thanh toán với ${quantity} "${book.title}"!`, 'success');
-    }
-
-    // Chuyển đến trang thanh toán
-    console.log('Proceeding to payment with:', checkoutItem);
-
-    // Chuyển đến trang thanh toán thực tế
-    onNavigateTo('checkout')();
+  // Format price
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND'
+    }).format(price);
   };
 
+  // Render star rating
   const renderStars = (rating) => {
-    return Array.from({ length: 5 }, (_, index) => (
-      <i
-        key={index}
-        className={`bi bi-star${index < Math.floor(rating || 0) ? '-fill' : ''} text-warning`}
-        style={{ fontSize: '12px' }}
-      ></i>
-    ));
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 !== 0;
+
+    for (let i = 0; i < fullStars; i++) {
+      stars.push(
+        <FontAwesomeIcon key={i} icon={faStar} className="text-warning" />
+      );
+    }
+
+    if (hasHalfStar) {
+      stars.push(
+        <FontAwesomeIcon key="half" icon={faStar} className="text-warning" style={{ opacity: 0.5 }} />
+      );
+    }
+
+    const emptyStars = 5 - Math.ceil(rating);
+    for (let i = 0; i < emptyStars; i++) {
+      stars.push(
+        <FontAwesomeIcon key={`empty-${i}`} icon={faStar} className="text-muted" />
+      );
+    }
+
+    return stars;
   };
 
+  if (loading) {
+    return (
+      <div className="container py-4">
+        <div className="text-center py-5">
+          <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">Đang tải...</span>
+          </div>
+          <p className="mt-3">Đang tải thông tin sản phẩm...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!product) {
     return (
       <div className="container py-4">
-        <div className="alert alert-warning" role="alert">
-          <i className="bi bi-exclamation-triangle me-2"></i>
-          Không tìm thấy sản phẩm
+        <div className="text-center py-5">
+          <FontAwesomeIcon icon={faShoppingCart} size="3x" className="text-muted mb-3" />
+          <h4>Sản phẩm không tồn tại</h4>
+          <p className="text-muted">Không tìm thấy sản phẩm với ID này.</p>
+          <button 
+            className="btn btn-primary"
+            onClick={() => onNavigateTo('home')()}
+          >
+            <FontAwesomeIcon icon={faArrowLeft} className="me-2" />
+            Quay về trang chủ
+          </button>
         </div>
       </div>
     );
@@ -365,213 +168,243 @@ Chủ đề:
 
   return (
     <div className="container py-4">
+      {/* Breadcrumb */}
+      <nav aria-label="breadcrumb" className="mb-4">
+        <ol className="breadcrumb">
+          <li className="breadcrumb-item">
+            <button 
+              className="btn btn-link p-0 text-decoration-none"
+              onClick={() => onNavigateTo('home')()}
+            >
+              Trang chủ
+            </button>
+          </li>
+          <li className="breadcrumb-item">
+            <button 
+              className="btn btn-link p-0 text-decoration-none"
+              onClick={() => onNavigateTo('books')()}
+            >
+              Sách
+            </button>
+          </li>
+          <li className="breadcrumb-item active" aria-current="page">
+            {product.title}
+          </li>
+        </ol>
+      </nav>
 
-      {/* Product Info Section */}
-      <div className="row mb-5">
+      <div className="row">
+        {/* Product Image */}
         <div className="col-lg-6">
-          <img
-            src={product.image}
-            alt={product.title}
-            className="img-fluid rounded shadow"
-            style={{ width: '100%', height: '500px', objectFit: 'contain', backgroundColor: '#f8f9fa' }}
-          />
+          <div className="product-image-container">
+            <img
+              src={product.cover_image}
+              className="img-fluid rounded shadow"
+              alt={product.title}
+              style={{ width: '100%', maxHeight: '500px', objectFit: 'cover' }}
+              onError={(e) => {
+                e.target.src = '/images/book1.jpg';
+              }}
+            />
+          </div>
         </div>
+
+        {/* Product Info */}
         <div className="col-lg-6">
-          <div className="ps-lg-4">
-            <h1 className="h2 mb-3">{product.title}</h1>
-            <p className="text-muted mb-3">{product.description}</p>
-
-            {/* Product Rating */}
-            <div className="mb-3">
-              <ProductRating 
-                productId={productId} 
-                averageRating={4.2} 
-                totalReviews={128} 
-              />
+          <div className="product-info">
+            <h1 className="product-title mb-3">{product.title}</h1>
+            
+            <div className="product-meta mb-3">
+              <p className="text-muted mb-1">
+                <strong>Tác giả:</strong> {product.author}
+              </p>
+              <p className="text-muted mb-1">
+                <strong>Nhà xuất bản:</strong> {product.publisher}
+              </p>
+              <p className="text-muted mb-1">
+                <strong>Danh mục:</strong> {product.category}
+              </p>
             </div>
 
-            <div className="mb-4">
-              <span className="h3 text-dark">
-                {typeof product.price === 'number'
-                  ? product.price.toLocaleString('vi-VN') + ' VNĐ'
-                  : product.price
-                }
-              </span>
-            </div>
-
-            {/* Quantity Selector */}
-            <div className="mb-4">
-              <label className="form-label fw-bold">Số lượng:</label>
+            {/* Rating */}
+            <div className="product-rating mb-3">
               <div className="d-flex align-items-center">
-                <button
-                  className="btn btn-outline-secondary"
-                  onClick={() => handleQuantityChange(-1)}
-                  disabled={quantity <= 1}
-                >
-                  -
-                </button>
-                <input
-                  className="form-control text-center mx-2"
-                  value={quantity}
-                  onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
-                  style={{ width: '80px' }}
-                  min="1"
-                />
-                <button
-                  className="btn btn-outline-secondary"
-                  onClick={() => handleQuantityChange(1)}
-                >
-                  +
-                </button>
+                <div className="me-2">
+                  {renderStars(product.rating || 0)}
+                </div>
+                <span className="text-muted">
+                  ({product.reviewCount || 0} đánh giá)
+                </span>
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="d-flex gap-2 mb-4">
-              {/* Add to Cart Button */}
-              <button
-                className="btn btn-dark flex-fill"
-                onClick={handleAddToCart}
-                style={{
-                  borderRadius: '6px',
-                  fontWeight: '500',
-                  padding: '6px 12px',
-                  fontSize: '13px'
-                }}
-              >
-                <i className="bi bi-cart-plus me-1"></i>
-                Thêm giỏ hàng
-              </button>
-
-              {/* Proceed to Payment Button */}
-              <button
-                className="btn btn-success flex-fill"
-                onClick={handleProceedToPayment}
-                style={{
-                  borderRadius: '6px',
-                  fontWeight: '500',
-                  padding: '6px 12px',
-                  fontSize: '13px',
-                  background: 'linear-gradient(135deg, #28a745 0%, #20c997 100%)',
-                  border: 'none',
-                  boxShadow: '0 2px 8px rgba(40, 167, 69, 0.25)',
-                  transition: 'all 0.3s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.transform = 'translateY(-1px)';
-                  e.target.style.boxShadow = '0 4px 12px rgba(40, 167, 69, 0.35)';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.transform = 'translateY(0)';
-                  e.target.style.boxShadow = '0 2px 8px rgba(40, 167, 69, 0.25)';
-                }}
-              >
-                <i className="bi bi-credit-card me-1"></i>
-                Thanh toán
-              </button>
+            {/* Price */}
+            <div className="product-price mb-4">
+              <h2 className="text-primary mb-0">{formatPrice(product.price)}</h2>
+              <small className="text-muted">
+                Còn {product.stock} cuốn trong kho
+              </small>
             </div>
 
-            {/* Product Details */}
-            <div className="row">
-              <div className="col-6">
-                <p className="mb-2"><strong>Tác giả:</strong> {product.author}</p>
-                <p className="mb-2"><strong>Nhà xuất bản:</strong> {product.company}</p>
-                <p className="mb-0"><strong>Thể loại:</strong> {product.tags.join(', ')}</p>
+            {/* Quantity and Actions */}
+            <div className="product-actions mb-4">
+              <div className="row align-items-center">
+                <div className="col-md-4">
+                  <label className="form-label">Số lượng:</label>
+                  <input
+                    type="number"
+                    className="form-control"
+                    min="1"
+                    max={product.stock}
+                    value={quantity}
+                    onChange={handleQuantityChange}
+                  />
+                </div>
+                <div className="col-md-8">
+                  <div className="d-grid gap-2 d-md-flex">
+                    <button
+                      className="btn btn-primary btn-lg flex-fill"
+                      onClick={handleAddToCart}
+                      disabled={product.stock === 0}
+                    >
+                      <FontAwesomeIcon icon={faShoppingCart} className="me-2" />
+                      {product.stock === 0 ? 'Hết hàng' : 'Thêm vào giỏ'}
+                    </button>
+                    <button
+                      className="btn btn-outline-danger"
+                      onClick={handleAddToWishlist}
+                      title="Thêm vào yêu thích"
+                    >
+                      <FontAwesomeIcon icon={faHeart} />
+                    </button>
+                    <button
+                      className="btn btn-outline-secondary"
+                      onClick={handleShare}
+                      title="Chia sẻ"
+                    >
+                      <FontAwesomeIcon icon={faShare} />
+                    </button>
+                  </div>
+                </div>
               </div>
+            </div>
+
+            {/* Description */}
+            <div className="product-description">
+              <h5>Mô tả sản phẩm</h5>
+              <p className="text-muted">{product.description}</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Description Section */}
-      <div className="mb-5">
-        <h3 className="mb-3">Mô tả chi tiết</h3>
-        <div className="bg-light p-4 rounded">
-          <pre className="mb-0" style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit' }}>
-            {product.fullDescription}
-          </pre>
-        </div>
-      </div>
-
-      {/* Reviews and Comments Section */}
-      <div className="mb-5">
-        <ReviewSection productId={productId} user={user} />
-      </div>
-
-      {/* Recommendations Section */}
-      <div className="mb-5">
-        <div className="d-flex justify-content-between align-items-center mb-3">
-          <h3>Recommendations</h3>
-          <a 
-            href="#" 
-            className="text-decoration-none" 
-            style={{
-              fontSize: '14px',
-              fontWeight: '500',
-              color: '#333',
-              transition: 'all 0.3s ease',
-              cursor: 'pointer'
-            }}
-            onClick={(e) => {
-              e.preventDefault();
-              if (onNavigateTo) {
-                onNavigateTo('books')();
-              }
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.color = '#007bff';
-              e.target.style.transform = 'translateX(5px)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.color = '#333';
-              e.target.style.transform = 'translateX(0)';
-            }}
-          >
-            View All <i className="bi bi-arrow-right ms-1"></i>
-          </a>
-        </div>
-
-        <div className="row g-4">
-          {recommendations.map(rec => (
-            <div key={rec.id} className="col-lg-3 col-md-4 col-sm-6">
-              <div 
-                className="card h-100 border-0 shadow-sm"
-                style={{ cursor: 'pointer', transition: 'transform 0.3s ease, box-shadow 0.3s ease' }}
-                onClick={() => {
-                  if (onNavigateToProduct) {
-                    onNavigateToProduct(rec.id);
-                  }
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-5px)';
-                  e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,0,0,0.2)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
-                }}
+      {/* Product Details Tabs */}
+      <div className="row mt-5">
+        <div className="col-12">
+          <ul className="nav nav-tabs" id="productTabs" role="tablist">
+            <li className="nav-item" role="presentation">
+              <button
+                className="nav-link active"
+                id="description-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#description"
+                type="button"
+                role="tab"
+                aria-controls="description"
+                aria-selected="true"
               >
-                <img
-                  src={rec.image}
-                  className="card-img-top"
-                  alt={rec.title}
-                  style={{ height: '200px', objectFit: 'contain', backgroundColor: '#f8f9fa' }}
-                />
-                <div className="card-body d-flex flex-column">
-                  <h6 className="card-title text-dark mb-2" style={{ fontSize: '14px', lineHeight: '1.3' }}>
-                    {rec.title}
-                  </h6>
-                  <p className="text-muted small mb-2">{rec.author}</p>
-                  <div className="d-flex align-items-center mb-2">
-                    {renderStars(rec.rating)}
+                Mô tả chi tiết
+              </button>
+            </li>
+            <li className="nav-item" role="presentation">
+              <button
+                className="nav-link"
+                id="reviews-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#reviews"
+                type="button"
+                role="tab"
+                aria-controls="reviews"
+                aria-selected="false"
+              >
+                Đánh giá ({product.reviewCount || 0})
+              </button>
+            </li>
+          </ul>
+          
+          <div className="tab-content" id="productTabsContent">
+            <div
+              className="tab-pane fade show active"
+              id="description"
+              role="tabpanel"
+              aria-labelledby="description-tab"
+            >
+              <div className="p-4">
+                <h5>Thông tin chi tiết</h5>
+                <div className="row">
+                  <div className="col-md-6">
+                    <table className="table table-borderless">
+                      <tbody>
+                        <tr>
+                          <td><strong>Tác giả:</strong></td>
+                          <td>{product.author}</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Nhà xuất bản:</strong></td>
+                          <td>{product.publisher}</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Danh mục:</strong></td>
+                          <td>{product.category}</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Ngày xuất bản:</strong></td>
+                          <td>{new Date(product.published_date).toLocaleDateString('vi-VN')}</td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </div>
-                  <div className="mt-auto">
-                    <span className="fw-bold text-dark">{rec.price}</span>
+                  <div className="col-md-6">
+                    <table className="table table-borderless">
+                      <tbody>
+                        <tr>
+                          <td><strong>Giá:</strong></td>
+                          <td className="text-primary fw-bold">{formatPrice(product.price)}</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Tình trạng:</strong></td>
+                          <td>
+                            <span className={`badge ${product.stock > 0 ? 'bg-success' : 'bg-danger'}`}>
+                              {product.stock > 0 ? 'Còn hàng' : 'Hết hàng'}
+                            </span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td><strong>Số lượng còn lại:</strong></td>
+                          <td>{product.stock} cuốn</td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               </div>
             </div>
-          ))}
+            
+            <div
+              className="tab-pane fade"
+              id="reviews"
+              role="tabpanel"
+              aria-labelledby="reviews-tab"
+            >
+              <div className="p-4">
+                <ReviewSection 
+                  productId={productId}
+                  reviews={reviews}
+                  loading={reviewsLoading}
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

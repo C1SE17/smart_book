@@ -20,201 +20,29 @@ const Home = ({ onNavigateTo }) => {
   useEffect(() => {
     const fetchBooks = async () => {
       setLoading(true);
+      
+      try {
+        // Import mock API
+        const { mockApi } = await import('../services/mockApi');
+        
+        // Fetch all books, new books, and popular books
+        const [booksResponse, newBooksData, popularBooksData] = await Promise.all([
+          mockApi.getBooks({ limit: 12 }),
+          mockApi.getNewBooks(4),
+          mockApi.getPopularBooks(4)
+        ]);
 
-      // Hiện tại, luôn sử dụng dữ liệu giả để tránh lỗi API
-      console.log('Using mock data for books display');
-
-      // Dữ liệu giả
-      const mockBooks = [
-        {
-          book_id: 1,
-          title: "WHERE THE CRAWDADS SING",
-          description: "A mystery novel about a girl who grows up alone in the marshes of North Carolina",
-          price: 105000, // $4.3 * 24,000 VND
-          stock: 50,
-          category_id: 1,
-          author_id: 1,
-          publisher_id: 1,
-          published_date: "2018-08-14",
-          cover_image: "/images/book1.jpg",
-          slug: "where-the-crawdads-sing",
-          author: "Delia Owens",
-          rating: 3.5
-        },
-        {
-          book_id: 2,
-          title: "Doraemon: Nobita và Cuộc Chiến Vũ Trụ",
-          description: "Cuộc phiêu lưu của Nobita và Doraemon trong không gian",
-          price: 248000, // $10.35 * 24,000 VND
-          stock: 30,
-          category_id: 2,
-          author_id: 2,
-          publisher_id: 2,
-          published_date: "2020-01-15",
-          cover_image: "/images/book2.jpg",
-          slug: "doraemon-nobita-vu-tru",
-          author: "Fujiko F. Fujio",
-          rating: 5.0
-        },
-        {
-          book_id: 3,
-          title: "Thanh Gươm Diệt Quỷ - Tập 1",
-          description: "Câu chuyện về Tanjiro và cuộc chiến chống lại ma quỷ",
-          price: 815000, // $33.95 * 24,000 VND
-          stock: 25,
-          category_id: 2,
-          author_id: 3,
-          publisher_id: 2,
-          published_date: "2019-06-20",
-          cover_image: "/images/book3.jpg",
-          slug: "thanh-guom-diet-quy-tap-1",
-          author: "Koyoharu Gotouge",
-          rating: 4.0
-        },
-        {
-          book_id: 4,
-          title: "Conan - Vụ Án Nữ Hoàng 450",
-          description: "Vụ án bí ẩn của thám tử Conan Edogawa",
-          price: 863000, // $35.95 * 24,000 VND
-          stock: 40,
-          category_id: 2,
-          author_id: 4,
-          publisher_id: 2,
-          published_date: "2021-03-10",
-          cover_image: "/images/book4.jpg",
-          slug: "conan-vu-an-nu-hoang-450",
-          author: "Gosho Aoyama",
-          rating: 5.0
-        },
-        {
-          book_id: 5,
-          title: "Harry Potter và Hòn Đá Phù Thủy",
-          description: "Tập 1 của bộ Harry Potter - cuộc phiêu lưu của cậu bé phù thủy",
-          price: 200000,
-          stock: 35,
-          category_id: 1,
-          author_id: 5,
-          publisher_id: 3,
-          published_date: "2017-09-01",
-          cover_image: "/images/book1.jpg",
-          slug: "harry-potter-va-hon-da-phu-thuy",
-          author: "J.K. Rowling",
-          rating: 4.8
-        },
-        {
-          book_id: 6,
-          title: "Đắc Nhân Tâm",
-          description: "Cuốn sách kinh điển về nghệ thuật giao tiếp và thu phục lòng người",
-          price: 120000,
-          stock: 60,
-          category_id: 1,
-          author_id: 6,
-          publisher_id: 4,
-          published_date: "2016-01-01",
-          cover_image: "/images/book2.jpg",
-          slug: "dac-nhan-tam",
-          author: "Dale Carnegie",
-          rating: 4.5
-        },
-        {
-          book_id: 7,
-          title: "One Piece - Tập 1000",
-          description: "Cuộc phiêu lưu của Luffy và băng hải tặc Mũ Rơm",
-          price: 25000,
-          stock: 100,
-          category_id: 2,
-          author_id: 7,
-          publisher_id: 2,
-          published_date: "2022-01-01",
-          cover_image: "/images/book3.jpg",
-          slug: "one-piece-tap-1000",
-          author: "Eiichiro Oda",
-          rating: 4.9
-        },
-        {
-          book_id: 8,
-          title: "Attack on Titan - Tập 34",
-          description: "Câu chuyện về cuộc chiến giữa loài người và Titan",
-          price: 30000,
-          stock: 80,
-          category_id: 2,
-          author_id: 8,
-          publisher_id: 2,
-          published_date: "2021-06-09",
-          cover_image: "/images/book4.jpg",
-          slug: "attack-on-titan-tap-34",
-          author: "Hajime Isayama",
-          rating: 4.7
-        },
-        {
-          book_id: 9,
-          title: "The Great Gatsby",
-          description: "Tiểu thuyết kinh điển của F. Scott Fitzgerald về giấc mơ Mỹ",
-          price: 150000,
-          stock: 45,
-          category_id: 1,
-          author_id: 9,
-          publisher_id: 1,
-          published_date: "1925-04-10",
-          cover_image: "/images/book1.jpg",
-          slug: "the-great-gatsby",
-          author: "F. Scott Fitzgerald",
-          rating: 4.3
-        },
-        {
-          book_id: 10,
-          title: "To Kill a Mockingbird",
-          description: "Cuốn tiểu thuyết về công lý và phân biệt chủng tộc ở miền Nam nước Mỹ",
-          price: 160000,
-          stock: 55,
-          category_id: 1,
-          author_id: 10,
-          publisher_id: 1,
-          published_date: "1960-07-11",
-          cover_image: "/images/book2.jpg",
-          slug: "to-kill-a-mockingbird",
-          author: "Harper Lee",
-          rating: 4.6
-        },
-        {
-          book_id: 11,
-          title: "Naruto - Tập 72",
-          description: "Câu chuyện về ninja trẻ Naruto và hành trình trở thành Hokage",
-          price: 28000,
-          stock: 90,
-          category_id: 2,
-          author_id: 11,
-          publisher_id: 2,
-          published_date: "2014-11-04",
-          cover_image: "/images/book3.jpg",
-          slug: "naruto-tap-72",
-          author: "Masashi Kishimoto",
-          rating: 4.8
-        },
-        {
-          book_id: 12,
-          title: "Dragon Ball Super - Tập 20",
-          description: "Cuộc phiêu lưu mới của Goku và các chiến binh Z",
-          price: 32000,
-          stock: 75,
-          category_id: 2,
-          author_id: 12,
-          publisher_id: 2,
-          published_date: "2023-03-02",
-          cover_image: "/images/book4.jpg",
-          slug: "dragon-ball-super-tap-20",
-          author: "Akira Toriyama",
-          rating: 4.4
-        }
-      ];
-
-      setBooks(mockBooks);
-      // Sách mới: 4 cuốn mới nhất theo ngày xuất bản
-      setNewBooks(mockBooks.sort((a, b) => new Date(b.published_date) - new Date(a.published_date)).slice(0, 4));
-      // Sách phổ biến: 4 cuốn có stock thấp nhất (bán nhiều)
-      setPopularBooks(mockBooks.sort((a, b) => a.stock - b.stock).slice(0, 4));
-
-      setLoading(false);
+        setBooks(booksResponse.data);
+        setNewBooks(newBooksData);
+        setPopularBooks(popularBooksData);
+      } catch (error) {
+        console.error('Error fetching books:', error);
+        setBooks([]);
+        setNewBooks([]);
+        setPopularBooks([]);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchBooks();
