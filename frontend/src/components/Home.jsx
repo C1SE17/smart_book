@@ -57,9 +57,21 @@ const Home = ({ onNavigateTo }) => {
     window.dispatchEvent(new PopStateEvent('popstate'));
   }, [onNavigateTo]);
 
-  // Xử lý thêm vào giỏ hàng - chỉ sử dụng localStorage
-  const handleAddToCart = useCallback((book, e) => {
+  // Xử lý thêm vào giỏ hàng - sử dụng mockApi
+  const handleAddToCart = useCallback(async (book, e) => {
     e.stopPropagation();
+
+    // Kiểm tra user đã đăng nhập chưa
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    if (!user) {
+      if (window.showToast) {
+        window.showToast('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng!', 'warning');
+      } else {
+        alert('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng!');
+      }
+      onNavigateTo('auth')();
+      return;
+    }
 
     // Kiểm tra còn hàng không
     if (book.stock <= 0) {
@@ -71,47 +83,60 @@ const Home = ({ onNavigateTo }) => {
       return;
     }
 
-    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    const existingItem = cart.find(item => item.book_id === book.book_id);
+    try {
+      // Import mock API
+      const { mockApi } = await import('../services/mockApi');
+      
+      // Lấy giỏ hàng hiện tại để kiểm tra số lượng
+      const cartData = await mockApi.getCartByUserId(user.user_id);
+      const existingItem = cartData.items.find(item => item.book_id === book.book_id);
 
-    if (existingItem) {
-      // Kiểm tra số lượng trong giỏ có vượt quá stock không
-      if (existingItem.quantity >= book.stock) {
-        if (window.showToast) {
-          window.showToast(`Chỉ còn ${book.stock} sản phẩm trong kho!`, 'warning');
-        } else {
-          alert(`Chỉ còn ${book.stock} sản phẩm trong kho!`);
+      if (existingItem) {
+        // Kiểm tra số lượng trong giỏ có vượt quá stock không
+        if (existingItem.quantity >= book.stock) {
+          if (window.showToast) {
+            window.showToast(`Chỉ còn ${book.stock} sản phẩm trong kho!`, 'warning');
+          } else {
+            alert(`Chỉ còn ${book.stock} sản phẩm trong kho!`);
+          }
+          return;
         }
-        return;
+        
+        // Tăng số lượng sản phẩm hiện có
+        await mockApi.updateCartItemQuantity(user.user_id, book.book_id, existingItem.quantity + 1);
+        
+        // Hiển thị thông báo thành công
+        if (window.showToast) {
+          window.showToast(`Đã tăng số lượng "${book.title}" trong giỏ hàng!`, 'success');
+        } else {
+          alert(`Đã tăng số lượng "${book.title}" trong giỏ hàng!`);
+        }
+      } else {
+        // Thêm sản phẩm mới vào giỏ hàng
+        await mockApi.addToCart(user.user_id, book.book_id, 1);
+        
+        // Hiển thị thông báo thành công
+        if (window.showToast) {
+          window.showToast(`✅ Thêm thành công! Đã thêm "${book.title}" vào giỏ hàng!`, 'success');
+        } else {
+          alert(`✅ Thêm thành công! Đã thêm "${book.title}" vào giỏ hàng!`);
+        }
       }
-      existingItem.quantity += 1;
 
-      // Hiển thị thông báo thành công
-      if (window.showToast) {
-        window.showToast(`Đã tăng số lượng "${book.title}" trong giỏ hàng!`, 'success');
-      }
-    } else {
-      cart.push({
-        book_id: book.book_id,
-        title: book.title,
-        author: book.author || 'Unknown Author',
-        price: book.price,
-        cover_image: book.cover_image,
-        quantity: 1,
-        added_at: new Date().toISOString()
-      });
+      // Kích hoạt sự kiện cập nhật giỏ hàng
+      window.dispatchEvent(new CustomEvent('cartUpdated', {
+        detail: { action: 'add', bookId: book.book_id }
+      }));
 
-      // Hiển thị thông báo thành công
+    } catch (error) {
+      console.error('Error adding to cart:', error);
       if (window.showToast) {
-        window.showToast(`✅ Thêm thành công! Đã thêm "${book.title}" vào giỏ hàng!`, 'success');
+        window.showToast('Không thể thêm sản phẩm vào giỏ hàng!', 'error');
+      } else {
+        alert('Không thể thêm sản phẩm vào giỏ hàng!');
       }
     }
-
-    localStorage.setItem('cart', JSON.stringify(cart));
-    window.dispatchEvent(new CustomEvent('cartUpdated', {
-      detail: { cart, action: 'add', bookId: book.book_id }
-    }));
-  }, []);
+  }, [onNavigateTo]);
 
 
   return (
