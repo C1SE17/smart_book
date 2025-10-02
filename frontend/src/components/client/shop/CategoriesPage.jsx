@@ -68,25 +68,25 @@ const CategoriesPage = ({ onNavigateTo }) => {
     filtered.sort((a, b) => {
       let aValue, bValue;
       
-      switch (sortBy) {
+    switch (sortBy) {
         case 'price':
           aValue = a.price;
           bValue = b.price;
-          break;
+        break;
         case 'title':
           aValue = a.title.toLowerCase();
           bValue = b.title.toLowerCase();
-          break;
-        case 'rating':
+        break;
+      case 'rating':
           aValue = a.rating || 0;
           bValue = b.rating || 0;
-          break;
+        break;
         case 'created_at':
-        default:
+      default:
           aValue = new Date(a.created_at);
           bValue = new Date(b.created_at);
-          break;
-      }
+        break;
+    }
 
       if (sortOrder === 'asc') {
         return aValue > bValue ? 1 : -1;
@@ -142,7 +142,7 @@ const CategoriesPage = ({ onNavigateTo }) => {
     const stars = [];
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 !== 0;
-
+    
     for (let i = 0; i < fullStars; i++) {
       stars.push(
         <FontAwesomeIcon key={i} icon={faStar} className="text-warning" />
@@ -192,9 +192,9 @@ const CategoriesPage = ({ onNavigateTo }) => {
 
   return (
     <div className="container-fluid py-4">
-      <div className="row">
+        <div className="row">
         {/* Sidebar */}
-        <div className="col-lg-3 col-md-4">
+          <div className="col-lg-3 col-md-4">
           <div className="card">
             <div className="card-header">
               <h5 className="mb-0">
@@ -203,33 +203,33 @@ const CategoriesPage = ({ onNavigateTo }) => {
               </h5>
             </div>
             <div className="card-body">
-              {/* Search */}
+            {/* Search */}
               <div className="mb-3">
                 <label className="form-label">Tìm kiếm</label>
                 <div className="input-group">
-                  <input
-                    type="text"
-                    className="form-control"
+              <input
+                type="text"
+                className="form-control"
                     placeholder="Nhập từ khóa..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
                   <button className="btn btn-outline-secondary" type="button">
                     <FontAwesomeIcon icon={faSearch} />
-                  </button>
-                </div>
+                    </button>
               </div>
+            </div>
 
               {/* Categories */}
               <div className="mb-3">
                 <label className="form-label">Danh mục</label>
                 <div className="list-group list-group-flush">
-                  <button
+                <button
                     className={`list-group-item list-group-item-action ${!selectedCategory ? 'active' : ''}`}
                     onClick={handleBackToCategories}
-                  >
+                >
                     Tất cả danh mục
-                  </button>
+                </button>
                   {categories.slice(0, 8).map((category) => (
                     <button
                       key={category.category_id}
@@ -239,32 +239,32 @@ const CategoriesPage = ({ onNavigateTo }) => {
                       {category.name}
                     </button>
                   ))}
-                </div>
               </div>
+            </div>
 
-              {/* Price Range */}
+            {/* Price Range */}
               <div className="mb-3">
                 <label className="form-label">Khoảng giá</label>
                 <div className="row">
-                  <div className="col-6">
-                    <input
+                <div className="col-6">
+                  <input
                       type="number"
-                      className="form-control form-control-sm"
+                    className="form-control form-control-sm"
                       placeholder="Từ"
                       value={priceRange.min}
                       onChange={(e) => setPriceRange(prev => ({ ...prev, min: parseInt(e.target.value) || 0 }))}
-                    />
-                  </div>
-                  <div className="col-6">
-                    <input
+                  />
+                </div>
+                <div className="col-6">
+                  <input
                       type="number"
-                      className="form-control form-control-sm"
+                    className="form-control form-control-sm"
                       placeholder="Đến"
                       value={priceRange.max}
                       onChange={(e) => setPriceRange(prev => ({ ...prev, max: parseInt(e.target.value) || 1000000 }))}
-                    />
-                  </div>
+                  />
                 </div>
+              </div>
               </div>
 
               {/* Sort */}
@@ -289,9 +289,9 @@ const CategoriesPage = ({ onNavigateTo }) => {
                   <option value="asc">Tăng dần</option>
                 </select>
               </div>
+              </div>
+              </div>
             </div>
-          </div>
-        </div>
 
         {/* Main Content */}
         <div className="col-lg-9 col-md-8">
@@ -331,29 +331,29 @@ const CategoriesPage = ({ onNavigateTo }) => {
                     {filteredProducts.length} sách được tìm thấy
                   </p>
                 </div>
-                <button 
+            <button
                   className="btn btn-outline-secondary"
                   onClick={handleBackToCategories}
-                >
+            >
                   <FontAwesomeIcon icon={faSort} className="me-2" />
                   Quay lại danh mục
-                </button>
-              </div>
+            </button>
+          </div>
 
               {filteredProducts.length > 0 ? (
                 <div className="row">
-                  {filteredProducts.map((product) => (
+              {filteredProducts.map((product) => (
                     <div key={product.book_id} className="col-lg-3 col-md-4 col-sm-6 mb-4">
-                      <div 
+                  <div
                         className="card h-100 shadow-sm product-card"
-                        style={{ cursor: 'pointer' }}
+                    style={{ cursor: 'pointer' }}
                         onClick={() => handleProductClick(product.book_id)}
-                      >
-                        <div className="position-relative">
-                          <img
+                  >
+                    <div className="position-relative">
+                      <img
                             src={product.cover_image}
-                            className="card-img-top"
-                            alt={product.title}
+                        className="card-img-top"
+                        alt={product.title}
                             style={{ height: '250px', objectFit: 'cover' }}
                             onError={(e) => {
                               e.target.src = '/images/book1.jpg';
@@ -367,28 +367,28 @@ const CategoriesPage = ({ onNavigateTo }) => {
                             >
                               <FontAwesomeIcon icon={faHeart} />
                             </button>
-                          </div>
-                        </div>
+                      </div>
+                    </div>
                         
-                        <div className="card-body d-flex flex-column">
+                    <div className="card-body d-flex flex-column">
                           <h6 className="card-title text-truncate" title={product.title}>
-                            {product.title}
-                          </h6>
+                        {product.title}
+                      </h6>
                           
                           <p className="text-muted small mb-2">
                             Tác giả: {product.author}
                           </p>
                           
-                          <div className="d-flex align-items-center mb-2">
+                      <div className="d-flex align-items-center mb-2">
                             <div className="me-2">
                               {renderStars(product.rating || 0)}
                             </div>
                             <small className="text-muted">
                               ({product.reviewCount || 0} đánh giá)
                             </small>
-                          </div>
+                      </div>
                           
-                          <div className="mt-auto">
+                      <div className="mt-auto">
                             <div className="d-flex justify-content-between align-items-center mb-2">
                               <span className="h5 text-primary mb-0">
                                 {formatPrice(product.price)}
@@ -405,14 +405,14 @@ const CategoriesPage = ({ onNavigateTo }) => {
                               <FontAwesomeIcon icon={faShoppingCart} className="me-2" />
                               Thêm vào giỏ
                             </button>
-                          </div>
-                        </div>
                       </div>
                     </div>
-                  ))}
+                  </div>
                 </div>
+              ))}
+            </div>
               ) : (
-                <div className="text-center py-5">
+              <div className="text-center py-5">
                   <FontAwesomeIcon icon={faSearch} size="3x" className="text-muted mb-3" />
                   <h4>Không tìm thấy sách nào</h4>
                   <p className="text-muted">
@@ -420,8 +420,8 @@ const CategoriesPage = ({ onNavigateTo }) => {
                   </p>
                 </div>
               )}
-            </div>
-          )}
+              </div>
+            )}
         </div>
       </div>
     </div>

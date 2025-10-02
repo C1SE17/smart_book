@@ -9,24 +9,50 @@ const Cart = ({ onBackToHome, onNavigateTo }) => {
 
   const fetchCartItems = useCallback(async () => {
     setLoading(true);
-    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-
+    
     try {
-      // Use the data already stored in cart instead of calling API
-      const itemsWithDetails = cart.map((item) => {
-        return {
-          ...item,
-          book_title: item.title || `Book ${item.book_id}`,
-          author: item.author || 'Unknown Author',
-          price: item.price || 0,
-          total_price: (item.price || 0) * item.quantity,
-          image_url: item.cover_image || '/images/book1.jpg'
-        };
-      });
+      // Get user from localStorage
+      const user = JSON.parse(localStorage.getItem('user') || 'null');
+      if (!user) {
+        setCartItems([]);
+        setLoading(false);
+        return;
+      }
+
+      // Use mock API to get cart items
+      const { mockApi } = await import('../../../services/mockApi');
+      const cartData = await mockApi.getCartByUserId(user.user_id);
+      
+      // Get book details for each cart item
+      const itemsWithDetails = await Promise.all(
+        cartData.items.map(async (item) => {
+          try {
+            const book = await mockApi.getBookById(item.book_id);
+            return {
+              ...item,
+              book_title: book.title,
+              author: book.author,
+              price: book.price,
+              total_price: book.price * item.quantity,
+              image_url: book.cover_image || '/images/book1.jpg'
+            };
+          } catch (error) {
+            console.error('Error fetching book details:', error);
+            return {
+              ...item,
+              book_title: `Book ${item.book_id}`,
+              author: 'Unknown Author',
+              price: 0,
+              total_price: 0,
+              image_url: '/images/book1.jpg'
+            };
+          }
+        })
+      );
 
       setCartItems(itemsWithDetails);
     } catch (error) {
-      console.error('Error processing cart items:', error);
+      console.error('Error fetching cart items:', error);
       setCartItems([]);
     } finally {
       setLoading(false);
@@ -45,54 +71,45 @@ const Cart = ({ onBackToHome, onNavigateTo }) => {
     return () => window.removeEventListener('cartUpdated', handleCartUpdate);
   }, []); // Remove fetchCartItems dependency to avoid infinite loop
 
-  const removeFromCart = useCallback((bookId) => {
+  const removeFromCart = useCallback(async (bookId) => {
     try {
-      // Lấy giỏ hàng hiện tại từ localStorage
-      let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      const user = JSON.parse(localStorage.getItem('user') || 'null');
+      if (!user) return;
 
-      // Xóa mục có book_id khớp
-      cart = cart.filter(item => item.book_id !== bookId);
-
-      // Lưu giỏ hàng đã cập nhật vào localStorage
-      localStorage.setItem('cart', JSON.stringify(cart));
+      const { mockApi } = await import('../../../services/mockApi');
+      await mockApi.removeFromCart(user.user_id, bookId);
 
       // Refresh cart items
       fetchCartItems();
 
       // Kích hoạt sự kiện cập nhật giỏ hàng
       window.dispatchEvent(new CustomEvent('cartUpdated', {
-        detail: { cart, action: 'remove', bookId }
+        detail: { action: 'remove', bookId }
       }));
     } catch (error) {
       console.error('Error removing item from cart:', error);
     }
   }, [fetchCartItems]);
 
-  const updateQuantity = useCallback((bookId, newQuantity) => {
+  const updateQuantity = useCallback(async (bookId, newQuantity) => {
     if (newQuantity < 1) {
       removeFromCart(bookId);
       return;
     }
 
     try {
-      // Lấy giỏ hàng hiện tại từ localStorage
-      let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      const user = JSON.parse(localStorage.getItem('user') || 'null');
+      if (!user) return;
 
-      // Tìm và cập nhật số lượng mục
-      const item = cart.find(item => item.book_id === bookId);
-      if (item) {
-        item.quantity = newQuantity;
-      }
-
-      // Lưu giỏ hàng đã cập nhật vào localStorage
-      localStorage.setItem('cart', JSON.stringify(cart));
+      const { mockApi } = await import('../../../services/mockApi');
+      await mockApi.updateCartItemQuantity(user.user_id, bookId, newQuantity);
 
       // Refresh cart items
       fetchCartItems();
 
       // Kích hoạt sự kiện cập nhật giỏ hàng
       window.dispatchEvent(new CustomEvent('cartUpdated', {
-        detail: { cart, action: 'update', bookId }
+        detail: { action: 'update', bookId, newQuantity }
       }));
     } catch (error) {
       console.error('Error updating quantity:', error);

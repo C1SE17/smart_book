@@ -6,15 +6,15 @@ import Notification from './components/client/notification/Notification'
 import Slide from './components/layouts/Slide'
 import MenuClient from './components/layouts/Menu'
 import OrderDetail from './components/client/orders/OrderDetail'
-import ProductDetail from './components/client/product/ProductDetail.jsx'
+import ProductDetail from './components/client/product/ProductDetail'
 import CategoriesPage from './components/client/shop/CategoriesPage'
 import Checkout from './components/client/orders/Checkout'
 import ListOrders from './components/client/orders/ListOrders'
 import Home from './components/Home'
 import BlogPage from './components/client/blog/BlogPage'
 import BlogDetail from './components/client/blog/BlogDetail'
-import Contact from './components/client/contact/Contact.jsx'
-import AboutUs from './components/client/about/AboutUs.jsx'
+import Contact from './components/client/contact/Contact'
+import AboutUs from './components/client/about/AboutUs'
 import { AuthorPage, AuthorDetail } from './components/client/author'
 import UserProfile from './components/user/UserProfile'
 import Auth from './features/auth/Auth'
@@ -33,12 +33,30 @@ function App() {
   const [user, setUser] = useState(null); // State xác thực người dùng
   const [profileTab, setProfileTab] = useState('profile'); // State tab profile
 
-  // Khởi tạo state người dùng từ token
+  // Khởi tạo state người dùng từ localStorage
   useEffect(() => {
-    const token = getToken();
-    if (token) {
-      setUser(getUserFromToken(token));
-    }
+    const loadUser = () => {
+      const userData = localStorage.getItem('user');
+      if (userData) {
+        try {
+          const parsedUser = JSON.parse(userData);
+          console.log('Loading user from localStorage:', parsedUser);
+          setUser(parsedUser);
+        } catch (error) {
+          console.error('Error parsing user data:', error);
+          localStorage.removeItem('user');
+        }
+      }
+    };
+    
+    loadUser();
+    
+    // Listen for storage changes (when user logs in from another tab)
+    window.addEventListener('storage', loadUser);
+    
+    return () => {
+      window.removeEventListener('storage', loadUser);
+    };
   }, []);
 
   // Xử lý định tuyến URL
@@ -69,7 +87,17 @@ function App() {
 
   const handleLoginSuccess = useCallback((userData) => {
     console.log('User logged in:', userData);
-    setUser(userData); // Lưu dữ liệu người dùng
+    // Reload user from localStorage after login
+    const userDataFromStorage = localStorage.getItem('user');
+    if (userDataFromStorage) {
+      try {
+        const parsedUser = JSON.parse(userDataFromStorage);
+        console.log('Setting user after login:', parsedUser);
+        setUser(parsedUser);
+      } catch (error) {
+        console.error('Error parsing user data after login:', error);
+      }
+    }
     navigateTo('/'); // Chuyển hướng về trang chủ sau khi đăng nhập
     setSearchQuery(''); // Xóa tìm kiếm
     setProductId(null); // Xóa ID sản phẩm

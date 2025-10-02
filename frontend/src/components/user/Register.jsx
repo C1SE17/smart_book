@@ -75,8 +75,9 @@ const Register = ({ onToggleMode, onRegisterSuccess }) => {
     setLoading(true);
     
     try {
-      // Gọi API backend để đăng ký
-      const response = await userService.register({
+      // Gọi mock API để đăng ký
+      const { mockApi } = await import('../../services/mockApi');
+      const response = await mockApi.register({
         name: formData.fullName,
         email: formData.email,
         password: formData.password,

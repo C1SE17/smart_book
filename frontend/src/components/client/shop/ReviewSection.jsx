@@ -1,13 +1,45 @@
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faStar, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faStar, faUser, faThumbsUp, faThumbsDown } from '@fortawesome/free-solid-svg-icons';
 
 const ReviewSection = ({ productId, reviews = [], loading = false }) => {
   const [newReview, setNewReview] = useState({
     rating: 5,
     review_text: ''
   });
+  const [newComment, setNewComment] = useState({
+    name: '',
+    comment: ''
+  });
   const [submitting, setSubmitting] = useState(false);
+  const [comments, setComments] = useState([
+    {
+      id: 1,
+      user: "Nguyễn Thị D",
+      date: "2024-01-20",
+      question: "Sách này có phù hợp với người mới bắt đầu không?",
+      likes: 5,
+      dislikes: 1,
+      adminReply: {
+        user: "Admin",
+        date: "2024-01-21",
+        content: "Có, sách này rất phù hợp với người mới bắt đầu. Tác giả giải thích rất chi tiết và dễ hiểu."
+      }
+    },
+    {
+      id: 2,
+      user: "Phạm Văn E",
+      date: "2024-01-18",
+      question: "Có thể đổi trả sách nếu không hài lòng không?",
+      likes: 3,
+      dislikes: 0,
+      adminReply: {
+        user: "Admin",
+        date: "2024-01-19",
+        content: "Chúng tôi có chính sách đổi trả trong vòng 7 ngày nếu sách còn nguyên vẹn."
+      }
+    }
+  ]);
 
   // Handle review submission
   const handleSubmitReview = async (e) => {
@@ -41,6 +73,25 @@ const ReviewSection = ({ productId, reviews = [], loading = false }) => {
     }
   };
 
+  // Handle comment submission
+  const handleSubmitComment = (e) => {
+    e.preventDefault();
+    if (!newComment.name.trim() || !newComment.comment.trim()) return;
+
+    const newCommentData = {
+      id: comments.length + 1,
+      user: newComment.name,
+      date: new Date().toISOString().split('T')[0],
+      question: newComment.comment,
+      likes: 0,
+      dislikes: 0
+    };
+
+    setComments(prev => [...prev, newCommentData]);
+    setNewComment({ name: '', comment: '' });
+    alert('Bình luận đã được gửi thành công!');
+  };
+
   // Calculate average rating
   const averageRating = reviews.length > 0 
     ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length 
@@ -63,34 +114,6 @@ const ReviewSection = ({ productId, reviews = [], loading = false }) => {
     return stars;
   };
 
-  // Render star distribution
-  const renderStarDistribution = () => {
-    const distribution = [5, 4, 3, 2, 1].map(star => ({
-      stars: star,
-      count: reviews.filter(r => r.rating === star).length,
-      percentage: reviews.length > 0 ? (reviews.filter(r => r.rating === star).length / reviews.length) * 100 : 0
-    }));
-
-    return (
-      <div className="star-distribution">
-        {distribution.map(({ stars, count, percentage }) => (
-          <div key={stars} className="d-flex align-items-center mb-2">
-            <div className="me-2">
-              {renderStars(stars)}
-            </div>
-            <div className="progress flex-grow-1 me-2" style={{ height: '8px' }}>
-              <div
-                className="progress-bar bg-warning"
-                style={{ width: `${percentage}%` }}
-              ></div>
-            </div>
-            <small className="text-muted">{count}</small>
-          </div>
-        ))}
-      </div>
-    );
-  };
-
   if (loading) {
     return (
       <div className="text-center py-4">
@@ -104,78 +127,9 @@ const ReviewSection = ({ productId, reviews = [], loading = false }) => {
 
   return (
     <div className="reviews-section">
-      <h5 className="mb-4">Đánh giá sản phẩm</h5>
-      
-      {/* Rating Summary */}
-      <div className="row mb-4">
-        <div className="col-md-4">
-          <div className="text-center">
-            <div className="display-4 text-primary mb-2">
-              {averageRating.toFixed(1)}
-            </div>
-            <div className="mb-2">
-              {renderStars(Math.round(averageRating))}
-            </div>
-            <p className="text-muted mb-0">
-              Dựa trên {reviews.length} đánh giá
-            </p>
-          </div>
-        </div>
-        <div className="col-md-8">
-          {renderStarDistribution()}
-        </div>
-      </div>
-
-      {/* Add Review Form */}
-      <div className="card mb-4">
-        <div className="card-header">
-          <h6 className="mb-0">Viết đánh giá của bạn</h6>
-        </div>
-        <div className="card-body">
-          <form onSubmit={handleSubmitReview}>
-            <div className="mb-3">
-              <label className="form-label">Đánh giá của bạn</label>
-              <div className="d-flex align-items-center">
-                <div className="me-3">
-                  {renderStars(newReview.rating, true, (rating) => 
-                    setNewReview(prev => ({ ...prev, rating }))
-                  )}
-                </div>
-                <span className="text-muted">
-                  {newReview.rating === 1 ? 'Rất tệ' :
-                   newReview.rating === 2 ? 'Tệ' :
-                   newReview.rating === 3 ? 'Bình thường' :
-                   newReview.rating === 4 ? 'Tốt' : 'Rất tốt'}
-                </span>
-              </div>
-            </div>
-            
-            <div className="mb-3">
-              <label className="form-label">Nhận xét</label>
-              <textarea
-                className="form-control"
-                rows="4"
-                placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm này..."
-                value={newReview.review_text}
-                onChange={(e) => setNewReview(prev => ({ ...prev, review_text: e.target.value }))}
-                required
-              ></textarea>
-            </div>
-            
-            <button
-              type="submit"
-              className="btn btn-primary"
-              disabled={submitting || !newReview.review_text.trim()}
-            >
-              {submitting ? 'Đang gửi...' : 'Gửi đánh giá'}
-            </button>
-          </form>
-        </div>
-      </div>
-
-      {/* Reviews List */}
-      <div className="reviews-list">
-        <h6 className="mb-3">Tất cả đánh giá ({reviews.length})</h6>
+      {/* Product Reviews Section */}
+      <div className="mb-5">
+        <h5 className="mb-4 fw-bold">Đánh giá sản phẩm</h5>
         
         {reviews.length === 0 ? (
           <div className="text-center py-4">
@@ -186,7 +140,7 @@ const ReviewSection = ({ productId, reviews = [], loading = false }) => {
         ) : (
           <div className="reviews">
             {reviews.map((review) => (
-              <div key={review.review_id} className="card mb-3">
+              <div key={review.review_id} className="card mb-3" style={{ backgroundColor: '#f8f9fa', border: 'none' }}>
                 <div className="card-body">
                   <div className="d-flex align-items-center mb-2">
                     <div className="avatar me-3">
@@ -205,14 +159,119 @@ const ReviewSection = ({ productId, reviews = [], loading = false }) => {
                         </small>
                       </div>
                     </div>
+                    <div className="d-flex align-items-center">
+                      <small className="text-muted me-3">
+                        Đánh giá này có hữu ích không?
+                      </small>
+                      <button className="btn btn-sm btn-outline-secondary me-2">
+                        <FontAwesomeIcon icon={faThumbsUp} className="me-1" />
+                        Hữu ích (12)
+                      </button>
+                    </div>
                   </div>
-                  
                   <p className="mb-0">{review.review_text}</p>
                 </div>
               </div>
             ))}
           </div>
         )}
+      </div>
+
+      {/* Comments Section */}
+      <div className="mb-5">
+        <h5 className="mb-4 fw-bold">Bình luận ({comments.length})</h5>
+        
+        {/* Comments List */}
+        <div className="comments">
+          {comments.map((comment) => (
+            <div key={comment.id} className="card mb-3" style={{ backgroundColor: '#f8f9fa', border: 'none' }}>
+              <div className="card-body">
+                {/* User Question */}
+                <div className="mb-3">
+                  <div className="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                      <strong>{comment.user}</strong>
+                      <small className="text-muted ms-2">{comment.date}</small>
+                    </div>
+                    <div className="d-flex align-items-center">
+                      <button className="btn btn-sm btn-outline-secondary me-2">
+                        <FontAwesomeIcon icon={faThumbsUp} className="me-1" />
+                        {comment.likes}
+                      </button>
+                      <button className="btn btn-sm btn-outline-secondary">
+                        <FontAwesomeIcon icon={faThumbsDown} className="me-1" />
+                        {comment.dislikes}
+                      </button>
+                    </div>
+                  </div>
+                  <p className="mb-2">{comment.question}</p>
+                  <div className="text-muted small">
+                    Chỉ admin mới có thể trả lời bình luận
+                  </div>
+                </div>
+
+                {/* Admin Reply */}
+                {comment.adminReply && (
+                  <div className="border-start border-3 border-primary ps-3">
+                    <div className="d-flex align-items-center mb-2">
+                      <strong className="me-2">{comment.adminReply.user}</strong>
+                      <span className="badge bg-primary">Admin</span>
+                      <small className="text-muted ms-2">{comment.adminReply.date}</small>
+                    </div>
+                    <p className="mb-0">{comment.adminReply.content}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Comment Form */}
+        <div className="card" style={{ backgroundColor: '#f8f9fa', border: 'none' }}>
+          <div className="card-body">
+            <form onSubmit={handleSubmitComment}>
+              <div className="mb-3">
+                <label htmlFor="commentName" className="form-label fw-medium">
+                  Tên của bạn <span className="text-danger">*</span>
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="commentName"
+                  placeholder="Nhập tên của bạn"
+                  value={newComment.name}
+                  onChange={(e) => setNewComment(prev => ({ ...prev, name: e.target.value }))}
+                  required
+                  style={{ backgroundColor: 'white', border: '1px solid #e9ecef' }}
+                />
+              </div>
+              
+              <div className="mb-3">
+                <label htmlFor="commentText" className="form-label fw-medium">
+                  Bình luận <span className="text-danger">*</span>
+                </label>
+                <textarea
+                  className="form-control"
+                  id="commentText"
+                  rows="4"
+                  placeholder="Viết bình luận của bạn..."
+                  value={newComment.comment}
+                  onChange={(e) => setNewComment(prev => ({ ...prev, comment: e.target.value }))}
+                  required
+                  style={{ backgroundColor: 'white', border: '1px solid #e9ecef' }}
+                ></textarea>
+              </div>
+              
+              <button 
+                type="submit"
+                className="btn btn-dark"
+                disabled={!newComment.name.trim() || !newComment.comment.trim()}
+              >
+                Gửi bình luận
+              </button>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
   );

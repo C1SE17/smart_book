@@ -135,47 +135,47 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch 
         <div className="col-12">
           {/* Search Header */}
           <div className="d-flex align-items-center mb-4">
-            <button 
+                    <button
               className="btn btn-outline-secondary me-3"
-              onClick={onBackToHome}
+                      onClick={onBackToHome}
             >
               <FontAwesomeIcon icon={faTimes} className="me-2" />
               Quay lại
-            </button>
+                    </button>
             <h2 className="mb-0">Tìm kiếm sách</h2>
-          </div>
+                </div>
 
           {/* Search Form */}
           <form onSubmit={handleSearchSubmit} className="mb-4">
             <div className="input-group">
-              <input
-                type="text"
-                className="form-control form-control-lg"
+                    <input
+                      type="text"
+                      className="form-control form-control-lg"
                 placeholder="Nhập tên sách, tác giả hoặc từ khóa..."
-                value={searchQuery}
+                      value={searchQuery}
                 onChange={handleSearchChange}
-              />
-              <button 
+                    />
+                    <button
                 className="btn btn-primary btn-lg" 
                 type="submit"
                 disabled={searchLoading}
               >
                 <FontAwesomeIcon icon={faSearch} className="me-2" />
                 {searchLoading ? 'Đang tìm...' : 'Tìm kiếm'}
-              </button>
+                    </button>
               {searchQuery && (
-                <button 
+                        <button
                   className="btn btn-outline-secondary btn-lg" 
                   type="button"
                   onClick={handleClearSearch}
                 >
                   <FontAwesomeIcon icon={faTimes} />
-                </button>
-              )}
-            </div>
+                        </button>
+                )}
+              </div>
           </form>
 
-          {/* Search Results */}
+        {/* Search Results */}
           {hasSearched && (
             <div className="search-results">
               {searchLoading ? (
@@ -192,7 +192,7 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch 
                   </div>
                   
                   <div className="row">
-                    {searchResults.map((book) => (
+                  {searchResults.map((book) => (
                       <div key={book.book_id} className="col-lg-3 col-md-4 col-sm-6 mb-4">
                         <div 
                           className="card h-100 shadow-sm book-card"
@@ -200,10 +200,10 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch 
                           onClick={() => handleBookClick(book.book_id)}
                         >
                           <div className="position-relative">
-                            <img
-                              src={book.cover_image}
-                              className="card-img-top"
-                              alt={book.title}
+                        <img
+                          src={book.cover_image}
+                          className="card-img-top"
+                          alt={book.title}
                               style={{ height: '250px', objectFit: 'cover' }}
                               onError={(e) => {
                                 e.target.src = '/images/book1.jpg';
@@ -220,11 +220,11 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch 
                             </div>
                           </div>
                           
-                          <div className="card-body d-flex flex-column">
+                        <div className="card-body d-flex flex-column">
                             <h6 className="card-title text-truncate" title={book.title}>
-                              {book.title}
-                            </h6>
-                            
+                            {book.title}
+                          </h6>
+                          
                             <p className="text-muted small mb-2">
                               Tác giả: {book.author}
                             </p>
@@ -242,25 +242,25 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch 
                               <div className="d-flex justify-content-between align-items-center mb-2">
                                 <span className="h5 text-primary mb-0">
                                   {formatPrice(book.price)}
-                                </span>
+                            </span>
                                 <small className="text-muted">
                                   Còn {book.stock} cuốn
                                 </small>
-                              </div>
-                              
-                              <button
+                          </div>
+
+                          <button
                                 className="btn btn-primary w-100"
                                 onClick={(e) => handleAddToCart(e, book.book_id)}
                               >
                                 <FontAwesomeIcon icon={faShoppingCart} className="me-2" />
-                                Thêm vào giỏ
-                              </button>
+                            Thêm vào giỏ
+                          </button>
                             </div>
-                          </div>
                         </div>
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  ))}
+                </div>
                 </>
               ) : (
                 <div className="text-center py-5">
@@ -283,8 +283,8 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch 
               <p className="text-muted">
                 Nhập tên sách, tác giả hoặc từ khóa để bắt đầu tìm kiếm
               </p>
-            </div>
-          )}
+          </div>
+        )}
         </div>
       </div>
     </div>

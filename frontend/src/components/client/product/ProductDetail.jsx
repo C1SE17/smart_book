@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faStar, faShoppingCart, faHeart, faShare, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { faStar, faShoppingCart, faHeart, faShare, faArrowLeft, faCheck, faTimes } from '@fortawesome/free-solid-svg-icons';
 import ReviewSection from '../shop/ReviewSection';
 import ProductRating from './ProductRating';
 
@@ -9,7 +9,17 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [reviews, setReviews] = useState([]);
+  const [recommendations, setRecommendations] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+
+  // Show toast notification
+  const showToast = (message, type = 'success') => {
+    setToast({ show: true, message, type });
+    setTimeout(() => {
+      setToast({ show: false, message: '', type: 'success' });
+    }, 3000);
+  };
 
   // Fetch product data
   useEffect(() => {
@@ -31,6 +41,22 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
 
     fetchProduct();
   }, [productId]);
+
+  // Fetch recommendations
+  useEffect(() => {
+    const fetchRecommendations = async () => {
+      try {
+        const { mockApi } = await import('../../../services/mockApi');
+        const response = await mockApi.getBooks({ limit: 4 });
+        setRecommendations(response.data);
+      } catch (error) {
+        console.error('Error fetching recommendations:', error);
+        setRecommendations([]);
+      }
+    };
+
+    fetchRecommendations();
+  }, []);
 
   // Fetch reviews
   useEffect(() => {
@@ -62,13 +88,33 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
   };
 
   // Handle add to cart
-  const handleAddToCart = () => {
-    if (user) {
-      // TODO: Implement add to cart with user authentication
-      console.log('Add to cart:', productId, quantity);
-    } else {
-      // Redirect to login
+  const handleAddToCart = async () => {
+    console.log('Current user state:', user);
+    console.log('User from localStorage:', localStorage.getItem('user'));
+    
+    if (!user) {
+      console.log('User not logged in');
+      showToast('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng.', 'error');
       onNavigateTo('auth')();
+      return;
+    }
+    if (!product) {
+      console.log('No product available');
+      return;
+    }
+
+    try {
+      console.log('Adding to cart:', { userId: user.user_id, bookId: product.book_id, quantity });
+      const { mockApi } = await import('../../../services/mockApi');
+      await mockApi.addToCart(user.user_id, product.book_id, quantity);
+      console.log('Successfully added to cart');
+      showToast(`${quantity} x "${product.title}" đã được thêm vào giỏ hàng!`, 'success');
+      
+      // Dispatch event to update cart count in menu
+      window.dispatchEvent(new CustomEvent('cartUpdated'));
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      showToast('Không thể thêm sản phẩm vào giỏ hàng.', 'error');
     }
   };
 
@@ -77,9 +123,38 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
     if (user) {
       // TODO: Implement add to wishlist
       console.log('Add to wishlist:', productId);
-    } else {
+      } else {
       // Redirect to login
       onNavigateTo('auth')();
+    }
+  };
+
+  // Handle checkout
+  const handleCheckout = async () => {
+    if (!user) {
+      showToast('Vui lòng đăng nhập để thanh toán.', 'error');
+      onNavigateTo('auth')();
+      return;
+    }
+    if (!product) return;
+
+    try {
+      // Add to cart first, then redirect to checkout
+      await handleAddToCart();
+      // Navigate to checkout page
+      onNavigateTo('checkout')();
+    } catch (error) {
+      console.error('Error in checkout:', error);
+    }
+  };
+
+  // Handle book click in recommendations
+  const handleBookClick = (bookId) => {
+    if (onNavigateToProduct) {
+      onNavigateToProduct(bookId);
+    } else {
+      // Fallback: navigate to product page
+      window.location.href = `/product?id=${bookId}`;
     }
   };
 
@@ -91,7 +166,7 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
         text: product?.description,
         url: window.location.href
       });
-    } else {
+        } else {
       // Fallback: copy to clipboard
       navigator.clipboard.writeText(window.location.href);
       alert('Link đã được sao chép!');
@@ -197,109 +272,135 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
         {/* Product Image */}
         <div className="col-lg-6">
           <div className="product-image-container">
-            <img
+          <img
               src={product.cover_image}
               className="img-fluid rounded shadow"
-              alt={product.title}
-              style={{ width: '100%', maxHeight: '500px', objectFit: 'cover' }}
+            alt={product.title}
+              style={{ width: '100%', maxHeight: '350px', objectFit: 'cover' }}
               onError={(e) => {
                 e.target.src = '/images/book1.jpg';
               }}
-            />
-          </div>
+          />
+        </div>
         </div>
 
         {/* Product Info */}
         <div className="col-lg-6">
           <div className="product-info">
-            <h1 className="product-title mb-3">{product.title}</h1>
+            <h2 className="product-title mb-2" style={{ fontSize: '1.5rem' }}>{product.title}</h2>
             
-            <div className="product-meta mb-3">
-              <p className="text-muted mb-1">
+            <div className="product-meta mb-2">
+              <p className="text-muted mb-1 small">
                 <strong>Tác giả:</strong> {product.author}
               </p>
-              <p className="text-muted mb-1">
+              <p className="text-muted mb-1 small">
                 <strong>Nhà xuất bản:</strong> {product.publisher}
               </p>
-              <p className="text-muted mb-1">
+              <p className="text-muted mb-1 small">
                 <strong>Danh mục:</strong> {product.category}
               </p>
             </div>
 
             {/* Rating */}
-            <div className="product-rating mb-3">
+            <div className="product-rating mb-2">
               <div className="d-flex align-items-center">
                 <div className="me-2">
                   {renderStars(product.rating || 0)}
                 </div>
-                <span className="text-muted">
-                  ({product.reviewCount || 0} đánh giá)
-                </span>
+                <span className="text-muted small">
+                  {product.rating || 0} ({product.reviewCount || 0} đánh giá)
+              </span>
               </div>
             </div>
 
             {/* Price */}
-            <div className="product-price mb-4">
-              <h2 className="text-primary mb-0">{formatPrice(product.price)}</h2>
-              <small className="text-muted">
-                Còn {product.stock} cuốn trong kho
-              </small>
+            <div className="product-price mb-3">
+              <h3 className="text-dark mb-0 fw-bold" style={{ fontSize: '1.5rem' }}>{formatPrice(product.price)}</h3>
             </div>
 
-            {/* Quantity and Actions */}
-            <div className="product-actions mb-4">
-              <div className="row align-items-center">
-                <div className="col-md-4">
-                  <label className="form-label">Số lượng:</label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    min="1"
-                    max={product.stock}
-                    value={quantity}
-                    onChange={handleQuantityChange}
-                  />
-                </div>
-                <div className="col-md-8">
-                  <div className="d-grid gap-2 d-md-flex">
-                    <button
-                      className="btn btn-primary btn-lg flex-fill"
-                      onClick={handleAddToCart}
-                      disabled={product.stock === 0}
-                    >
-                      <FontAwesomeIcon icon={faShoppingCart} className="me-2" />
-                      {product.stock === 0 ? 'Hết hàng' : 'Thêm vào giỏ'}
-                    </button>
-                    <button
-                      className="btn btn-outline-danger"
-                      onClick={handleAddToWishlist}
-                      title="Thêm vào yêu thích"
-                    >
-                      <FontAwesomeIcon icon={faHeart} />
-                    </button>
-                    <button
-                      className="btn btn-outline-secondary"
-                      onClick={handleShare}
-                      title="Chia sẻ"
-                    >
-                      <FontAwesomeIcon icon={faShare} />
-                    </button>
-                  </div>
-                </div>
+            {/* Quantity Selector */}
+            <div className="quantity-selector mb-3">
+              <div className="d-flex align-items-center" style={{ maxWidth: '180px' }}>
+                <button 
+                  className="btn btn-outline-secondary btn-sm"
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  style={{ width: '35px', height: '35px' }}
+                >
+                  -
+                </button>
+                <input
+                  className="form-control text-center mx-2"
+                  min="1"
+                  max={product.stock}
+                  value={quantity}
+                  onChange={handleQuantityChange}
+                  style={{ width: '50px', height: '35px', fontSize: '0.9rem' }}
+                />
+                <button 
+                  className="btn btn-outline-secondary btn-sm"
+                  onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
+                  style={{ width: '35px', height: '35px' }}
+                >
+                  +
+                </button>
               </div>
             </div>
 
+            {/* Action Buttons */}
+            <div className="product-actions mb-3">
+              <div className="d-grid gap-2">
+                <button
+                  className="btn btn-dark"
+                  onClick={handleAddToCart}
+                  disabled={product.stock === 0}
+                  style={{ height: '40px', fontSize: '1rem' }}
+                >
+                  <FontAwesomeIcon icon={faShoppingCart} className="me-2" />
+                  Thêm giỏ hàng
+                </button>
+                <button
+                  className="btn btn-success"
+                  onClick={handleCheckout}
+                  disabled={product.stock === 0}
+                  style={{ height: '40px', fontSize: '1rem' }}
+                >
+                  Thanh toán
+                </button>
+              </div>
+            </div>
+
+            {/* Product Meta */}
+            <div className="product-meta mb-3">
+            <div className="row">
+              <div className="col-6">
+                <small className="text-muted">
+                  <strong>Author:</strong> {product.author}
+                </small>
+              </div>
+              <div className="col-6">
+                <small className="text-muted">
+                  <strong>Company:</strong> {product.publisher}
+                </small>
+              </div>
+              <div className="col-12 mt-1">
+                <small className="text-muted">
+                  <strong>Tags:</strong> book
+                </small>
+              </div>
+            </div>
+          </div>
+
             {/* Description */}
             <div className="product-description">
-              <h5>Mô tả sản phẩm</h5>
-              <p className="text-muted">{product.description}</p>
+              <h6 className="fw-bold mb-2">Description</h6>
+              <p className="text-muted small">{product.description}</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Product Details Tabs */}
-      <div className="row mt-5">
+      <div className="row mt-4">
         <div className="col-12">
           <ul className="nav nav-tabs" id="productTabs" role="tablist">
             <li className="nav-item" role="presentation">
@@ -341,7 +442,7 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
             >
               <div className="p-4">
                 <h5>Thông tin chi tiết</h5>
-                <div className="row">
+            <div className="row">
                   <div className="col-md-6">
                     <table className="table table-borderless">
                       <tbody>
@@ -389,7 +490,7 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
                 </div>
               </div>
             </div>
-            
+
             <div
               className="tab-pane fade"
               id="reviews"
@@ -397,16 +498,172 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
               aria-labelledby="reviews-tab"
             >
               <div className="p-4">
+                {/* Overall Rating Summary */}
+                <div className="rating-summary mb-4">
+                  <div className="row">
+                    <div className="col-md-4">
+                      <div className="text-center">
+                        <div className="display-4 text-info mb-2 fw-bold">
+                          {product.rating || 0}
+                        </div>
+                        <div className="mb-2">
+                          {renderStars(product.rating || 0)}
+                        </div>
+                        <p className="text-muted mb-0">
+                          ({product.reviewCount || 0} đánh giá)
+                        </p>
+                      </div>
+                    </div>
+                    <div className="col-md-8">
+                      <div className="star-distribution">
+                        {[5, 4, 3, 2, 1].map(star => {
+                          const count = reviews.filter(r => r.rating === star).length;
+                          const percentage = reviews.length > 0 ? (count / reviews.length) * 100 : 0;
+                          return (
+                            <div key={star} className="d-flex align-items-center mb-2">
+                              <div className="me-2">
+                                {renderStars(star)}
+                              </div>
+                              <div className="progress flex-grow-1 me-2" style={{ height: '8px' }}>
+                                <div 
+                                  className="progress-bar bg-warning" 
+                                  style={{ width: `${percentage}%` }}
+                                ></div>
+                              </div>
+                              <small className="text-muted">{count}</small>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <ReviewSection 
                   productId={productId}
                   reviews={reviews}
                   loading={reviewsLoading}
                 />
+                  </div>
+                </div>
               </div>
-            </div>
+        </div>
+      </div>
+
+      {/* Recommendations Section */}
+      <div className="recommendations-section mt-4">
+        <div className="container-fluid">
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <h5 className="fw-bold mb-0">Recommendations</h5>
+            <a href="#" className="text-decoration-none text-dark">
+              View All <span className="ms-1">→</span>
+            </a>
+          </div>
+          
+          <div className="row">
+            {recommendations.map((book) => (
+              <div key={book.book_id} className="col-lg-3 col-md-4 col-sm-6 mb-4">
+                <div className="card h-100 border-0 shadow-sm">
+                  <div className="card-img-top position-relative">
+                    <img
+                      src={book.cover_image}
+                      className="img-fluid"
+                      alt={book.title}
+                      style={{ height: '200px', objectFit: 'cover', width: '100%' }}
+                      onError={(e) => {
+                        e.target.src = '/images/book1.jpg';
+                      }}
+                    />
+                  </div>
+                  <div className="card-body d-flex flex-column">
+                    <h6 className="card-title fw-bold mb-2" style={{ fontSize: '0.9rem' }}>
+                      {book.title}
+                    </h6>
+                    <p className="text-muted small mb-2">{book.author}</p>
+                    <div className="d-flex align-items-center mb-2">
+                      <div className="me-1">
+                        {renderStars(book.rating || 0)}
+                      </div>
+                    </div>
+                    <div className="mt-auto">
+                      <div className="fw-bold text-dark">
+                        {formatPrice(book.price)}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="card-footer bg-transparent border-0 p-3">
+                    <button
+                      className="btn btn-outline-primary btn-sm w-100"
+                      onClick={() => handleBookClick(book.book_id)}
+                    >
+                      Xem chi tiết
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
+
+      {/* Toast Notification */}
+      {toast.show && (
+        <div 
+          className={`toast-notification ${toast.type === 'success' ? 'toast-success' : 'toast-error'}`}
+          style={{
+            position: 'fixed',
+            top: '20px',
+            right: '20px',
+            zIndex: 9999,
+            minWidth: '300px',
+            padding: '16px 20px',
+            borderRadius: '8px',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            animation: 'slideInRight 0.3s ease-out',
+            backgroundColor: toast.type === 'success' ? '#10b981' : '#ef4444',
+            color: 'white',
+            fontSize: '14px',
+            fontWeight: '500'
+          }}
+        >
+          <FontAwesomeIcon 
+            icon={toast.type === 'success' ? faCheck : faTimes} 
+            style={{ fontSize: '16px' }}
+          />
+          <span>{toast.message}</span>
+          <button
+            onClick={() => setToast({ show: false, message: '', type: 'success' })}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'white',
+              fontSize: '18px',
+              cursor: 'pointer',
+              marginLeft: 'auto',
+              padding: '0',
+              opacity: '0.8'
+            }}
+          >
+            ×
+          </button>
+        </div>
+      )}
+
+      <style>{`
+        @keyframes slideInRight {
+          from {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+      `}</style>
     </div>
   );
 };

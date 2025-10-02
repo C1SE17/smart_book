@@ -58,8 +58,9 @@ const Login = ({ onToggleMode, onLoginSuccess, onForgotPassword }) => {
     setLoading(true);
     
     try {
-      // Gọi API backend để đăng nhập
-      const response = await userService.login({
+      // Gọi mock API để đăng nhập
+      const { mockApi } = await import('../../services/mockApi');
+      const response = await mockApi.login({
         email: formData.email,
         password: formData.password
       });
@@ -75,10 +76,21 @@ const Login = ({ onToggleMode, onLoginSuccess, onForgotPassword }) => {
       // Lưu token vào localStorage
       localStorage.setItem('userToken', response.token);
       
-      // Gọi callback thành công với dữ liệu user từ backend
+      // Lưu thông tin user đầy đủ từ mock API
+      const userData = {
+        user_id: response.user.user_id,
+        email: response.user.email,
+        name: response.user.name, // Sử dụng tên thực từ đăng ký
+        phone: response.user.phone,
+        address: response.user.address,
+        token: response.token
+      };
+      localStorage.setItem('user', JSON.stringify(userData));
+      
+      // Gọi callback thành công với dữ liệu user từ mock API
       if (onLoginSuccess) {
         onLoginSuccess({
-          token: response.token,
+          ...userData,
           isLoggedIn: true
         });
       }

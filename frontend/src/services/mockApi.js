@@ -48,7 +48,10 @@ const authors = [
   { author_id: 12, name: "J.K. Rowling", slug: "jk-rowling", bio: "Tác giả Harry Potter." },
   { author_id: 13, name: "Trang Hạ", slug: "trang-ha", bio: "Tác giả sách dành cho phụ nữ." },
   { author_id: 14, name: "Minh Nhật", slug: "minh-nhat", bio: "Nhà văn trẻ Việt Nam." },
-  { author_id: 15, name: "Agatha Christie", slug: "agatha-christie", bio: "Nữ hoàng trinh thám, tác giả Hercule Poirot." }
+  { author_id: 15, name: "Agatha Christie", slug: "agatha-christie", bio: "Nữ hoàng trinh thám, tác giả Hercule Poirot." },
+  { author_id: 16, name: "Delia Owens", slug: "delia-owens", bio: "Tác giả người Mỹ, nổi tiếng với Where the Crawdads Sing." },
+  { author_id: 17, name: "Fujiko F. Fujio", slug: "fujiko-f-fujio", bio: "Tác giả manga Doraemon." },
+  { author_id: 18, name: "Koyoharu Gotouge", slug: "koyoharu-gotouge", bio: "Tác giả manga Demon Slayer - Kimetsu No Yaiba." }
 ];
 
 // Dữ liệu từ SQL - Publishers
@@ -72,61 +75,61 @@ const publishers = [
 const books = [
   {
     book_id: 1,
-    title: "Đắc Nhân Tâm - Bản in 1",
-    description: "Sách kỹ năng sống kinh điển",
-    category_id: 1,
+    title: "WHERE THE CRAWDADS SING",
+    description: "A novel by Delia Owens - #1 New York Times Bestseller",
+    category_id: 2,
     publisher_id: 5,
-    author_id: 1,
-    price: 120000,
+    author_id: 16,
+    price: 350000,
     stock: 100,
     published_date: "2020-01-01",
     cover_image: "/images/book1.jpg",
-    slug: "ac-nhan-tam-ban-in-1",
+    slug: "where-the-crawdads-sing",
     created_at: "2024-01-01T00:00:00Z",
     updated_at: "2024-01-01T00:00:00Z"
   },
   {
     book_id: 2,
-    title: "Tuổi Trẻ Đáng Giá Bao Nhiêu - Bản in 1",
-    description: "Sách truyền cảm hứng dành cho giới trẻ",
-    category_id: 1,
-    publisher_id: 5,
-    author_id: 1,
-    price: 85000,
+    title: "Doraemon: Nobita's Little Star Wars",
+    description: "Manga truyện tranh Doraemon tập 8",
+    category_id: 26,
+    publisher_id: 2,
+    author_id: 17,
+    price: 280000,
     stock: 80,
     published_date: "2020-01-01",
     cover_image: "/images/book2.jpg",
-    slug: "tuoi-tre-ang-gia-bao-nhieu-ban-in-1",
+    slug: "doraemon-nobita-little-star-wars",
     created_at: "2024-01-01T00:00:00Z",
     updated_at: "2024-01-01T00:00:00Z"
   },
   {
     book_id: 3,
-    title: "Harry Potter và Hòn Đá Phù Thủy - Bản in 1",
-    description: "Tập 1 của bộ Harry Potter",
-    category_id: 9,
-    publisher_id: 12,
-    author_id: 12,
+    title: "Demon Slayer - Kimetsu No Yaiba",
+    description: "Manga truyện tranh Diệt Quỷ tập 1",
+    category_id: 26,
+    publisher_id: 2,
+    author_id: 18,
     price: 150000,
     stock: 50,
     published_date: "2020-01-01",
     cover_image: "/images/book3.jpg",
-    slug: "harry-potter-va-hon-a-phu-thuy-ban-in-1",
+    slug: "demon-slayer-kimetsu-no-yaiba",
     created_at: "2024-01-01T00:00:00Z",
     updated_at: "2024-01-01T00:00:00Z"
   },
   {
     book_id: 4,
-    title: "Harry Potter và Phòng Chứa Bí Mật - Bản in 1",
-    description: "Tập 2 của bộ Harry Potter",
-    category_id: 9,
-    publisher_id: 12,
-    author_id: 12,
-    price: 155000,
+    title: "Conan - Fu Jin Nobunaga 450",
+    description: "Manga truyện tranh Detective Conan tập 450",
+    category_id: 26,
+    publisher_id: 2,
+    author_id: 4,
+    price: 180000,
     stock: 50,
     published_date: "2020-01-01",
     cover_image: "/images/book4.jpg",
-    slug: "harry-potter-va-phong-chua-bi-mat-ban-in-1",
+    slug: "conan-fu-jin-nobunaga-450",
     created_at: "2024-01-01T00:00:00Z",
     updated_at: "2024-01-01T00:00:00Z"
   },
@@ -598,6 +601,64 @@ export const mockApi = {
   },
 
   // Users API
+  register: async (userData) => {
+    const { name, email, password, phone, address } = userData;
+    
+    // Check if email already exists
+    const existingUser = users.find(u => u.email === email);
+    if (existingUser) {
+      return Promise.reject(new Error('Email đã được sử dụng'));
+    }
+    
+    // Create new user
+    const newUser = {
+      user_id: users.length + 1,
+      name: name,
+      email: email,
+      phone: phone || '',
+      address: address || '',
+      role: 'customer',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    
+    users.push(newUser);
+    
+    // Generate mock token
+    const token = `mock_token_${newUser.user_id}_${Date.now()}`;
+    
+    return {
+      user: newUser,
+      token: token,
+      message: 'Đăng ký thành công'
+    };
+  },
+
+  login: async (credentials) => {
+    const { email, password } = credentials;
+    
+    // Find user by email
+    const user = users.find(u => u.email === email);
+    if (!user) {
+      return Promise.reject(new Error('Email hoặc mật khẩu không đúng'));
+    }
+    
+    // In real app, you would verify password hash
+    // For mock, we'll just check if password is provided
+    if (!password) {
+      return Promise.reject(new Error('Vui lòng nhập mật khẩu'));
+    }
+    
+    // Generate mock token
+    const token = `mock_token_${user.user_id}_${Date.now()}`;
+    
+    return {
+      user: user,
+      token: token,
+      message: 'Đăng nhập thành công'
+    };
+  },
+
   getUserById: async (id) => {
     return users.find(u => u.user_id === parseInt(id));
   },

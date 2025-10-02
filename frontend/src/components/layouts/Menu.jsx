@@ -6,11 +6,22 @@ const MenuClient = ({ onNavigateTo, onBackToHome, user, onLogout, onViewAllNotif
 
 
   // Cập nhật số lượng mục trong giỏ hàng
-  const updateCartCount = useCallback(() => {
-    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-    setCartItemCount(totalItems);
-  }, []);
+  const updateCartCount = useCallback(async () => {
+    if (!user) {
+      setCartItemCount(0);
+      return;
+    }
+
+    try {
+      const { mockApi } = await import('../../services/mockApi');
+      const cartData = await mockApi.getCartByUserId(user.user_id);
+      const totalItems = cartData.items.reduce((sum, item) => sum + item.quantity, 0);
+      setCartItemCount(totalItems);
+    } catch (error) {
+      console.error('Error fetching cart count:', error);
+      setCartItemCount(0);
+    }
+  }, [user]);
 
   // Lắng nghe cập nhật giỏ hàng
   useEffect(() => {
@@ -20,9 +31,22 @@ const MenuClient = ({ onNavigateTo, onBackToHome, user, onLogout, onViewAllNotif
       updateCartCount();
     };
 
+    // Listen for custom cart update events
     window.addEventListener('cartUpdated', handleCartUpdate);
-    return () => window.removeEventListener('cartUpdated', handleCartUpdate);
+    
+    // Listen for storage changes (when cart is updated from another component)
+    window.addEventListener('storage', handleCartUpdate);
+    
+    return () => {
+      window.removeEventListener('cartUpdated', handleCartUpdate);
+      window.removeEventListener('storage', handleCartUpdate);
+    };
   }, [updateCartCount]);
+
+  // Reload cart count when user changes
+  useEffect(() => {
+    updateCartCount();
+  }, [user, updateCartCount]);
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark fixed-top" style={{ borderTop: '3px solid #8B5CF6', zIndex: 1040 }}>
