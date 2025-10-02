@@ -43,28 +43,17 @@ class UserController {
         if (!email || !password) {
             return res.status(400).json({ error: 'Thiếu email hoặc mật khẩu' });
         }
-        // For development: accept any email with password '123456'
-        if (password !== '123456') {
-            return res.status(401).json({ error: 'Mật khẩu không đúng' });
-        }
-        
-        // Create a mock user for development
-        const mockUser = {
-            id: 1,
-            name: 'Demo User',
-            email: email,
-            role: 'user'
-        };
-        
-        console.log('Login attempt:', { email, password });
-        
-        const token = jwt.sign({ userId: mockUser.id, role: mockUser.role }, process.env.JWT_SECRET || 'default_secret', {
-            expiresIn: '1h'
-        });
-        
-        res.json({ 
-            token, 
-            message: 'Đăng nhập thành công',
+        User.findByEmail(email, (err, user) => {
+            if (err) return res.status(500).json({ error: 'Lỗi cơ sở dữ liệu' });
+            if (!user) return res.status(401).json({ error: 'Email không tồn tại' });
+            bcrypt.compare(password, user.password_hash, (err, match) => {
+                if (err) return res.status(500).json({ error: 'Lỗi xác thực' });
+                if (!match) return res.status(401).json({ error: 'Mật khẩu không đúng' });
+                const token = jwt.sign({ userId: user.user_id, role: user.role }, process.env.JWT_SECRET, {
+                    expiresIn: '1h'
+                });
+                res.json({ token, message: 'Đăng nhập thành công' });
+            });
         });
     }
 

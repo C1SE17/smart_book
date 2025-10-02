@@ -2,8 +2,8 @@ const Book = require('../models/Book');
 
 exports.getAllBooks = async (req, res) => { // Lấy danh sách sản phẩm
     try {
-        const { page, limit, category_id, author_id, publisher_id, search, category } = req.query;
-        const books = await Book.getAll({ page: parseInt(page), limit: parseInt(limit), category_id, author_id, publisher_id, search, category });
+        const { page, limit, category_id, author_id, publisher_id, search } = req.query;
+        const books = await Book.getAll({ page: parseInt(page), limit: parseInt(limit), category_id, author_id, publisher_id, search });
         res.json(books);
     } catch (err) {
         res.status(500).json({ error: err.message });
