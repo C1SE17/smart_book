@@ -134,6 +134,18 @@ CREATE TABLE reviews (
     CONSTRAINT fk_review_book FOREIGN KEY (book_id) REFERENCES books(book_id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 USE smart_book;
+-- 12. review_replies (phản hồi bình luận)
+CREATE TABLE review_replies (
+    reply_id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'ID phản hồi',
+    review_id INT NOT NULL COMMENT 'Bình luận được phản hồi',
+    user_id INT NOT NULL COMMENT 'Người phản hồi',
+    reply_text TEXT NOT NULL COMMENT 'Nội dung phản hồi',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Ngày phản hồi',
+    CONSTRAINT fk_reply_review FOREIGN KEY (review_id) REFERENCES reviews(review_id) ON DELETE CASCADE,
+    CONSTRAINT fk_reply_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+USE smart_book;
 -- bảng warehouse (ràng buộc với books)
 CREATE TABLE warehouse (
     warehouse_id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'ID kho',
