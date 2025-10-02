@@ -543,6 +543,7 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
                   productId={productId}
                   reviews={reviews}
                   loading={reviewsLoading}
+                  user={user}
                 />
                   </div>
                 </div>

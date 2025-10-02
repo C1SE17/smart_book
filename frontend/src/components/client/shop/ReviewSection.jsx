@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faStar, faUser, faThumbsUp, faThumbsDown } from '@fortawesome/free-solid-svg-icons';
 
-const ReviewSection = ({ productId, reviews = [], loading = false }) => {
+const ReviewSection = ({ productId, reviews = [], loading = false, user = null }) => {
   const [newReview, setNewReview] = useState({
     rating: 5,
     review_text: ''
@@ -12,6 +12,17 @@ const ReviewSection = ({ productId, reviews = [], loading = false }) => {
     comment: ''
   });
   const [submitting, setSubmitting] = useState(false);
+  
+  // Auto-fill name when user is logged in
+  useEffect(() => {
+    if (user && user.name) {
+      setNewComment(prev => ({
+        ...prev,
+        name: user.name
+      }));
+    }
+  }, [user]);
+  
   const [comments, setComments] = useState([
     {
       id: 1,
@@ -238,12 +249,23 @@ const ReviewSection = ({ productId, reviews = [], loading = false }) => {
                   type="text"
                   className="form-control"
                   id="commentName"
-                  placeholder="Nhập tên của bạn"
+                  placeholder={user ? "Tên từ tài khoản của bạn" : "Nhập tên của bạn"}
                   value={newComment.name}
                   onChange={(e) => setNewComment(prev => ({ ...prev, name: e.target.value }))}
                   required
-                  style={{ backgroundColor: 'white', border: '1px solid #e9ecef' }}
+                  disabled={!!user}
+                  style={{ 
+                    backgroundColor: user ? '#f8f9fa' : 'white', 
+                    border: '1px solid #e9ecef',
+                    cursor: user ? 'not-allowed' : 'text'
+                  }}
                 />
+                {user && (
+                  <small className="text-muted">
+                    <FontAwesomeIcon icon={faUser} className="me-1" />
+                    Tên được lấy từ tài khoản của bạn
+                  </small>
+                )}
               </div>
               
               <div className="mb-3">
