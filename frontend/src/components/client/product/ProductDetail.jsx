@@ -139,12 +139,31 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
     if (!product) return;
 
     try {
-      // Add to cart first, then redirect to checkout
+      // Add to cart first
       await handleAddToCart();
+      
+      // Show success message
+      showToast('Đã thêm sản phẩm vào giỏ hàng!', 'success');
+      
+      // Create checkout item for immediate checkout
+      const checkoutItem = {
+        book_id: product.book_id,
+        title: product.title,
+        price: product.price,
+        quantity: quantity,
+        cover_image: product.cover_image,
+        author: product.author,
+        publisher: product.publisher
+      };
+      
+      // Save to sessionStorage for checkout
+      sessionStorage.setItem('checkoutItems', JSON.stringify([checkoutItem]));
+      
       // Navigate to checkout page
       onNavigateTo('checkout');
     } catch (error) {
       console.error('Error in checkout:', error);
+      showToast('Có lỗi xảy ra khi thêm sản phẩm vào giỏ hàng.', 'error');
     }
   };
 

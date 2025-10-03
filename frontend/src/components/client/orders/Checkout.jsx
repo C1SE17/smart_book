@@ -9,7 +9,8 @@ const Checkout = ({ onBackToHome, onNavigateTo }) => {
         address: '',
         city: '',
         district: '',
-        ward: ''
+        ward: '',
+        orderNotes: ''
     });
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -104,6 +105,7 @@ const Checkout = ({ onBackToHome, onNavigateTo }) => {
                 items: checkoutItems,
                 shippingInfo: formData,
                 paymentMethod: 'cod',
+                orderNotes: formData.orderNotes,
                 total: calculateTotal(),
                 status: 'pending',
                 createdAt: new Date().toISOString()
@@ -144,7 +146,7 @@ const Checkout = ({ onBackToHome, onNavigateTo }) => {
                     <div className="col-md-8">
                         <div className="text-center">
                             <div className="mb-4">
-                                <i className="bi bi-cart-x" style={{ fontSize: '4rem', color: '#6c757d' }}></i>
+                                <i className="fas fa-shopping-cart" style={{ fontSize: '4rem', color: '#6c757d' }}></i>
                             </div>
                             <h3 className="mb-3">Giỏ hàng trống</h3>
                             <p className="text-muted mb-4">Bạn chưa có sản phẩm nào để thanh toán</p>
@@ -152,7 +154,7 @@ const Checkout = ({ onBackToHome, onNavigateTo }) => {
                                 className="btn btn-primary"
                                 onClick={onBackToHome}
                             >
-                                <i className="bi bi-house me-2"></i>
+                                <i className="fas fa-home me-2"></i>
                                 Về trang chủ
                             </button>
                         </div>
@@ -171,7 +173,7 @@ const Checkout = ({ onBackToHome, onNavigateTo }) => {
                             className="btn btn-outline-secondary me-3"
                             onClick={onBackToHome}
                         >
-                            <i className="bi bi-arrow-left"></i>
+                            <i className="fas fa-arrow-left"></i>
                         </button>
                         <h2 className="mb-0">Thanh toán</h2>
                     </div>
@@ -184,7 +186,7 @@ const Checkout = ({ onBackToHome, onNavigateTo }) => {
                     <div className="card">
                         <div className="card-header">
                             <h5 className="mb-0">
-                                <i className="bi bi-geo-alt me-2"></i>
+                                <i className="fas fa-map-marker-alt me-2"></i>
                                 Thông tin giao hàng
                             </h5>
                         </div>
@@ -303,7 +305,7 @@ const Checkout = ({ onBackToHome, onNavigateTo }) => {
                                 <div className="card mt-4">
                                     <div className="card-header">
                                         <h6 className="mb-0">
-                                            <i className="bi bi-credit-card me-2"></i>
+                                            <i className="fas fa-credit-card me-2"></i>
                                             Phương thức thanh toán
                                         </h6>
                                     </div>
@@ -327,6 +329,32 @@ const Checkout = ({ onBackToHome, onNavigateTo }) => {
                                     </div>
                                 </div>
 
+                                {/* Order Notes */}
+                                <div className="card mt-4">
+                                    <div className="card-header">
+                                        <h6 className="mb-0">
+                                            <i className="fas fa-comment-alt me-2"></i>
+                                            Ghi chú đơn hàng
+                                        </h6>
+                                    </div>
+                                    <div className="card-body">
+                                        <div className="mb-3">
+                                            <label className="form-label">Ghi chú cho đơn hàng</label>
+                                            <textarea
+                                                className="form-control"
+                                                name="orderNotes"
+                                                value={formData.orderNotes || ''}
+                                                onChange={handleInputChange}
+                                                rows="3"
+                                                placeholder="Nhập ghi chú cho đơn hàng (tùy chọn)..."
+                                            />
+                                            <small className="text-muted">
+                                                Bạn có thể thêm ghi chú về thời gian giao hàng, hướng dẫn địa chỉ, hoặc yêu cầu đặc biệt
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div className="d-grid mt-4">
                                     <button
                                         type="submit"
@@ -340,7 +368,7 @@ const Checkout = ({ onBackToHome, onNavigateTo }) => {
                                             </>
                                         ) : (
                                             <>
-                                                <i className="bi bi-check-circle me-2"></i>
+                                                <i className="fas fa-check-circle me-2"></i>
                                                 Đặt hàng ngay
                                             </>
                                         )}
@@ -356,7 +384,7 @@ const Checkout = ({ onBackToHome, onNavigateTo }) => {
                     <div className="card">
                         <div className="card-header">
                             <h5 className="mb-0">
-                                <i className="bi bi-bag me-2"></i>
+                                <i className="fas fa-shopping-bag me-2"></i>
                                 Đơn hàng của bạn
                             </h5>
                         </div>
@@ -398,7 +426,7 @@ const Checkout = ({ onBackToHome, onNavigateTo }) => {
 
                             <div className="mt-3">
                                 <small className="text-muted">
-                                    <i className="bi bi-info-circle me-1"></i>
+                                    <i className="fas fa-info-circle me-1"></i>
                                     Phí vận chuyển sẽ được tính khi xác nhận đơn hàng
                                 </small>
                             </div>

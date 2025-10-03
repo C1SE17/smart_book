@@ -17,6 +17,7 @@ import Contact from './components/client/contact/Contact'
 import AboutUs from './components/client/about/AboutUs'
 import { AuthorPage, AuthorDetail } from './components/client/author'
 import AdminLayout from './components/admin/AdminLayout'
+import Layout from './components/layouts/Layout'
 import Dashboard from './components/admin/Dashboard'
 import CategoryManagement from './components/admin/CategoryManagement'
 import BookManagement from './components/admin/BookManagement'
@@ -270,10 +271,12 @@ function App() {
         />
       )}
       {currentPage === 'checkout' && (
-        <Checkout
-          onBackToHome={handleBackToHome}
-          onNavigateTo={handleNavigateTo}
-        />
+        <Layout onViewAllNotifications={handleViewAllNotifications}>
+          <Checkout
+            onBackToHome={handleBackToHome}
+            onNavigateTo={handleNavigateTo}
+          />
+        </Layout>
       )}
       {currentPage === 'orders' && (
         <ErrorBoundary>
