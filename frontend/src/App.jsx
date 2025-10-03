@@ -16,6 +16,12 @@ import BlogDetail from './components/client/blog/BlogDetail'
 import Contact from './components/client/contact/Contact'
 import AboutUs from './components/client/about/AboutUs'
 import { AuthorPage, AuthorDetail } from './components/client/author'
+import AdminLayout from './components/admin/AdminLayout'
+import Dashboard from './components/admin/Dashboard'
+import CategoryManagement from './components/admin/CategoryManagement'
+import BookManagement from './components/admin/BookManagement'
+import WarehouseManagement from './components/admin/WarehouseManagement'
+import OrderManagement from './components/admin/OrderManagement'
 import UserProfile from './components/user/UserProfile'
 import Auth from './features/auth/Auth'
 import ErrorBoundary from './components/common/ErrorBoundary/ErrorBoundary'
@@ -50,18 +56,18 @@ function App() {
         setUser(null);
       }
     };
-    
+
     loadUser();
-    
+
     // Listen for storage changes (when user logs in from another tab)
     window.addEventListener('storage', loadUser);
-    
+
     // Listen for logout all devices event
     const handleUserLoggedOut = () => {
       setUser(null);
     };
     window.addEventListener('userLoggedOut', handleUserLoggedOut);
-    
+
     return () => {
       window.removeEventListener('storage', loadUser);
       window.removeEventListener('userLoggedOut', handleUserLoggedOut);
@@ -155,19 +161,37 @@ function App() {
       'contact': '/contact',
       'about': '/about',
       'author': '/author',
-      'author-detail': '/author-detail'
+      'author-detail': '/author-detail',
+      'admin-dashboard': '/admin/dashboard',
+      'admin-books': '/admin/books',
+      'admin-categories': '/admin/categories',
+      'admin-warehouse': '/admin/warehouse',
+      'admin-orders': '/admin/orders',
+      'admin-users': '/admin/users',
+      'admin-reviews': '/admin/reviews',
+      'admin-reports': '/admin/reports'
     };
 
     const path = routeMap[page] || '/';
-    
+
     // Handle product page with productId
     if (page === 'product' && params.productId) {
       setProductId(params.productId);
       navigateTo(path, { id: params.productId });
-    } else {
+    }
+    // Handle author detail page with authorId
+    else if (page === 'author-detail' && params.id) {
+      setAuthorId(params.id);
+      navigateTo(path, { id: params.id });
+    }
+    // Handle admin pages
+    else if (page.startsWith('admin-')) {
       navigateTo(path);
     }
-    
+    else {
+      navigateTo(path);
+    }
+
     window.scrollTo(0, 0);
   }, []);
 
@@ -304,61 +328,355 @@ function App() {
         </ErrorBoundary>
       )}
 
+      {/* Admin Pages */}
+      {currentPage === 'admin-dashboard' && (
+        <ErrorBoundary>
+          <AdminLayout onNavigateTo={handleNavigateTo} currentPage="admin-dashboard">
+            <Dashboard />
+          </AdminLayout>
+        </ErrorBoundary>
+      )}
+      {currentPage === 'admin-books' && (
+        <ErrorBoundary>
+          <AdminLayout onNavigateTo={handleNavigateTo} currentPage="admin-books">
+            <BookManagement />
+          </AdminLayout>
+        </ErrorBoundary>
+      )}
+      {currentPage === 'admin-categories' && (
+        <ErrorBoundary>
+          <AdminLayout onNavigateTo={handleNavigateTo} currentPage="admin-categories">
+            <CategoryManagement />
+          </AdminLayout>
+        </ErrorBoundary>
+      )}
+      {currentPage === 'admin-warehouse' && (
+        <ErrorBoundary>
+          <AdminLayout onNavigateTo={handleNavigateTo} currentPage="admin-warehouse">
+            <WarehouseManagement />
+          </AdminLayout>
+        </ErrorBoundary>
+      )}
+      {currentPage === 'admin-orders' && (
+        <ErrorBoundary>
+          <AdminLayout onNavigateTo={handleNavigateTo} currentPage="admin-orders">
+            <OrderManagement />
+          </AdminLayout>
+        </ErrorBoundary>
+      )}
+
+      {/* Fallback for admin pages */}
+      {currentPage && currentPage.startsWith('admin-') && !currentPage.includes('admin-dashboard') && !currentPage.includes('admin-books') && !currentPage.includes('admin-categories') && !currentPage.includes('admin-warehouse') && !currentPage.includes('admin-orders') && (
+        <ErrorBoundary>
+          <AdminLayout onNavigateTo={handleNavigateTo} currentPage={currentPage}>
+            <div className="text-center py-5">
+              <h3>Trang đang được phát triển</h3>
+              <p className="text-muted">Tính năng này sẽ sớm có mặt</p>
+            </div>
+          </AdminLayout>
+        </ErrorBoundary>
+      )}
+
 
       {/* Footer */}
-      <footer className="bg-light py-5 mt-5">
+      <footer
+        className="py-5 mt-5"
+        style={{
+          backgroundColor: '#000000',
+          background: 'linear-gradient(135deg, #000000 0%, #1a1a1a 100%)',
+          borderTop: '3px solid #e74c3c'
+        }}
+      >
         <div className="container">
           <div className="row">
             {/* Connect Column */}
             <div className="col-lg-2 col-md-4 col-sm-6 mb-4">
-              <h5 className="fw-bold text-dark mb-3">Connect</h5>
-              <div className="text-dark">
-                <p className="mb-2">1000 Nguyen Van A, Thanh Khe, Da Nang, Viet Nam</p>
-                <p className="mb-2">smartbook@gmail.com</p>
-                <p className="mb-0">12334566676</p>
+              <h5
+                className="fw-bold mb-3"
+                style={{
+                  color: '#ecf0f1',
+                  fontSize: '1.1rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px'
+                }}
+              >
+                Connect
+              </h5>
+              <div style={{ color: '#bdc3c7' }}>
+                <p className="mb-2" style={{ fontSize: '0.9rem', lineHeight: '1.6' }}>
+                  <i className="fas fa-map-marker-alt me-2" style={{ color: '#e74c3c' }}></i>
+                  1000 Nguyen Van A, Thanh Khe, Da Nang, Viet Nam
+                </p>
+                <p className="mb-2" style={{ fontSize: '0.9rem', lineHeight: '1.6' }}>
+                  <i className="fas fa-envelope me-2" style={{ color: '#e74c3c' }}></i>
+                  smartbook@gmail.com
+                </p>
+                <p className="mb-0" style={{ fontSize: '0.9rem', lineHeight: '1.6' }}>
+                  <i className="fas fa-phone me-2" style={{ color: '#e74c3c' }}></i>
+                  12334566676
+                </p>
               </div>
             </div>
 
-
             {/* Explore Column */}
             <div className="col-lg-2 col-md-4 col-sm-6 mb-4">
-              <h5 className="fw-bold text-dark mb-3">Explore</h5>
-              <div className="text-dark">
-                <a href="#" className="text-decoration-none text-dark d-block mb-2">About Us</a>
-                <a href="#" className="text-decoration-none text-dark d-block mb-2">Our Team</a>
-                <a href="#" className="text-decoration-none text-dark d-block mb-2">Careers</a>
-                <a href="#" className="text-decoration-none text-dark d-block mb-2">Press</a>
-                <a href="#" className="text-decoration-none text-dark d-block mb-0">Blog</a>
+              <h5
+                className="fw-bold mb-3"
+                style={{
+                  color: '#ecf0f1',
+                  fontSize: '1.1rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px'
+                }}
+              >
+                Explore
+              </h5>
+              <div style={{ color: '#bdc3c7' }}>
+                <a
+                  href="#"
+                  className="text-decoration-none d-block mb-2"
+                  style={{
+                    color: '#bdc3c7',
+                    fontSize: '0.9rem',
+                    transition: 'color 0.3s ease',
+                    lineHeight: '1.6'
+                  }}
+                  onMouseEnter={(e) => e.target.style.color = '#e74c3c'}
+                  onMouseLeave={(e) => e.target.style.color = '#bdc3c7'}
+                >
+                  About Us
+                </a>
+                <a
+                  href="#"
+                  className="text-decoration-none d-block mb-2"
+                  style={{
+                    color: '#bdc3c7',
+                    fontSize: '0.9rem',
+                    transition: 'color 0.3s ease',
+                    lineHeight: '1.6'
+                  }}
+                  onMouseEnter={(e) => e.target.style.color = '#e74c3c'}
+                  onMouseLeave={(e) => e.target.style.color = '#bdc3c7'}
+                >
+                  Our Team
+                </a>
+                <a
+                  href="#"
+                  className="text-decoration-none d-block mb-2"
+                  style={{
+                    color: '#bdc3c7',
+                    fontSize: '0.9rem',
+                    transition: 'color 0.3s ease',
+                    lineHeight: '1.6'
+                  }}
+                  onMouseEnter={(e) => e.target.style.color = '#e74c3c'}
+                  onMouseLeave={(e) => e.target.style.color = '#bdc3c7'}
+                >
+                  Careers
+                </a>
+                <a
+                  href="#"
+                  className="text-decoration-none d-block mb-2"
+                  style={{
+                    color: '#bdc3c7',
+                    fontSize: '0.9rem',
+                    transition: 'color 0.3s ease',
+                    lineHeight: '1.6'
+                  }}
+                  onMouseEnter={(e) => e.target.style.color = '#e74c3c'}
+                  onMouseLeave={(e) => e.target.style.color = '#bdc3c7'}
+                >
+                  Press
+                </a>
+                <a
+                  href="#"
+                  className="text-decoration-none d-block mb-0"
+                  style={{
+                    color: '#bdc3c7',
+                    fontSize: '0.9rem',
+                    transition: 'color 0.3s ease',
+                    lineHeight: '1.6'
+                  }}
+                  onMouseEnter={(e) => e.target.style.color = '#e74c3c'}
+                  onMouseLeave={(e) => e.target.style.color = '#bdc3c7'}
+                >
+                  Blog
+                </a>
               </div>
             </div>
 
             {/* Account Column */}
             <div className="col-lg-2 col-md-4 col-sm-6 mb-4">
-              <h5 className="fw-bold text-dark mb-3">Account</h5>
-              <div className="text-dark">
-                <a href="#" className="text-decoration-none text-dark d-block mb-2">My Account</a>
-                <a href="#" className="text-decoration-none text-dark d-block mb-2">Order History</a>
-                <a href="#" className="text-decoration-none text-dark d-block mb-2">Wishlist</a>
-                <a href="#" className="text-decoration-none text-dark d-block mb-2">Newsletter</a>
-                <a href="#" className="text-decoration-none text-dark d-block mb-0">Support</a>
+              <h5
+                className="fw-bold mb-3"
+                style={{
+                  color: '#ecf0f1',
+                  fontSize: '1.1rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px'
+                }}
+              >
+                Account
+              </h5>
+              <div style={{ color: '#bdc3c7' }}>
+                <a
+                  href="#"
+                  className="text-decoration-none d-block mb-2"
+                  style={{
+                    color: '#bdc3c7',
+                    fontSize: '0.9rem',
+                    transition: 'color 0.3s ease',
+                    lineHeight: '1.6'
+                  }}
+                  onMouseEnter={(e) => e.target.style.color = '#e74c3c'}
+                  onMouseLeave={(e) => e.target.style.color = '#bdc3c7'}
+                >
+                  My Account
+                </a>
+                <a
+                  href="#"
+                  className="text-decoration-none d-block mb-2"
+                  style={{
+                    color: '#bdc3c7',
+                    fontSize: '0.9rem',
+                    transition: 'color 0.3s ease',
+                    lineHeight: '1.6'
+                  }}
+                  onMouseEnter={(e) => e.target.style.color = '#e74c3c'}
+                  onMouseLeave={(e) => e.target.style.color = '#bdc3c7'}
+                >
+                  Order History
+                </a>
+                <a
+                  href="#"
+                  className="text-decoration-none d-block mb-2"
+                  style={{
+                    color: '#bdc3c7',
+                    fontSize: '0.9rem',
+                    transition: 'color 0.3s ease',
+                    lineHeight: '1.6'
+                  }}
+                  onMouseEnter={(e) => e.target.style.color = '#e74c3c'}
+                  onMouseLeave={(e) => e.target.style.color = '#bdc3c7'}
+                >
+                  Wishlist
+                </a>
+                <a
+                  href="#"
+                  className="text-decoration-none d-block mb-2"
+                  style={{
+                    color: '#bdc3c7',
+                    fontSize: '0.9rem',
+                    transition: 'color 0.3s ease',
+                    lineHeight: '1.6'
+                  }}
+                  onMouseEnter={(e) => e.target.style.color = '#e74c3c'}
+                  onMouseLeave={(e) => e.target.style.color = '#bdc3c7'}
+                >
+                  Newsletter
+                </a>
+                <a
+                  href="#"
+                  className="text-decoration-none d-block mb-0"
+                  style={{
+                    color: '#bdc3c7',
+                    fontSize: '0.9rem',
+                    transition: 'color 0.3s ease',
+                    lineHeight: '1.6'
+                  }}
+                  onMouseEnter={(e) => e.target.style.color = '#e74c3c'}
+                  onMouseLeave={(e) => e.target.style.color = '#bdc3c7'}
+                >
+                  Support
+                </a>
               </div>
             </div>
 
             {/* Get in touch Column */}
             <div className="col-lg-2 col-md-4 col-sm-6 mb-4">
-              <h5 className="fw-bold text-dark mb-3">Get in touch</h5>
-              <div className="text-dark">
-                <a 
-                  href="#" 
-                  className="text-decoration-none text-dark d-block mb-2"
+              <h5
+                className="fw-bold mb-3"
+                style={{
+                  color: '#ecf0f1',
+                  fontSize: '1.1rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px'
+                }}
+              >
+                Get in touch
+              </h5>
+              <div style={{ color: '#bdc3c7' }}>
+                <a
+                  href="#"
+                  className="text-decoration-none d-block mb-2"
+                  style={{
+                    color: '#bdc3c7',
+                    fontSize: '0.9rem',
+                    transition: 'color 0.3s ease',
+                    lineHeight: '1.6'
+                  }}
                   onClick={(e) => { e.preventDefault(); onNavigateTo('contact')(); }}
+                  onMouseEnter={(e) => e.target.style.color = '#e74c3c'}
+                  onMouseLeave={(e) => e.target.style.color = '#bdc3c7'}
                 >
                   Contact Us
                 </a>
-                <a href="#" className="text-decoration-none text-dark d-block mb-2">Help Center</a>
-                <a href="#" className="text-decoration-none text-dark d-block mb-2">Feedback</a>
-                <a href="#" className="text-decoration-none text-dark d-block mb-2">Partnership</a>
-                <a href="#" className="text-decoration-none text-dark d-block mb-0">Advertise</a>
+                <a
+                  href="#"
+                  className="text-decoration-none d-block mb-2"
+                  style={{
+                    color: '#bdc3c7',
+                    fontSize: '0.9rem',
+                    transition: 'color 0.3s ease',
+                    lineHeight: '1.6'
+                  }}
+                  onMouseEnter={(e) => e.target.style.color = '#e74c3c'}
+                  onMouseLeave={(e) => e.target.style.color = '#bdc3c7'}
+                >
+                  Help Center
+                </a>
+                <a
+                  href="#"
+                  className="text-decoration-none d-block mb-2"
+                  style={{
+                    color: '#bdc3c7',
+                    fontSize: '0.9rem',
+                    transition: 'color 0.3s ease',
+                    lineHeight: '1.6'
+                  }}
+                  onMouseEnter={(e) => e.target.style.color = '#e74c3c'}
+                  onMouseLeave={(e) => e.target.style.color = '#bdc3c7'}
+                >
+                  Feedback
+                </a>
+                <a
+                  href="#"
+                  className="text-decoration-none d-block mb-2"
+                  style={{
+                    color: '#bdc3c7',
+                    fontSize: '0.9rem',
+                    transition: 'color 0.3s ease',
+                    lineHeight: '1.6'
+                  }}
+                  onMouseEnter={(e) => e.target.style.color = '#e74c3c'}
+                  onMouseLeave={(e) => e.target.style.color = '#bdc3c7'}
+                >
+                  Partnership
+                </a>
+                <a
+                  href="#"
+                  className="text-decoration-none d-block mb-0"
+                  style={{
+                    color: '#bdc3c7',
+                    fontSize: '0.9rem',
+                    transition: 'color 0.3s ease',
+                    lineHeight: '1.6'
+                  }}
+                  onMouseEnter={(e) => e.target.style.color = '#e74c3c'}
+                  onMouseLeave={(e) => e.target.style.color = '#bdc3c7'}
+                >
+                  Advertise
+                </a>
               </div>
             </div>
           </div>
@@ -366,14 +684,42 @@ function App() {
       </footer>
 
       {/* Bottom Bar */}
-      <div className="bg-dark text-white py-3">
+      <div
+        className="py-3"
+        style={{
+          backgroundColor: '#0d0d0d',
+          borderTop: '1px solid #333333'
+        }}
+      >
         <div className="container">
           <div className="row">
             <div className="col-12 text-center">
-              <p className="mb-0 small">
+              <p className="mb-0 small" style={{ color: '#95a5a6', fontSize: '0.85rem' }}>
                 © 2025 Smart Bookstore. All rights reserved. |
-                <a href="#" className="text-white text-decoration-none ms-2">Privacy Policy</a> |
-                <a href="#" className="text-white text-decoration-none ms-2">Terms of Service</a>
+                <a
+                  href="#"
+                  className="text-decoration-none ms-2"
+                  style={{
+                    color: '#95a5a6',
+                    transition: 'color 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => e.target.style.color = '#e74c3c'}
+                  onMouseLeave={(e) => e.target.style.color = '#95a5a6'}
+                >
+                  Privacy Policy
+                </a> |
+                <a
+                  href="#"
+                  className="text-decoration-none ms-2"
+                  style={{
+                    color: '#95a5a6',
+                    transition: 'color 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => e.target.style.color = '#e74c3c'}
+                  onMouseLeave={(e) => e.target.style.color = '#95a5a6'}
+                >
+                  Terms of Service
+                </a>
               </p>
             </div>
           </div>

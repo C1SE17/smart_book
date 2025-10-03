@@ -20,11 +20,11 @@ const Home = ({ onNavigateTo }) => {
   useEffect(() => {
     const fetchBooks = async () => {
       setLoading(true);
-      
+
       try {
         // Import mock API
         const { mockApi } = await import('../services/mockApi');
-        
+
         // Fetch all books, new books, and popular books
         const [booksResponse, newBooksData, popularBooksData] = await Promise.all([
           mockApi.getBooks({ limit: 12 }),
@@ -83,7 +83,7 @@ const Home = ({ onNavigateTo }) => {
     try {
       // Import mock API
       const { mockApi } = await import('../services/mockApi');
-      
+
       // Lấy giỏ hàng hiện tại để kiểm tra số lượng
       const cartData = await mockApi.getCartByUserId(user.user_id);
       const existingItem = cartData.items.find(item => item.book_id === book.book_id);
@@ -98,10 +98,10 @@ const Home = ({ onNavigateTo }) => {
           }
           return;
         }
-        
+
         // Tăng số lượng sản phẩm hiện có
         await mockApi.updateCartItemQuantity(user.user_id, book.book_id, existingItem.quantity + 1);
-        
+
         // Hiển thị thông báo thành công
         if (window.showToast) {
           window.showToast(`Đã tăng số lượng "${book.title}" trong giỏ hàng!`, 'success');
@@ -111,7 +111,7 @@ const Home = ({ onNavigateTo }) => {
       } else {
         // Thêm sản phẩm mới vào giỏ hàng
         await mockApi.addToCart(user.user_id, book.book_id, 1);
-        
+
         // Hiển thị thông báo thành công
         if (window.showToast) {
           window.showToast(`✅ Thêm thành công! Đã thêm "${book.title}" vào giỏ hàng!`, 'success');
@@ -263,24 +263,6 @@ const Home = ({ onNavigateTo }) => {
             <div className="col">
               <h2 className="fw-bold text-dark">Sách Nổi Bật</h2>
             </div>
-            <div className="col-auto">
-              <a href="#" className="text-decoration-none" style={{
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#333',
-                transition: 'all 0.3s ease'
-              }}
-                onMouseEnter={(e) => {
-                  e.target.style.color = '#007bff';
-                  e.target.style.transform = 'translateX(5px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.color = '#333';
-                  e.target.style.transform = 'translateX(0)';
-                }}>
-                Xem Tất Cả <i className="bi bi-arrow-right ms-1"></i>
-              </a>
-            </div>
           </div>
 
           <div className="row g-4">
@@ -417,24 +399,6 @@ const Home = ({ onNavigateTo }) => {
             <div className="col">
               <h2 className="fw-bold text-dark">Sách Mới</h2>
             </div>
-            <div className="col-auto">
-              <a href="#" className="text-decoration-none" style={{
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#333',
-                transition: 'all 0.3s ease'
-              }}
-                onMouseEnter={(e) => {
-                  e.target.style.color = '#007bff';
-                  e.target.style.transform = 'translateX(5px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.color = '#333';
-                  e.target.style.transform = 'translateX(0)';
-                }}>
-                Xem Tất Cả <i className="bi bi-arrow-right ms-1"></i>
-              </a>
-            </div>
           </div>
 
           <div className="row g-4">
@@ -570,24 +534,6 @@ const Home = ({ onNavigateTo }) => {
           <div className="row align-items-center mb-4">
             <div className="col">
               <h2 className="fw-bold text-dark">Sách Phổ Biến</h2>
-            </div>
-            <div className="col-auto">
-              <a href="#" className="text-decoration-none" style={{
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#333',
-                transition: 'all 0.3s ease'
-              }}
-                onMouseEnter={(e) => {
-                  e.target.style.color = '#007bff';
-                  e.target.style.transform = 'translateX(5px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.color = '#333';
-                  e.target.style.transform = 'translateX(0)';
-                }}>
-                Xem Tất Cả <i className="bi bi-arrow-right ms-1"></i>
-              </a>
             </div>
           </div>
 
@@ -726,9 +672,9 @@ const Home = ({ onNavigateTo }) => {
               <h2 className="fw-bold text-dark">Tác Giả Yêu Thích</h2>
             </div>
             <div className="col-auto">
-              <a 
-                href="#" 
-                className="text-decoration-none" 
+              <a
+                href="#"
+                className="text-decoration-none"
                 style={{
                   fontSize: '14px',
                   fontWeight: '500',
@@ -755,20 +701,40 @@ const Home = ({ onNavigateTo }) => {
 
           <div className="row g-4 justify-content-center">
             {[
-              { name: "Fujiko Fujio", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face" },
-              { name: "Delia Owens", image: "https://photo.znews.vn/w960/Uploaded/sgorvz/2025_05_23/tac_gia_70_tuoi.jpg" },
-              { name: "Koyoharu Gotouge", image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face" },
-              { name: "Gosho Aoyama", image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&crop=face" },
-              { name: "Haruki Murakami", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face" },
-              { name: "J.K. Rowling", image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&crop=face" }
+              { id: 2, name: "Fujiko F. Fujio", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face" },
+              { id: 7, name: "Delia Owens", image: "https://photo.znews.vn/w960/Uploaded/sgorvz/2025_05_23/tac_gia_70_tuoi.jpg" },
+              { id: 1, name: "Koyoharu Gotouge", image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face" },
+              { id: 4, name: "Gosho Aoyama", image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&crop=face" },
+              { id: 8, name: "Haruki Murakami", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face" },
+              { id: 3, name: "J.K. Rowling", image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&crop=face" }
             ].map((author, index) => (
               <div key={index} className="col-lg-2 col-md-3 col-sm-4 col-6">
-                <div className="text-center">
+                <div
+                  className="text-center"
+                  style={{
+                    cursor: 'pointer',
+                    transition: 'transform 0.3s ease',
+                    padding: '10px',
+                    borderRadius: '10px'
+                  }}
+                  onClick={() => onNavigateTo('author-detail', { id: author.id })}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-5px)';
+                    e.currentTarget.style.backgroundColor = '#f8f9fa';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }}
+                >
                   <img
                     src={author.image}
                     alt={author.name}
                     className="rounded-circle mx-auto mb-3"
                     style={{ width: '80px', height: '80px', objectFit: 'cover' }}
+                    onError={(e) => {
+                      e.target.src = 'https://via.placeholder.com/80x80/6c757d/ffffff?text=' + encodeURIComponent(author.name.charAt(0));
+                    }}
                   />
                   <h6 className="text-dark mb-0">{author.name}</h6>
                 </div>

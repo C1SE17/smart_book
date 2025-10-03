@@ -33,10 +33,10 @@ const MenuClient = ({ onNavigateTo, onBackToHome, user, onLogout, onViewAllNotif
 
     // Listen for custom cart update events
     window.addEventListener('cartUpdated', handleCartUpdate);
-    
+
     // Listen for storage changes (when cart is updated from another component)
     window.addEventListener('storage', handleCartUpdate);
-    
+
     return () => {
       window.removeEventListener('cartUpdated', handleCartUpdate);
       window.removeEventListener('storage', handleCartUpdate);
@@ -105,26 +105,26 @@ const MenuClient = ({ onNavigateTo, onBackToHome, user, onLogout, onViewAllNotif
             </li>
 
 
-        <li className="nav-item">
-          <a
-            className="nav-link text-white fw-normal"
-            href="#"
-            onClick={(e) => { e.preventDefault(); onNavigateTo('blog'); }}
-            style={{ fontSize: '1rem', fontFamily: 'sans-serif' }}
-          >
-            Blog
-          </a>
-        </li>
-        <li className="nav-item">
-          <a
-            className="nav-link text-white fw-normal"
-            href="#"
-            onClick={(e) => { e.preventDefault(); onNavigateTo('author'); }}
-            style={{ fontSize: '1rem', fontFamily: 'sans-serif' }}
-          >
-            Tác Giả
-          </a>
-        </li>
+            <li className="nav-item">
+              <a
+                className="nav-link text-white fw-normal"
+                href="#"
+                onClick={(e) => { e.preventDefault(); onNavigateTo('blog'); }}
+                style={{ fontSize: '1rem', fontFamily: 'sans-serif' }}
+              >
+                Blog
+              </a>
+            </li>
+            <li className="nav-item">
+              <a
+                className="nav-link text-white fw-normal"
+                href="#"
+                onClick={(e) => { e.preventDefault(); onNavigateTo('author'); }}
+                style={{ fontSize: '1rem', fontFamily: 'sans-serif' }}
+              >
+                Tác Giả
+              </a>
+            </li>
 
             <li className="nav-item">
               <a
@@ -235,6 +235,19 @@ const MenuClient = ({ onNavigateTo, onBackToHome, user, onLogout, onViewAllNotif
                       >
                         <i className="fas fa-shopping-bag me-2"></i>
                         Đơn Hàng
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        className="dropdown-item"
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          onNavigateTo('admin-dashboard');
+                        }}
+                      >
+                        <i className="fas fa-cog me-2"></i>
+                        Admin Dashboard
                       </a>
                     </li>
                     <li><hr className="dropdown-divider" /></li>

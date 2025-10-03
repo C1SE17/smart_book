@@ -20,6 +20,14 @@ export const routes = {
   about: "/about",
   author: "/author",
   "author-detail": "/author-detail",
+  "admin-dashboard": "/admin/dashboard",
+  "admin-books": "/admin/books",
+  "admin-categories": "/admin/categories",
+  "admin-warehouse": "/admin/warehouse",
+  "admin-orders": "/admin/orders",
+  "admin-users": "/admin/users",
+  "admin-reviews": "/admin/reviews",
+  "admin-reports": "/admin/reports",
 };
 
 // Route handlers
@@ -107,6 +115,28 @@ export const handleRoute = (
     const id = urlParams.get("id");
     if (id) {
       setAuthorId(parseInt(id));
+    }
+  } else if (path.startsWith("/admin")) {
+    // Admin routes
+    if (path === "/admin/dashboard") {
+      setCurrentPage("admin-dashboard");
+    } else if (path === "/admin/books") {
+      setCurrentPage("admin-books");
+    } else if (path === "/admin/categories") {
+      setCurrentPage("admin-categories");
+    } else if (path === "/admin/warehouse") {
+      setCurrentPage("admin-warehouse");
+    } else if (path === "/admin/orders") {
+      setCurrentPage("admin-orders");
+    } else if (path === "/admin/users") {
+      setCurrentPage("admin-users");
+    } else if (path === "/admin/reviews") {
+      setCurrentPage("admin-reviews");
+    } else if (path === "/admin/reports") {
+      setCurrentPage("admin-reports");
+    } else {
+      // Default admin route
+      setCurrentPage("admin-dashboard");
     }
   } else {
     // Default to home for unknown routes
