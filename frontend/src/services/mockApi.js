@@ -699,63 +699,111 @@ export const mockApi = {
   register: async (userData) => {
     const { name, email, password, phone, address } = userData;
     
-    // Check if email already exists
-    const existingUser = users.find(u => u.email === email);
-    if (existingUser) {
-      return Promise.reject(new Error('Email đã được sử dụng'));
+    try {
+      // Gọi backend API thật để đăng ký
+      const response = await fetch('http://localhost:3306/api/users/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+          phone: phone || '',
+          address: address || '',
+          role: 'customer'
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Đăng ký thất bại');
+      }
+
+      const result = await response.json();
+      
+      // Tạo user object cho frontend
+      const newUser = {
+        user_id: Date.now(), // Tạm thời dùng timestamp
+        name: name,
+        email: email,
+        phone: phone || '',
+        address: address || '',
+        role: 'customer',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      
+      // Thêm vào mock data để frontend hoạt động
+      users.push(newUser);
+      
+      // Generate mock token
+      const token = `mock_token_${newUser.user_id}_${Date.now()}`;
+      
+      return {
+        user: newUser,
+        token: token,
+        message: result.message || 'Đăng ký thành công'
+      };
+    } catch (error) {
+      console.error('Lỗi đăng ký:', error);
+      throw error;
     }
-    
-    // Get next user_id (find max user_id and add 1)
-    const maxUserId = users.length > 0 ? Math.max(...users.map(u => u.user_id)) : 0;
-    
-    // Create new user
-    const newUser = {
-      user_id: maxUserId + 1,
-      name: name,
-      email: email,
-      phone: phone || '',
-      address: address || '',
-      role: 'customer',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
-    
-    users.push(newUser);
-    
-    // Generate mock token
-    const token = `mock_token_${newUser.user_id}_${Date.now()}`;
-    
-    
-    return {
-      user: newUser,
-      token: token,
-      message: 'Đăng ký thành công'
-    };
   },
 
   login: async (credentials) => {
     const { email, password } = credentials;
     
-    // Find user by email
-    const user = users.find(u => u.email === email);
-    if (!user) {
-      return Promise.reject(new Error('Email hoặc mật khẩu không đúng'));
+    try {
+      // Gọi backend API thật để đăng nhập
+      const response = await fetch('http://localhost:3306/api/users/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Đăng nhập thất bại');
+      }
+
+      const result = await response.json();
+      
+      // Tìm user trong mock data hoặc tạo mới
+      let user = users.find(u => u.email === email);
+      if (!user) {
+        // Nếu không tìm thấy trong mock data, tạo user mới
+        user = {
+          user_id: Date.now(),
+          name: email.split('@')[0], // Tạm thời dùng email làm tên
+          email: email,
+          phone: '',
+          address: '',
+          role: 'customer',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        users.push(user);
+      }
+      
+      // Sử dụng token từ backend
+      const token = result.token || `mock_token_${user.user_id}_${Date.now()}`;
+      
+      return {
+        user: user,
+        token: token,
+        message: result.message || 'Đăng nhập thành công'
+      };
+    } catch (error) {
+      console.error('Lỗi đăng nhập:', error);
+      throw error;
     }
-    
-    // In real app, you would verify password hash
-    // For mock, we'll just check if password is provided
-    if (!password) {
-      return Promise.reject(new Error('Vui lòng nhập mật khẩu'));
-    }
-    
-    // Generate mock token
-    const token = `mock_token_${user.user_id}_${Date.now()}`;
-    
-    return {
-      user: user,
-      token: token,
-      message: 'Đăng nhập thành công'
-    };
   },
 
   getUserById: async (id) => {
