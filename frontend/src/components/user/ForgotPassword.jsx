@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { validateEmail } from '../../utils';
+import { mockApi } from '../../services/mockApi';
+import ResetPassword from './ResetPassword';
 
 const ForgotPassword = ({ onBackToLogin, onBackToHome }) => {
   const [formData, setFormData] = useState({
@@ -9,6 +11,8 @@ const ForgotPassword = ({ onBackToLogin, onBackToHome }) => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [showResetPassword, setShowResetPassword] = useState(false);
+  const [resetSuccess, setResetSuccess] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -49,19 +53,92 @@ const ForgotPassword = ({ onBackToLogin, onBackToHome }) => {
     setLoading(true);
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Gọi mock API để gửi email reset
+      const response = await mockApi.sendResetEmail(formData.email);
       
-      console.log('Password reset request sent to:', formData.email);
-      setSuccess(true);
+      console.log('Password reset response:', response);
+      console.log('Debug code:', response.debugCode); // Chỉ để debug
+      
+      setShowResetPassword(true);
       
     } catch (error) {
       console.error('Password reset error:', error);
-      setErrors({ general: 'Gửi email đặt lại mật khẩu thất bại. Vui lòng thử lại.' });
+      setErrors({ general: error.message || 'Gửi email đặt lại mật khẩu thất bại. Vui lòng thử lại.' });
     } finally {
       setLoading(false);
     }
   };
+
+  const handleResetSuccess = (message) => {
+    setResetSuccess(true);
+    console.log('Reset password success:', message);
+  };
+
+  const handleBackToCode = () => {
+    setShowResetPassword(false);
+    setResetSuccess(false);
+  };
+
+  if (resetSuccess) {
+    return (
+      <div>
+        {/* Page Title */}
+        <div className="position-absolute top-0 start-0 p-3">
+          <span className="text-muted small">Success</span>
+        </div>
+
+        {/* Success Card */}
+        <div className="card shadow-lg border-0" style={{width: '100%', minHeight: '600px', borderRadius: '10px'}}>
+          <div className="card-body p-5 d-flex flex-column justify-content-center align-items-center text-center">
+            {/* Success Icon */}
+            <div className="mb-4">
+              <div 
+                className="rounded-circle d-flex align-items-center justify-content-center mx-auto"
+                style={{
+                  width: '80px',
+                  height: '80px',
+                  backgroundColor: '#d4edda',
+                  color: '#155724'
+                }}
+              >
+                <i className="bi bi-check-circle-fill" style={{fontSize: '2.5rem'}}></i>
+              </div>
+            </div>
+
+            {/* Success Message */}
+            <h3 className="fw-bold text-dark mb-3">Thành công!</h3>
+            <p className="text-muted mb-4">
+              Mật khẩu của bạn đã được cập nhật thành công.
+            </p>
+
+            {/* Action Button */}
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={onBackToLogin}
+              style={{
+                borderRadius: '8px',
+                padding: '12px 24px',
+                fontSize: '16px'
+              }}
+            >
+              Đăng nhập ngay
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (showResetPassword) {
+    return (
+      <ResetPassword 
+        email={formData.email}
+        onBackToLogin={onBackToLogin}
+        onSuccess={handleResetSuccess}
+      />
+    );
+  }
 
   if (success) {
     return (

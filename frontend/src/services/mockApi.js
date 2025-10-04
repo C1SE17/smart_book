@@ -231,6 +231,7 @@ const users = [
     user_id: 1,
     name: "Admin",
     email: "admin@gmail.com",
+    password: "admin123", // Mật khẩu mặc định
     phone: "0909000111",
     address: "Hà Nội",
     role: "admin",
@@ -241,6 +242,7 @@ const users = [
     user_id: 2,
     name: "Nguyen Van A",
     email: "nguyenvanb@gmail.com",
+    password: "password123", // Mật khẩu mặc định
     phone: "0912000222",
     address: "TP.HCM",
     role: "customer",
@@ -251,6 +253,7 @@ const users = [
     user_id: 3,
     name: "Vo Dinh Trung",
     email: "123@gmail.com",
+    password: "password123", // Mật khẩu mặc định
     phone: "",
     address: "",
     role: "customer",
@@ -261,6 +264,7 @@ const users = [
     user_id: 4,
     name: "Nguyen Van B",
     email: "test@gmail.com",
+    password: "password123", // Mật khẩu mặc định
     phone: "0909000333",
     address: "Da Nang",
     role: "customer",
@@ -695,6 +699,182 @@ export const mockApi = {
     return newOrder;
   },
 
+  // Forgot Password API
+  sendResetEmail: async (email) => {
+    try {
+      // Kiểm tra email có tồn tại không
+      const user = users.find(u => u.email === email);
+      if (!user) {
+        throw new Error('Email không tồn tại trong hệ thống');
+      }
+
+      // Tạo mã reset (6 chữ số)
+      const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+      
+      // Lưu mã reset vào localStorage (trong thực tế sẽ gửi email)
+      const resetData = {
+        email: email,
+        code: resetCode,
+        expiresAt: Date.now() + 15 * 60 * 1000, // 15 phút
+        attempts: 0
+      };
+      
+      localStorage.setItem(`reset_${email}`, JSON.stringify(resetData));
+      
+      console.log(`Reset code for ${email}: ${resetCode}`); // Debug log
+      console.log(`Mã xác thực cho ${email} là: ${resetCode}`);
+      console.log(`Mã sẽ hết hạn sau 15 phút`);
+      
+      return {
+        success: true,
+        message: 'Mã xác thực đã được gửi đến email của bạn',
+        // Trong thực tế, không trả về code
+        debugCode: resetCode // Chỉ để debug
+      };
+    } catch (error) {
+      console.error('Lỗi gửi email reset:', error);
+      throw error;
+    }
+  },
+
+  verifyResetCode: async (email, code) => {
+    try {
+      const resetData = localStorage.getItem(`reset_${email}`);
+      if (!resetData) {
+        throw new Error('Mã xác thực không hợp lệ hoặc đã hết hạn');
+      }
+
+      const parsedData = JSON.parse(resetData);
+      
+      // Kiểm tra hết hạn
+      if (Date.now() > parsedData.expiresAt) {
+        localStorage.removeItem(`reset_${email}`);
+        throw new Error('Mã xác thực đã hết hạn');
+      }
+
+      // Kiểm tra số lần thử
+      if (parsedData.attempts >= 3) {
+        localStorage.removeItem(`reset_${email}`);
+        throw new Error('Bạn đã nhập sai quá nhiều lần. Vui lòng yêu cầu mã mới');
+      }
+
+      // Kiểm tra mã
+      if (parsedData.code !== code) {
+        parsedData.attempts += 1;
+        localStorage.setItem(`reset_${email}`, JSON.stringify(parsedData));
+        throw new Error(`Mã xác thực không đúng. Còn ${3 - parsedData.attempts} lần thử`);
+      }
+
+      // Tạo token reset
+      const resetToken = `reset_token_${email}_${Date.now()}`;
+      parsedData.resetToken = resetToken;
+      localStorage.setItem(`reset_${email}`, JSON.stringify(parsedData));
+
+      return {
+        success: true,
+        message: 'Mã xác thực hợp lệ',
+        resetToken: resetToken
+      };
+    } catch (error) {
+      console.error('Lỗi xác thực mã:', error);
+      throw error;
+    }
+  },
+
+  resetPassword: async (email, newPassword, resetToken) => {
+    try {
+      const resetData = localStorage.getItem(`reset_${email}`);
+      if (!resetData) {
+        throw new Error('Phiên đặt lại mật khẩu không hợp lệ');
+      }
+
+      const parsedData = JSON.parse(resetData);
+      
+      // Kiểm tra token
+      if (parsedData.resetToken !== resetToken) {
+        throw new Error('Token không hợp lệ');
+      }
+
+      // Kiểm tra hết hạn
+      if (Date.now() > parsedData.expiresAt) {
+        localStorage.removeItem(`reset_${email}`);
+        throw new Error('Phiên đặt lại mật khẩu đã hết hạn');
+      }
+
+      // Cập nhật mật khẩu trong mock data để đồng bộ
+      console.log(`Mock: Cập nhật mật khẩu cho ${email}`);
+      console.log(`Mock: Mật khẩu mới: ${newPassword}`);
+      
+      // Cập nhật mật khẩu trong mock users array
+      const userIndex = users.findIndex(u => u.email === email);
+      if (userIndex !== -1) {
+        users[userIndex].password = newPassword; // Lưu mật khẩu mới trong mock data
+        users[userIndex].updated_at = new Date().toISOString();
+        console.log(`Mock: Đã cập nhật mật khẩu trong mock data cho user: ${email}`);
+      }
+      
+      // Lưu mật khẩu mới vào localStorage để login sử dụng
+      const userData = localStorage.getItem('user');
+      if (userData) {
+        const parsedUser = JSON.parse(userData);
+        if (parsedUser.email === email) {
+          parsedUser.password = newPassword;
+          localStorage.setItem('user', JSON.stringify(parsedUser));
+          console.log(`Mock: Đã cập nhật mật khẩu trong localStorage cho user: ${email}`);
+        }
+      }
+
+      // Xóa dữ liệu reset
+      localStorage.removeItem(`reset_${email}`);
+
+      return {
+        success: true,
+        message: 'Mật khẩu đã được cập nhật thành công'
+      };
+    } catch (error) {
+      console.error('Lỗi đặt lại mật khẩu:', error);
+      throw error;
+    }
+  },
+
+  // Test function để kiểm tra mock API
+  testForgotPasswordFlow: async (email) => {
+    try {
+      console.log('🧪 Testing Forgot Password Flow for:', email);
+      
+      // Step 1: Send reset email
+      const step1 = await mockApi.sendResetEmail(email);
+      console.log('✅ Step 1 - Send Reset Email:', step1);
+      
+      // Step 2: Get the code from localStorage
+      const resetData = localStorage.getItem(`reset_${email}`);
+      if (!resetData) {
+        throw new Error('Không tìm thấy dữ liệu reset');
+      }
+      
+      const parsedData = JSON.parse(resetData);
+      const code = parsedData.code;
+      console.log('🔐 Step 2 - Got Code:', code);
+      
+      // Step 3: Verify code
+      const step3 = await mockApi.verifyResetCode(email, code);
+      console.log('✅ Step 3 - Verify Code:', step3);
+      
+      // Step 4: Reset password
+      const step4 = await mockApi.resetPassword(email, 'newpassword123', step3.resetToken);
+      console.log('✅ Step 4 - Reset Password:', step4);
+      
+      return {
+        success: true,
+        message: 'Test flow completed successfully',
+        steps: { step1, step2: { code }, step3, step4 }
+      };
+    } catch (error) {
+      console.error('❌ Test flow failed:', error);
+      throw error;
+    }
+  },
+
   // Users API
   register: async (userData) => {
     const { name, email, password, phone, address } = userData;
@@ -761,7 +941,45 @@ export const mockApi = {
     const { email, password } = credentials;
     
     try {
-      // Gọi backend API thật để đăng nhập
+      // Kiểm tra trong mock data trước
+      const mockUser = users.find(u => u.email === email);
+      if (mockUser && mockUser.password === password) {
+        console.log('Mock: Đăng nhập thành công từ mock data');
+        
+        // Decode JWT token để lấy role
+        let userRole = 'customer'; // Default role
+        if (mockUser.role) {
+          userRole = mockUser.role;
+        }
+        
+        // Override role cho admin emails
+        if (email.includes('admin')) {
+          userRole = 'admin';
+          console.log('Overriding role to admin for email:', email);
+        }
+        
+        const user = {
+          user_id: mockUser.user_id,
+          name: mockUser.name,
+          email: mockUser.email,
+          phone: mockUser.phone || '',
+          address: mockUser.address || '',
+          role: userRole,
+          created_at: mockUser.created_at,
+          updated_at: mockUser.updated_at
+        };
+        
+        const token = `mock_token_${user.user_id}_${Date.now()}`;
+        
+        return {
+          user: user,
+          token: token,
+          message: 'Đăng nhập thành công'
+        };
+      }
+      
+      // Nếu không tìm thấy trong mock data, gọi backend
+      console.log('Mock: Không tìm thấy trong mock data, gọi backend...');
       const response = await fetch('http://localhost:3306/api/users/login', {
         method: 'POST',
         headers: {
