@@ -92,7 +92,7 @@ const Dashboard = () => {
         <div>
             {/* Header */}
             <div className="d-flex justify-content-between align-items-center mb-4">
-                <h2 className="fw-bold text-dark">Dashboard Tổng Quan</h2>
+                <h2 className="fw-bold text-dark">Tổng Quan</h2>
                 <div className="text-muted">
                     <i className="fas fa-calendar me-2"></i>
                     {new Date().toLocaleDateString('vi-VN')}

@@ -207,7 +207,7 @@ const Home = ({ onNavigateTo }) => {
                   cursor: 'pointer',
                   borderRadius: '8px',
                   overflow: 'hidden',
-                  height: '350px',
+                  height: '450px',
                   backgroundColor: 'white'
                 }}
                   onClick={() => {
@@ -287,7 +287,7 @@ const Home = ({ onNavigateTo }) => {
                   cursor: 'pointer',
                   borderRadius: '8px',
                   overflow: 'hidden',
-                  height: '350px',
+                  height: '450px',
                   backgroundColor: 'white'
                 }}
                   onClick={() => handleBookClick(book.book_id)}
@@ -315,33 +315,51 @@ const Home = ({ onNavigateTo }) => {
                       className="card-img-top"
                       alt={book.title}
                       style={{
-                        height: '220px',
+                        height: '280px',
                         objectFit: 'contain',
                         width: '100%',
                         backgroundColor: '#f8f9fa'
                       }}
                     />
-                    {/* Nút Thêm Vào Giỏ Hàng - xuất hiện khi hover và còn hàng */}
-                    {book.stock > 0 && (
-                      <div
-                        className="position-absolute top-0 end-0 p-2 add-to-cart-btn"
+                    {/* Heart Icon - góc trên trái */}
+                    <div className="position-absolute top-0 start-0 m-2">
+                      <button
+                        className="btn btn-sm btn-light rounded-circle"
                         style={{
-                          opacity: 0,
-                          transition: 'opacity 0.3s ease'
+                          width: '35px',
+                          height: '35px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          backgroundColor: 'rgba(255,255,255,0.9)',
+                          border: 'none'
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // TODO: Add to wishlist functionality
                         }}
                       >
+                        <i className="bi bi-heart text-dark" style={{ fontSize: '14px' }}></i>
+                      </button>
+                    </div>
+                    
+                    {/* Shopping Cart Icon - góc trên phải */}
+                    {book.stock > 0 && (
+                      <div className="position-absolute top-0 end-0 m-2">
                         <button
-                          className="btn btn-sm btn-light rounded-circle"
+                          className="btn btn-sm rounded-circle"
                           style={{
-                            width: '40px',
-                            height: '40px',
+                            width: '35px',
+                            height: '35px',
                             display: 'flex',
                             alignItems: 'center',
-                            justifyContent: 'center'
+                            justifyContent: 'center',
+                            backgroundColor: '#007bff',
+                            border: 'none'
                           }}
                           onClick={(e) => handleAddToCart(book, e)}
                         >
-                          <i className="bi bi-cart-plus"></i>
+                          <i className="bi bi-cart-plus text-white" style={{ fontSize: '14px' }}></i>
                         </button>
                       </div>
                     )}
@@ -374,15 +392,48 @@ const Home = ({ onNavigateTo }) => {
                           ></i>
                         ))}
                         <span className="text-muted small ms-1" style={{ fontSize: '11px' }}>
-                          {book.rating ? book.rating.toFixed(1) : '0.0'} (1)
+                          ({book.reviewCount || 1})
                         </span>
                       </div>
                     </div>
 
                     <div className="mt-auto">
-                      <p className="card-text fw-bold text-dark mb-0" style={{ fontSize: '1.1rem' }}>
-                        {(book.price || 0).toLocaleString('vi-VN')} VNĐ
-                      </p>
+                      <div className="d-flex justify-content-between align-items-center mb-3">
+                        <span className="fw-bold text-dark h5 mb-0">
+                          {book.price ? new Intl.NumberFormat('vi-VN', {
+                            style: 'currency',
+                            currency: 'VND'
+                          }).format(book.price) : 'Liên hệ'}
+                        </span>
+                        {book.stock > 0 ? (
+                          <small className="text-success">
+                            <i className="bi bi-check-circle me-1"></i>
+                            Còn hàng
+                          </small>
+                        ) : (
+                          <small className="text-danger">
+                            <i className="bi bi-x-circle me-1"></i>
+                            Hết hàng
+                          </small>
+                        )}
+                      </div>
+                      {/* Button Xem chi tiết */}
+                      <button
+                        className="btn btn-outline-primary w-100"
+                        style={{
+                          fontSize: '14px',
+                          padding: '8px 16px',
+                          border: '1px solid #007bff',
+                          backgroundColor: 'white',
+                          color: '#007bff'
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleBookClick(book.book_id);
+                        }}
+                      >
+                        Xem chi tiết
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -423,7 +474,7 @@ const Home = ({ onNavigateTo }) => {
                   cursor: 'pointer',
                   borderRadius: '8px',
                   overflow: 'hidden',
-                  height: '350px',
+                  height: '450px',
                   backgroundColor: 'white'
                 }}
                   onClick={() => handleBookClick(book.book_id)}
@@ -451,33 +502,51 @@ const Home = ({ onNavigateTo }) => {
                       className="card-img-top"
                       alt={book.title}
                       style={{
-                        height: '220px',
+                        height: '280px',
                         objectFit: 'contain',
                         width: '100%',
                         backgroundColor: '#f8f9fa'
                       }}
                     />
-                    {/* Nút Thêm Vào Giỏ Hàng - xuất hiện khi hover và còn hàng */}
-                    {book.stock > 0 && (
-                      <div
-                        className="position-absolute top-0 end-0 p-2 add-to-cart-btn"
+                    {/* Heart Icon - góc trên trái */}
+                    <div className="position-absolute top-0 start-0 m-2">
+                      <button
+                        className="btn btn-sm btn-light rounded-circle"
                         style={{
-                          opacity: 0,
-                          transition: 'opacity 0.3s ease'
+                          width: '35px',
+                          height: '35px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          backgroundColor: 'rgba(255,255,255,0.9)',
+                          border: 'none'
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // TODO: Add to wishlist functionality
                         }}
                       >
+                        <i className="bi bi-heart text-dark" style={{ fontSize: '14px' }}></i>
+                      </button>
+                    </div>
+                    
+                    {/* Shopping Cart Icon - góc trên phải */}
+                    {book.stock > 0 && (
+                      <div className="position-absolute top-0 end-0 m-2">
                         <button
-                          className="btn btn-sm btn-light rounded-circle"
+                          className="btn btn-sm rounded-circle"
                           style={{
-                            width: '40px',
-                            height: '40px',
+                            width: '35px',
+                            height: '35px',
                             display: 'flex',
                             alignItems: 'center',
-                            justifyContent: 'center'
+                            justifyContent: 'center',
+                            backgroundColor: '#007bff',
+                            border: 'none'
                           }}
                           onClick={(e) => handleAddToCart(book, e)}
                         >
-                          <i className="bi bi-cart-plus"></i>
+                          <i className="bi bi-cart-plus text-white" style={{ fontSize: '14px' }}></i>
                         </button>
                       </div>
                     )}
@@ -510,15 +579,48 @@ const Home = ({ onNavigateTo }) => {
                           ></i>
                         ))}
                         <span className="text-muted small ms-1" style={{ fontSize: '11px' }}>
-                          {book.rating ? book.rating.toFixed(1) : '0.0'} (1)
+                          ({book.reviewCount || 1})
                         </span>
                       </div>
                     </div>
 
                     <div className="mt-auto">
-                      <p className="card-text fw-bold text-dark mb-0" style={{ fontSize: '1.1rem' }}>
-                        {(book.price || 0).toLocaleString('vi-VN')} VNĐ
-                      </p>
+                      <div className="d-flex justify-content-between align-items-center mb-3">
+                        <span className="fw-bold text-dark h5 mb-0">
+                          {book.price ? new Intl.NumberFormat('vi-VN', {
+                            style: 'currency',
+                            currency: 'VND'
+                          }).format(book.price) : 'Liên hệ'}
+                        </span>
+                        {book.stock > 0 ? (
+                          <small className="text-success">
+                            <i className="bi bi-check-circle me-1"></i>
+                            Còn hàng
+                          </small>
+                        ) : (
+                          <small className="text-danger">
+                            <i className="bi bi-x-circle me-1"></i>
+                            Hết hàng
+                          </small>
+                        )}
+                      </div>
+                      {/* Button Xem chi tiết */}
+                      <button
+                        className="btn btn-outline-primary w-100"
+                        style={{
+                          fontSize: '14px',
+                          padding: '8px 16px',
+                          border: '1px solid #007bff',
+                          backgroundColor: 'white',
+                          color: '#007bff'
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleBookClick(book.book_id);
+                        }}
+                      >
+                        Xem chi tiết
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -559,7 +661,7 @@ const Home = ({ onNavigateTo }) => {
                   cursor: 'pointer',
                   borderRadius: '8px',
                   overflow: 'hidden',
-                  height: '350px',
+                  height: '450px',
                   backgroundColor: 'white'
                 }}
                   onClick={() => handleBookClick(book.book_id)}
@@ -587,33 +689,51 @@ const Home = ({ onNavigateTo }) => {
                       className="card-img-top"
                       alt={book.title}
                       style={{
-                        height: '220px',
+                        height: '280px',
                         objectFit: 'contain',
                         width: '100%',
                         backgroundColor: '#f8f9fa'
                       }}
                     />
-                    {/* Nút Thêm Vào Giỏ Hàng - xuất hiện khi hover và còn hàng */}
-                    {book.stock > 0 && (
-                      <div
-                        className="position-absolute top-0 end-0 p-2 add-to-cart-btn"
+                    {/* Heart Icon - góc trên trái */}
+                    <div className="position-absolute top-0 start-0 m-2">
+                      <button
+                        className="btn btn-sm btn-light rounded-circle"
                         style={{
-                          opacity: 0,
-                          transition: 'opacity 0.3s ease'
+                          width: '35px',
+                          height: '35px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          backgroundColor: 'rgba(255,255,255,0.9)',
+                          border: 'none'
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // TODO: Add to wishlist functionality
                         }}
                       >
+                        <i className="bi bi-heart text-dark" style={{ fontSize: '14px' }}></i>
+                      </button>
+                    </div>
+                    
+                    {/* Shopping Cart Icon - góc trên phải */}
+                    {book.stock > 0 && (
+                      <div className="position-absolute top-0 end-0 m-2">
                         <button
-                          className="btn btn-sm btn-light rounded-circle"
+                          className="btn btn-sm rounded-circle"
                           style={{
-                            width: '40px',
-                            height: '40px',
+                            width: '35px',
+                            height: '35px',
                             display: 'flex',
                             alignItems: 'center',
-                            justifyContent: 'center'
+                            justifyContent: 'center',
+                            backgroundColor: '#007bff',
+                            border: 'none'
                           }}
                           onClick={(e) => handleAddToCart(book, e)}
                         >
-                          <i className="bi bi-cart-plus"></i>
+                          <i className="bi bi-cart-plus text-white" style={{ fontSize: '14px' }}></i>
                         </button>
                       </div>
                     )}
@@ -646,15 +766,48 @@ const Home = ({ onNavigateTo }) => {
                           ></i>
                         ))}
                         <span className="text-muted small ms-1" style={{ fontSize: '11px' }}>
-                          {book.rating ? book.rating.toFixed(1) : '0.0'} (1)
+                          ({book.reviewCount || 1})
                         </span>
                       </div>
                     </div>
 
                     <div className="mt-auto">
-                      <p className="card-text fw-bold text-dark mb-0" style={{ fontSize: '1.1rem' }}>
-                        {(book.price || 0).toLocaleString('vi-VN')} VNĐ
-                      </p>
+                      <div className="d-flex justify-content-between align-items-center mb-3">
+                        <span className="fw-bold text-dark h5 mb-0">
+                          {book.price ? new Intl.NumberFormat('vi-VN', {
+                            style: 'currency',
+                            currency: 'VND'
+                          }).format(book.price) : 'Liên hệ'}
+                        </span>
+                        {book.stock > 0 ? (
+                          <small className="text-success">
+                            <i className="bi bi-check-circle me-1"></i>
+                            Còn hàng
+                          </small>
+                        ) : (
+                          <small className="text-danger">
+                            <i className="bi bi-x-circle me-1"></i>
+                            Hết hàng
+                          </small>
+                        )}
+                      </div>
+                      {/* Button Xem chi tiết */}
+                      <button
+                        className="btn btn-outline-primary w-100"
+                        style={{
+                          fontSize: '14px',
+                          padding: '8px 16px',
+                          border: '1px solid #007bff',
+                          backgroundColor: 'white',
+                          color: '#007bff'
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleBookClick(book.book_id);
+                        }}
+                      >
+                        Xem chi tiết
+                      </button>
                     </div>
                   </div>
                 </div>

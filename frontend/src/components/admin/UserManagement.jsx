@@ -1,0 +1,458 @@
+import React, { useState, useEffect } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUser, faTrash, faSearch, faEdit, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+
+const UserManagement = () => {
+    const [users, setUsers] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filterRole, setFilterRole] = useState('all');
+    const [showModal, setShowModal] = useState(false);
+    const [selectedUser, setSelectedUser] = useState(null);
+    const [actionType, setActionType] = useState(''); // 'view', 'edit', 'delete'
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        phone: '',
+        address: '',
+        role: 'customer'
+    });
+    const [formErrors, setFormErrors] = useState({});
+
+    // Fetch users from Backend API
+    useEffect(() => {
+        const fetchUsers = async () => {
+            setLoading(true);
+            try {
+                // Lấy token từ localStorage
+                let token = localStorage.getItem('userToken');
+                
+                // Nếu không có token, thử lấy từ user data
+                if (!token) {
+                    console.log('No userToken found, trying to get from user data');
+                    const userData = localStorage.getItem('user');
+                    if (userData) {
+                        try {
+                            const parsedUser = JSON.parse(userData);
+                            token = parsedUser.token;
+                            console.log('Found token in user data:', token ? 'Yes' : 'No');
+                        } catch (error) {
+                            console.error('Error parsing user data:', error);
+                        }
+                    }
+                }
+
+                if (!token) {
+                    console.error('No token found anywhere');
+                    setUsers([]);
+                    setLoading(false);
+                    return;
+                }
+
+                console.log('Using token for API call');
+                const response = await fetch('http://localhost:3306/api/users/users', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const usersData = await response.json();
+                console.log('Fetched users data from backend:', usersData);
+                
+                // Filter out admin users and add default values for missing fields
+                const filteredUsers = usersData
+                    .filter(user => user.role !== 'admin')
+                    .map(user => ({
+                        ...user,
+                        last_login: user.updated_at || user.created_at,
+                        total_orders: user.total_orders || 0,
+                        total_spent: user.total_spent || 0
+                    }));
+
+                console.log('Filtered users:', filteredUsers);
+                setUsers(filteredUsers);
+            } catch (error) {
+                console.error('Error fetching users:', error);
+                // Fallback to empty array on error
+                setUsers([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchUsers();
+    }, []);
+
+    // Filter users based on search and filters
+    const filteredUsers = users.filter(user => {
+        const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            user.phone.includes(searchTerm);
+        const matchesRole = filterRole === 'all' || user.role === filterRole;
+        
+        return matchesSearch && matchesRole;
+    });
+
+    // Handle search
+    const handleSearch = (e) => {
+        setSearchTerm(e.target.value);
+    };
+
+    // Handle filter changes
+    const handleFilterChange = (type, value) => {
+        if (type === 'role') {
+            setFilterRole(value);
+        }
+    };
+
+    // Handle modal actions
+    const handleModalAction = (user, action) => {
+        setSelectedUser(user);
+        setActionType(action);
+        setFormData({
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+            address: user.address,
+            role: user.role
+        });
+        setShowModal(true);
+    };
+
+    // Handle form submission
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        
+        if (actionType === 'delete') {
+            if (window.confirm(`Bạn có chắc chắn muốn xóa tài khoản ${selectedUser.name}?`)) {
+                try {
+                    // Lấy token với cùng logic như fetchUsers
+                    let token = localStorage.getItem('userToken');
+                    if (!token) {
+                        const userData = localStorage.getItem('user');
+                        if (userData) {
+                            try {
+                                const parsedUser = JSON.parse(userData);
+                                token = parsedUser.token;
+                            } catch (error) {
+                                console.error('Error parsing user data:', error);
+                            }
+                        }
+                    }
+
+                    if (!token) {
+                        console.error('No token found for delete operation');
+                        if (window.showToast) {
+                            window.showToast('Không tìm thấy token xác thực!', 'error');
+                        }
+                        return;
+                    }
+
+                    const response = await fetch(`http://localhost:3306/api/users/users/${selectedUser.user_id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    // Remove user from local state
+                    setUsers(prev => prev.filter(user => user.user_id !== selectedUser.user_id));
+                    setShowModal(false);
+                    
+                    if (window.showToast) {
+                        window.showToast('Tài khoản đã được xóa thành công!', 'success');
+                    }
+                } catch (error) {
+                    console.error('Error deleting user:', error);
+                    if (window.showToast) {
+                        window.showToast('Có lỗi xảy ra khi xóa tài khoản!', 'error');
+                    }
+                }
+            }
+        }
+    };
+
+    // Close modal
+    const closeModal = () => {
+        setShowModal(false);
+        setSelectedUser(null);
+        setActionType('');
+        setFormData({
+            name: '',
+            email: '',
+            phone: '',
+            address: '',
+            role: 'customer'
+        });
+        setFormErrors({});
+    };
+
+    // Format currency
+    const formatCurrency = (amount) => {
+        return new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND'
+        }).format(amount);
+    };
+
+    // Format date
+    const formatDate = (dateString) => {
+        if (!dateString) return 'N/A';
+        try {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return 'N/A';
+            return date.toLocaleDateString('vi-VN');
+        } catch (error) {
+            console.error('Error formatting date:', error);
+            return 'N/A';
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="d-flex justify-content-center align-items-center" style={{ height: '400px' }}>
+                <div className="spinner-border text-primary" role="status">
+                    <span className="visually-hidden">Đang tải...</span>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="container-fluid">
+            {/* Header */}
+            <div className="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 className="mb-1">
+                        <FontAwesomeIcon icon={faUser} className="me-2 text-primary" />
+                        Quản lý người dùng
+                    </h2>
+                    <p className="text-muted mb-0">Quản lý tài khoản khách hàng</p>
+                </div>
+                <div className="d-flex align-items-center">
+                    <span className="badge bg-primary">
+                        Tổng: {users.length} người dùng
+                    </span>
+                </div>
+            </div>
+
+            {/* Filters */}
+            <div className="card mb-4">
+                <div className="card-body">
+                    <div className="row g-3">
+                        <div className="col-md-4">
+                            <label className="form-label">Tìm kiếm</label>
+                            <div className="input-group">
+                                <span className="input-group-text">
+                                    <FontAwesomeIcon icon={faSearch} />
+                                </span>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="Tìm theo tên, email, số điện thoại..."
+                                    value={searchTerm}
+                                    onChange={handleSearch}
+                                />
+                            </div>
+                        </div>
+                        <div className="col-md-3">
+                            <label className="form-label">Vai trò</label>
+                            <select
+                                className="form-select"
+                                value={filterRole}
+                                onChange={(e) => handleFilterChange('role', e.target.value)}
+                            >
+                                <option value="all">Tất cả vai trò</option>
+                                <option value="customer">Khách hàng</option>
+                            </select>
+                        </div>
+                        <div className="col-md-2">
+                            <label className="form-label">&nbsp;</label>
+                            <div className="d-grid">
+                                <button
+                                    className="btn btn-outline-secondary"
+                                    onClick={() => {
+                                        setSearchTerm('');
+                                        setFilterRole('all');
+                                    }}
+                                >
+                                    Xóa bộ lọc
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Users Table */}
+            <div className="card">
+                <div className="card-body">
+                    <div className="table-responsive">
+                        <table className="table table-hover">
+                            <thead className="table-light">
+                                <tr>
+                                    <th>Thông tin</th>
+                                    <th>Liên hệ</th>
+                                    <th>Thống kê</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filteredUsers.map((user) => (
+                                    <tr key={user.user_id}>
+                                        <td>
+                                            <div>
+                                                <div className="fw-bold">{user.name}</div>
+                                                <small className="text-muted">
+                                                    ID: {user.user_id} | {formatDate(user.created_at)}
+                                                </small>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div>
+                                                <div className="small">{user.email}</div>
+                                                <div className="small text-muted">{user.phone || 'Chưa cập nhật'}</div>
+                                                <div className="small text-muted">{user.address || 'Chưa cập nhật'}</div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div className="small">
+                                                <div>Đơn hàng: {user.total_orders}</div>
+                                                <div>Chi tiêu: {formatCurrency(user.total_spent)}</div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div className="btn-group" role="group">
+                                                <button
+                                                    className="btn btn-outline-info btn-sm"
+                                                    onClick={() => handleModalAction(user, 'view')}
+                                                    title="Xem chi tiết"
+                                                >
+                                                    <FontAwesomeIcon icon={faEye} />
+                                                </button>
+                                                <button
+                                                    className="btn btn-outline-danger btn-sm"
+                                                    onClick={() => handleModalAction(user, 'delete')}
+                                                    title="Xóa tài khoản"
+                                                >
+                                                    <FontAwesomeIcon icon={faTrash} />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {filteredUsers.length === 0 && (
+                        <div className="text-center py-4">
+                            <FontAwesomeIcon icon={faUser} size="3x" className="text-muted mb-3" />
+                            <p className="text-muted">Không tìm thấy người dùng nào</p>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Modal */}
+            {showModal && (
+                <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <div className="modal-dialog modal-lg">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">
+                                    {actionType === 'view' && 'Chi tiết người dùng'}
+                                    {actionType === 'edit' && 'Chỉnh sửa người dùng'}
+                                    {actionType === 'delete' && 'Xóa tài khoản'}
+                                </h5>
+                                <button
+                                    type="button"
+                                    className="btn-close"
+                                    onClick={closeModal}
+                                ></button>
+                            </div>
+                            <form onSubmit={handleSubmit}>
+                                <div className="modal-body">
+                                    {actionType === 'view' && (
+                                        <div className="row">
+                                            <div className="col-md-6">
+                                                <h6>Thông tin cá nhân</h6>
+                                                <p><strong>Tên:</strong> {selectedUser?.name}</p>
+                                                <p><strong>Email:</strong> {selectedUser?.email}</p>
+                                                <p><strong>Số điện thoại:</strong> {selectedUser?.phone || 'Chưa cập nhật'}</p>
+                                                <p><strong>Địa chỉ:</strong> {selectedUser?.address || 'Chưa cập nhật'}</p>
+                                                <p><strong>Vai trò:</strong> 
+                                                    <span className={`badge ms-2 ${selectedUser?.role === 'admin' ? 'bg-danger' : 'bg-primary'}`}>
+                                                        {selectedUser?.role === 'admin' ? 'Admin' : 'Khách hàng'}
+                                                    </span>
+                                                </p>
+                                            </div>
+                                            <div className="col-md-6">
+                                                <h6>Thông tin tài khoản</h6>
+                                                <p><strong>Ngày tạo:</strong> {formatDate(selectedUser?.created_at)}</p>
+                                                <p><strong>Cập nhật cuối:</strong> {formatDate(selectedUser?.updated_at)}</p>
+                                                <p><strong>Tổng đơn hàng:</strong> {selectedUser?.total_orders}</p>
+                                                <p><strong>Tổng chi tiêu:</strong> {formatCurrency(selectedUser?.total_spent)}</p>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {actionType === 'delete' && (
+                                        <div className="alert alert-warning">
+                                            <FontAwesomeIcon icon={faTrash} className="me-2" />
+                                            <strong>Cảnh báo:</strong> Bạn sắp xóa vĩnh viễn tài khoản này. Hành động này không thể hoàn tác!
+                                        </div>
+                                    )}
+
+                                    {actionType === 'delete' && (
+                                        <div className="mb-3">
+                                            <label className="form-label">Xác nhận xóa tài khoản:</label>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                placeholder={`Nhập "${selectedUser?.name}" để xác nhận`}
+                                                required
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="modal-footer">
+                                    <button
+                                        type="button"
+                                        className="btn btn-secondary"
+                                        onClick={closeModal}
+                                    >
+                                        Hủy
+                                    </button>
+                                    {actionType !== 'view' && (
+                                        <button
+                                            type="submit"
+                                            className={`btn ${
+                                                actionType === 'delete' ? 'btn-danger' : 'btn-primary'
+                                            }`}
+                                        >
+                                            {actionType === 'delete' && 'Xóa tài khoản'}
+                                        </button>
+                                    )}
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
+export default UserManagement;

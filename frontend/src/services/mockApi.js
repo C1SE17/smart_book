@@ -225,53 +225,7 @@ const books = [
   }
 ];
 
-// Mock Users (có thể tạo bằng Postman)
-const users = [
-  {
-    user_id: 1,
-    name: "Admin",
-    email: "admin@gmail.com",
-    password: "admin123", // Mật khẩu mặc định
-    phone: "0909000111",
-    address: "Hà Nội",
-    role: "admin",
-    created_at: "2024-01-01T00:00:00Z",
-    updated_at: "2024-01-01T00:00:00Z"
-  },
-  {
-    user_id: 2,
-    name: "Nguyen Van A",
-    email: "nguyenvanb@gmail.com",
-    password: "password123", // Mật khẩu mặc định
-    phone: "0912000222",
-    address: "TP.HCM",
-    role: "customer",
-    created_at: "2024-01-01T00:00:00Z",
-    updated_at: "2024-01-01T00:00:00Z"
-  },
-  {
-    user_id: 3,
-    name: "Vo Dinh Trung",
-    email: "123@gmail.com",
-    password: "password123", // Mật khẩu mặc định
-    phone: "",
-    address: "",
-    role: "customer",
-    created_at: "2024-01-01T00:00:00Z",
-    updated_at: "2024-01-01T00:00:00Z"
-  },
-  {
-    user_id: 4,
-    name: "Nguyen Van B",
-    email: "test@gmail.com",
-    password: "password123", // Mật khẩu mặc định
-    phone: "0909000333",
-    address: "Da Nang",
-    role: "customer",
-    created_at: "2024-01-01T00:00:00Z",
-    updated_at: "2024-01-01T00:00:00Z"
-  }
-];
+// Không còn mock users, chỉ sử dụng dữ liệu từ SQL database
 
 // Mock Reviews
 const reviews = [
@@ -543,6 +497,7 @@ export const mockApi = {
   getPublisherById: async (id) => {
     return publishers.find(p => p.publisher_id === parseInt(id));
   },
+
 
   // Reviews API
   getReviewsByBookId: async (bookId) => {
@@ -941,45 +896,8 @@ export const mockApi = {
     const { email, password } = credentials;
     
     try {
-      // Kiểm tra trong mock data trước
-      const mockUser = users.find(u => u.email === email);
-      if (mockUser && mockUser.password === password) {
-        console.log('Mock: Đăng nhập thành công từ mock data');
-        
-        // Decode JWT token để lấy role
-        let userRole = 'customer'; // Default role
-        if (mockUser.role) {
-          userRole = mockUser.role;
-        }
-        
-        // Override role cho admin emails
-        if (email.includes('admin')) {
-          userRole = 'admin';
-          console.log('Overriding role to admin for email:', email);
-        }
-        
-        const user = {
-          user_id: mockUser.user_id,
-          name: mockUser.name,
-          email: mockUser.email,
-          phone: mockUser.phone || '',
-          address: mockUser.address || '',
-          role: userRole,
-          created_at: mockUser.created_at,
-          updated_at: mockUser.updated_at
-        };
-        
-        const token = `mock_token_${user.user_id}_${Date.now()}`;
-        
-        return {
-          user: user,
-          token: token,
-          message: 'Đăng nhập thành công'
-        };
-      }
-      
-      // Nếu không tìm thấy trong mock data, gọi backend
-      console.log('Mock: Không tìm thấy trong mock data, gọi backend...');
+      // Chỉ sử dụng backend API
+      console.log('Gọi backend API để đăng nhập...');
       const response = await fetch('http://localhost:3306/api/users/login', {
         method: 'POST',
         headers: {
@@ -1018,34 +936,46 @@ export const mockApi = {
         console.log('Overriding role to admin for email:', email);
       }
       
-      // Tìm user trong mock data hoặc tạo mới
-      let user = users.find(u => u.email === email);
-      if (!user) {
-        // Nếu không tìm thấy trong mock data, tạo user mới với role từ token
-        user = {
-          user_id: Date.now(),
-          name: email.split('@')[0], // Tạm thời dùng email làm tên
+      // Lấy thông tin user từ backend
+      const userResponse = await fetch(`http://localhost:3306/api/users/${result.userId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${result.token}`
+        }
+      });
+
+      let userData = {};
+      if (userResponse.ok) {
+        userData = await userResponse.json();
+      } else {
+        // Fallback nếu không lấy được thông tin user
+        userData = {
+          user_id: result.userId,
+          name: email.split('@')[0],
           email: email,
           phone: '',
           address: '',
-          role: userRole, // Lấy role từ JWT token
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          role: userRole,
+          status: 'active'
         };
-        users.push(user);
-      } else {
-        // Cập nhật role từ token
-        user.role = userRole;
       }
       
-      console.log('Final user object before return:', user);
-      
-      // Sử dụng token từ backend
-      const token = result.token || `mock_token_${user.user_id}_${Date.now()}`;
+      console.log('User data from backend:', userData);
       
       return {
-        user: user,
-        token: token,
+        user: {
+          user_id: userData.user_id,
+          name: userData.name,
+          email: userData.email,
+          phone: userData.phone || '',
+          address: userData.address || '',
+          role: userRole,
+          status: userData.status || 'active',
+          created_at: userData.created_at,
+          updated_at: userData.updated_at
+        },
+        token: result.token,
         message: result.message || 'Đăng nhập thành công'
       };
     } catch (error) {
@@ -1055,7 +985,25 @@ export const mockApi = {
   },
 
   getUserById: async (id) => {
-    return users.find(u => u.user_id === parseInt(id));
+    // Lấy user từ backend thay vì mock data
+    try {
+      const token = localStorage.getItem('userToken') || JSON.parse(localStorage.getItem('user') || '{}').token;
+      const response = await fetch(`http://localhost:3306/api/users/${id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.ok) {
+        return await response.json();
+      }
+      return null;
+    } catch (error) {
+      console.error('Error fetching user:', error);
+      return null;
+    }
   },
 
   updateUser: async (id, userData, currentUser = null) => {

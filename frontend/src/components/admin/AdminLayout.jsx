@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const AdminLayout = ({ children, onNavigateTo, currentPage }) => {
+const AdminLayout = ({ children, onNavigateTo, onLogout, onBackToHome, currentPage }) => {
     const [sidebarOpen, setSidebarOpen] = useState(true);
 
     const menuItems = [
@@ -19,7 +19,11 @@ const AdminLayout = ({ children, onNavigateTo, currentPage }) => {
     };
 
     const handleBackToHome = () => {
-        onNavigateTo('home');
+        if (onBackToHome) {
+            onBackToHome();
+        } else {
+            onNavigateTo('home');
+        }
     };
 
     return (
@@ -47,13 +51,25 @@ const AdminLayout = ({ children, onNavigateTo, currentPage }) => {
 
                     {/* Back to Home */}
                     <button
-                        className="btn btn-outline-light btn-sm mb-4"
+                        className="btn btn-outline-light btn-sm mb-3"
                         onClick={handleBackToHome}
                         style={{ width: '100%' }}
                     >
                         <i className="fas fa-home me-2"></i>
                         {sidebarOpen && 'Về trang chủ'}
                     </button>
+
+                    {/* Logout Button */}
+                    {onLogout && (
+                        <button
+                            className="btn btn-outline-danger btn-sm mb-4"
+                            onClick={onLogout}
+                            style={{ width: '100%' }}
+                        >
+                            <i className="fas fa-sign-out-alt me-2"></i>
+                            {sidebarOpen && 'Đăng xuất'}
+                        </button>
+                    )}
 
                     {/* Menu Items */}
                     <nav className="nav flex-column">

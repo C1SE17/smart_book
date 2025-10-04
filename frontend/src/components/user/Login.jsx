@@ -99,7 +99,8 @@ const Login = ({ onToggleMode, onLoginSuccess, onForgotPassword }) => {
       
     } catch (error) {
       console.error('Lỗi đăng nhập:', error);
-      setErrors({ general: 'Đăng nhập thất bại. Vui lòng thử lại.' });
+      // Hiển thị thông báo lỗi cụ thể từ error message
+      setErrors({ general: error.message || 'Đăng nhập thất bại. Vui lòng thử lại.' });
     } finally {
       setLoading(false);
     }

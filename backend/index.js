@@ -42,7 +42,7 @@ app.use((req, res, next) => {
 
 // Tuyến gốc
 app.get('/', (req, res) => {
-    res.send('Xin chào đén với smart book!');
+    res.send('Xin chào đến với smart book!');
 });
 
 // Gắn tuyến API

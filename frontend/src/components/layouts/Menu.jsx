@@ -51,20 +51,22 @@ const MenuClient = ({ onNavigateTo, onBackToHome, user, onLogout, onViewAllNotif
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark fixed-top" style={{ borderTop: '3px solid #8B5CF6', zIndex: 1040 }}>
       <div className="container">
-        {/* Brand Name */}
-        <span
-          className="navbar-brand fw-bold text-white"
+        {/* Brand Logo */}
+        <img
+          src="/images/Logo.png"
+          alt="SMART BOOK"
+          className="navbar-brand"
           onClick={onBackToHome}
           style={{
-            fontSize: '1.5rem',
-            fontFamily: 'sans-serif',
-            letterSpacing: '0.5px',
+            height: '60px',
+            width: 'auto',
             cursor: 'pointer',
-
+            filter: 'brightness(0) invert(1)', // Chuyển thành màu trắng
+            transition: 'opacity 0.3s ease'
           }}
-        >
-          SMART BOOK
-        </span>
+          onMouseEnter={(e) => e.target.style.opacity = '0.8'}
+          onMouseLeave={(e) => e.target.style.opacity = '1'}
+        />
 
 
         {/* Mobile Toggle */}

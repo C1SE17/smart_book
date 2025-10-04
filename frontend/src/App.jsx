@@ -23,6 +23,7 @@ import CategoryManagement from './components/admin/CategoryManagement'
 import BookManagement from './components/admin/BookManagement'
 import WarehouseManagement from './components/admin/WarehouseManagement'
 import OrderManagement from './components/admin/OrderManagement'
+import UserManagement from './components/admin/UserManagement'
 import UserProfile from './components/user/UserProfile'
 import Auth from './features/auth/Auth'
 import ErrorBoundary from './components/common/ErrorBoundary/ErrorBoundary'
@@ -39,6 +40,7 @@ function App() {
   const [authorId, setAuthorId] = useState(null); // ID blog cho trang chi tiết blog
   const [user, setUser] = useState(null); // State xác thực người dùng
   const [profileTab, setProfileTab] = useState('profile'); // State tab profile
+  const [adminWantsHome, setAdminWantsHome] = useState(false); // State để theo dõi admin có muốn ở trang chủ
 
   // Khởi tạo state người dùng từ localStorage
   useEffect(() => {
@@ -73,7 +75,16 @@ function App() {
       window.removeEventListener('storage', loadUser);
       window.removeEventListener('userLoggedOut', handleUserLoggedOut);
     };
-  }, []);
+  }, []); // Bỏ currentPage khỏi dependency để tránh vòng lặp
+
+  // Effect riêng để xử lý admin redirect
+  useEffect(() => {
+    // Admin có thể truy cập homepage, không cần redirect tự động
+    if (user && user.role === 'admin' && currentPage === 'home' && window.location.pathname === '/') {
+      console.log('Admin đang truy cập homepage');
+      // Không redirect, để admin có thể ở homepage
+    }
+  }, [user, currentPage, adminWantsHome]);
 
   // Xử lý định tuyến URL
   useEffect(() => {
@@ -101,6 +112,18 @@ function App() {
     window.scrollTo(0, 0);
   }, []);
 
+  // Handler riêng cho admin về trang chủ (không logout)
+  const handleAdminBackToHome = useCallback(() => {
+    // Set flag để admin có thể ở trang chủ
+    setAdminWantsHome(true);
+    
+    // Navigate về trang chủ
+    navigateTo('/');
+    setSearchQuery('');
+    setProductId(null);
+    window.scrollTo(0, 0);
+  }, []);
+
   const handleLoginSuccess = useCallback((userData) => {
     console.log('User logged in:', userData);
     // Force reload user from localStorage after login
@@ -111,11 +134,27 @@ function App() {
         console.log('Setting user after login:', parsedUser);
         console.log('User role:', parsedUser.role);
         setUser(parsedUser);
+        
+        // Kiểm tra role và chuyển hướng phù hợp
+        if (parsedUser.role === 'admin') {
+          // Admin chuyển hướng đến homepage trước
+          navigateTo('/');
+          console.log('Admin logged in, redirecting to homepage');
+        } else {
+          // User thường chuyển hướng về trang chủ
+          navigateTo('/');
+          console.log('Customer logged in, redirecting to home');
+        }
       } catch (error) {
         console.error('Error parsing user data after login:', error);
+        // Fallback về trang chủ nếu có lỗi
+        navigateTo('/');
       }
+    } else {
+      // Fallback về trang chủ nếu không có dữ liệu user
+      navigateTo('/');
     }
-    navigateTo('/'); // Chuyển hướng về trang chủ sau khi đăng nhập
+    
     setSearchQuery(''); // Xóa tìm kiếm
     setProductId(null); // Xóa ID sản phẩm
     // Đặt lại vị trí cuộn lên đầu sau khi đăng nhập
@@ -125,6 +164,8 @@ function App() {
   const handleLogout = useCallback(() => {
     removeToken(); // Xóa token khỏi localStorage
     setUser(null); // Xóa dữ liệu người dùng
+    setAdminWantsHome(false); // Reset admin flag
+    setCurrentPage('home'); // Reset current page to home
     navigateTo('/'); // Chuyển hướng về trang chủ sau khi đăng xuất
     setSearchQuery(''); // Xóa tìm kiếm
     setProductId(null); // Xóa ID sản phẩm
@@ -175,6 +216,11 @@ function App() {
     };
 
     const path = routeMap[page] || '/';
+
+    // Reset admin wants home flag when navigating to admin pages
+    if (page.startsWith('admin-')) {
+      setAdminWantsHome(false);
+    }
 
     // Handle product page with productId
     if (page === 'product' && params.productId) {
@@ -335,44 +381,51 @@ function App() {
       {/* Admin Pages */}
       {currentPage === 'admin-dashboard' && (
         <ErrorBoundary>
-          <AdminLayout onNavigateTo={handleNavigateTo} currentPage="admin-dashboard">
+          <AdminLayout onNavigateTo={handleNavigateTo} onLogout={handleLogout} onBackToHome={handleAdminBackToHome} currentPage="admin-dashboard">
             <Dashboard />
           </AdminLayout>
         </ErrorBoundary>
       )}
       {currentPage === 'admin-books' && (
         <ErrorBoundary>
-          <AdminLayout onNavigateTo={handleNavigateTo} currentPage="admin-books">
+          <AdminLayout onNavigateTo={handleNavigateTo} onLogout={handleLogout} onBackToHome={handleAdminBackToHome} currentPage="admin-books">
             <BookManagement />
           </AdminLayout>
         </ErrorBoundary>
       )}
       {currentPage === 'admin-categories' && (
         <ErrorBoundary>
-          <AdminLayout onNavigateTo={handleNavigateTo} currentPage="admin-categories">
+          <AdminLayout onNavigateTo={handleNavigateTo} onLogout={handleLogout} onBackToHome={handleAdminBackToHome} currentPage="admin-categories">
             <CategoryManagement />
           </AdminLayout>
         </ErrorBoundary>
       )}
       {currentPage === 'admin-warehouse' && (
         <ErrorBoundary>
-          <AdminLayout onNavigateTo={handleNavigateTo} currentPage="admin-warehouse">
+          <AdminLayout onNavigateTo={handleNavigateTo} onLogout={handleLogout} onBackToHome={handleAdminBackToHome} currentPage="admin-warehouse">
             <WarehouseManagement />
           </AdminLayout>
         </ErrorBoundary>
       )}
       {currentPage === 'admin-orders' && (
         <ErrorBoundary>
-          <AdminLayout onNavigateTo={handleNavigateTo} currentPage="admin-orders">
+          <AdminLayout onNavigateTo={handleNavigateTo} onLogout={handleLogout} onBackToHome={handleAdminBackToHome} currentPage="admin-orders">
             <OrderManagement />
+          </AdminLayout>
+        </ErrorBoundary>
+      )}
+      {currentPage === 'admin-users' && (
+        <ErrorBoundary>
+          <AdminLayout onNavigateTo={handleNavigateTo} onLogout={handleLogout} onBackToHome={handleAdminBackToHome} currentPage="admin-users">
+            <UserManagement />
           </AdminLayout>
         </ErrorBoundary>
       )}
 
       {/* Fallback for admin pages */}
-      {currentPage && currentPage.startsWith('admin-') && !currentPage.includes('admin-dashboard') && !currentPage.includes('admin-books') && !currentPage.includes('admin-categories') && !currentPage.includes('admin-warehouse') && !currentPage.includes('admin-orders') && (
+      {currentPage && currentPage.startsWith('admin-') && !currentPage.includes('admin-dashboard') && !currentPage.includes('admin-books') && !currentPage.includes('admin-categories') && !currentPage.includes('admin-warehouse') && !currentPage.includes('admin-orders') && !currentPage.includes('admin-users') && (
         <ErrorBoundary>
-          <AdminLayout onNavigateTo={handleNavigateTo} currentPage={currentPage}>
+          <AdminLayout onNavigateTo={handleNavigateTo} onLogout={handleLogout} onBackToHome={handleAdminBackToHome} currentPage={currentPage}>
             <div className="text-center py-5">
               <h3>Trang đang được phát triển</h3>
               <p className="text-muted">Tính năng này sẽ sớm có mặt</p>
