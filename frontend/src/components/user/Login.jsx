@@ -83,8 +83,10 @@ const Login = ({ onToggleMode, onLoginSuccess, onForgotPassword }) => {
         name: response.user.name, // Sử dụng tên thực từ đăng ký
         phone: response.user.phone,
         address: response.user.address,
+        role: response.user.role, // Lưu role từ backend
         token: response.token
       };
+      console.log('Saving user data to localStorage:', userData);
       localStorage.setItem('user', JSON.stringify(userData));
       
       // Gọi callback thành công với dữ liệu user từ mock API

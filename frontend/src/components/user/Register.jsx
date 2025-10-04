@@ -86,6 +86,7 @@ const Register = ({ onToggleMode, onRegisterSuccess }) => {
       });
       
       console.log('Đăng ký thành công:', response);
+      console.log('User role after registration:', response.user?.role);
       
       // Hiển thị thông báo thành công
       setErrors({ success: 'Đăng ký thành công! Vui lòng đăng nhập với thông tin của bạn.' });

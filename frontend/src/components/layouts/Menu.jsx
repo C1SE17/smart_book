@@ -206,6 +206,10 @@ const MenuClient = ({ onNavigateTo, onBackToHome, user, onLogout, onViewAllNotif
                     data-bs-toggle="dropdown"
                     aria-expanded="false"
                     style={{ color: '#fff' }}
+                    onClick={() => {
+                      console.log('Current user data:', user);
+                      console.log('User role:', user.role);
+                    }}
                   >
                     <i className="fas fa-user me-2" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
                     <span className="fw-medium">{user.name || user.email || 'User'}</span>
@@ -237,19 +241,21 @@ const MenuClient = ({ onNavigateTo, onBackToHome, user, onLogout, onViewAllNotif
                         Đơn Hàng
                       </a>
                     </li>
-                    <li>
-                      <a
-                        className="dropdown-item"
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          onNavigateTo('admin-dashboard');
-                        }}
-                      >
-                        <i className="fas fa-cog me-2"></i>
-                        Admin Dashboard
-                      </a>
-                    </li>
+                    {user.role === 'admin' && (
+                      <li>
+                        <a
+                          className="dropdown-item"
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            onNavigateTo('admin-dashboard');
+                          }}
+                        >
+                          <i className="fas fa-cog me-2"></i>
+                          Admin Dashboard
+                        </a>
+                      </li>
+                    )}
                     <li><hr className="dropdown-divider" /></li>
                     <li>
                       <button

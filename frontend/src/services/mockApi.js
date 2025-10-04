@@ -712,7 +712,7 @@ export const mockApi = {
           password,
           phone: phone || '',
           address: address || '',
-          role: 'customer'
+          role: email.includes('admin') ? 'admin' : 'customer' // Tự động set admin nếu email chứa 'admin'
         })
       });
 
@@ -723,6 +723,9 @@ export const mockApi = {
 
       const result = await response.json();
       
+      // Xác định role dựa trên email (vì backend không xử lý role)
+      const userRole = email.includes('admin') ? 'admin' : 'customer';
+      
       // Tạo user object cho frontend
       const newUser = {
         user_id: Date.now(), // Tạm thời dùng timestamp
@@ -730,10 +733,12 @@ export const mockApi = {
         email: email,
         phone: phone || '',
         address: address || '',
-        role: 'customer',
+        role: userRole, // Sử dụng role được xác định từ email
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
+      
+      console.log('Created user with role:', userRole, 'for email:', email);
       
       // Thêm vào mock data để frontend hoạt động
       users.push(newUser);
@@ -775,22 +780,47 @@ export const mockApi = {
 
       const result = await response.json();
       
+      // Decode JWT token để lấy role
+      let userRole = 'customer'; // Default role
+      if (result.token) {
+        try {
+          // Decode JWT token (chỉ lấy payload, không verify signature)
+          const payload = JSON.parse(atob(result.token.split('.')[1]));
+          userRole = payload.role || 'customer';
+          console.log('Decoded JWT payload:', payload);
+          console.log('User role from token:', userRole);
+        } catch (error) {
+          console.warn('Không thể decode token, sử dụng role mặc định:', error);
+        }
+      }
+      
+      // Override role cho admin emails (tạm thời fix)
+      if (email.includes('admin')) {
+        userRole = 'admin';
+        console.log('Overriding role to admin for email:', email);
+      }
+      
       // Tìm user trong mock data hoặc tạo mới
       let user = users.find(u => u.email === email);
       if (!user) {
-        // Nếu không tìm thấy trong mock data, tạo user mới
+        // Nếu không tìm thấy trong mock data, tạo user mới với role từ token
         user = {
           user_id: Date.now(),
           name: email.split('@')[0], // Tạm thời dùng email làm tên
           email: email,
           phone: '',
           address: '',
-          role: 'customer',
+          role: userRole, // Lấy role từ JWT token
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         };
         users.push(user);
+      } else {
+        // Cập nhật role từ token
+        user.role = userRole;
       }
+      
+      console.log('Final user object before return:', user);
       
       // Sử dụng token từ backend
       const token = result.token || `mock_token_${user.user_id}_${Date.now()}`;

@@ -103,12 +103,13 @@ function App() {
 
   const handleLoginSuccess = useCallback((userData) => {
     console.log('User logged in:', userData);
-    // Reload user from localStorage after login
+    // Force reload user from localStorage after login
     const userDataFromStorage = localStorage.getItem('user');
     if (userDataFromStorage) {
       try {
         const parsedUser = JSON.parse(userDataFromStorage);
         console.log('Setting user after login:', parsedUser);
+        console.log('User role:', parsedUser.role);
         setUser(parsedUser);
       } catch (error) {
         console.error('Error parsing user data after login:', error);

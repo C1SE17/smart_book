@@ -49,16 +49,24 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
 
   // Khởi tạo dữ liệu form khi user thay đổi
   useEffect(() => {
+    // Ưu tiên role từ localStorage user object
+    const userRole = user?.role || displayUser.role || 'customer';
+    
     const newFormData = {
       name: displayUser.name || '',
       email: displayUser.email || '',
       phone: displayUser.phone || '',
       address: displayUser.address || '',
-      role: displayUser.role || 'customer'
+      role: userRole
     };
+    
+    console.log('Initializing form data with role:', userRole);
+    console.log('User object role:', user?.role);
+    console.log('DisplayUser role:', displayUser.role);
+    
     setFormData(newFormData);
     setUserProfile(displayUser);
-  }, [displayUser]);
+  }, [displayUser, user]);
 
   // Fetch user profile from backend
   const fetchUserProfile = useCallback(async () => {
@@ -67,25 +75,58 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
       return;
     }
 
+    // Tạm thời tắt gọi backend để tránh role bị override
+    // Sử dụng trực tiếp dữ liệu từ localStorage
+    console.log('Using localStorage data directly (backend disabled for role fix)');
+    console.log('User from localStorage:', user);
+    console.log('User role from localStorage:', user?.role);
+    
+    setUserProfile(user);
+    setFormData({
+      name: user.name || '',
+      email: user.email || '',
+      phone: user.phone || '',
+      address: user.address || '',
+      role: user.role || 'customer'
+    });
+    
+    console.log('Form data set with role:', user.role || 'customer');
+    
+    setLoading(false);
+
+    // Code gọi backend (đã tắt)
+    /*
     try {
       setLoading(true);
-      // For now, we'll use a placeholder userId since we don't have it in the token
-      // In a real app, you would decode the JWT token to get the userId
       const profileData = await userService.getProfile(1, user.token);
-      setUserProfile(profileData);
+      
+      const finalProfileData = {
+        ...profileData,
+        role: user.role || profileData.role || 'customer'
+      };
+      
+      setUserProfile(finalProfileData);
       setFormData({
-        name: profileData.name || '',
-        email: profileData.email || '',
-        phone: profileData.phone || '',
-        address: profileData.address || '',
-        role: profileData.role || 'customer'
+        name: finalProfileData.name || '',
+        email: finalProfileData.email || '',
+        phone: finalProfileData.phone || '',
+        address: finalProfileData.address || '',
+        role: finalProfileData.role || 'customer'
       });
     } catch (error) {
       console.error('Lỗi lấy thông tin profile:', error);
-      setUserProfile(displayUser);
+      setUserProfile(user);
+      setFormData({
+        name: user.name || '',
+        email: user.email || '',
+        phone: user.phone || '',
+        address: user.address || '',
+        role: user.role || 'customer'
+      });
     } finally {
       setLoading(false);
     }
+    */
   }, [user, displayUser]);
 
   // Load profile data on mount
