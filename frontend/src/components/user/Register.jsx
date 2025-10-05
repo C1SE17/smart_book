@@ -76,6 +76,11 @@ const Register = ({ onToggleMode, onRegisterSuccess }) => {
     setLoading(true);
     
     try {
+      // Clear any cached data before registering
+      console.log('Clearing localStorage cache...');
+      localStorage.removeItem('user');
+      localStorage.removeItem('userToken');
+      
       // Gọi real API để đăng ký
       const response = await apiService.register({
         name: formData.fullName,

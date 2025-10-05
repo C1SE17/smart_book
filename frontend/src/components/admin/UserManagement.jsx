@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faTrash, faSearch, faEdit, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import apiService from '../../services/api';
 
 const UserManagement = () => {
     const [users, setUsers] = useState([]);
@@ -18,51 +19,21 @@ const UserManagement = () => {
         role: 'customer'
     });
     const [formErrors, setFormErrors] = useState({});
+    
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+    const [isPageChanging, setIsPageChanging] = useState(false);
 
     // Fetch users from Backend API
     useEffect(() => {
         const fetchUsers = async () => {
             setLoading(true);
             try {
-                // Lấy token từ localStorage
-                let token = localStorage.getItem('userToken');
+                console.log('Fetching users from backend API...');
                 
-                // Nếu không có token, thử lấy từ user data
-                if (!token) {
-                    console.log('No userToken found, trying to get from user data');
-                    const userData = localStorage.getItem('user');
-                    if (userData) {
-                        try {
-                            const parsedUser = JSON.parse(userData);
-                            token = parsedUser.token;
-                            console.log('Found token in user data:', token ? 'Yes' : 'No');
-                        } catch (error) {
-                            console.error('Error parsing user data:', error);
-                        }
-                    }
-                }
-
-                if (!token) {
-                    console.error('No token found anywhere');
-                    setUsers([]);
-                    setLoading(false);
-                    return;
-                }
-
-                console.log('Using token for API call');
-                const response = await fetch('http://localhost:3306/api/users/users', {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const usersData = await response.json();
+                // Sử dụng apiService để lấy danh sách users
+                const usersData = await apiService.getAllUsers();
                 console.log('Fetched users data from backend:', usersData);
                 
                 // Filter out admin users and add default values for missing fields
@@ -79,6 +50,28 @@ const UserManagement = () => {
                 setUsers(filteredUsers);
             } catch (error) {
                 console.error('Error fetching users:', error);
+                
+                // Hiển thị thông báo lỗi chi tiết
+                let errorMessage = 'Không thể tải danh sách người dùng';
+                if (error.message.includes('fetch')) {
+                    errorMessage = 'Không thể kết nối đến server. Vui lòng kiểm tra backend có đang chạy không.';
+                } else if (error.message.includes('401')) {
+                    errorMessage = 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.';
+                } else if (error.message.includes('403')) {
+                    errorMessage = 'Bạn không có quyền truy cập trang này.';
+                } else if (error.message.includes('404')) {
+                    errorMessage = 'API endpoint không tồn tại.';
+                } else if (error.message.includes('500')) {
+                    errorMessage = 'Lỗi server. Vui lòng thử lại sau.';
+                }
+                
+                // Hiển thị thông báo lỗi
+                if (window.showToast) {
+                    window.showToast(errorMessage, 'error');
+                } else {
+                    alert(errorMessage);
+                }
+                
                 // Fallback to empty array on error
                 setUsers([]);
             } finally {
@@ -99,6 +92,17 @@ const UserManagement = () => {
         return matchesSearch && matchesRole;
     });
 
+    // Pagination calculations
+    const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const currentUsers = filteredUsers.slice(startIndex, endIndex);
+
+    // Reset to first page when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, filterRole, itemsPerPage]);
+
     // Handle search
     const handleSearch = (e) => {
         setSearchTerm(e.target.value);
@@ -109,6 +113,58 @@ const UserManagement = () => {
         if (type === 'role') {
             setFilterRole(value);
         }
+    };
+
+    // Pagination handlers
+    const handlePageChange = (page) => {
+        if (page === currentPage) return;
+        
+        setIsPageChanging(true);
+        
+        // Smooth transition with slight delay
+        setTimeout(() => {
+            setCurrentPage(page);
+            setIsPageChanging(false);
+        }, 150);
+    };
+
+    const handleItemsPerPageChange = (e) => {
+        setItemsPerPage(parseInt(e.target.value));
+    };
+
+    // Generate page numbers for pagination
+    const getPageNumbers = () => {
+        const pages = [];
+        const maxVisiblePages = 5;
+        
+        if (totalPages <= maxVisiblePages) {
+            for (let i = 1; i <= totalPages; i++) {
+                pages.push(i);
+            }
+        } else {
+            const startPage = Math.max(1, currentPage - 2);
+            const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+            
+            if (startPage > 1) {
+                pages.push(1);
+                if (startPage > 2) {
+                    pages.push('...');
+                }
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                pages.push(i);
+            }
+            
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    pages.push('...');
+                }
+                pages.push(totalPages);
+            }
+        }
+        
+        return pages;
     };
 
     // Handle modal actions
@@ -132,39 +188,10 @@ const UserManagement = () => {
         if (actionType === 'delete') {
             if (window.confirm(`Bạn có chắc chắn muốn xóa tài khoản ${selectedUser.name}?`)) {
                 try {
-                    // Lấy token với cùng logic như fetchUsers
-                    let token = localStorage.getItem('userToken');
-                    if (!token) {
-                        const userData = localStorage.getItem('user');
-                        if (userData) {
-                            try {
-                                const parsedUser = JSON.parse(userData);
-                                token = parsedUser.token;
-                            } catch (error) {
-                                console.error('Error parsing user data:', error);
-                            }
-                        }
-                    }
-
-                    if (!token) {
-                        console.error('No token found for delete operation');
-                        if (window.showToast) {
-                            window.showToast('Không tìm thấy token xác thực!', 'error');
-                        }
-                        return;
-                    }
-
-                    const response = await fetch(`http://localhost:3306/api/users/users/${selectedUser.user_id}`, {
-                        method: 'DELETE',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
-                        }
-                    });
-
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
+                    console.log('Deleting user:', selectedUser.user_id);
+                    
+                    // Sử dụng apiService để xóa user
+                    await apiService.deleteUser(selectedUser.user_id);
 
                     // Remove user from local state
                     setUsers(prev => prev.filter(user => user.user_id !== selectedUser.user_id));
@@ -297,9 +324,29 @@ const UserManagement = () => {
 
             {/* Users Table */}
             <div className="card">
-                <div className="card-body">
-                    <div className="table-responsive">
-                        <table className="table table-hover">
+                <div className="card-body position-relative">
+                    {/* Loading overlay for page changes */}
+                    {isPageChanging && (
+                        <div className="position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center" 
+                             style={{ 
+                                 backgroundColor: 'rgba(255, 255, 255, 0.8)', 
+                                 zIndex: 10,
+                                 borderRadius: '0.375rem'
+                             }}>
+                            <div className="spinner-border text-primary" role="status">
+                                <span className="visually-hidden">Đang chuyển trang...</span>
+                            </div>
+                        </div>
+                    )}
+                    
+                    <div className="table-responsive" style={{ minHeight: '400px' }}>
+                        <table 
+                            className="table table-hover" 
+                            style={{ 
+                                transition: 'opacity 0.2s ease-in-out',
+                                opacity: isPageChanging ? 0.7 : 1
+                            }}
+                        >
                             <thead className="table-light">
                                 <tr>
                                     <th>Thông tin</th>
@@ -309,7 +356,7 @@ const UserManagement = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {filteredUsers.map((user) => (
+                                {currentUsers.map((user) => (
                                     <tr key={user.user_id}>
                                         <td>
                                             <div>
@@ -356,10 +403,80 @@ const UserManagement = () => {
                         </table>
                     </div>
 
-                    {filteredUsers.length === 0 && (
+                    {currentUsers.length === 0 && (
                         <div className="text-center py-4">
                             <FontAwesomeIcon icon={faUser} size="3x" className="text-muted mb-3" />
                             <p className="text-muted">Không tìm thấy người dùng nào</p>
+                        </div>
+                    )}
+
+                    {/* Pagination Controls */}
+                    {filteredUsers.length > 0 && (
+                        <div className="d-flex justify-content-between align-items-center mt-4">
+                            <div className="d-flex align-items-center">
+                                <span className="text-muted me-3">
+                                    Hiển thị {startIndex + 1} - {Math.min(endIndex, filteredUsers.length)} trong {filteredUsers.length} kết quả
+                                </span>
+                                <div className="d-flex align-items-center">
+                                    <label className="form-label me-2 mb-0">Hiển thị:</label>
+                                    <select 
+                                        className="form-select form-select-sm" 
+                                        style={{width: 'auto'}}
+                                        value={itemsPerPage} 
+                                        onChange={handleItemsPerPageChange}
+                                    >
+                                        <option value={5}>5</option>
+                                        <option value={10}>10</option>
+                                        <option value={20}>20</option>
+                                        <option value={50}>50</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            {totalPages > 1 && (
+                                <nav>
+                                    <ul className="pagination pagination-sm mb-0">
+                                        <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                                            <button 
+                                                className="page-link" 
+                                                onClick={() => handlePageChange(currentPage - 1)}
+                                                disabled={currentPage === 1 || isPageChanging}
+                                                style={{ transition: 'all 0.2s ease' }}
+                                            >
+                                                Trước
+                                            </button>
+                                        </li>
+                                        
+                                        {getPageNumbers().map((page, index) => (
+                                            <li key={index} className={`page-item ${page === currentPage ? 'active' : ''} ${page === '...' ? 'disabled' : ''}`}>
+                                                {page === '...' ? (
+                                                    <span className="page-link">...</span>
+                                                ) : (
+                                                    <button 
+                                                        className="page-link" 
+                                                        onClick={() => handlePageChange(page)}
+                                                        disabled={isPageChanging}
+                                                        style={{ transition: 'all 0.2s ease' }}
+                                                    >
+                                                        {page}
+                                                    </button>
+                                                )}
+                                            </li>
+                                        ))}
+                                        
+                                        <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                                            <button 
+                                                className="page-link" 
+                                                onClick={() => handlePageChange(currentPage + 1)}
+                                                disabled={currentPage === totalPages || isPageChanging}
+                                                style={{ transition: 'all 0.2s ease' }}
+                                            >
+                                                Sau
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </nav>
+                            )}
                         </div>
                     )}
                 </div>

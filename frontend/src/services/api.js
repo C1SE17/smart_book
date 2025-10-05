@@ -20,16 +20,36 @@ class ApiService {
     }
 
     try {
+      console.log('Making API request to:', url, 'with config:', config);
       const response = await fetch(url, config);
       
+      console.log('Response status:', response.status, response.statusText);
+      
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-        throw new Error(errorData.error || `HTTP ${response.status}`);
+        let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorData.message || errorMessage;
+          console.error('Error response data:', errorData);
+        } catch (parseError) {
+          console.error('Could not parse error response:', parseError);
+        }
+        throw new Error(errorMessage);
       }
 
-      return await response.json();
+      const data = await response.json();
+      console.log('API response data:', data);
+      return data;
     } catch (error) {
       console.error('API Request failed:', error);
+      console.error('Request URL:', url);
+      console.error('Request config:', config);
+      
+      // Provide more specific error messages
+      if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        throw new Error('Không thể kết nối đến server. Vui lòng kiểm tra backend có đang chạy không.');
+      }
+      
       throw error;
     }
   }
@@ -37,6 +57,9 @@ class ApiService {
   // Authentication APIs
   async register(userData) {
     const { name, email, password, phone, address } = userData;
+    
+    // Clear any cached data before registering
+    console.log('Clearing cache before registration...');
     
     const response = await this.request('/users/register', {
       method: 'POST',
@@ -50,24 +73,21 @@ class ApiService {
       })
     });
 
-    // Tạo user object cho frontend
-    const newUser = {
-      user_id: Date.now(), // Tạm thời dùng timestamp
-      name: name,
-      email: email,
-      phone: phone || '',
-      address: address || '',
-      role: email.includes('admin') ? 'admin' : 'customer',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
+    console.log('Registration response from backend:', response);
 
-    // Generate mock token (backend sẽ trả về token thật sau khi login)
-    const token = `temp_token_${newUser.user_id}_${Date.now()}`;
-
+    // Sử dụng dữ liệu từ backend response
     return {
-      user: newUser,
-      token: token,
+      user: response.user || {
+        user_id: response.user_id,
+        name: name,
+        email: email,
+        phone: phone || '',
+        address: address || '',
+        role: email.includes('admin') ? 'admin' : 'customer',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      },
+      token: response.token,
       message: response.message || 'Đăng ký thành công'
     };
   }
@@ -101,20 +121,23 @@ class ApiService {
       console.log('Overriding role to admin for email:', email);
     }
 
-    // Lấy thông tin user từ backend
+    // Lấy thông tin user từ backend API
     let userData = {};
     try {
-      userData = await this.request(`/users/${userId}`, {
+      console.log('Fetching user data for userId:', userId);
+      userData = await this.request(`/users/users/${userId}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${response.token}`
         }
       });
+      console.log('User data from backend API:', userData);
     } catch (error) {
-      console.warn('Không thể lấy thông tin user, sử dụng thông tin mặc định');
+      console.warn('Không thể lấy thông tin user từ API, sử dụng thông tin cơ bản');
+      // Fallback với thông tin cơ bản, không tạo từ email
       userData = {
         user_id: userId,
-        name: email.split('@')[0],
+        name: 'User', // Không tạo từ email
         email: email,
         phone: '',
         address: '',
@@ -146,7 +169,17 @@ class ApiService {
   }
 
   async getUserById(id) {
-    return await this.request(`/users/${id}`);
+    return await this.request(`/users/users/${id}`);
+  }
+
+  async getAllUsers() {
+    return await this.request('/users/users');
+  }
+
+  async deleteUser(id) {
+    return await this.request(`/users/users/${id}`, {
+      method: 'DELETE'
+    });
   }
 
   logout() {
