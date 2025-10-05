@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { validateEmail } from '../../utils';
 import { userService } from '../../services';
+import apiService from '../../services/api';
 
 const Login = ({ onToggleMode, onLoginSuccess, onForgotPassword }) => {
   const [formData, setFormData] = useState({
@@ -58,9 +59,8 @@ const Login = ({ onToggleMode, onLoginSuccess, onForgotPassword }) => {
     setLoading(true);
     
     try {
-      // Gọi mock API để đăng nhập
-      const { mockApi } = await import('../../services/mockApi');
-      const response = await mockApi.login({
+      // Gọi real API để đăng nhập
+      const response = await apiService.login({
         email: formData.email,
         password: formData.password
       });
@@ -70,13 +70,9 @@ const Login = ({ onToggleMode, onLoginSuccess, onForgotPassword }) => {
       // Lưu dữ liệu user nếu được chọn "Ghi nhớ"
       if (formData.rememberMe) {
         localStorage.setItem('userEmail', formData.email);
-        localStorage.setItem('userToken', response.token);
       }
       
-      // Lưu token vào localStorage
-      localStorage.setItem('userToken', response.token);
-      
-      // Lưu thông tin user đầy đủ từ mock API
+      // Lưu thông tin user đầy đủ từ API
       const userData = {
         user_id: response.user.user_id,
         email: response.user.email,

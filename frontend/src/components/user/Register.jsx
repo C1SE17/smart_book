@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { validateEmail } from '../../utils';
 import { userService } from '../../services';
+import apiService from '../../services/api';
 
 const Register = ({ onToggleMode, onRegisterSuccess }) => {
   const [formData, setFormData] = useState({
@@ -75,9 +76,8 @@ const Register = ({ onToggleMode, onRegisterSuccess }) => {
     setLoading(true);
     
     try {
-      // Gọi mock API để đăng ký
-      const { mockApi } = await import('../../services/mockApi');
-      const response = await mockApi.register({
+      // Gọi real API để đăng ký
+      const response = await apiService.register({
         name: formData.fullName,
         email: formData.email,
         password: formData.password,
