@@ -5,3 +5,4 @@ export { default as BookManagement } from './BookManagement';
 export { default as WarehouseManagement } from './WarehouseManagement';
 export { default as OrderManagement } from './OrderManagement';
 export { default as UserManagement } from './UserManagement';
+export { default as ReviewManagement } from './ReviewManagement';

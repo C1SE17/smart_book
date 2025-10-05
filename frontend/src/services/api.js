@@ -249,6 +249,72 @@ class ApiService {
     });
   }
 
+  async getAllReviews() {
+    try {
+      // Gọi API admin endpoint để lấy tất cả 5000 reviews
+      console.log('🔄 Fetching all reviews from admin endpoint /reviews/admin/all...');
+      const allReviews = await this.request('/reviews/admin/all');
+      console.log(`✅ Successfully fetched ${allReviews.length} reviews from database`);
+      
+      if (allReviews.length < 5000) {
+        console.warn(`⚠️ Expected 5000 reviews but got ${allReviews.length}. This might be correct if some reviews were deleted.`);
+      }
+      
+      return allReviews;
+    } catch (error) {
+      console.error('❌ Error fetching all reviews from admin endpoint:', error);
+      console.error('Error details:', {
+        message: error.message,
+        status: error.status,
+        response: error.response
+      });
+      
+      // Kiểm tra nếu lỗi là do authentication
+      if (error.status === 401 || error.status === 403) {
+        console.error('🔐 Authentication error - user might not be admin or not logged in');
+        throw new Error('Bạn cần đăng nhập với tài khoản admin để xem tất cả đánh giá');
+      }
+      
+      // Fallback: lấy reviews từ một số sách mẫu nếu admin endpoint không hoạt động
+      console.warn('🔄 Admin reviews endpoint failed, trying fallback method...');
+      try {
+        const allReviews = [];
+        
+        // Lấy reviews từ nhiều sách hơn (book_id 1-200) để có nhiều dữ liệu hơn
+        console.log('🔄 Fetching reviews from individual books (1-200)...');
+        for (let bookId = 1; bookId <= 200; bookId++) {
+          try {
+            const reviews = await this.getReviewsByBookId(bookId);
+            if (reviews && reviews.length > 0) {
+              allReviews.push(...reviews);
+              if (bookId % 50 === 0) {
+                console.log(`📚 Processed ${bookId} books, found ${allReviews.length} reviews so far...`);
+              }
+            }
+          } catch (bookError) {
+            // Không log warning cho mỗi book không có reviews
+          }
+        }
+        
+        console.log(`✅ Fallback method fetched ${allReviews.length} reviews from individual books`);
+        return allReviews;
+      } catch (fallbackError) {
+        console.error('❌ Error in fallback method:', fallbackError);
+        return [];
+      }
+    }
+  }
+
+  async deleteReview(reviewId) {
+    return await this.request(`/reviews/admin/${reviewId}`, {
+      method: 'DELETE'
+    });
+  }
+
+  async getAverageRating(bookId) {
+    return await this.request(`/reviews/book/${bookId}/average`);
+  }
+
   // Cart API
   async getCartByUserId(userId) {
     return await this.request(`/cart/user/${userId}`);

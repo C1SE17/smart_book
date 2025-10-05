@@ -24,6 +24,7 @@ import BookManagement from './components/admin/BookManagement'
 import WarehouseManagement from './components/admin/WarehouseManagement'
 import OrderManagement from './components/admin/OrderManagement'
 import UserManagement from './components/admin/UserManagement'
+import ReviewManagement from './components/admin/ReviewManagement'
 import UserProfile from './components/user/UserProfile'
 import Auth from './features/auth/Auth'
 import ErrorBoundary from './components/common/ErrorBoundary/ErrorBoundary'
@@ -421,9 +422,16 @@ function App() {
           </AdminLayout>
         </ErrorBoundary>
       )}
+      {currentPage === 'admin-reviews' && (
+        <ErrorBoundary>
+          <AdminLayout onNavigateTo={handleNavigateTo} onLogout={handleLogout} onBackToHome={handleAdminBackToHome} currentPage="admin-reviews">
+            <ReviewManagement />
+          </AdminLayout>
+        </ErrorBoundary>
+      )}
 
       {/* Fallback for admin pages */}
-      {currentPage && currentPage.startsWith('admin-') && !currentPage.includes('admin-dashboard') && !currentPage.includes('admin-books') && !currentPage.includes('admin-categories') && !currentPage.includes('admin-warehouse') && !currentPage.includes('admin-orders') && !currentPage.includes('admin-users') && (
+      {currentPage && currentPage.startsWith('admin-') && !currentPage.includes('admin-dashboard') && !currentPage.includes('admin-books') && !currentPage.includes('admin-categories') && !currentPage.includes('admin-warehouse') && !currentPage.includes('admin-orders') && !currentPage.includes('admin-users') && !currentPage.includes('admin-reviews') && (
         <ErrorBoundary>
           <AdminLayout onNavigateTo={handleNavigateTo} onLogout={handleLogout} onBackToHome={handleAdminBackToHome} currentPage={currentPage}>
             <div className="text-center py-5">
