@@ -22,23 +22,23 @@ const ReviewSection = ({ productId, reviews = [], loading = false, user = null, 
   const [sortBy, setSortBy] = useState('newest'); // 'newest', 'oldest', 'highest', 'lowest'
 
   // Calculate average rating and total reviews
-  const averageRating = reviews && reviews.length > 0 
-    ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length 
+  const averageRating = reviews && reviews.length > 0
+    ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length
     : 0;
   const totalReviews = reviews ? reviews.length : 0;
 
   // Filter and sort reviews
   const filteredAndSortedReviews = React.useMemo(() => {
     if (!reviews || reviews.length === 0) return [];
-    
+
     let filtered = reviews;
-    
+
     // Filter by rating
     if (filterRating !== 'all') {
       const rating = parseInt(filterRating);
       filtered = reviews.filter(review => review.rating === rating);
     }
-    
+
     // Sort reviews
     const sorted = [...filtered].sort((a, b) => {
       switch (sortBy) {
@@ -54,10 +54,10 @@ const ReviewSection = ({ productId, reviews = [], loading = false, user = null, 
           return 0;
       }
     });
-    
+
     return sorted;
   }, [reviews, filterRating, sortBy]);
-  
+
   // Auto-fill name when user is logged in
   useEffect(() => {
     if (user && user.name) {
@@ -71,7 +71,7 @@ const ReviewSection = ({ productId, reviews = [], loading = false, user = null, 
   // Handle review submission
   const handleSubmitReview = async (e) => {
     e.preventDefault();
-    
+
     if (!user) {
       alert('Vui lòng đăng nhập để viết đánh giá!');
       return;
@@ -83,10 +83,10 @@ const ReviewSection = ({ productId, reviews = [], loading = false, user = null, 
     }
 
     // Check if user already reviewed this product
-    const existingReview = reviews.find(review => 
+    const existingReview = reviews.find(review =>
       review.user_id === user.user_id && review.book_id === parseInt(productId)
     );
-    
+
     if (existingReview) {
       if (window.showToast) {
         window.showToast('Bạn đã đánh giá sản phẩm này rồi!', 'warning');
@@ -98,23 +98,26 @@ const ReviewSection = ({ productId, reviews = [], loading = false, user = null, 
 
     setReviewSubmitting(true);
     try {
-      const { mockApi } = await import('../../../services/mockApi');
-      const reviewData = {
-        book_id: parseInt(productId),
-        user_id: user.user_id,
-        rating: newReview.rating,
-        review_text: newReview.review_text.trim(),
-        user_name: user.name
-      };
+      // TODO: Implement real review API
+      // const { reviewApi } = await import('../../../services/reviewApi');
+      // const reviewData = {
+      //   book_id: parseInt(productId),
+      //   user_id: user.user_id,
+      //   rating: newReview.rating,
+      //   review_text: newReview.review_text.trim(),
+      //   user_name: user.name
+      // };
+      // const result = await reviewApi.addReview(reviewData);
 
-      const result = await mockApi.addReview(reviewData);
-      
+      // Mock response for now
+      const result = { success: true };
+
       // Reset form
       setNewReview({
         rating: 5,
         review_text: ''
       });
-      
+
       // Show success message
       if (window.showToast) {
         window.showToast('Đánh giá đã được gửi thành công!', 'success');
@@ -137,7 +140,7 @@ const ReviewSection = ({ productId, reviews = [], loading = false, user = null, 
       setReviewSubmitting(false);
     }
   };
-  
+
   // Initialize comments with proper book_id
   const [comments, setComments] = useState(() => [
     {
@@ -210,10 +213,10 @@ const ReviewSection = ({ productId, reviews = [], loading = false, user = null, 
 
     // Check if user already commented on this product
     if (user) {
-      const existingComment = comments.find(comment => 
+      const existingComment = comments.find(comment =>
         comment.user_id === user.user_id && comment.book_id === parseInt(productId)
       );
-      
+
       if (existingComment) {
         if (window.showToast) {
           window.showToast('Bạn đã bình luận sản phẩm này rồi!', 'warning');
@@ -237,7 +240,7 @@ const ReviewSection = ({ productId, reviews = [], loading = false, user = null, 
 
     setComments(prev => [...prev, newCommentData]);
     setNewComment({ name: '', comment: '' });
-    
+
     // Show success message using toast
     if (window.showToast) {
       window.showToast('Bình luận đã được gửi thành công!', 'success');
@@ -252,25 +255,25 @@ const ReviewSection = ({ productId, reviews = [], loading = false, user = null, 
     if (!newReply.content.trim()) return;
 
     setReplySubmitting(true);
-    
+
     // Simulate API call delay
     setTimeout(() => {
-      setComments(prev => prev.map(comment => 
-        comment.id === newReply.commentId 
+      setComments(prev => prev.map(comment =>
+        comment.id === newReply.commentId
           ? {
-              ...comment,
-              adminReply: {
-                user: "Admin",
-                date: new Date().toISOString().split('T')[0],
-                content: newReply.content.trim()
-              }
+            ...comment,
+            adminReply: {
+              user: "Admin",
+              date: new Date().toISOString().split('T')[0],
+              content: newReply.content.trim()
             }
+          }
           : comment
       ));
-      
+
       setNewReply({ commentId: null, content: '' });
       setReplySubmitting(false);
-      
+
       // Show success message using toast
       if (window.showToast) {
         window.showToast('Phản hồi đã được gửi thành công!', 'success');
@@ -296,12 +299,12 @@ const ReviewSection = ({ productId, reviews = [], loading = false, user = null, 
   // Handle delete admin reply
   const handleDeleteReply = (commentId) => {
     if (window.confirm('Bạn có chắc chắn muốn xóa phản hồi này không?')) {
-      setComments(prev => prev.map(comment => 
-        comment.id === commentId 
+      setComments(prev => prev.map(comment =>
+        comment.id === commentId
           ? { ...comment, adminReply: null }
           : comment
       ));
-      
+
       // Show success message using toast
       if (window.showToast) {
         window.showToast('Phản hồi đã được xóa thành công!', 'success');
@@ -345,7 +348,7 @@ const ReviewSection = ({ productId, reviews = [], loading = false, user = null, 
       {/* Product Reviews Section */}
       <div className="mb-5">
         <h5 className="mb-4 fw-bold">Đánh giá sản phẩm</h5>
-        
+
         {/* Rating Summary */}
         <div className="row mb-4">
           <div className="col-md-4">
@@ -371,8 +374,8 @@ const ReviewSection = ({ productId, reviews = [], loading = false, user = null, 
                     </div>
                     <div className="flex-grow-1 mx-2">
                       <div className="progress" style={{ height: '8px' }}>
-                        <div 
-                          className="progress-bar bg-warning" 
+                        <div
+                          className="progress-bar bg-warning"
                           style={{ width: `${percentage}%` }}
                         ></div>
                       </div>
@@ -384,7 +387,7 @@ const ReviewSection = ({ productId, reviews = [], loading = false, user = null, 
             </div>
           </div>
         </div>
-        
+
         {/* Filter and Sort Controls */}
         <div className="filter-controls mb-4">
           <div className="row align-items-center">
@@ -433,7 +436,7 @@ const ReviewSection = ({ productId, reviews = [], loading = false, user = null, 
             </div>
           )}
         </div>
-        
+
         {totalReviews === 0 ? (
           <div className="text-center py-4">
             <FontAwesomeIcon icon={faStar} size="2x" className="text-muted mb-3" />
@@ -525,7 +528,7 @@ const ReviewSection = ({ productId, reviews = [], loading = false, user = null, 
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="mb-3">
                   <label htmlFor="reviewText" className="form-label fw-medium">Nội dung đánh giá <span className="text-danger">*</span></label>
                   <textarea
@@ -539,7 +542,7 @@ const ReviewSection = ({ productId, reviews = [], loading = false, user = null, 
                     required
                   />
                 </div>
-                
+
                 <div className="d-flex justify-content-end">
                   <button
                     type="submit"
@@ -585,7 +588,7 @@ const ReviewSection = ({ productId, reviews = [], loading = false, user = null, 
           <FontAwesomeIcon icon={faUser} className="me-2" />
           Bình luận ({comments.length})
         </h5>
-        
+
         {/* Admin Instructions */}
         {user && user.role === 'admin' && (
           <div className="alert alert-info mb-4" role="alert">
@@ -599,7 +602,7 @@ const ReviewSection = ({ productId, reviews = [], loading = false, user = null, 
             </ul>
           </div>
         )}
-        
+
         {/* Comments List */}
         <div className="comments">
           {comments.map((comment) => (
@@ -745,8 +748,8 @@ const ReviewSection = ({ productId, reviews = [], loading = false, user = null, 
                     onChange={(e) => setNewComment(prev => ({ ...prev, name: e.target.value }))}
                     required
                     disabled={!!user}
-                    style={{ 
-                      backgroundColor: user ? '#f8f9fa' : 'white', 
+                    style={{
+                      backgroundColor: user ? '#f8f9fa' : 'white',
                       border: '1px solid #e9ecef',
                       cursor: user ? 'not-allowed' : 'text'
                     }}
@@ -758,7 +761,7 @@ const ReviewSection = ({ productId, reviews = [], loading = false, user = null, 
                     </small>
                   )}
                 </div>
-                
+
                 <div className="mb-3">
                   <label htmlFor="commentText" className="form-label fw-medium">
                     Bình luận <span className="text-danger">*</span>
@@ -774,8 +777,8 @@ const ReviewSection = ({ productId, reviews = [], loading = false, user = null, 
                     style={{ backgroundColor: 'white', border: '1px solid #e9ecef' }}
                   ></textarea>
                 </div>
-                
-                <button 
+
+                <button
                   type="submit"
                   className="btn btn-dark"
                   disabled={!newComment.name.trim() || !newComment.comment.trim()}

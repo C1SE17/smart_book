@@ -3,8 +3,8 @@ const router = express.Router();
 const AuthorController = require('../controllers/AuthorController');
 const { auth, adminOnly } = require('../middleware/auth');
 
-// Lấy danh sách tác giả (chỉ admin)
-router.get('/', auth, adminOnly, AuthorController.getAllAuthors);
+// Lấy danh sách tác giả (public)
+router.get('/', AuthorController.getAllAuthors);
 
 // Lấy chi tiết tác giả (chỉ admin)
 router.get('/:id', auth, adminOnly, AuthorController.getAuthor);

@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { categoryApi } from '../../services/bookApi';
 
 const CategoryManagement = () => {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [editingCategory, setEditingCategory] = useState(null);
     const [formErrors, setFormErrors] = useState({});
@@ -12,79 +14,31 @@ const CategoryManagement = () => {
         parent_category_id: null
     });
 
-    // Mock data - trong thực tế sẽ fetch từ API
-    useEffect(() => {
-        const fetchCategories = async () => {
+    // Fetch categories from real API
+    const fetchCategories = useCallback(async () => {
+        try {
             setLoading(true);
-            setTimeout(() => {
-                setCategories([
-                    {
-                        category_id: 1,
-                        name: 'Văn học',
-                        description: 'Các tác phẩm văn học trong nước và quốc tế',
-                        parent_category_id: null,
-                        slug: 'van-hoc',
-                        created_at: '2024-01-01',
-                        updated_at: '2024-01-15',
-                        book_count: 45
-                    },
-                    {
-                        category_id: 2,
-                        name: 'Tiểu thuyết',
-                        description: 'Tiểu thuyết văn học',
-                        parent_category_id: 1,
-                        slug: 'tieu-thuyet',
-                        created_at: '2024-01-01',
-                        updated_at: '2024-01-15',
-                        book_count: 23
-                    },
-                    {
-                        category_id: 3,
-                        name: 'Thơ ca',
-                        description: 'Tập thơ và thơ ca',
-                        parent_category_id: 1,
-                        slug: 'tho-ca',
-                        created_at: '2024-01-01',
-                        updated_at: '2024-01-15',
-                        book_count: 12
-                    },
-                    {
-                        category_id: 4,
-                        name: 'Khoa học',
-                        description: 'Sách khoa học và công nghệ',
-                        parent_category_id: null,
-                        slug: 'khoa-hoc',
-                        created_at: '2024-01-01',
-                        updated_at: '2024-01-15',
-                        book_count: 67
-                    },
-                    {
-                        category_id: 5,
-                        name: 'Lịch sử',
-                        description: 'Sách lịch sử và văn hóa',
-                        parent_category_id: null,
-                        slug: 'lich-su',
-                        created_at: '2024-01-01',
-                        updated_at: '2024-01-15',
-                        book_count: 34
-                    },
-                    {
-                        category_id: 6,
-                        name: 'Manga/Comic',
-                        description: 'Truyện tranh và manga',
-                        parent_category_id: null,
-                        slug: 'manga-comic',
-                        created_at: '2024-01-01',
-                        updated_at: '2024-01-15',
-                        book_count: 156
-                    }
-                ]);
-                setLoading(false);
-            }, 1000);
-        };
+            setError(null);
+            const response = await categoryApi.getAllCategories();
 
-        fetchCategories();
+            if (response.success) {
+                setCategories(response.data);
+            } else {
+                setError(response.message);
+                setCategories([]);
+            }
+        } catch (error) {
+            console.error('Error fetching categories:', error);
+            setError('Không thể tải danh sách danh mục: ' + error.message);
+            setCategories([]);
+        } finally {
+            setLoading(false);
+        }
     }, []);
+
+    useEffect(() => {
+        fetchCategories();
+    }, [fetchCategories]);
 
     // Validation function
     const validateForm = (data) => {
@@ -117,13 +71,24 @@ const CategoryManagement = () => {
         setShowModal(true);
     };
 
-    const handleDeleteCategory = (categoryId) => {
+    const handleDeleteCategory = async (categoryId) => {
         if (window.confirm('Bạn có chắc chắn muốn xóa danh mục này?')) {
-            setCategories(categories.filter(cat => cat.category_id !== categoryId));
+            try {
+                const response = await categoryApi.deleteCategory(categoryId);
+                if (response.success) {
+                    setCategories(categories.filter(cat => cat.category_id !== categoryId));
+                    alert('Xóa danh mục thành công!');
+                } else {
+                    alert('Lỗi khi xóa danh mục: ' + response.message);
+                }
+            } catch (error) {
+                console.error('Error deleting category:', error);
+                alert('Lỗi khi xóa danh mục: ' + error.message);
+            }
         }
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         // Validate form
@@ -136,22 +101,34 @@ const CategoryManagement = () => {
         try {
             if (editingCategory) {
                 // Update category
-                setCategories(categories.map(cat =>
-                    cat.category_id === editingCategory.category_id
-                        ? { ...cat, ...formData, updated_at: new Date().toISOString().split('T')[0] }
-                        : cat
-                ));
+                const response = await categoryApi.updateCategory(editingCategory.category_id, formData);
+                if (response.success) {
+                    setCategories(categories.map(cat =>
+                        cat.category_id === editingCategory.category_id
+                            ? { ...cat, ...formData, updated_at: new Date().toISOString().split('T')[0] }
+                            : cat
+                    ));
+                    alert('Cập nhật danh mục thành công!');
+                } else {
+                    alert('Lỗi khi cập nhật danh mục: ' + response.message);
+                }
             } else {
                 // Add new category
-                const newCategory = {
-                    category_id: Math.max(...categories.map(c => c.category_id)) + 1,
-                    ...formData,
-                    slug: formData.name.toLowerCase().replace(/\s+/g, '-'),
-                    created_at: new Date().toISOString().split('T')[0],
-                    updated_at: new Date().toISOString().split('T')[0],
-                    book_count: 0
-                };
-                setCategories([...categories, newCategory]);
+                const response = await categoryApi.createCategory(formData);
+                if (response.success) {
+                    const newCategory = {
+                        category_id: response.data.category_id || Math.max(...categories.map(c => c.category_id)) + 1,
+                        ...formData,
+                        slug: formData.name.toLowerCase().replace(/\s+/g, '-'),
+                        created_at: new Date().toISOString().split('T')[0],
+                        updated_at: new Date().toISOString().split('T')[0],
+                        book_count: 0
+                    };
+                    setCategories([...categories, newCategory]);
+                    alert('Thêm danh mục thành công!');
+                } else {
+                    alert('Lỗi khi thêm danh mục: ' + response.message);
+                }
             }
 
             setShowModal(false);
@@ -159,7 +136,7 @@ const CategoryManagement = () => {
             setFormErrors({});
         } catch (error) {
             console.error('Error saving category:', error);
-            alert('Có lỗi xảy ra khi lưu danh mục. Vui lòng thử lại.');
+            alert('Lỗi khi lưu danh mục: ' + error.message);
         }
     };
 
@@ -179,6 +156,20 @@ const CategoryManagement = () => {
                 <div className="spinner-border text-primary" role="status">
                     <span className="visually-hidden">Loading...</span>
                 </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="alert alert-danger text-center py-5" role="alert">
+                <i className="fas fa-exclamation-triangle me-2"></i>
+                {error}
+                <p className="mt-2">Vui lòng đảm bảo backend đang chạy và kết nối database.</p>
+                <button className="btn btn-outline-danger" onClick={fetchCategories}>
+                    <i className="fas fa-sync-alt me-2"></i>
+                    Thử lại
+                </button>
             </div>
         );
     }

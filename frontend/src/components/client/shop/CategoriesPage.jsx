@@ -20,14 +20,19 @@ const CategoriesPage = ({ onNavigateTo }) => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const { mockApi } = await import('../../../services/mockApi');
-        
-        const [categoriesData, productsResponse, authorsData] = await Promise.all([
-          mockApi.getCategories(),
-          mockApi.getBooks({ limit: 50 }),
-          mockApi.getAuthors()
-        ]);
-        
+        // TODO: Implement real API
+        // const { categoryApi, bookApi, authorApi } = await import('../../../services/api');
+        // const [categoriesData, productsResponse, authorsData] = await Promise.all([
+        //   categoryApi.getCategories(),
+        //   bookApi.getBooks({ limit: 50 }),
+        //   authorApi.getAuthors()
+        // ]);
+
+        // Mock data for now
+        const categoriesData = { success: true, data: [] };
+        const productsResponse = { success: true, data: [] };
+        const authorsData = { success: true, data: [] };
+
         setCategories(categoriesData);
         setProducts(productsResponse.data);
         setAuthors(authorsData);
@@ -64,7 +69,7 @@ const CategoriesPage = ({ onNavigateTo }) => {
     // Filter by search query
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(product => 
+      filtered = filtered.filter(product =>
         product.title.toLowerCase().includes(query) ||
         product.author.toLowerCase().includes(query) ||
         product.description.toLowerCase().includes(query)
@@ -72,33 +77,33 @@ const CategoriesPage = ({ onNavigateTo }) => {
     }
 
     // Filter by price range
-    filtered = filtered.filter(product => 
+    filtered = filtered.filter(product =>
       product.price >= priceRange.min && product.price <= priceRange.max
     );
 
     // Sort products
     filtered.sort((a, b) => {
       let aValue, bValue;
-      
-    switch (sortBy) {
+
+      switch (sortBy) {
         case 'price':
           aValue = a.price;
           bValue = b.price;
-        break;
+          break;
         case 'title':
           aValue = a.title.toLowerCase();
           bValue = b.title.toLowerCase();
-        break;
-      case 'rating':
+          break;
+        case 'rating':
           aValue = a.rating || 0;
           bValue = b.rating || 0;
-        break;
+          break;
         case 'created_at':
-      default:
+        default:
           aValue = new Date(a.created_at);
           bValue = new Date(b.created_at);
-        break;
-    }
+          break;
+      }
 
       if (sortOrder === 'asc') {
         return aValue > bValue ? 1 : -1;
@@ -148,21 +153,22 @@ const CategoriesPage = ({ onNavigateTo }) => {
   // Handle add to cart
   const handleAddToCart = async (e, bookId) => {
     e.stopPropagation();
-    
+
     try {
-      const { mockApi } = await import('../../../services/mockApi');
+      // TODO: Implement real cart API
+      // const { cartApi } = await import('../../../services/cartApi');
       const user = JSON.parse(localStorage.getItem('user'));
-      
+
       if (!user) {
         alert('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng!');
         return;
       }
 
-      await mockApi.addToCart(user.user_id, bookId, 1);
-      
+      // await cartApi.addToCart(user.user_id, bookId, 1);
+
       // Dispatch cart updated event
       window.dispatchEvent(new CustomEvent('cartUpdated'));
-      
+
       alert('Đã thêm sản phẩm vào giỏ hàng!');
     } catch (error) {
       console.error('Error adding to cart:', error);
@@ -190,7 +196,7 @@ const CategoriesPage = ({ onNavigateTo }) => {
     const stars = [];
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 !== 0;
-    
+
     for (let i = 0; i < fullStars; i++) {
       stars.push(
         <FontAwesomeIcon key={i} icon={faStar} className="text-warning" />
@@ -229,7 +235,7 @@ const CategoriesPage = ({ onNavigateTo }) => {
     <div className="container py-4" style={{ maxWidth: '1200px' }}>
       <div className="row justify-content-center">
         {/* Sidebar */}
-          <div className="col-lg-3 col-md-4">
+        <div className="col-lg-3 col-md-4">
           <div className="card">
             <div className="card-header">
               <h5 className="mb-0">
@@ -238,7 +244,7 @@ const CategoriesPage = ({ onNavigateTo }) => {
               </h5>
             </div>
             <div className="card-body">
-            {/* Search */}
+              {/* Search */}
               <div className="mb-3">
                 <label className="form-label fw-bold mb-2" style={{ fontSize: '0.9rem' }}>Tìm kiếm</label>
                 <div className="input-group input-group-sm">
@@ -256,7 +262,7 @@ const CategoriesPage = ({ onNavigateTo }) => {
                 </div>
               </div>
 
-            {/* Categories */}
+              {/* Categories */}
               <div className="mb-3">
                 <label className="form-label fw-bold mb-2" style={{ fontSize: '0.9rem' }}>Danh mục</label>
                 <div className="list-group list-group-flush" style={{ maxHeight: '250px', overflowY: 'auto' }}>
@@ -291,7 +297,7 @@ const CategoriesPage = ({ onNavigateTo }) => {
                 </div>
               </div>
 
-            {/* Authors */}
+              {/* Authors */}
               <div className="mb-3">
                 <label className="form-label fw-bold mb-2" style={{ fontSize: '0.9rem' }}>Tác Giả</label>
                 <div className="list-group list-group-flush" style={{ maxHeight: '250px', overflowY: 'auto' }}>
@@ -326,7 +332,7 @@ const CategoriesPage = ({ onNavigateTo }) => {
                 </div>
               </div>
 
-            {/* Price Range */}
+              {/* Price Range */}
               <div className="mb-3">
                 <label className="form-label fw-bold mb-2" style={{ fontSize: '0.9rem' }}>Khoảng Giá</label>
                 <div className="row g-2">
@@ -372,7 +378,7 @@ const CategoriesPage = ({ onNavigateTo }) => {
 
               {/* Reset Filter Button */}
               <div className="d-grid">
-                <button 
+                <button
                   className="btn btn-outline-secondary btn-sm"
                   onClick={handleResetFilters}
                   style={{ fontSize: '0.8rem' }}
@@ -418,16 +424,16 @@ const CategoriesPage = ({ onNavigateTo }) => {
           {showCategoryCards ? (
             // Category Cards View
             <div>
-            <div className="d-flex justify-content-between align-items-center mb-4">
+              <div className="d-flex justify-content-between align-items-center mb-4">
                 <h2>Danh mục sách</h2>
               </div>
-              
+
               <div className="row">
                 {categories.map((category) => {
                   const bookCount = products.filter(p => p.category_id === category.category_id).length;
                   return (
                     <div key={category.category_id} className="col-lg-3 col-md-4 col-sm-6 mb-4">
-                      <div 
+                      <div
                         className="card h-100 shadow-sm category-card"
                         style={{ cursor: 'pointer' }}
                         onClick={() => handleCategorySelect(category.name)}
@@ -449,11 +455,11 @@ const CategoriesPage = ({ onNavigateTo }) => {
             <div>
               {filteredProducts.length > 0 ? (
                 <div className="row">
-              {filteredProducts.map((product) => (
+                  {filteredProducts.map((product) => (
                     <div key={product.book_id} className="col-lg-3 col-md-6 mb-4">
                       <div
                         className="card h-100 border-0 shadow-sm product-card"
-                        style={{ 
+                        style={{
                           cursor: 'pointer',
                           borderRadius: '8px',
                           height: '350px',
@@ -479,14 +485,14 @@ const CategoriesPage = ({ onNavigateTo }) => {
                             addToCartBtn.style.opacity = '0';
                           }
                         }}
-                  >
-                    <div className="position-relative">
-                      <img
+                      >
+                        <div className="position-relative">
+                          <img
                             src={product.cover_image}
-                        className="card-img-top"
-                        alt={product.title}
-                            style={{ 
-                              height: '220px', 
+                            className="card-img-top"
+                            alt={product.title}
+                            style={{
+                              height: '220px',
                               objectFit: 'contain',
                               width: '100%',
                               backgroundColor: '#f8f9fa'
@@ -531,10 +537,10 @@ const CategoriesPage = ({ onNavigateTo }) => {
                               >
                                 <FontAwesomeIcon icon={faShoppingCart} />
                               </button>
-                      </div>
+                            </div>
                           )}
-                    </div>
-                        
+                        </div>
+
                         <div className="card-body p-3 d-flex flex-column">
                           <h6 className="card-title fw-bold mb-2" style={{
                             fontSize: '1rem',
@@ -545,12 +551,12 @@ const CategoriesPage = ({ onNavigateTo }) => {
                             overflow: 'hidden',
                             minHeight: '2.6rem'
                           }}>
-                        {product.title}
-                      </h6>
+                            {product.title}
+                          </h6>
                           <p className="card-text text-muted mb-2" style={{ fontSize: '0.9rem' }}>
                             {product.author}
                           </p>
-                      <div className="d-flex align-items-center mb-2">
+                          <div className="d-flex align-items-center mb-2">
                             <div className="me-2">
                               {Array.from({ length: 5 }, (_, i) => (
                                 <FontAwesomeIcon
@@ -562,8 +568,8 @@ const CategoriesPage = ({ onNavigateTo }) => {
                               ))}
                             </div>
                             <small className="text-muted">({product.reviewCount || 0})</small>
-                      </div>
-                      <div className="mt-auto">
+                          </div>
+                          <div className="mt-auto">
                             <p className="card-text fw-bold text-dark mb-2" style={{ fontSize: '1.1rem' }}>
                               {formatPrice(product.price)}
                             </p>
@@ -576,22 +582,22 @@ const CategoriesPage = ({ onNavigateTo }) => {
                             >
                               Xem chi tiết
                             </button>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  ))}
                 </div>
-              ))}
-            </div>
               ) : (
-              <div className="text-center py-5">
+                <div className="text-center py-5">
                   <FontAwesomeIcon icon={faSearch} size="3x" className="text-muted mb-3" />
                   <h4>Không tìm thấy sách nào</h4>
                   <p className="text-muted">
                     Không có sách nào phù hợp với bộ lọc của bạn.
                   </p>
-              </div>
-            )}
-          </div>
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>

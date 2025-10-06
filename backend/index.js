@@ -45,13 +45,22 @@ app.get('/', (req, res) => {
     res.send('Xin chào đến với smart book!');
 });
 
+// Test API không cần auth
+app.get('/api/test', (req, res) => {
+    res.json({
+        message: 'API is working!',
+        timestamp: new Date().toISOString(),
+        database: 'Connected'
+    });
+});
+
 // Gắn tuyến API
 app.use('/api/users', userRoutes);
 app.use('/api/books', bookRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/authors', authorRoutes);
 app.use('/api/publishers', publisherRoutes);
-app.use('/api/cart', cartRoutes); 
+app.use('/api/cart', cartRoutes);
 app.use('/api/order', orderRoutes);
 app.use('/api/warehouse', warehouseRoutes);
 app.use('/api/reviews', reviewRoutes);

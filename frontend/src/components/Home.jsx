@@ -22,19 +22,19 @@ const Home = ({ onNavigateTo }) => {
       setLoading(true);
 
       try {
-        // Import mock API
-        const { mockApi } = await import('../services/mockApi');
+        // Import real API
+        const { bookApi } = await import('../services/bookApi');
 
         // Fetch all books, new books, and popular books
         const [booksResponse, newBooksData, popularBooksData] = await Promise.all([
-          mockApi.getBooks({ limit: 12 }),
-          mockApi.getNewBooks(4),
-          mockApi.getPopularBooks(4)
+          bookApi.getAllBooks({ limit: 12 }),
+          bookApi.getAllBooks({ limit: 4 }), // New books
+          bookApi.getAllBooks({ limit: 4 })  // Popular books
         ]);
 
         setBooks(booksResponse.data);
-        setNewBooks(newBooksData);
-        setPopularBooks(popularBooksData);
+        setNewBooks(newBooksData.data);
+        setPopularBooks(popularBooksData.data);
       } catch (error) {
         console.error('Error fetching books:', error);
         setBooks([]);
@@ -54,7 +54,7 @@ const Home = ({ onNavigateTo }) => {
     onNavigateTo('product', { productId: bookId });
   }, [onNavigateTo]);
 
-  // Xử lý thêm vào giỏ hàng - sử dụng mockApi
+  // Xử lý thêm vào giỏ hàng - TODO: implement real cart API
   const handleAddToCart = useCallback(async (book, e) => {
     e.stopPropagation();
 
@@ -81,12 +81,10 @@ const Home = ({ onNavigateTo }) => {
     }
 
     try {
-      // Import mock API
-      const { mockApi } = await import('../services/mockApi');
-
-      // Lấy giỏ hàng hiện tại để kiểm tra số lượng
-      const cartData = await mockApi.getCartByUserId(user.user_id);
-      const existingItem = cartData.items.find(item => item.book_id === book.book_id);
+      // TODO: Implement real cart API
+      // const { cartApi } = await import('../services/cartApi');
+      // const cartData = await cartApi.getCartByUserId(user.user_id);
+      // const existingItem = cartData.items.find(item => item.book_id === book.book_id);
 
       if (existingItem) {
         // Kiểm tra số lượng trong giỏ có vượt quá stock không
@@ -100,7 +98,8 @@ const Home = ({ onNavigateTo }) => {
         }
 
         // Tăng số lượng sản phẩm hiện có
-        await mockApi.updateCartItemQuantity(user.user_id, book.book_id, existingItem.quantity + 1);
+        // TODO: Implement real cart API
+        // await cartApi.updateCartItemQuantity(user.user_id, book.book_id, existingItem.quantity + 1);
 
         // Hiển thị thông báo thành công
         if (window.showToast) {
@@ -110,7 +109,8 @@ const Home = ({ onNavigateTo }) => {
         }
       } else {
         // Thêm sản phẩm mới vào giỏ hàng
-        await mockApi.addToCart(user.user_id, book.book_id, 1);
+        // TODO: Implement real cart API
+        // await cartApi.addToCart(user.user_id, book.book_id, 1);
 
         // Hiển thị thông báo thành công
         if (window.showToast) {
@@ -342,7 +342,7 @@ const Home = ({ onNavigateTo }) => {
                         <i className="bi bi-heart text-dark" style={{ fontSize: '14px' }}></i>
                       </button>
                     </div>
-                    
+
                     {/* Shopping Cart Icon - góc trên phải */}
                     {book.stock > 0 && (
                       <div className="position-absolute top-0 end-0 m-2">
@@ -529,7 +529,7 @@ const Home = ({ onNavigateTo }) => {
                         <i className="bi bi-heart text-dark" style={{ fontSize: '14px' }}></i>
                       </button>
                     </div>
-                    
+
                     {/* Shopping Cart Icon - góc trên phải */}
                     {book.stock > 0 && (
                       <div className="position-absolute top-0 end-0 m-2">
@@ -716,7 +716,7 @@ const Home = ({ onNavigateTo }) => {
                         <i className="bi bi-heart text-dark" style={{ fontSize: '14px' }}></i>
                       </button>
                     </div>
-                    
+
                     {/* Shopping Cart Icon - góc trên phải */}
                     {book.stock > 0 && (
                       <div className="position-absolute top-0 end-0 m-2">

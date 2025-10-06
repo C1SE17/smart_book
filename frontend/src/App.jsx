@@ -117,7 +117,7 @@ function App() {
   const handleAdminBackToHome = useCallback(() => {
     // Set flag để admin có thể ở trang chủ
     setAdminWantsHome(true);
-    
+
     // Navigate về trang chủ
     navigateTo('/');
     setSearchQuery('');
@@ -135,7 +135,7 @@ function App() {
         console.log('Setting user after login:', parsedUser);
         console.log('User role:', parsedUser.role);
         setUser(parsedUser);
-        
+
         // Kiểm tra role và chuyển hướng phù hợp
         if (parsedUser.role === 'admin') {
           // Admin chuyển hướng đến homepage trước
@@ -155,7 +155,7 @@ function App() {
       // Fallback về trang chủ nếu không có dữ liệu user
       navigateTo('/');
     }
-    
+
     setSearchQuery(''); // Xóa tìm kiếm
     setProductId(null); // Xóa ID sản phẩm
     // Đặt lại vị trí cuộn lên đầu sau khi đăng nhập
@@ -394,6 +394,7 @@ function App() {
           </AdminLayout>
         </ErrorBoundary>
       )}
+
       {currentPage === 'admin-categories' && (
         <ErrorBoundary>
           <AdminLayout onNavigateTo={handleNavigateTo} onLogout={handleLogout} onBackToHome={handleAdminBackToHome} currentPage="admin-categories">
@@ -443,353 +444,6 @@ function App() {
       )}
 
 
-      {/* Footer */}
-      <footer
-        className="py-5 mt-5"
-        style={{
-          backgroundColor: '#000000',
-          background: 'linear-gradient(135deg, #000000 0%, #1a1a1a 100%)',
-          borderTop: '3px solid #e74c3c'
-        }}
-      >
-        <div className="container">
-          <div className="row">
-            {/* Connect Column */}
-            <div className="col-lg-2 col-md-4 col-sm-6 mb-4">
-              <h5
-                className="fw-bold mb-3"
-                style={{
-                  color: '#ecf0f1',
-                  fontSize: '1.1rem',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px'
-                }}
-              >
-                Connect
-              </h5>
-              <div style={{ color: '#bdc3c7' }}>
-                <p className="mb-2" style={{ fontSize: '0.9rem', lineHeight: '1.6' }}>
-                  <i className="fas fa-map-marker-alt me-2" style={{ color: '#e74c3c' }}></i>
-                  1000 Nguyen Van A, Thanh Khe, Da Nang, Viet Nam
-                </p>
-                <p className="mb-2" style={{ fontSize: '0.9rem', lineHeight: '1.6' }}>
-                  <i className="fas fa-envelope me-2" style={{ color: '#e74c3c' }}></i>
-                  smartbook@gmail.com
-                </p>
-                <p className="mb-0" style={{ fontSize: '0.9rem', lineHeight: '1.6' }}>
-                  <i className="fas fa-phone me-2" style={{ color: '#e74c3c' }}></i>
-                  12334566676
-                </p>
-              </div>
-            </div>
-
-            {/* Explore Column */}
-            <div className="col-lg-2 col-md-4 col-sm-6 mb-4">
-              <h5
-                className="fw-bold mb-3"
-                style={{
-                  color: '#ecf0f1',
-                  fontSize: '1.1rem',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px'
-                }}
-              >
-                Explore
-              </h5>
-              <div style={{ color: '#bdc3c7' }}>
-                <a
-                  href="#"
-                  className="text-decoration-none d-block mb-2"
-                  style={{
-                    color: '#bdc3c7',
-                    fontSize: '0.9rem',
-                    transition: 'color 0.3s ease',
-                    lineHeight: '1.6'
-                  }}
-                  onMouseEnter={(e) => e.target.style.color = '#e74c3c'}
-                  onMouseLeave={(e) => e.target.style.color = '#bdc3c7'}
-                >
-                  About Us
-                </a>
-                <a
-                  href="#"
-                  className="text-decoration-none d-block mb-2"
-                  style={{
-                    color: '#bdc3c7',
-                    fontSize: '0.9rem',
-                    transition: 'color 0.3s ease',
-                    lineHeight: '1.6'
-                  }}
-                  onMouseEnter={(e) => e.target.style.color = '#e74c3c'}
-                  onMouseLeave={(e) => e.target.style.color = '#bdc3c7'}
-                >
-                  Our Team
-                </a>
-                <a
-                  href="#"
-                  className="text-decoration-none d-block mb-2"
-                  style={{
-                    color: '#bdc3c7',
-                    fontSize: '0.9rem',
-                    transition: 'color 0.3s ease',
-                    lineHeight: '1.6'
-                  }}
-                  onMouseEnter={(e) => e.target.style.color = '#e74c3c'}
-                  onMouseLeave={(e) => e.target.style.color = '#bdc3c7'}
-                >
-                  Careers
-                </a>
-                <a
-                  href="#"
-                  className="text-decoration-none d-block mb-2"
-                  style={{
-                    color: '#bdc3c7',
-                    fontSize: '0.9rem',
-                    transition: 'color 0.3s ease',
-                    lineHeight: '1.6'
-                  }}
-                  onMouseEnter={(e) => e.target.style.color = '#e74c3c'}
-                  onMouseLeave={(e) => e.target.style.color = '#bdc3c7'}
-                >
-                  Press
-                </a>
-                <a
-                  href="#"
-                  className="text-decoration-none d-block mb-0"
-                  style={{
-                    color: '#bdc3c7',
-                    fontSize: '0.9rem',
-                    transition: 'color 0.3s ease',
-                    lineHeight: '1.6'
-                  }}
-                  onMouseEnter={(e) => e.target.style.color = '#e74c3c'}
-                  onMouseLeave={(e) => e.target.style.color = '#bdc3c7'}
-                >
-                  Blog
-                </a>
-              </div>
-            </div>
-
-            {/* Account Column */}
-            <div className="col-lg-2 col-md-4 col-sm-6 mb-4">
-              <h5
-                className="fw-bold mb-3"
-                style={{
-                  color: '#ecf0f1',
-                  fontSize: '1.1rem',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px'
-                }}
-              >
-                Account
-              </h5>
-              <div style={{ color: '#bdc3c7' }}>
-                <a
-                  href="#"
-                  className="text-decoration-none d-block mb-2"
-                  style={{
-                    color: '#bdc3c7',
-                    fontSize: '0.9rem',
-                    transition: 'color 0.3s ease',
-                    lineHeight: '1.6'
-                  }}
-                  onMouseEnter={(e) => e.target.style.color = '#e74c3c'}
-                  onMouseLeave={(e) => e.target.style.color = '#bdc3c7'}
-                >
-                  My Account
-                </a>
-                <a
-                  href="#"
-                  className="text-decoration-none d-block mb-2"
-                  style={{
-                    color: '#bdc3c7',
-                    fontSize: '0.9rem',
-                    transition: 'color 0.3s ease',
-                    lineHeight: '1.6'
-                  }}
-                  onMouseEnter={(e) => e.target.style.color = '#e74c3c'}
-                  onMouseLeave={(e) => e.target.style.color = '#bdc3c7'}
-                >
-                  Order History
-                </a>
-                <a
-                  href="#"
-                  className="text-decoration-none d-block mb-2"
-                  style={{
-                    color: '#bdc3c7',
-                    fontSize: '0.9rem',
-                    transition: 'color 0.3s ease',
-                    lineHeight: '1.6'
-                  }}
-                  onMouseEnter={(e) => e.target.style.color = '#e74c3c'}
-                  onMouseLeave={(e) => e.target.style.color = '#bdc3c7'}
-                >
-                  Wishlist
-                </a>
-                <a
-                  href="#"
-                  className="text-decoration-none d-block mb-2"
-                  style={{
-                    color: '#bdc3c7',
-                    fontSize: '0.9rem',
-                    transition: 'color 0.3s ease',
-                    lineHeight: '1.6'
-                  }}
-                  onMouseEnter={(e) => e.target.style.color = '#e74c3c'}
-                  onMouseLeave={(e) => e.target.style.color = '#bdc3c7'}
-                >
-                  Newsletter
-                </a>
-                <a
-                  href="#"
-                  className="text-decoration-none d-block mb-0"
-                  style={{
-                    color: '#bdc3c7',
-                    fontSize: '0.9rem',
-                    transition: 'color 0.3s ease',
-                    lineHeight: '1.6'
-                  }}
-                  onMouseEnter={(e) => e.target.style.color = '#e74c3c'}
-                  onMouseLeave={(e) => e.target.style.color = '#bdc3c7'}
-                >
-                  Support
-                </a>
-              </div>
-            </div>
-
-            {/* Get in touch Column */}
-            <div className="col-lg-2 col-md-4 col-sm-6 mb-4">
-              <h5
-                className="fw-bold mb-3"
-                style={{
-                  color: '#ecf0f1',
-                  fontSize: '1.1rem',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px'
-                }}
-              >
-                Get in touch
-              </h5>
-              <div style={{ color: '#bdc3c7' }}>
-                <a
-                  href="#"
-                  className="text-decoration-none d-block mb-2"
-                  style={{
-                    color: '#bdc3c7',
-                    fontSize: '0.9rem',
-                    transition: 'color 0.3s ease',
-                    lineHeight: '1.6'
-                  }}
-                  onClick={(e) => { e.preventDefault(); onNavigateTo('contact')(); }}
-                  onMouseEnter={(e) => e.target.style.color = '#e74c3c'}
-                  onMouseLeave={(e) => e.target.style.color = '#bdc3c7'}
-                >
-                  Contact Us
-                </a>
-                <a
-                  href="#"
-                  className="text-decoration-none d-block mb-2"
-                  style={{
-                    color: '#bdc3c7',
-                    fontSize: '0.9rem',
-                    transition: 'color 0.3s ease',
-                    lineHeight: '1.6'
-                  }}
-                  onMouseEnter={(e) => e.target.style.color = '#e74c3c'}
-                  onMouseLeave={(e) => e.target.style.color = '#bdc3c7'}
-                >
-                  Help Center
-                </a>
-                <a
-                  href="#"
-                  className="text-decoration-none d-block mb-2"
-                  style={{
-                    color: '#bdc3c7',
-                    fontSize: '0.9rem',
-                    transition: 'color 0.3s ease',
-                    lineHeight: '1.6'
-                  }}
-                  onMouseEnter={(e) => e.target.style.color = '#e74c3c'}
-                  onMouseLeave={(e) => e.target.style.color = '#bdc3c7'}
-                >
-                  Feedback
-                </a>
-                <a
-                  href="#"
-                  className="text-decoration-none d-block mb-2"
-                  style={{
-                    color: '#bdc3c7',
-                    fontSize: '0.9rem',
-                    transition: 'color 0.3s ease',
-                    lineHeight: '1.6'
-                  }}
-                  onMouseEnter={(e) => e.target.style.color = '#e74c3c'}
-                  onMouseLeave={(e) => e.target.style.color = '#bdc3c7'}
-                >
-                  Partnership
-                </a>
-                <a
-                  href="#"
-                  className="text-decoration-none d-block mb-0"
-                  style={{
-                    color: '#bdc3c7',
-                    fontSize: '0.9rem',
-                    transition: 'color 0.3s ease',
-                    lineHeight: '1.6'
-                  }}
-                  onMouseEnter={(e) => e.target.style.color = '#e74c3c'}
-                  onMouseLeave={(e) => e.target.style.color = '#bdc3c7'}
-                >
-                  Advertise
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </footer>
-
-      {/* Bottom Bar */}
-      <div
-        className="py-3"
-        style={{
-          backgroundColor: '#0d0d0d',
-          borderTop: '1px solid #333333'
-        }}
-      >
-        <div className="container">
-          <div className="row">
-            <div className="col-12 text-center">
-              <p className="mb-0 small" style={{ color: '#95a5a6', fontSize: '0.85rem' }}>
-                © 2025 Smart Bookstore. All rights reserved. |
-                <a
-                  href="#"
-                  className="text-decoration-none ms-2"
-                  style={{
-                    color: '#95a5a6',
-                    transition: 'color 0.3s ease'
-                  }}
-                  onMouseEnter={(e) => e.target.style.color = '#e74c3c'}
-                  onMouseLeave={(e) => e.target.style.color = '#95a5a6'}
-                >
-                  Privacy Policy
-                </a> |
-                <a
-                  href="#"
-                  className="text-decoration-none ms-2"
-                  style={{
-                    color: '#95a5a6',
-                    transition: 'color 0.3s ease'
-                  }}
-                  onMouseEnter={(e) => e.target.style.color = '#e74c3c'}
-                  onMouseLeave={(e) => e.target.style.color = '#95a5a6'}
-                >
-                  Terms of Service
-                </a>
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
       <ToastContainer />
     </div>
   )

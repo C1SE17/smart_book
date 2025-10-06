@@ -13,10 +13,8 @@ const MenuClient = ({ onNavigateTo, onBackToHome, user, onLogout, onViewAllNotif
     }
 
     try {
-      const { mockApi } = await import('../../services/mockApi');
-      const cartData = await mockApi.getCartByUserId(user.user_id);
-      const totalItems = cartData.items.reduce((sum, item) => sum + item.quantity, 0);
-      setCartItemCount(totalItems);
+      // Mock cart data for now
+      setCartItemCount(0);
     } catch (error) {
       console.error('Error fetching cart count:', error);
       setCartItemCount(0);

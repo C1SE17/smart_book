@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { mockApi } from '../../services/mockApi';
+// import { passwordResetApi } from '../../services/passwordResetApi';
 
 const ResetPassword = ({ email, onBackToLogin, onSuccess }) => {
   const [step, setStep] = useState('code'); // 'code' or 'password'
@@ -33,7 +33,7 @@ const ResetPassword = ({ email, onBackToLogin, onSuccess }) => {
       ...prev,
       [name]: value
     }));
-    
+
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({
@@ -72,21 +72,21 @@ const ResetPassword = ({ email, onBackToLogin, onSuccess }) => {
 
   const handleVerifyCode = async (e) => {
     e.preventDefault();
-    
+
     if (!validateCodeForm()) {
       return;
     }
 
     setLoading(true);
-    
+
     try {
-      const response = await mockApi.verifyResetCode(email, formData.code);
+      const response = await passwordResetApi.verifyResetCode(email, formData.code);
       console.log('Verify code response:', response);
-      
+
       setResetToken(response.resetToken);
       setStep('password');
       setErrors({});
-      
+
     } catch (error) {
       console.error('Verify code error:', error);
       setErrors({ general: error.message });
@@ -97,21 +97,21 @@ const ResetPassword = ({ email, onBackToLogin, onSuccess }) => {
 
   const handleResetPassword = async (e) => {
     e.preventDefault();
-    
+
     if (!validatePasswordForm()) {
       return;
     }
 
     setLoading(true);
-    
+
     try {
-      const response = await mockApi.resetPassword(email, formData.newPassword, resetToken);
+      const response = await passwordResetApi.resetPassword(email, formData.newPassword, resetToken);
       console.log('Reset password response:', response);
-      
+
       if (onSuccess) {
         onSuccess(response.message);
       }
-      
+
     } catch (error) {
       console.error('Reset password error:', error);
       setErrors({ general: error.message });
@@ -123,7 +123,7 @@ const ResetPassword = ({ email, onBackToLogin, onSuccess }) => {
   const handleResendCode = async () => {
     setLoading(true);
     try {
-      await mockApi.sendResetEmail(email);
+      await passwordResetApi.sendResetEmail(email);
       setTimeLeft(15 * 60); // Reset timer
       setErrors({});
     } catch (error) {
@@ -142,13 +142,13 @@ const ResetPassword = ({ email, onBackToLogin, onSuccess }) => {
         </div>
 
         {/* Verify Code Card */}
-        <div className="card shadow-lg border-0" style={{width: '100%', minHeight: '600px', borderRadius: '10px'}}>
+        <div className="card shadow-lg border-0" style={{ width: '100%', minHeight: '600px', borderRadius: '10px' }}>
           <div className="card-body p-5">
             {/* Main Heading */}
-            <h2 className="text-center mb-4 fw-bold" style={{fontFamily: 'serif'}}>Verify Code</h2>
-            
+            <h2 className="text-center mb-4 fw-bold" style={{ fontFamily: 'serif' }}>Verify Code</h2>
+
             {/* Divider Line */}
-            <hr className="text-muted mb-4" style={{opacity: 0.3}} />
+            <hr className="text-muted mb-4" style={{ opacity: 0.3 }} />
 
             {/* Description */}
             <p className="text-muted text-center mb-4">
@@ -236,7 +236,7 @@ const ResetPassword = ({ email, onBackToLogin, onSuccess }) => {
                 onClick={handleResendCode}
                 disabled={loading}
                 className="btn btn-link text-primary text-decoration-none p-0 fw-medium"
-                style={{border: 'none', background: 'none'}}
+                style={{ border: 'none', background: 'none' }}
               >
                 Gửi lại mã
               </button>
@@ -244,11 +244,11 @@ const ResetPassword = ({ email, onBackToLogin, onSuccess }) => {
 
             {/* Back to Login */}
             <div className="text-center mt-4">
-              <button 
+              <button
                 type="button"
                 onClick={onBackToLogin}
                 className="btn btn-link text-secondary text-decoration-none p-0 fw-medium"
-                style={{border: 'none', background: 'none'}}
+                style={{ border: 'none', background: 'none' }}
               >
                 ← Quay lại đăng nhập
               </button>
@@ -267,13 +267,13 @@ const ResetPassword = ({ email, onBackToLogin, onSuccess }) => {
       </div>
 
       {/* Reset Password Card */}
-      <div className="card shadow-lg border-0" style={{width: '100%', minHeight: '600px', borderRadius: '10px'}}>
+      <div className="card shadow-lg border-0" style={{ width: '100%', minHeight: '600px', borderRadius: '10px' }}>
         <div className="card-body p-5">
           {/* Main Heading */}
-          <h2 className="text-center mb-4 fw-bold" style={{fontFamily: 'serif'}}>Reset Password</h2>
-          
+          <h2 className="text-center mb-4 fw-bold" style={{ fontFamily: 'serif' }}>Reset Password</h2>
+
           {/* Divider Line */}
-          <hr className="text-muted mb-4" style={{opacity: 0.3}} />
+          <hr className="text-muted mb-4" style={{ opacity: 0.3 }} />
 
           {/* Description */}
           <p className="text-muted text-center mb-4">
@@ -370,11 +370,11 @@ const ResetPassword = ({ email, onBackToLogin, onSuccess }) => {
 
           {/* Back to Login */}
           <div className="text-center">
-            <button 
+            <button
               type="button"
               onClick={onBackToLogin}
               className="btn btn-link text-secondary text-decoration-none p-0 fw-medium"
-              style={{border: 'none', background: 'none'}}
+              style={{ border: 'none', background: 'none' }}
             >
               ← Quay lại đăng nhập
             </button>

@@ -24,14 +24,16 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch 
 
     try {
       // Import mock API
-      const { mockApi } = await import('../../../services/mockApi');
-      
-      // Search books
-      const response = await mockApi.getBooks({ 
-        search: query.trim(),
-        limit: 20 
-      });
-      
+      // TODO: Implement real search API
+      // const { bookApi } = await import('../../../services/bookApi');
+      // const response = await bookApi.getBooks({ 
+      //   search: query.trim(),
+      //   limit: 20 
+      // });
+
+      // Mock data for now
+      const response = { success: true, data: [] };
+
       setSearchResults(response.data);
     } catch (error) {
       console.error('Error searching books:', error);
@@ -50,8 +52,10 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch 
     }
 
     try {
-      const { mockApi } = await import('../../../services/mockApi');
-      const suggestions = await mockApi.getSearchSuggestions(query);
+      // TODO: Implement real search suggestions API
+      // const { searchApi } = await import('../../../services/searchApi');
+      // const suggestions = await searchApi.getSearchSuggestions(query);
+      const suggestions = [];
       setSuggestions(suggestions);
       setShowSuggestions(true);
     } catch (error) {
@@ -64,10 +68,10 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch 
   const handleSearchChange = (e) => {
     const value = e.target.value;
     setSearchQuery(value);
-    
+
     // Get suggestions as user types (but don't search yet)
     getSuggestions(value);
-    
+
     // Don't call parent search function here - only show suggestions
   };
 
@@ -107,21 +111,22 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch 
   // Handle add to cart
   const handleAddToCart = async (book, e) => {
     e.stopPropagation();
-    
+
     try {
-      const { mockApi } = await import('../../../services/mockApi');
+      // TODO: Implement real cart API
+      // const { cartApi } = await import('../../../services/cartApi');
       const user = JSON.parse(localStorage.getItem('user'));
-      
+
       if (!user) {
         alert('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng!');
         return;
       }
 
-      await mockApi.addToCart(user.user_id, book.book_id, 1);
-      
+      // await cartApi.addToCart(user.user_id, book.book_id, 1);
+
       // Dispatch cart updated event
       window.dispatchEvent(new CustomEvent('cartUpdated'));
-      
+
       alert('Đã thêm sản phẩm vào giỏ hàng!');
     } catch (error) {
       console.error('Error adding to cart:', error);
@@ -176,14 +181,16 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch 
   useEffect(() => {
     const loadPopularKeywords = async () => {
       try {
-        const { mockApi } = await import('../../../services/mockApi');
-        const keywords = await mockApi.getPopularKeywords();
+        // TODO: Implement real popular keywords API
+        // const { searchApi } = await import('../../../services/searchApi');
+        // const keywords = await searchApi.getPopularKeywords();
+        const keywords = [];
         setPopularKeywords(keywords);
       } catch (error) {
         console.error('Error loading popular keywords:', error);
       }
     };
-    
+
     loadPopularKeywords();
   }, []);
 
@@ -260,7 +267,7 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch 
                   Tìm kiếm
                 </button>
               </div>
-              
+
               {/* Search Suggestions Dropdown */}
               {showSuggestions && suggestions.length > 0 && (
                 <div className="position-absolute w-100 bg-white border rounded shadow-lg" style={{ zIndex: 1000, top: '100%' }}>
@@ -345,11 +352,11 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch 
                   <div className="d-flex justify-content-between align-items-center mb-3">
                     <h4>Kết quả tìm kiếm cho "{searchQuery}" ({searchResults.length} sách)</h4>
                   </div>
-                  
+
                   <div className="row">
                     {searchResults.map((book) => (
                       <div key={book.book_id} className="col-lg-3 col-md-6 mb-4">
-                        <div 
+                        <div
                           className="card h-100 border-0 shadow-sm"
                           style={{
                             transition: 'all 0.3s ease',
@@ -428,7 +435,7 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch 
                               </button>
                             </div>
                           </div>
-                          
+
                           <div className="card-body p-3 d-flex flex-column">
                             <h6 className="card-title fw-bold mb-2" style={{
                               fontSize: '1rem',
@@ -475,7 +482,7 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch 
                   <FontAwesomeIcon icon={faSearch} size="3x" className="text-muted mb-3" />
                   <h4>Không tìm thấy sách nào</h4>
                   <p className="text-muted">
-                    Không có kết quả nào cho từ khóa "{searchQuery}". 
+                    Không có kết quả nào cho từ khóa "{searchQuery}".
                     Hãy thử với từ khóa khác.
                   </p>
                 </div>

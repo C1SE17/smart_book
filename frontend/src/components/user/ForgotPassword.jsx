@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { validateEmail } from '../../utils';
-import { mockApi } from '../../services/mockApi';
+// import { passwordResetApi } from '../../services/passwordResetApi';
 import ResetPassword from './ResetPassword';
 
 const ForgotPassword = ({ onBackToLogin, onBackToHome }) => {
@@ -20,7 +20,7 @@ const ForgotPassword = ({ onBackToLogin, onBackToHome }) => {
       ...prev,
       [name]: value
     }));
-    
+
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({
@@ -45,22 +45,22 @@ const ForgotPassword = ({ onBackToLogin, onBackToHome }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
 
     setLoading(true);
-    
+
     try {
       // Gọi mock API để gửi email reset
-      const response = await mockApi.sendResetEmail(formData.email);
-      
+      const response = await passwordResetApi.sendResetEmail(formData.email);
+
       console.log('Password reset response:', response);
       console.log('Debug code:', response.debugCode); // Chỉ để debug
-      
+
       setShowResetPassword(true);
-      
+
     } catch (error) {
       console.error('Password reset error:', error);
       setErrors({ general: error.message || 'Gửi email đặt lại mật khẩu thất bại. Vui lòng thử lại.' });
@@ -88,11 +88,11 @@ const ForgotPassword = ({ onBackToLogin, onBackToHome }) => {
         </div>
 
         {/* Success Card */}
-        <div className="card shadow-lg border-0" style={{width: '100%', minHeight: '600px', borderRadius: '10px'}}>
+        <div className="card shadow-lg border-0" style={{ width: '100%', minHeight: '600px', borderRadius: '10px' }}>
           <div className="card-body p-5 d-flex flex-column justify-content-center align-items-center text-center">
             {/* Success Icon */}
             <div className="mb-4">
-              <div 
+              <div
                 className="rounded-circle d-flex align-items-center justify-content-center mx-auto"
                 style={{
                   width: '80px',
@@ -101,7 +101,7 @@ const ForgotPassword = ({ onBackToLogin, onBackToHome }) => {
                   color: '#155724'
                 }}
               >
-                <i className="bi bi-check-circle-fill" style={{fontSize: '2.5rem'}}></i>
+                <i className="bi bi-check-circle-fill" style={{ fontSize: '2.5rem' }}></i>
               </div>
             </div>
 
@@ -132,7 +132,7 @@ const ForgotPassword = ({ onBackToLogin, onBackToHome }) => {
 
   if (showResetPassword) {
     return (
-      <ResetPassword 
+      <ResetPassword
         email={formData.email}
         onBackToLogin={onBackToLogin}
         onSuccess={handleResetSuccess}
@@ -149,11 +149,11 @@ const ForgotPassword = ({ onBackToLogin, onBackToHome }) => {
         </div>
 
         {/* Success Card */}
-        <div className="card shadow-lg border-0" style={{width: '100%', minHeight: '600px', borderRadius: '10px'}}>
+        <div className="card shadow-lg border-0" style={{ width: '100%', minHeight: '600px', borderRadius: '10px' }}>
           <div className="card-body p-5 d-flex flex-column justify-content-center align-items-center text-center">
             {/* Success Icon */}
             <div className="mb-4">
-              <div 
+              <div
                 className="rounded-circle d-flex align-items-center justify-content-center mx-auto"
                 style={{
                   width: '80px',
@@ -162,7 +162,7 @@ const ForgotPassword = ({ onBackToLogin, onBackToHome }) => {
                   color: '#155724'
                 }}
               >
-                <i className="bi bi-check-circle-fill" style={{fontSize: '2.5rem'}}></i>
+                <i className="bi bi-check-circle-fill" style={{ fontSize: '2.5rem' }}></i>
               </div>
             </div>
 
@@ -172,7 +172,7 @@ const ForgotPassword = ({ onBackToLogin, onBackToHome }) => {
               We've sent a password reset link to <strong>{formData.email}</strong>
             </p>
             <p className="text-muted small mb-4">
-              Please check your email and click the link to reset your password. 
+              Please check your email and click the link to reset your password.
               If you don't see the email, check your spam folder.
             </p>
 
@@ -217,13 +217,13 @@ const ForgotPassword = ({ onBackToLogin, onBackToHome }) => {
       </div>
 
       {/* Forgot Password Card */}
-      <div className="card shadow-lg border-0" style={{width: '100%', minHeight: '600px', borderRadius: '10px'}}>
+      <div className="card shadow-lg border-0" style={{ width: '100%', minHeight: '600px', borderRadius: '10px' }}>
         <div className="card-body p-5">
           {/* Main Heading */}
-          <h2 className="text-center mb-4 fw-bold" style={{fontFamily: 'serif'}}>Forgot Password</h2>
-          
+          <h2 className="text-center mb-4 fw-bold" style={{ fontFamily: 'serif' }}>Forgot Password</h2>
+
           {/* Divider Line */}
-          <hr className="text-muted mb-4" style={{opacity: 0.3}} />
+          <hr className="text-muted mb-4" style={{ opacity: 0.3 }} />
 
           {/* Description */}
           <p className="text-muted text-center mb-4">
@@ -295,12 +295,12 @@ const ForgotPassword = ({ onBackToLogin, onBackToHome }) => {
           {/* Back to Login */}
           <div className="text-center">
             <p className="text-muted small mb-0">
-              Remember your password? 
-              <button 
+              Remember your password?
+              <button
                 type="button"
                 onClick={onBackToLogin}
                 className="btn btn-link text-primary text-decoration-none p-0 ms-1 fw-medium"
-                style={{border: 'none', background: 'none'}}
+                style={{ border: 'none', background: 'none' }}
               >
                 Back to Login
               </button>

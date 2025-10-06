@@ -25,11 +25,15 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
   useEffect(() => {
     const fetchProduct = async () => {
       if (!productId) return;
-      
+
       setLoading(true);
       try {
-        const { mockApi } = await import('../../../services/mockApi');
-        const productData = await mockApi.getBookById(productId);
+        // TODO: Use real API
+        // const { bookApi } = await import('../../../services/bookApi');
+        // const productData = await bookApi.getBookById(productId);
+
+        // Mock data for now
+        const productData = { success: true, data: { book_id: productId, title: 'Sample Book', price: 100000 } };
         setProduct(productData);
       } catch (error) {
         console.error('Error fetching product:', error);
@@ -46,8 +50,10 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
   useEffect(() => {
     const fetchRecommendations = async () => {
       try {
-        const { mockApi } = await import('../../../services/mockApi');
-        const response = await mockApi.getBooks({ limit: 4 });
+        // TODO: Use real API
+        // const { bookApi } = await import('../../../services/bookApi');
+        // const response = await bookApi.getBooks({ limit: 4 });
+        const response = { success: true, data: [] };
         setRecommendations(response.data);
       } catch (error) {
         console.error('Error fetching recommendations:', error);
@@ -61,11 +67,13 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
   // Fetch reviews
   const fetchReviews = async () => {
     if (!productId) return;
-    
+
     setReviewsLoading(true);
     try {
-      const { mockApi } = await import('../../../services/mockApi');
-      const reviewsData = await mockApi.getReviewsByBookId(productId);
+      // TODO: Use real API
+      // const { reviewApi } = await import('../../../services/reviewApi');
+      // const reviewsData = await reviewApi.getReviewsByBookId(productId);
+      const reviewsData = { success: true, data: [] };
       setReviews(reviewsData);
     } catch (error) {
       console.error('Error fetching reviews:', error);
@@ -91,7 +99,7 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
   const handleAddToCart = async () => {
     console.log('Current user state:', user);
     console.log('User from localStorage:', localStorage.getItem('user'));
-    
+
     if (!user) {
       console.log('User not logged in');
       showToast('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng.', 'error');
@@ -105,11 +113,12 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
 
     try {
       console.log('Adding to cart:', { userId: user.user_id, bookId: product.book_id, quantity });
-      const { mockApi } = await import('../../../services/mockApi');
-      await mockApi.addToCart(user.user_id, product.book_id, quantity);
+      // TODO: Use real cart API
+      // const { cartApi } = await import('../../../services/cartApi');
+      // await cartApi.addToCart(user.user_id, product.book_id, quantity);
       console.log('Successfully added to cart');
       showToast(`${quantity} x "${product.title}" đã được thêm vào giỏ hàng!`, 'success');
-      
+
       // Dispatch event to update cart count in menu
       window.dispatchEvent(new CustomEvent('cartUpdated'));
     } catch (error) {
@@ -123,7 +132,7 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
     if (user) {
       // TODO: Implement add to wishlist
       console.log('Add to wishlist:', productId);
-      } else {
+    } else {
       // Redirect to login
       onNavigateTo('auth');
     }
@@ -141,10 +150,10 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
     try {
       // Add to cart first
       await handleAddToCart();
-      
+
       // Show success message
       showToast('Đã thêm sản phẩm vào giỏ hàng!', 'success');
-      
+
       // Create checkout item for immediate checkout
       const checkoutItem = {
         book_id: product.book_id,
@@ -155,10 +164,10 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
         author: product.author,
         publisher: product.publisher
       };
-      
+
       // Save to sessionStorage for checkout
       sessionStorage.setItem('checkoutItems', JSON.stringify([checkoutItem]));
-      
+
       // Navigate to checkout page
       onNavigateTo('checkout');
     } catch (error) {
@@ -185,7 +194,7 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
         text: product?.description,
         url: window.location.href
       });
-        } else {
+    } else {
       // Fallback: copy to clipboard
       navigator.clipboard.writeText(window.location.href);
       alert('Link đã được sao chép!');
@@ -248,7 +257,7 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
           <FontAwesomeIcon icon={faShoppingCart} size="3x" className="text-muted mb-3" />
           <h4>Sản phẩm không tồn tại</h4>
           <p className="text-muted">Không tìm thấy sản phẩm với ID này.</p>
-          <button 
+          <button
             className="btn btn-primary"
             onClick={() => onNavigateTo('home')}
           >
@@ -266,7 +275,7 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
       <nav aria-label="breadcrumb" className="mb-4">
         <ol className="breadcrumb">
           <li className="breadcrumb-item">
-            <button 
+            <button
               className="btn btn-link p-0 text-decoration-none"
               onClick={() => onNavigateTo('home')}
             >
@@ -274,7 +283,7 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
             </button>
           </li>
           <li className="breadcrumb-item">
-            <button 
+            <button
               className="btn btn-link p-0 text-decoration-none"
               onClick={() => onNavigateTo('books')}
             >
@@ -291,23 +300,23 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
         {/* Product Image */}
         <div className="col-lg-6">
           <div className="product-image-container">
-          <img
+            <img
               src={product.cover_image}
               className="img-fluid rounded shadow"
-            alt={product.title}
+              alt={product.title}
               style={{ width: '100%', maxHeight: '500px', objectFit: 'contain' }}
               onError={(e) => {
                 e.target.src = '/images/book1.jpg';
               }}
-          />
-        </div>
+            />
+          </div>
         </div>
 
         {/* Product Info */}
         <div className="col-lg-6">
           <div className="product-info">
             <h2 className="product-title mb-2" style={{ fontSize: '1.5rem' }}>{product.title}</h2>
-            
+
             <div className="product-meta mb-2">
               <p className="text-muted mb-1 small">
                 <strong>Tác giả:</strong> {product.author}
@@ -328,7 +337,7 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
                 </div>
                 <span className="text-muted small">
                   {product.rating || 0} ({product.reviewCount || 0} đánh giá)
-              </span>
+                </span>
               </div>
             </div>
 
@@ -390,24 +399,24 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
 
             {/* Product Meta */}
             <div className="product-meta mb-3">
-            <div className="row">
-              <div className="col-6">
-                <small className="text-muted">
-                  <strong>Author:</strong> {product.author}
-                </small>
-              </div>
-              <div className="col-6">
-                <small className="text-muted">
-                  <strong>Company:</strong> {product.publisher}
-                </small>
-              </div>
-              <div className="col-12 mt-1">
-                <small className="text-muted">
-                  <strong>Tags:</strong> book
-                </small>
+              <div className="row">
+                <div className="col-6">
+                  <small className="text-muted">
+                    <strong>Author:</strong> {product.author}
+                  </small>
+                </div>
+                <div className="col-6">
+                  <small className="text-muted">
+                    <strong>Company:</strong> {product.publisher}
+                  </small>
+                </div>
+                <div className="col-12 mt-1">
+                  <small className="text-muted">
+                    <strong>Tags:</strong> book
+                  </small>
+                </div>
               </div>
             </div>
-          </div>
 
             {/* Description */}
             <div className="product-description">
@@ -451,7 +460,7 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
               </button>
             </li>
           </ul>
-          
+
           <div className="tab-content" id="productTabsContent">
             <div
               className="tab-pane fade show active"
@@ -461,7 +470,7 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
             >
               <div className="p-4">
                 <h5>Thông tin chi tiết</h5>
-            <div className="row">
+                <div className="row">
                   <div className="col-md-6">
                     <table className="table table-borderless">
                       <tbody>
@@ -517,7 +526,7 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
               aria-labelledby="reviews-tab"
             >
               <div className="p-4">
-                <ReviewSection 
+                <ReviewSection
                   productId={productId}
                   reviews={reviews}
                   loading={reviewsLoading}
@@ -533,12 +542,12 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
       {/* Recommendations Section */}
       <div className="recommendations-section mt-5">
         <div className="container-fluid">
-        <div className="d-flex justify-content-between align-items-center mb-4">
+          <div className="d-flex justify-content-between align-items-center mb-4">
             <h4 className="fw-bold mb-0">Sách gợi ý</h4>
             <a href="#" className="text-decoration-none text-dark fw-medium">
               Xem tất cả <span className="ms-1">→</span>
             </a>
-        </div>
+          </div>
 
           <div className="row">
             {recommendations.map((book) => (
@@ -649,13 +658,13 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
                 </div>
               </div>
             ))}
-            </div>
+          </div>
         </div>
       </div>
 
       {/* Toast Notification */}
       {toast.show && (
-        <div 
+        <div
           className={`toast-notification ${toast.type === 'success' ? 'toast-success' : 'toast-error'}`}
           style={{
             position: 'fixed',
@@ -676,8 +685,8 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
             fontWeight: '500'
           }}
         >
-          <FontAwesomeIcon 
-            icon={toast.type === 'success' ? faCheck : faTimes} 
+          <FontAwesomeIcon
+            icon={toast.type === 'success' ? faCheck : faTimes}
             style={{ fontSize: '16px' }}
           />
           <span>{toast.message}</span>

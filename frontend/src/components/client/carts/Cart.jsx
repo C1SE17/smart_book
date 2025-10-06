@@ -9,7 +9,7 @@ const Cart = ({ onBackToHome, onNavigateTo }) => {
 
   const fetchCartItems = useCallback(async () => {
     setLoading(true);
-    
+
     try {
       // Get user from localStorage
       const user = JSON.parse(localStorage.getItem('user') || 'null');
@@ -20,14 +20,20 @@ const Cart = ({ onBackToHome, onNavigateTo }) => {
       }
 
       // Use mock API to get cart items
-      const { mockApi } = await import('../../../services/mockApi');
-      const cartData = await mockApi.getCartByUserId(user.user_id);
-      
+      // TODO: Implement real cart API
+      // const { cartApi } = await import('../../../services/cartApi');
+      // const cartData = await cartApi.getCartByUserId(user.user_id);
+
+      // Mock data for now
+      const cartData = { success: true, items: [] };
+
       // Get book details for each cart item
       const itemsWithDetails = await Promise.all(
         cartData.items.map(async (item) => {
           try {
-            const book = await mockApi.getBookById(item.book_id);
+            // TODO: Use real API
+            // const book = await bookApi.getBookById(item.book_id);
+            const book = { success: true, data: { book_id: item.book_id, title: 'Sample Book', price: 100000 } };
             return {
               ...item,
               book_title: book.title,
@@ -76,8 +82,9 @@ const Cart = ({ onBackToHome, onNavigateTo }) => {
       const user = JSON.parse(localStorage.getItem('user') || 'null');
       if (!user) return;
 
-      const { mockApi } = await import('../../../services/mockApi');
-      await mockApi.removeFromCart(user.user_id, bookId);
+      // TODO: Implement real cart API
+      // const { cartApi } = await import('../../../services/cartApi');
+      // await cartApi.removeFromCart(user.user_id, bookId);
 
       // Refresh cart items
       fetchCartItems();
@@ -101,8 +108,9 @@ const Cart = ({ onBackToHome, onNavigateTo }) => {
       const user = JSON.parse(localStorage.getItem('user') || 'null');
       if (!user) return;
 
-      const { mockApi } = await import('../../../services/mockApi');
-      await mockApi.updateCartItemQuantity(user.user_id, bookId, newQuantity);
+      // TODO: Implement real cart API
+      // const { cartApi } = await import('../../../services/cartApi');
+      // await cartApi.updateCartItemQuantity(user.user_id, bookId, newQuantity);
 
       // Refresh cart items
       fetchCartItems();
@@ -200,13 +208,12 @@ const Cart = ({ onBackToHome, onNavigateTo }) => {
           return;
         }
 
-        const { mockApi } = await import('../../../services/mockApi');
-        
-        // Xóa từng sản phẩm trong giỏ hàng
-        for (const item of cartItems) {
-          await mockApi.removeFromCart(user.user_id, item.book_id);
-        }
-        
+        // TODO: Implement real cart API
+        // const { cartApi } = await import('../../../services/cartApi');
+        // for (const item of cartItems) {
+        //   await cartApi.removeFromCart(user.user_id, item.book_id);
+        // }
+
         setSelectedItems([]);
         setSelectAll(false);
         fetchCartItems();

@@ -1,8 +1,10 @@
 const db = require('../config/db');
 
 class Book {
-    static async getAll({ page = 1, limit = 10, category_id, author_id, publisher_id, search }) {
-        const offset = (page - 1) * limit; // Tính offset cho phân trang
+    static async getAll({ page = 1, limit = 1000, category_id, author_id, publisher_id, search }) {
+        const limitNum = parseInt(limit) || 1000;
+        const pageNum = parseInt(page) || 1;
+        const offset = (pageNum - 1) * limitNum; // Tính offset cho phân trang
         let query = 'SELECT * FROM books';
         let conditions = [];
         let params = [];
@@ -29,7 +31,7 @@ class Book {
         }
 
         query += ' LIMIT ? OFFSET ?'; // Thêm phân trang
-        params.push(limit, offset);
+        params.push(limitNum, offset);
 
         const [rows] = await db.promise().query(query, params);
         return rows;

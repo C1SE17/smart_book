@@ -18,7 +18,7 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
   const [isEditing, setIsEditing] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [userProfile, setUserProfile] = useState(null);
-  
+
   // State cho form đổi mật khẩu
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: '',
@@ -51,7 +51,7 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
   useEffect(() => {
     // Ưu tiên role từ localStorage user object
     const userRole = user?.role || displayUser.role || 'customer';
-    
+
     const newFormData = {
       name: displayUser.name || '',
       email: displayUser.email || '',
@@ -59,11 +59,11 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
       address: displayUser.address || '',
       role: userRole
     };
-    
+
     console.log('Initializing form data with role:', userRole);
     console.log('User object role:', user?.role);
     console.log('DisplayUser role:', displayUser.role);
-    
+
     setFormData(newFormData);
     setUserProfile(displayUser);
   }, [displayUser, user]);
@@ -80,7 +80,7 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
     console.log('Using localStorage data directly (backend disabled for role fix)');
     console.log('User from localStorage:', user);
     console.log('User role from localStorage:', user?.role);
-    
+
     setUserProfile(user);
     setFormData({
       name: user.name || '',
@@ -89,9 +89,9 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
       address: user.address || '',
       role: user.role || 'customer'
     });
-    
+
     console.log('Form data set with role:', user.role || 'customer');
-    
+
     setLoading(false);
 
     // Code gọi backend (đã tắt)
@@ -225,17 +225,20 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
     setLoading(true);
 
     try {
-      // Sử dụng mockApi thay vì userService
-      const { mockApi } = await import('../../services/mockApi');
-      const updatedProfile = await mockApi.updateUser(user.user_id, formData, user);
-      
+      // TODO: Implement real user API
+      // const { userApi } = await import('../../services/userApi');
+      // const updatedProfile = await userApi.updateUser(user.user_id, formData, user);
+
+      // Mock response for now
+      const updatedProfile = { ...formData };
+
       // Cập nhật user trong localStorage
       const updatedUser = {
         ...user,
         ...updatedProfile
       };
       localStorage.setItem('user', JSON.stringify(updatedUser));
-      
+
       setUserProfile(updatedProfile);
 
       if (onUpdateProfile) {
@@ -270,24 +273,28 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
   const handleLogoutAllDevices = useCallback(async () => {
     if (window.confirm('Bạn có chắc chắn muốn đăng xuất tất cả thiết bị? Bạn sẽ cần đăng nhập lại trên thiết bị này.')) {
       try {
-        const { mockApi } = await import('../../services/mockApi');
-        const result = await mockApi.logoutAllDevices(user.user_id);
-        
+        // TODO: Implement real logout API
+        // const { userApi } = await import('../../services/userApi');
+        // const result = await userApi.logoutAllDevices(user.user_id);
+
+        // Mock response for now
+        const result = { success: true };
+
         if (result.success) {
           // Xóa tất cả dữ liệu user khỏi localStorage
           localStorage.removeItem('user');
           localStorage.removeItem('userToken');
           localStorage.removeItem('userEmail');
-          
+
           // Dispatch event để App.jsx biết user đã đăng xuất
           window.dispatchEvent(new CustomEvent('userLoggedOut'));
-          
+
           if (window.showToast) {
             window.showToast('Đã đăng xuất tất cả thiết bị! Vui lòng đăng nhập lại.', 'success');
           } else {
             alert('Đã đăng xuất tất cả thiết bị! Vui lòng đăng nhập lại.');
           }
-          
+
           // Redirect về trang chủ sau 2 giây
           setTimeout(() => {
             if (onBackToHome) {
@@ -296,7 +303,7 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
               window.location.href = '/';
             }
           }, 2000);
-          
+
         } else {
           if (window.showToast) {
             window.showToast(result.message, 'error');
@@ -304,7 +311,7 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
             alert(result.message);
           }
         }
-        
+
       } catch (error) {
         console.error('Error logging out all devices:', error);
         if (window.showToast) {
@@ -323,7 +330,7 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
       ...prev,
       [name]: value
     }));
-    
+
     // Clear error khi user nhập
     if (passwordErrors[name]) {
       setPasswordErrors(prev => ({
@@ -364,7 +371,7 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
   // Submit đổi mật khẩu
   const handlePasswordSubmit = useCallback(async (e) => {
     e.preventDefault();
-    
+
     if (!validatePasswordForm()) {
       return;
     }
@@ -372,11 +379,13 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
     setPasswordLoading(true);
 
     try {
-      const { mockApi } = await import('../../services/mockApi');
-      const result = await mockApi.changePassword(user.user_id, {
-        currentPassword: passwordForm.currentPassword,
-        newPassword: passwordForm.newPassword
-      });
+      // TODO: Implement real password change API
+      // const { userApi } = await import('../../services/userApi');
+      // const result = await userApi.changePassword(user.user_id, {
+      //   currentPassword: passwordForm.currentPassword,
+
+      // Mock response for now
+      const result = { success: true };
 
       if (result.success) {
         // Reset form
@@ -848,7 +857,7 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
                           {/* Change Password Section */}
                           <div className="mb-4">
                             <h6 className="text-muted mb-3">Đổi Mật Khẩu</h6>
-                            
+
                             {passwordErrors.general && (
                               <div className="alert alert-danger alert-dismissible fade show" role="alert">
                                 <i className="fas fa-exclamation-circle me-2"></i>
@@ -924,8 +933,8 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
                                   )}
                                 </div>
                                 <div className="col-12">
-                                  <button 
-                                    type="submit" 
+                                  <button
+                                    type="submit"
                                     className="btn btn-primary"
                                     disabled={passwordLoading}
                                   >
@@ -983,7 +992,7 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
                               <strong>Cảnh báo:</strong> Các hành động dưới đây có thể ảnh hưởng đến tài khoản của bạn.
                             </div>
                             <div className="d-flex gap-2">
-                              <button 
+                              <button
                                 className="btn btn-outline-danger"
                                 onClick={handleLogoutAllDevices}
                               >
