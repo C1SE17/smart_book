@@ -96,13 +96,19 @@ class UserController {
 
     // Lấy toàn bộ người dùng (chỉ admin)
     static getAllUsers(req, res) {
-        console.log('Fetching all users for admin:', req.user.role); // Debug
-        User.getAll((err, users) => {
-            if (err) {
-                console.log('Database error:', err); // Debug lỗi DB
-                return res.status(500).json({ error: 'Lỗi truy vấn cơ sở dữ liệu' });
-            }
-            res.json(users);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    User.getAllPaged(page, limit, (err, result) => {
+        if (err) {
+            return res.status(500).json({ error: 'Lỗi truy vấn cơ sở dữ liệu' });
+        }
+        res.json({
+            users: result.users,
+            total: result.total,
+            page,
+            limit,
+            totalPages: Math.ceil(result.total / limit)
+            });
         });
     }
 

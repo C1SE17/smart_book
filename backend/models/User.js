@@ -58,6 +58,18 @@ class User {
             callback(err, results);
         });
     }
+    static getAllPaged(page = 1, limit = 10, callback) {
+    const offset = (page - 1) * limit;
+    const query = 'SELECT * FROM users LIMIT ? OFFSET ?';
+    db.query(query, [limit, offset], (err, results) => {
+        if (err) return callback(err);
+        // Đếm tổng số user để trả về cho client
+        db.query('SELECT COUNT(*) AS total FROM users', (countErr, countRes) => {
+            if (countErr) return callback(countErr);
+            callback(null, { users: results, total: countRes[0].total });
+            });
+        });
+    }
 }
 
 
