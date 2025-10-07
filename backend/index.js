@@ -1,6 +1,5 @@
 // Nhập thư viện
 const express = require('express');
-const cors = require('cors');
 const dotenv = require('dotenv');
 const userRoutes = require('./routes/userRoutes');
 const bookRoutes = require('./routes/bookRoutes');
@@ -19,14 +18,6 @@ dotenv.config();
 const app = express(); // Đảm bảo app được khai báo trước khi sử dụng
 const port = process.env.PORT || 3306;
 
-// Cấu hình CORS
-app.use(cors({
-    origin: ['http://localhost:5173', 'http://localhost:3000'], // Frontend và Admin
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-}));
-
 // Phân tích JSON từ body
 app.use(express.json());
 
@@ -42,16 +33,7 @@ app.use((req, res, next) => {
 
 // Tuyến gốc
 app.get('/', (req, res) => {
-    res.send('Xin chào đến với smart book!');
-});
-
-// Test API không cần auth
-app.get('/api/test', (req, res) => {
-    res.json({
-        message: 'API is working!',
-        timestamp: new Date().toISOString(),
-        database: 'Connected'
-    });
+    res.send('Xin chào đén với smart book!');
 });
 
 // Gắn tuyến API
@@ -60,7 +42,7 @@ app.use('/api/books', bookRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/authors', authorRoutes);
 app.use('/api/publishers', publisherRoutes);
-app.use('/api/cart', cartRoutes);
+app.use('/api/cart', cartRoutes); 
 app.use('/api/order', orderRoutes);
 app.use('/api/warehouse', warehouseRoutes);
 app.use('/api/reviews', reviewRoutes);

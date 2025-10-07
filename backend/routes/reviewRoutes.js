@@ -26,8 +26,4 @@ router.delete('/reply/:reply_id', auth, ReviewController.deleteReply);
 
 //số sao trung bình
 router.get('/book/:book_id/average', ReviewController.getAverageRating);
-
-// // Admin lấy tất cả đánh giá
-// router.get('/admin/all', auth, adminOnly, ReviewController.getAllReviews);
-
 module.exports = router;

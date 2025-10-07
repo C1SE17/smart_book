@@ -96,18 +96,6 @@ const ReplyModel = {
         const [result] = await db.promise().query(query, params);
         return result.affectedRows;
     },
-//  // Lấy tất cả đánh giá cho admin (với thông tin user và book)
-//  getAll: async () => {
-//     const [rows] = await db.promise().query(
-//         `SELECT r.*, u.name AS user_name, u.email AS user_email, b.title AS book_title, b.author AS book_author
-//          FROM reviews r
-//          JOIN users u ON r.user_id = u.user_id
-//          JOIN books b ON r.book_id = b.book_id
-//          ORDER BY r.created_at DESC`
-//     );
-//     return rows;
-// }
-   
 };
 
 module.exports = { ReviewModel, ReplyModel };

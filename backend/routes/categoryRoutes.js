@@ -3,8 +3,8 @@ const router = express.Router();
 const CategoryController = require('../controllers/CategoryController');
 const { auth, adminOnly } = require('../middleware/auth');
 
-// Lấy danh sách danh mục (public)
-router.get('/', CategoryController.getAllCategories);
+// Lấy danh sách danh mục (chỉ admin)
+router.get('/', auth, adminOnly, CategoryController.getAllCategories);
 
 // Lấy chi tiết danh mục (chỉ admin)
 router.get('/:id', auth, adminOnly, CategoryController.getCategory);
