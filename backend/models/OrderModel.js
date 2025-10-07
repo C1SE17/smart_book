@@ -23,7 +23,11 @@ class OrderModel {
                 'INSERT INTO order_items (order_id, book_id, quantity, price_at_order) VALUES (?, ?, ?, ?)',
                 [orderId, bookId, quantity, price]
             );
-
+            // Trừ kho
+            await db.promise().query(
+                'UPDATE warehouse SET quantity = quantity - ? WHERE book_id = ?',
+                [quantity, bookId]
+            );
             console.log('Tạo đơn tạm thành công, orderId:', orderId);
             return { order_id: orderId, total_amount: totalAmount };
         } catch (err) {
@@ -64,7 +68,17 @@ class OrderModel {
                 'INSERT INTO order_items (order_id, book_id, quantity, price_at_order) SELECT ?, ci.book_id, quantity, b.price FROM cart_items ci JOIN books b ON ci.book_id = b.book_id WHERE ci.cart_id = ? AND ci.cart_item_id IN (?)',
                 [orderId, cartId, selectedCartItemIds]
             );
-
+            // Trừ kho cho từng sản phẩm
+            const [items] = await db.promise().query(
+                'SELECT book_id, quantity FROM cart_items WHERE cart_id = ? AND cart_item_id IN (?)',
+            [cartId, selectedCartItemIds]
+        );
+            for (const item of items) {
+            await db.promise().query(
+                'UPDATE warehouse SET quantity = quantity - ? WHERE book_id = ?',
+                [item.quantity, item.book_id]
+            );
+        }
             // Xóa cart_items đã chọn
             await db.promise().query('DELETE FROM cart_items WHERE cart_id = ? AND cart_item_id IN (?)', [cartId, selectedCartItemIds]);
 
@@ -138,6 +152,91 @@ class OrderModel {
             console.error('Lỗi cập nhật trạng thái đơn hàng:', err.message);
             throw err;
         }
+        // Nếu trạng thái là cancelled, cộng lại kho
+        if (status === 'cancelled') {
+            const [items] = await db.promise().query(
+                'SELECT book_id, quantity FROM order_items WHERE order_id = ?', [orderId]
+            );
+            for (const item of items) {
+                await db.promise().query(
+                    'UPDATE warehouse SET quantity = quantity + ? WHERE book_id = ?',
+                    [item.quantity, item.book_id]
+                );
+            }
+        }
+    }
+    // Tổng tiền thu được theo ngày/tháng
+    static async getRevenue({ type = 'day', date }) {
+        let query = '';
+        let params = [];
+        if (type === 'day') {
+            query = `SELECT DATE(created_at) AS day, SUM(total_price) AS revenue, COUNT(order_id) AS total_orders
+                     FROM orders
+                     WHERE status IN ('paid','shipped','completed')
+                     AND DATE(created_at) = ?
+                     GROUP BY day`;
+            params = [date];
+        } else if (type === 'month') {
+            query = `SELECT DATE_FORMAT(created_at, '%Y-%m') AS month, SUM(total_price) AS revenue, COUNT(order_id) AS total_orders
+                     FROM orders
+                     WHERE status IN ('paid','shipped','completed')
+                     AND DATE_FORMAT(created_at, '%Y-%m') = ?
+                     GROUP BY month`;
+            params = [date];
+        }
+        const [rows] = await db.promise().query(query, params);
+        return rows[0] || {};
+    }
+
+    // Thống kê số lượng từng sản phẩm bán được theo ngày/tháng
+    static async getProductStats({ type = 'day', date }) {
+        let query = '';
+        let params = [];
+        if (type === 'day') {
+            query = `SELECT oi.book_id, b.title, SUM(oi.quantity) AS sold_quantity
+                     FROM order_items oi
+                     JOIN orders o ON oi.order_id = o.order_id
+                     JOIN books b ON oi.book_id = b.book_id
+                     WHERE o.status IN ('paid','shipped','completed')
+                     AND DATE(o.created_at) = ?
+                     GROUP BY oi.book_id, b.title`;
+            params = [date];
+        } else if (type === 'month') {
+            query = `SELECT oi.book_id, b.title, SUM(oi.quantity) AS sold_quantity
+                     FROM order_items oi
+                     JOIN orders o ON oi.order_id = o.order_id
+                     JOIN books b ON oi.book_id = b.book_id
+                     WHERE o.status IN ('paid','shipped','completed')
+                     AND DATE_FORMAT(o.created_at, '%Y-%m') = ?
+                     GROUP BY oi.book_id, b.title`;
+            params = [date];
+        }
+        const [rows] = await db.promise().query(query, params);
+        return rows;
+    }
+
+    // Thống kê doanh thu từng ngày trong tháng (cho biểu đồ)
+    static async getDailyRevenueOfMonth(month) {
+        const query = `SELECT DATE(created_at) AS day, SUM(total_price) AS revenue, COUNT(order_id) AS total_orders
+                       FROM orders
+                       WHERE status IN ('paid','shipped','completed')
+                       AND DATE_FORMAT(created_at, '%Y-%m') = ?
+                       GROUP BY day
+                       ORDER BY day ASC`;
+        const [rows] = await db.promise().query(query, [month]);
+        return rows;
+    }
+
+    // Thống kê doanh thu từng tháng trong năm (cho biểu đồ)
+    static async getMonthlyRevenueOfYear(year) {
+        const query = `SELECT DATE_FORMAT(created_at, '%Y-%m') AS month, SUM(total_price) AS revenue, COUNT(order_id) AS total_orders
+                       FROM orders
+                       WHERE status IN ('paid','shipped','completed')
+                       AND YEAR(created_at) = ?
+                       GROUP BY month
+                       ORDER BY month ASC`;
+        const [rows] = await db.promise().query(query, [year]);
+        return rows;
     }
 }
 
