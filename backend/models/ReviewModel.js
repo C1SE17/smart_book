@@ -96,6 +96,14 @@ const ReplyModel = {
         const [result] = await db.promise().query(query, params);
         return result.affectedRows;
     },
+    // Sửa phản hồi (chỉ admin)
+    update: async (reply_id, reply_text) => {
+    const [result] = await db.promise().query(
+        'UPDATE review_replies SET reply_text = ? WHERE reply_id = ?',
+        [reply_text, reply_id]
+        );
+    return result.affectedRows;
+    }
 };
 
 module.exports = { ReviewModel, ReplyModel };

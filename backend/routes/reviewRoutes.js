@@ -18,12 +18,16 @@ router.delete('/:review_id', auth, ReviewController.deleteReview);
 // Admin xóa đánh giá
 router.delete('/admin/:review_id', auth, adminOnly, ReviewController.adminDeleteReview);
 
-// Thêm phản hồi cho bình luận
-router.post('/:review_id/reply', auth, ReviewController.createReply);
+// Admin phản hồi bình luận
+router.post('/:review_id/reply', auth, adminOnly, ReviewController.createReply);
 
-// Xóa phản hồi (user hoặc admin)
-router.delete('/reply/:reply_id', auth, ReviewController.deleteReply);
+// Admin sửa phản hồi
+router.put('/reply/:reply_id', auth, adminOnly, ReviewController.updateReply);
 
-//số sao trung bình
+// Admin xóa phản hồi
+router.delete('/reply/:reply_id', auth, adminOnly, ReviewController.deleteReply);
+
+// Số sao trung bình
 router.get('/book/:book_id/average', ReviewController.getAverageRating);
+
 module.exports = router;
