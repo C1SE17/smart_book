@@ -49,7 +49,7 @@ class UserController {
             bcrypt.compare(password, user.password_hash, (err, match) => {
                 if (err) return res.status(500).json({ error: 'Lỗi xác thực' });
                 if (!match) return res.status(401).json({ error: 'Mật khẩu không đúng' });
-                const token = jwt.sign({ userId: user.user_id, role: user.role }, process.env.JWT_SECRET, {
+                const token = jwt.sign({ userId: user.user_id, role: user.role }, process.env.JWT_SECRET || 'default_jwt_secret_key', {
                     expiresIn: '1h'
                 });
                 res.json({ 

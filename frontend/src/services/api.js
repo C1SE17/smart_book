@@ -206,6 +206,7 @@ class ApiService {
     if (params.limit) queryParams.append('limit', params.limit);
 
     const queryString = queryParams.toString();
+    // Sử dụng endpoint chính thức với auth
     const endpoint = `/users${queryString ? `?${queryString}` : ''}`;
     
     const response = await this.apiCall(endpoint);

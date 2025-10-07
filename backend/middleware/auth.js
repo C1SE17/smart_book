@@ -21,7 +21,7 @@ const auth = (req, res, next) => {
     }
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'default_jwt_secret_key');
         console.log('Decoded user:', decoded); // In thông tin decoded
         req.user = decoded; // Lưu thông tin user (userId, role)
         next();
