@@ -134,7 +134,7 @@ const WarehouseManagement = () => {
                 book_id: bookId,
                 quantity: quantity,
                 last_updated: new Date().toISOString(),
-                book_title: books.find(b => b.book_id === bookId)?.title || '',
+                title: books.find(b => b.book_id === bookId)?.title || '',
                 transactions: [
                     { type: 'import', quantity, date: new Date().toISOString().split('T')[0], reason: importForm.reason }
                 ]
@@ -308,7 +308,7 @@ const WarehouseManagement = () => {
                                     return (
                                         <tr key={item.warehouse_id}>
                                             <td>
-                                                <div className="fw-medium text-dark">{item.book_title}</div>
+                                                <div className="fw-medium text-dark">{item.title}</div>
                                             </td>
                                             <td className="text-center">
                                                 <span className="fw-bold fs-5">{item.quantity}</span>
