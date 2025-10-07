@@ -86,6 +86,11 @@ const Home = ({ onNavigateTo }) => {
       // const cartData = await cartApi.getCartByUserId(user.user_id);
       // const existingItem = cartData.items.find(item => item.book_id === book.book_id);
 
+      // For now, check localStorage for cart items
+      const cartKey = `cart_${user.user_id}`;
+      const existingCart = JSON.parse(localStorage.getItem(cartKey) || '[]');
+      const existingItem = existingCart.find(item => item.book_id === book.book_id);
+
       if (existingItem) {
         // Kiểm tra số lượng trong giỏ có vượt quá stock không
         if (existingItem.quantity >= book.stock) {
@@ -98,8 +103,13 @@ const Home = ({ onNavigateTo }) => {
         }
 
         // Tăng số lượng sản phẩm hiện có
-        // TODO: Implement real cart API
-        // await cartApi.updateCartItemQuantity(user.user_id, book.book_id, existingItem.quantity + 1);
+        existingItem.quantity += 1;
+        
+        // Cập nhật localStorage
+        const updatedCart = existingCart.map(item => 
+          item.book_id === book.book_id ? existingItem : item
+        );
+        localStorage.setItem(cartKey, JSON.stringify(updatedCart));
 
         // Hiển thị thông báo thành công
         if (window.showToast) {
@@ -109,8 +119,17 @@ const Home = ({ onNavigateTo }) => {
         }
       } else {
         // Thêm sản phẩm mới vào giỏ hàng
-        // TODO: Implement real cart API
-        // await cartApi.addToCart(user.user_id, book.book_id, 1);
+        const newItem = {
+          book_id: book.book_id,
+          title: book.title,
+          price: book.price,
+          quantity: 1,
+          cover_image: book.cover_image
+        };
+        
+        // Thêm vào localStorage
+        const updatedCart = [...existingCart, newItem];
+        localStorage.setItem(cartKey, JSON.stringify(updatedCart));
 
         // Hiển thị thông báo thành công
         if (window.showToast) {

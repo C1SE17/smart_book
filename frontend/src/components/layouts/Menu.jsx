@@ -13,8 +13,15 @@ const MenuClient = ({ onNavigateTo, onBackToHome, user, onLogout, onViewAllNotif
     }
 
     try {
-      // Mock cart data for now
-      setCartItemCount(0);
+      // Get cart items from localStorage
+      const cartKey = `cart_${user.user_id}`;
+      const cartItems = JSON.parse(localStorage.getItem(cartKey) || '[]');
+      
+      // Calculate total quantity of all items
+      const totalQuantity = cartItems.reduce((total, item) => total + (item.quantity || 0), 0);
+      setCartItemCount(totalQuantity);
+      
+      console.log('🛒 Cart count updated:', totalQuantity, 'items');
     } catch (error) {
       console.error('Error fetching cart count:', error);
       setCartItemCount(0);

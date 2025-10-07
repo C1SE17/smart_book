@@ -24,8 +24,10 @@ const Cart = ({ onBackToHome, onNavigateTo }) => {
       // const { cartApi } = await import('../../../services/cartApi');
       // const cartData = await cartApi.getCartByUserId(user.user_id);
 
-      // Mock data for now
-      const cartData = { success: true, items: [] };
+      // For now, get cart items from localStorage
+      const cartKey = `cart_${user.user_id}`;
+      const cartItemsFromStorage = JSON.parse(localStorage.getItem(cartKey) || '[]');
+      const cartData = { success: true, items: cartItemsFromStorage };
 
       // Get book details for each cart item
       const itemsWithDetails = await Promise.all(
@@ -33,14 +35,14 @@ const Cart = ({ onBackToHome, onNavigateTo }) => {
           try {
             // TODO: Use real API
             // const book = await bookApi.getBookById(item.book_id);
-            const book = { success: true, data: { book_id: item.book_id, title: 'Sample Book', price: 100000 } };
+            // For now, use the data already stored in localStorage
             return {
               ...item,
-              book_title: book.title,
-              author: book.author,
-              price: book.price,
-              total_price: book.price * item.quantity,
-              image_url: book.cover_image || '/images/book1.jpg'
+              book_title: item.title || `Book ${item.book_id}`,
+              author: item.author || 'Unknown Author',
+              price: item.price || 0,
+              total_price: (item.price || 0) * item.quantity,
+              image_url: item.cover_image || '/images/book1.jpg'
             };
           } catch (error) {
             console.error('Error fetching book details:', error);
@@ -86,6 +88,12 @@ const Cart = ({ onBackToHome, onNavigateTo }) => {
       // const { cartApi } = await import('../../../services/cartApi');
       // await cartApi.removeFromCart(user.user_id, bookId);
 
+      // Remove from localStorage
+      const cartKey = `cart_${user.user_id}`;
+      const cartItems = JSON.parse(localStorage.getItem(cartKey) || '[]');
+      const updatedCart = cartItems.filter(item => item.book_id !== bookId);
+      localStorage.setItem(cartKey, JSON.stringify(updatedCart));
+
       // Refresh cart items
       fetchCartItems();
 
@@ -111,6 +119,14 @@ const Cart = ({ onBackToHome, onNavigateTo }) => {
       // TODO: Implement real cart API
       // const { cartApi } = await import('../../../services/cartApi');
       // await cartApi.updateCartItemQuantity(user.user_id, bookId, newQuantity);
+
+      // Update localStorage
+      const cartKey = `cart_${user.user_id}`;
+      const cartItems = JSON.parse(localStorage.getItem(cartKey) || '[]');
+      const updatedCart = cartItems.map(item => 
+        item.book_id === bookId ? { ...item, quantity: newQuantity } : item
+      );
+      localStorage.setItem(cartKey, JSON.stringify(updatedCart));
 
       // Refresh cart items
       fetchCartItems();
@@ -177,9 +193,13 @@ const Cart = ({ onBackToHome, onNavigateTo }) => {
     }
 
     try {
-      let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      const user = JSON.parse(localStorage.getItem('user') || 'null');
+      if (!user) return;
+
+      const cartKey = `cart_${user.user_id}`;
+      let cart = JSON.parse(localStorage.getItem(cartKey) || '[]');
       cart = cart.filter(item => !selectedItems.includes(item.book_id));
-      localStorage.setItem('cart', JSON.stringify(cart));
+      localStorage.setItem(cartKey, JSON.stringify(cart));
 
       setSelectedItems([]);
       setSelectAll(false);
@@ -213,6 +233,10 @@ const Cart = ({ onBackToHome, onNavigateTo }) => {
         // for (const item of cartItems) {
         //   await cartApi.removeFromCart(user.user_id, item.book_id);
         // }
+
+        // Clear localStorage
+        const cartKey = `cart_${user.user_id}`;
+        localStorage.setItem(cartKey, JSON.stringify([]));
 
         setSelectedItems([]);
         setSelectAll(false);

@@ -342,10 +342,14 @@ function App() {
         </ErrorBoundary>
       )}
       {currentPage === 'books' && (
-        <CategoriesPage onNavigateTo={handleNavigateTo} />
+        <ErrorBoundary>
+          <CategoriesPage onNavigateTo={handleNavigateTo} />
+        </ErrorBoundary>
       )}
       {currentPage === 'categories' && (
-        <CategoriesPage onNavigateTo={handleNavigateTo} />
+        <ErrorBoundary>
+          <CategoriesPage onNavigateTo={handleNavigateTo} />
+        </ErrorBoundary>
       )}
       {currentPage === 'product' && (
         <ProductDetail productId={productId} onNavigateTo={handleNavigateTo} onNavigateToProduct={handleNavigateToProduct} user={user} />

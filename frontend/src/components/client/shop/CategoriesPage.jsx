@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faFilter, faSort, faStar, faShoppingCart, faHeart, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { bookApi, categoryApi, authorApi } from '../../../services/bookApi';
 
 const CategoriesPage = ({ onNavigateTo }) => {
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -20,24 +21,50 @@ const CategoriesPage = ({ onNavigateTo }) => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // TODO: Implement real API
-        // const { categoryApi, bookApi, authorApi } = await import('../../../services/api');
-        // const [categoriesData, productsResponse, authorsData] = await Promise.all([
-        //   categoryApi.getCategories(),
-        //   bookApi.getBooks({ limit: 50 }),
-        //   authorApi.getAuthors()
-        // ]);
+        console.log('🔄 Fetching real data from API...');
+        
+        // Fetch data from real API
+        const [categoriesResponse, booksResponse, authorsResponse] = await Promise.all([
+          categoryApi.getAllCategories(),
+          bookApi.getAllBooks({ limit: 1000 }), // Lấy tối đa 1000 sách
+          authorApi.getAllAuthors()
+        ]);
 
-        // Mock data for now
-        const categoriesData = { success: true, data: [] };
-        const productsResponse = { success: true, data: [] };
-        const authorsData = { success: true, data: [] };
+        console.log('📊 API Responses:', {
+          categories: categoriesResponse,
+          books: booksResponse,
+          authors: authorsResponse
+        });
 
-        setCategories(categoriesData);
-        setProducts(productsResponse.data);
-        setAuthors(authorsData);
+        // Set data from API responses
+        if (categoriesResponse.success) {
+          setCategories(categoriesResponse.data || []);
+          console.log('✅ Categories loaded:', categoriesResponse.data?.length || 0);
+        }
+
+        if (booksResponse.success) {
+          setProducts(booksResponse.data || []);
+          console.log('✅ Books loaded:', booksResponse.data?.length || 0);
+        }
+
+        if (authorsResponse.success) {
+          setAuthors(authorsResponse.data || []);
+          console.log('✅ Authors loaded:', authorsResponse.data?.length || 0);
+        }
+
+        console.log('🎉 All data loaded successfully from real API!');
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('❌ Error fetching data from API:', error);
+        
+        // Fallback to empty arrays on error
+        setCategories([]);
+        setProducts([]);
+        setAuthors([]);
+        
+        // Show error message to user
+        if (window.showToast) {
+          window.showToast('Không thể tải dữ liệu từ server. Vui lòng thử lại sau.', 'error');
+        }
       } finally {
         setLoading(false);
       }
@@ -48,51 +75,65 @@ const CategoriesPage = ({ onNavigateTo }) => {
 
   // Filter products based on selected category and search
   const filteredProducts = useMemo(() => {
+    if (!products || !Array.isArray(products)) return [];
+    
     let filtered = [...products];
 
     // Filter by category
-    if (selectedCategory) {
-      const category = categories.find(c => c.name === selectedCategory);
+    if (selectedCategory && categories && Array.isArray(categories)) {
+      const category = categories.find(c => c && c.name === selectedCategory);
       if (category) {
-        filtered = filtered.filter(product => product.category_id === category.category_id);
+        filtered = filtered.filter(product => product && product.category_id === category.category_id);
       }
     }
 
     // Filter by author
-    if (selectedAuthor) {
-      const author = authors.find(a => a.name === selectedAuthor);
+    if (selectedAuthor && authors && Array.isArray(authors)) {
+      const author = authors.find(a => a && a.name === selectedAuthor);
       if (author) {
-        filtered = filtered.filter(product => product.author_id === author.author_id);
+        filtered = filtered.filter(product => product && product.author_id === author.author_id);
       }
     }
 
     // Filter by search query
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(product =>
-        product.title.toLowerCase().includes(query) ||
-        product.author.toLowerCase().includes(query) ||
-        product.description.toLowerCase().includes(query)
-      );
+      filtered = filtered.filter(product => {
+        if (!product) return false;
+        
+        // Search in title
+        const titleMatch = product.title && product.title.toLowerCase().includes(query);
+        
+        // Search in author name
+        const author = authors.find(a => a && a.author_id === product.author_id);
+        const authorMatch = author && author.name && author.name.toLowerCase().includes(query);
+        
+        // Search in description
+        const descriptionMatch = product.description && product.description.toLowerCase().includes(query);
+        
+        return titleMatch || authorMatch || descriptionMatch;
+      });
     }
 
     // Filter by price range
     filtered = filtered.filter(product =>
-      product.price >= priceRange.min && product.price <= priceRange.max
+      product && product.price && product.price >= priceRange.min && product.price <= priceRange.max
     );
 
     // Sort products
     filtered.sort((a, b) => {
+      if (!a || !b) return 0;
+      
       let aValue, bValue;
 
       switch (sortBy) {
         case 'price':
-          aValue = a.price;
-          bValue = b.price;
+          aValue = a.price || 0;
+          bValue = b.price || 0;
           break;
         case 'title':
-          aValue = a.title.toLowerCase();
-          bValue = b.title.toLowerCase();
+          aValue = (a.title || '').toLowerCase();
+          bValue = (b.title || '').toLowerCase();
           break;
         case 'rating':
           aValue = a.rating || 0;
@@ -100,8 +141,8 @@ const CategoriesPage = ({ onNavigateTo }) => {
           break;
         case 'created_at':
         default:
-          aValue = new Date(a.created_at);
-          bValue = new Date(b.created_at);
+          aValue = new Date(a.created_at || 0);
+          bValue = new Date(b.created_at || 0);
           break;
       }
 
@@ -181,6 +222,41 @@ const CategoriesPage = ({ onNavigateTo }) => {
     e.stopPropagation();
     // TODO: Implement wishlist functionality
     alert('Tính năng yêu thích sẽ được thêm sớm!');
+  };
+
+  // Handle refresh data
+  const handleRefreshData = async () => {
+    setLoading(true);
+    try {
+      console.log('🔄 Refreshing data from API...');
+      
+      const [categoriesResponse, booksResponse, authorsResponse] = await Promise.all([
+        categoryApi.getAllCategories(),
+        bookApi.getAllBooks({ limit: 1000 }),
+        authorApi.getAllAuthors()
+      ]);
+
+      if (categoriesResponse.success) {
+        setCategories(categoriesResponse.data || []);
+      }
+      if (booksResponse.success) {
+        setProducts(booksResponse.data || []);
+      }
+      if (authorsResponse.success) {
+        setAuthors(authorsResponse.data || []);
+      }
+
+      if (window.showToast) {
+        window.showToast('Dữ liệu đã được cập nhật thành công!', 'success');
+      }
+    } catch (error) {
+      console.error('❌ Error refreshing data:', error);
+      if (window.showToast) {
+        window.showToast('Không thể cập nhật dữ liệu. Vui lòng thử lại.', 'error');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Format price
@@ -275,10 +351,11 @@ const CategoriesPage = ({ onNavigateTo }) => {
                     }}
                     style={{ fontSize: '0.85rem', textDecoration: 'none' }}
                   >
-                    Tất Cả ({products.length})
+                    Tất Cả ({products && Array.isArray(products) ? products.length : 0})
                   </a>
-                  {categories.map((category) => {
-                    const count = products.filter(p => p.category_id === category.category_id).length;
+                  {categories && Array.isArray(categories) && categories.map((category) => {
+                    if (!category) return null;
+                    const count = products && Array.isArray(products) ? products.filter(p => p && p.category_id === category.category_id).length : 0;
                     return (
                       <a
                         key={category.category_id}
@@ -310,10 +387,11 @@ const CategoriesPage = ({ onNavigateTo }) => {
                     }}
                     style={{ fontSize: '0.85rem', textDecoration: 'none' }}
                   >
-                    Tất Cả ({products.length})
+                    Tất Cả ({products && Array.isArray(products) ? products.length : 0})
                   </a>
-                  {authors.map((author) => {
-                    const count = products.filter(p => p.author_id === author.author_id).length;
+                  {authors && Array.isArray(authors) && authors.map((author) => {
+                    if (!author) return null;
+                    const count = products && Array.isArray(products) ? products.filter(p => p && p.author_id === author.author_id).length : 0;
                     return (
                       <a
                         key={author.author_id}
@@ -377,7 +455,7 @@ const CategoriesPage = ({ onNavigateTo }) => {
               </div>
 
               {/* Reset Filter Button */}
-              <div className="d-grid">
+              <div className="d-grid mb-2">
                 <button
                   className="btn btn-outline-secondary btn-sm"
                   onClick={handleResetFilters}
@@ -385,6 +463,19 @@ const CategoriesPage = ({ onNavigateTo }) => {
                 >
                   <FontAwesomeIcon icon={faTimes} className="me-1" />
                   Đặt Lại
+                </button>
+              </div>
+
+              {/* Refresh Data Button */}
+              <div className="d-grid">
+                <button
+                  className="btn btn-outline-primary btn-sm"
+                  onClick={handleRefreshData}
+                  disabled={loading}
+                  style={{ fontSize: '0.8rem' }}
+                >
+                  <FontAwesomeIcon icon={faSearch} className="me-1" />
+                  {loading ? 'Đang tải...' : 'Làm mới'}
                 </button>
               </div>
             </div>
@@ -396,7 +487,14 @@ const CategoriesPage = ({ onNavigateTo }) => {
           {/* Header with results count and sort */}
           <div className="d-flex justify-content-between align-items-center mb-4">
             <div>
-              <h6 className="mb-0">Hiển thị {filteredProducts.length} kết quả</h6>
+              <h6 className="mb-0">
+                Hiển thị {filteredProducts.length} kết quả
+                {products && Array.isArray(products) && (
+                  <span className="text-muted ms-2">
+                    (Tổng: {products.length} sách, {categories && Array.isArray(categories) ? categories.length : 0} danh mục)
+                  </span>
+                )}
+              </h6>
             </div>
             <div className="d-flex align-items-center">
               <label className="form-label me-2 mb-0">Sắp xếp theo:</label>
@@ -429,8 +527,9 @@ const CategoriesPage = ({ onNavigateTo }) => {
               </div>
 
               <div className="row">
-                {categories.map((category) => {
-                  const bookCount = products.filter(p => p.category_id === category.category_id).length;
+                {categories && Array.isArray(categories) && categories.map((category) => {
+                  if (!category) return null;
+                  const bookCount = products && Array.isArray(products) ? products.filter(p => p && p.category_id === category.category_id).length : 0;
                   return (
                     <div key={category.category_id} className="col-lg-3 col-md-4 col-sm-6 mb-4">
                       <div
@@ -455,7 +554,9 @@ const CategoriesPage = ({ onNavigateTo }) => {
             <div>
               {filteredProducts.length > 0 ? (
                 <div className="row">
-                  {filteredProducts.map((product) => (
+                  {filteredProducts && Array.isArray(filteredProducts) && filteredProducts.map((product) => {
+                    if (!product) return null;
+                    return (
                     <div key={product.book_id} className="col-lg-3 col-md-6 mb-4">
                       <div
                         className="card h-100 border-0 shadow-sm product-card"
@@ -554,7 +655,10 @@ const CategoriesPage = ({ onNavigateTo }) => {
                             {product.title}
                           </h6>
                           <p className="card-text text-muted mb-2" style={{ fontSize: '0.9rem' }}>
-                            {product.author}
+                            {(() => {
+                              const author = authors.find(a => a && a.author_id === product.author_id);
+                              return author ? author.name : `Tác giả ID: ${product.author_id}`;
+                            })()}
                           </p>
                           <div className="d-flex align-items-center mb-2">
                             <div className="me-2">
@@ -586,7 +690,8 @@ const CategoriesPage = ({ onNavigateTo }) => {
                         </div>
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="text-center py-5">
