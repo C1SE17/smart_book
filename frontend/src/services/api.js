@@ -172,8 +172,9 @@ class ApiService {
     return await this.request(`/users/users/${id}`);
   }
 
-  async getAllUsers() {
-    return await this.request('/users/users');
+  async getAllUsers(params = {}) {
+    const queryParams = new URLSearchParams(params).toString();
+    return await this.request(`/users/users${queryParams ? `?${queryParams}` : ''}`);
   }
 
   async deleteUser(id) {

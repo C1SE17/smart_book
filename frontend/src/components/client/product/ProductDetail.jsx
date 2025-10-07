@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faStar, faShoppingCart, faHeart, faShare, faArrowLeft, faCheck, faTimes } from '@fortawesome/free-solid-svg-icons';
 import ReviewSection from '../shop/ReviewSection';
 import ProductRating from './ProductRating';
+import ErrorBoundary from '../../common/ErrorBoundary/ErrorBoundary';
 
 const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = null }) => {
   const [product, setProduct] = useState(null);
@@ -74,7 +75,7 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
       // const { reviewApi } = await import('../../../services/reviewApi');
       // const reviewsData = await reviewApi.getReviewsByBookId(productId);
       const reviewsData = { success: true, data: [] };
-      setReviews(reviewsData);
+      setReviews(reviewsData.data || []);
     } catch (error) {
       console.error('Error fetching reviews:', error);
       setReviews([]);
@@ -526,13 +527,15 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
               aria-labelledby="reviews-tab"
             >
               <div className="p-4">
-                <ReviewSection
-                  productId={productId}
-                  reviews={reviews}
-                  loading={reviewsLoading}
-                  user={user}
-                  onAddReview={fetchReviews}
-                />
+                <ErrorBoundary>
+                  <ReviewSection
+                    productId={productId}
+                    reviews={reviews}
+                    loading={reviewsLoading}
+                    user={user}
+                    onAddReview={fetchReviews}
+                  />
+                </ErrorBoundary>
               </div>
             </div>
           </div>

@@ -24,79 +24,80 @@ const UserManagement = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [isPageChanging, setIsPageChanging] = useState(false);
+    const [totalUsers, setTotalUsers] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
 
-    // Fetch users from Backend API
-    useEffect(() => {
-        const fetchUsers = async () => {
-            setLoading(true);
-            try {
-                console.log('Fetching users from backend API...');
-                
-                // Sử dụng apiService để lấy danh sách users
-                const usersData = await apiService.getAllUsers();
-                console.log('Fetched users data from backend:', usersData);
-                
-                // Filter out admin users and add default values for missing fields
-                const filteredUsers = usersData
-                    .filter(user => user.role !== 'admin')
-                    .map(user => ({
-                        ...user,
-                        last_login: user.updated_at || user.created_at,
-                        total_orders: user.total_orders || 0,
-                        total_spent: user.total_spent || 0
-                    }));
+    // Fetch users from Backend API with pagination
+    const fetchUsers = async (page = currentPage, limit = itemsPerPage) => {
+        setLoading(true);
+        try {
+            console.log(`Fetching users from backend API - Page: ${page}, Limit: ${limit}...`);
+            
+            // Sử dụng apiService để lấy danh sách users với phân trang
+            const response = await apiService.getAllUsers({ page, limit });
+            console.log('Fetched users data from backend:', response);
+            
+            // Extract users array from response object
+            const usersData = response.users || response;
+            console.log('Users array:', usersData);
+            
+            // Filter out admin users and add default values for missing fields
+            const filteredUsers = usersData
+                .filter(user => user.role !== 'admin')
+                .map(user => ({
+                    ...user,
+                    last_login: user.updated_at || user.created_at,
+                    total_orders: user.total_orders || 0,
+                    total_spent: user.total_spent || 0
+                }));
 
-                console.log('Filtered users:', filteredUsers);
-                setUsers(filteredUsers);
-            } catch (error) {
-                console.error('Error fetching users:', error);
-                
-                // Hiển thị thông báo lỗi chi tiết
-                let errorMessage = 'Không thể tải danh sách người dùng';
-                if (error.message.includes('fetch')) {
-                    errorMessage = 'Không thể kết nối đến server. Vui lòng kiểm tra backend có đang chạy không.';
-                } else if (error.message.includes('401')) {
-                    errorMessage = 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.';
-                } else if (error.message.includes('403')) {
-                    errorMessage = 'Bạn không có quyền truy cập trang này.';
-                } else if (error.message.includes('404')) {
-                    errorMessage = 'API endpoint không tồn tại.';
-                } else if (error.message.includes('500')) {
-                    errorMessage = 'Lỗi server. Vui lòng thử lại sau.';
-                }
-                
-                // Hiển thị thông báo lỗi
-                if (window.showToast) {
-                    window.showToast(errorMessage, 'error');
-                } else {
-                    alert(errorMessage);
-                }
-                
-                // Fallback to empty array on error
-                setUsers([]);
-            } finally {
-                setLoading(false);
+            console.log('Filtered users:', filteredUsers);
+            setUsers(filteredUsers);
+            
+            // Update pagination info from backend response
+            if (response.total !== undefined) {
+                setTotalUsers(response.total);
+                setTotalPages(response.totalPages || Math.ceil(response.total / limit));
             }
-        };
+        } catch (error) {
+            console.error('Error fetching users:', error);
+            
+            // Hiển thị thông báo lỗi chi tiết
+            let errorMessage = 'Không thể tải danh sách người dùng';
+            if (error.message.includes('fetch')) {
+                errorMessage = 'Không thể kết nối đến server. Vui lòng kiểm tra backend có đang chạy không.';
+            } else if (error.message.includes('401')) {
+                errorMessage = 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.';
+            } else if (error.message.includes('403')) {
+                errorMessage = 'Bạn không có quyền truy cập trang này.';
+            } else if (error.message.includes('404')) {
+                errorMessage = 'API endpoint không tồn tại.';
+            } else if (error.message.includes('500')) {
+                errorMessage = 'Lỗi server. Vui lòng thử lại sau.';
+            }
+            
+            // Hiển thị thông báo lỗi
+            if (window.showToast) {
+                window.showToast(errorMessage, 'error');
+            } else {
+                alert(errorMessage);
+            }
+            
+            // Fallback to empty array on error
+            setUsers([]);
+        } finally {
+            setLoading(false);
+        }
+    };
 
+    // Initial fetch
+    useEffect(() => {
         fetchUsers();
     }, []);
 
-    // Filter users based on search and filters
-    const filteredUsers = users.filter(user => {
-        const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            user.phone.includes(searchTerm);
-        const matchesRole = filterRole === 'all' || user.role === filterRole;
-        
-        return matchesSearch && matchesRole;
-    });
-
-    // Pagination calculations
-    const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    const currentUsers = filteredUsers.slice(startIndex, endIndex);
+    // For now, we'll use server-side pagination without client-side filtering
+    // In a real app, you might want to implement server-side search and filtering
+    const currentUsers = users;
 
     // Reset to first page when filters change
     useEffect(() => {
@@ -120,16 +121,21 @@ const UserManagement = () => {
         if (page === currentPage) return;
         
         setIsPageChanging(true);
+        setCurrentPage(page);
         
-        // Smooth transition with slight delay
-        setTimeout(() => {
-            setCurrentPage(page);
+        // Fetch new page data
+        fetchUsers(page, itemsPerPage).finally(() => {
             setIsPageChanging(false);
-        }, 150);
+        });
     };
 
     const handleItemsPerPageChange = (e) => {
-        setItemsPerPage(parseInt(e.target.value));
+        const newItemsPerPage = parseInt(e.target.value);
+        setItemsPerPage(newItemsPerPage);
+        setCurrentPage(1); // Reset to first page
+        
+        // Fetch data with new items per page
+        fetchUsers(1, newItemsPerPage);
     };
 
     // Generate page numbers for pagination
@@ -193,8 +199,8 @@ const UserManagement = () => {
                     // Sử dụng apiService để xóa user
                     await apiService.deleteUser(selectedUser.user_id);
 
-                    // Remove user from local state
-                    setUsers(prev => prev.filter(user => user.user_id !== selectedUser.user_id));
+                    // Refresh the current page to get updated data
+                    fetchUsers(currentPage, itemsPerPage);
                     setShowModal(false);
                     
                     if (window.showToast) {
@@ -269,7 +275,7 @@ const UserManagement = () => {
                 </div>
                 <div className="d-flex align-items-center">
                     <span className="badge bg-primary">
-                        Tổng: {users.length} người dùng
+                        Tổng: {totalUsers} người dùng
                     </span>
                 </div>
             </div>
@@ -411,11 +417,11 @@ const UserManagement = () => {
                     )}
 
                     {/* Pagination Controls */}
-                    {filteredUsers.length > 0 && (
+                    {currentUsers.length > 0 && (
                         <div className="d-flex justify-content-between align-items-center mt-4">
                             <div className="d-flex align-items-center">
                                 <span className="text-muted me-3">
-                                    Hiển thị {startIndex + 1} - {Math.min(endIndex, filteredUsers.length)} trong {filteredUsers.length} kết quả
+                                    Hiển thị {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, totalUsers)} trong {totalUsers} kết quả
                                 </span>
                                 <div className="d-flex align-items-center">
                                     <label className="form-label me-2 mb-0">Hiển thị:</label>
