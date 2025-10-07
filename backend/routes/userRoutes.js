@@ -14,11 +14,11 @@ router.post('/login', UserController.login);
 // Tuyến cập nhật thông tin người dùng
 router.put('/update', auth, UserController.updateUser); // Chỉ sửa bản thân
 // Tuyến lấy thông tin người dùng
-router.get('/users/:user_id', auth, UserController.getUser); // User lấy bản thân, admin lấy bất kỳ
+router.get('/:user_id', auth, UserController.getUser); // User lấy bản thân, admin lấy bất kỳ
 // Tuyến lấy toàn bộ người dùng (chỉ admin)
-router.get('/users', auth, adminOnly, UserController.getAllUsers); // Chỉ admin
+router.get('/', auth, adminOnly, UserController.getAllUsers); // Chỉ admin
 // Tuyến xóa người dùng
-router.delete('/users/:user_id', auth, adminOnly, UserController.deleteUser); // Chỉ admin
+router.delete('/:user_id', auth, adminOnly, UserController.deleteUser); // Chỉ admin
 // Tuyến đăng xuất
 router.post('/logout', auth, UserController.logout); // Yêu cầu auth
 

@@ -52,7 +52,18 @@ class UserController {
                 const token = jwt.sign({ userId: user.user_id, role: user.role }, process.env.JWT_SECRET, {
                     expiresIn: '1h'
                 });
-                res.json({ token, message: 'Đăng nhập thành công' });
+                res.json({ 
+                    token, 
+                    user: {
+                        user_id: user.user_id,
+                        name: user.name,
+                        email: user.email,
+                        phone: user.phone,
+                        address: user.address,
+                        role: user.role
+                    },
+                    message: 'Đăng nhập thành công' 
+                });
             });
         });
     }

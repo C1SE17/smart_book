@@ -434,6 +434,11 @@ function App() {
           </AdminLayout>
         </ErrorBoundary>
       )}
+      {currentPage === 'debug' && (
+        <ErrorBoundary>
+          <SimpleDebug />
+        </ErrorBoundary>
+      )}
 
       {/* Fallback for admin pages */}
       {currentPage && currentPage.startsWith('admin-') && !currentPage.includes('admin-dashboard') && !currentPage.includes('admin-books') && !currentPage.includes('admin-categories') && !currentPage.includes('admin-warehouse') && !currentPage.includes('admin-orders') && !currentPage.includes('admin-users') && !currentPage.includes('admin-reviews') && (

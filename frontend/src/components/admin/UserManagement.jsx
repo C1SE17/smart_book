@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faTrash, faSearch, faEdit, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import { faUser, faTrash, faSearch, faEdit, faEye, faEyeSlash, faCircle, faCircleCheck } from '@fortawesome/free-solid-svg-icons';
 import apiService from '../../services';
 
 const UserManagement = () => {
@@ -8,6 +8,7 @@ const UserManagement = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterRole, setFilterRole] = useState('all');
+    const [filterStatus, setFilterStatus] = useState('all');
     const [showModal, setShowModal] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
     const [actionType, setActionType] = useState(''); // 'view', 'edit', 'delete'
@@ -22,7 +23,7 @@ const UserManagement = () => {
     
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(10);
+    const [itemsPerPage, setItemsPerPage] = useState(50);
     const [isPageChanging, setIsPageChanging] = useState(false);
     const [totalUsers, setTotalUsers] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
@@ -31,28 +32,43 @@ const UserManagement = () => {
     const fetchUsers = async (page = currentPage, limit = itemsPerPage) => {
         setLoading(true);
         try {
-            console.log(`Fetching users from backend API - Page: ${page}, Limit: ${limit}...`);
+            console.log(`🔄 Fetching users from backend API - Page: ${page}, Limit: ${limit}...`);
+            console.log('🔧 API Service:', apiService);
+            console.log('🔧 API Service methods:', Object.keys(apiService));
+            
+            // Check token
+            const token = localStorage.getItem('token');
+            console.log('🔑 Token:', token ? token.substring(0, 20) + '...' : 'No token');
             
             // Sử dụng apiService để lấy danh sách users với phân trang
             const response = await apiService.getAllUsers({ page, limit });
-            console.log('Fetched users data from backend:', response);
+            console.log('📡 Fetched users data from backend:', response);
+            
+            // Check if response is successful
+            if (!response.success) {
+                throw new Error(response.message || 'API call failed');
+            }
             
             // Extract users array from response object
-            const usersData = response.users || response;
+            const usersData = response.data || response.users || response;
             console.log('Users array:', usersData);
             
-            // Filter out admin users and add default values for missing fields
-            const filteredUsers = usersData
-                .filter(user => user.role !== 'admin')
-                .map(user => ({
-                    ...user,
-                    last_login: user.updated_at || user.created_at,
-                    total_orders: user.total_orders || 0,
-                    total_spent: user.total_spent || 0
-                }));
+            // Check if usersData is an array
+            if (!Array.isArray(usersData)) {
+                throw new Error('Invalid response format: expected array');
+            }
+            
+            // Add default values for missing fields (hiển thị tất cả users bao gồm admin)
+            const processedUsers = usersData.map(user => ({
+                ...user,
+                last_login: user.updated_at || user.created_at,
+                // Tạo trạng thái online/offline ảo random
+                isOnline: Math.random() > 0.3, // 70% chance online
+                lastSeen: new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000).toISOString() // Random trong 24h qua
+            }));
 
-            console.log('Filtered users:', filteredUsers);
-            setUsers(filteredUsers);
+            console.log('Processed users:', processedUsers);
+            setUsers(processedUsers);
             
             // Update pagination info from backend response
             if (response.total !== undefined) {
@@ -95,14 +111,27 @@ const UserManagement = () => {
         fetchUsers();
     }, []);
 
-    // For now, we'll use server-side pagination without client-side filtering
-    // In a real app, you might want to implement server-side search and filtering
-    const currentUsers = users;
+    // Filter users based on search term, role, and status
+    const filteredUsers = users.filter(user => {
+        const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            user.phone?.toLowerCase().includes(searchTerm.toLowerCase());
+        
+        const matchesRole = filterRole === 'all' || user.role === filterRole;
+        
+        const matchesStatus = filterStatus === 'all' || 
+                            (filterStatus === 'online' && user.isOnline) ||
+                            (filterStatus === 'offline' && !user.isOnline);
+        
+        return matchesSearch && matchesRole && matchesStatus;
+    });
+
+    const currentUsers = filteredUsers;
 
     // Reset to first page when filters change
     useEffect(() => {
         setCurrentPage(1);
-    }, [searchTerm, filterRole, itemsPerPage]);
+    }, [searchTerm, filterRole, filterStatus, itemsPerPage]);
 
     // Handle search
     const handleSearch = (e) => {
@@ -239,6 +268,24 @@ const UserManagement = () => {
         }).format(amount);
     };
 
+    // Format last seen time
+    const formatLastSeen = (lastSeen) => {
+        const now = new Date();
+        const lastSeenDate = new Date(lastSeen);
+        const diffInMinutes = Math.floor((now - lastSeenDate) / (1000 * 60));
+        
+        if (diffInMinutes < 1) return 'Vừa xong';
+        if (diffInMinutes < 60) return `${diffInMinutes} phút trước`;
+        
+        const diffInHours = Math.floor(diffInMinutes / 60);
+        if (diffInHours < 24) return `${diffInHours} giờ trước`;
+        
+        const diffInDays = Math.floor(diffInHours / 24);
+        if (diffInDays < 7) return `${diffInDays} ngày trước`;
+        
+        return lastSeenDate.toLocaleDateString('vi-VN');
+    };
+
     // Format date
     const formatDate = (dateString) => {
         if (!dateString) return 'N/A';
@@ -299,7 +346,7 @@ const UserManagement = () => {
                                 />
                             </div>
                         </div>
-                        <div className="col-md-3">
+                        <div className="col-md-2">
                             <label className="form-label">Vai trò</label>
                             <select
                                 className="form-select"
@@ -311,6 +358,18 @@ const UserManagement = () => {
                             </select>
                         </div>
                         <div className="col-md-2">
+                            <label className="form-label">Trạng thái</label>
+                            <select
+                                className="form-select"
+                                value={filterStatus}
+                                onChange={(e) => setFilterStatus(e.target.value)}
+                            >
+                                <option value="all">Tất cả</option>
+                                <option value="online">Online</option>
+                                <option value="offline">Offline</option>
+                            </select>
+                        </div>
+                        <div className="col-md-2">
                             <label className="form-label">&nbsp;</label>
                             <div className="d-grid">
                                 <button
@@ -318,6 +377,7 @@ const UserManagement = () => {
                                     onClick={() => {
                                         setSearchTerm('');
                                         setFilterRole('all');
+                                        setFilterStatus('all');
                                     }}
                                 >
                                     Xóa bộ lọc
@@ -356,8 +416,8 @@ const UserManagement = () => {
                             <thead className="table-light">
                                 <tr>
                                     <th>Thông tin</th>
+                                    <th>Trạng thái</th>
                                     <th>Liên hệ</th>
-                                    <th>Thống kê</th>
                                     <th>Thao tác</th>
                                 </tr>
                             </thead>
@@ -366,7 +426,9 @@ const UserManagement = () => {
                                     <tr key={user.user_id}>
                                         <td>
                                             <div>
-                                                <div className="fw-bold">{user.name}</div>
+                                                <div className="fw-bold">
+                                                    {user.name}
+                                                </div>
                                                 <small className="text-muted">
                                                     ID: {user.user_id} | {formatDate(user.created_at)}
                                                 </small>
@@ -374,15 +436,29 @@ const UserManagement = () => {
                                         </td>
                                         <td>
                                             <div>
-                                                <div className="small">{user.email}</div>
-                                                <div className="small text-muted">{user.phone || 'Chưa cập nhật'}</div>
-                                                <div className="small text-muted">{user.address || 'Chưa cập nhật'}</div>
+                                                <div className="d-flex align-items-center mb-1">
+                                                    <span className={`badge ${user.isOnline ? 'bg-success' : 'bg-secondary'} me-2`}>
+                                                        {user.isOnline ? 'Online' : 'Offline'}
+                                                    </span>
+                                                    {user.isOnline ? (
+                                                        <>
+                                                            <FontAwesomeIcon icon={faCircleCheck} className="text-success me-1" />
+                                                            <span className="small text-muted">Đang hoạt động</span>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <FontAwesomeIcon icon={faCircle} className="text-danger me-1" />
+                                                            <span className="small text-muted">{formatLastSeen(user.lastSeen)}</span>
+                                                        </>
+                                                    )}
+                                                </div>
                                             </div>
                                         </td>
                                         <td>
-                                            <div className="small">
-                                                <div>Đơn hàng: {user.total_orders}</div>
-                                                <div>Chi tiêu: {formatCurrency(user.total_spent)}</div>
+                                            <div>
+                                                <div className="small">{user.email}</div>
+                                                <div className="small text-muted">{user.phone || 'Chưa cập nhật'}</div>
+                                                <div className="small text-muted">{user.address || 'Chưa cập nhật'}</div>
                                             </div>
                                         </td>
                                         <td>
@@ -520,13 +596,29 @@ const UserManagement = () => {
                                                         {selectedUser?.role === 'admin' ? 'Admin' : 'Khách hàng'}
                                                     </span>
                                                 </p>
+                                                <p><strong>Trạng thái:</strong> 
+                                                    <span className={`badge ms-2 ${selectedUser?.isOnline ? 'bg-success' : 'bg-secondary'}`}>
+                                                        {selectedUser?.isOnline ? 'Online' : 'Offline'}
+                                                    </span>
+                                                </p>
+                                                <p><strong>Hoạt động cuối:</strong> 
+                                                    {selectedUser?.isOnline ? (
+                                                        <>
+                                                            <FontAwesomeIcon icon={faCircleCheck} className="text-success me-1" />
+                                                            Đang hoạt động
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <FontAwesomeIcon icon={faCircle} className="text-danger me-1" />
+                                                            {formatLastSeen(selectedUser?.lastSeen)}
+                                                        </>
+                                                    )}
+                                                </p>
                                             </div>
                                             <div className="col-md-6">
                                                 <h6>Thông tin tài khoản</h6>
                                                 <p><strong>Ngày tạo:</strong> {formatDate(selectedUser?.created_at)}</p>
                                                 <p><strong>Cập nhật cuối:</strong> {formatDate(selectedUser?.updated_at)}</p>
-                                                <p><strong>Tổng đơn hàng:</strong> {selectedUser?.total_orders}</p>
-                                                <p><strong>Tổng chi tiêu:</strong> {formatCurrency(selectedUser?.total_spent)}</p>
                                             </div>
                                         </div>
                                     )}

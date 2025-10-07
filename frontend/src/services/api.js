@@ -199,6 +199,34 @@ class ApiService {
     return await this.apiCall('/users');
   }
 
+  async getAllUsers(params = {}) {
+    const queryParams = new URLSearchParams();
+    
+    if (params.page) queryParams.append('page', params.page);
+    if (params.limit) queryParams.append('limit', params.limit);
+
+    const queryString = queryParams.toString();
+    const endpoint = `/users${queryString ? `?${queryString}` : ''}`;
+    
+    const response = await this.apiCall(endpoint);
+    
+    // Backend trả về format {users: [...], total: ..., page: ..., limit: ..., totalPages: ...}
+    // Cần convert thành format {success: true, data: [...]}
+    if (response.success && response.data) {
+      return {
+        success: true,
+        data: response.data.users || response.data,
+        total: response.data.total,
+        page: response.data.page,
+        limit: response.data.limit,
+        totalPages: response.data.totalPages,
+        message: 'Success'
+      };
+    }
+    
+    return response;
+  }
+
   async getUserById(id) {
     return await this.apiCall(`/users/${id}`);
   }
@@ -225,7 +253,7 @@ class ApiService {
 
   // ==================== AUTH ====================
   async login(credentials) {
-    return await this.apiCall('/auth/login', {
+    return await this.apiCall('/users/login', {
       method: 'POST',
       body: JSON.stringify(credentials)
     });

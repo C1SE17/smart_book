@@ -66,28 +66,38 @@ const Login = ({ onToggleMode, onLoginSuccess, onForgotPassword }) => {
       
       console.log('Đăng nhập thành công:', response);
       
+      // Check if response is successful
+      if (!response.success) {
+        throw new Error(response.message || 'Login failed');
+      }
+      
       // Lưu dữ liệu user nếu được chọn "Ghi nhớ"
       if (formData.rememberMe) {
         localStorage.setItem('userEmail', formData.email);
       }
       
-      // Lưu thông tin user đầy đủ từ API
-      const userData = {
-        user_id: response.user.user_id,
-        email: response.user.email,
-        name: response.user.name, // Sử dụng tên thực từ đăng ký
-        phone: response.user.phone,
-        address: response.user.address,
-        role: response.user.role, // Lưu role từ backend
-        token: response.token
-      };
-      console.log('Saving user data to localStorage:', userData);
-      localStorage.setItem('user', JSON.stringify(userData));
+      // Extract user data from response
+      const userData = response.data || response;
       
-      // Gọi callback thành công với dữ liệu user từ mock API
+      // Lưu thông tin user đầy đủ từ API
+      const userInfo = {
+        user_id: userData.user.user_id,
+        email: userData.user.email,
+        name: userData.user.name,
+        phone: userData.user.phone,
+        address: userData.user.address,
+        role: userData.user.role,
+        token: userData.token
+      };
+      
+      console.log('Saving user data to localStorage:', userInfo);
+      localStorage.setItem('user', JSON.stringify(userInfo));
+      localStorage.setItem('token', userData.token);
+      
+      // Gọi callback thành công với dữ liệu user
       if (onLoginSuccess) {
         onLoginSuccess({
-          ...userData,
+          ...userInfo,
           isLoggedIn: true
         });
       }
