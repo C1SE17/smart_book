@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useBookManagement } from '../../hooks/useBookManagement';
-import DatabaseTest from './DatabaseTest';
 
 const BookManagement = () => {
     const {
@@ -352,10 +351,6 @@ const BookManagement = () => {
                 </div>
             </div>
 
-            {/* Database Test Component */}
-            <div className="mt-5">
-                <DatabaseTest />
-            </div>
         </div>
     );
 };

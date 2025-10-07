@@ -3,7 +3,14 @@ const Book = require('../models/Book');
 exports.getAllBooks = async (req, res) => { // Lấy danh sách sản phẩm
     try {
         const { page, limit, category_id, author_id, publisher_id, search } = req.query;
-        const books = await Book.getAll({ page: parseInt(page), limit: parseInt(limit), category_id, author_id, publisher_id, search });
+        const books = await Book.getAll({
+            page: page ? parseInt(page) : 1,
+            limit: limit ? parseInt(limit) : 10,
+            category_id,
+            author_id,
+            publisher_id,
+            search
+        });
         res.json(books);
     } catch (err) {
         res.status(500).json({ error: err.message });

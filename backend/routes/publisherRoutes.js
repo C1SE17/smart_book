@@ -3,8 +3,8 @@ const router = express.Router();
 const PublisherController = require('../controllers/PublisherController');
 const { auth, adminOnly } = require('../middleware/auth');
 
-// Lấy danh sách nhà xuất bản (chỉ admin)
-router.get('/', auth, adminOnly, PublisherController.getAllPublishers);
+// Lấy danh sách nhà xuất bản (công khai cho frontend)
+router.get('/', PublisherController.getAllPublishers);
 
 // Lấy chi tiết nhà xuất bản (chỉ admin)
 router.get('/:id', auth, adminOnly, PublisherController.getPublisher);
