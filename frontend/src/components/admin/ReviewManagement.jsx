@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faStar, faTrash, faSearch, faEye, faBook, faUser } from '@fortawesome/free-solid-svg-icons';
-import apiService from '../../services/api';
+import apiService from '../../services';
 
 const ReviewManagement = () => {
     const [reviews, setReviews] = useState([]);
@@ -79,7 +79,7 @@ const ReviewManagement = () => {
         const userName = review.user_name || review.username || 'N/A';
         const userEmail = review.user_email || review.user_email || 'N/A';
         const bookTitle = review.book_title || review.title || 'N/A';
-        const bookAuthor = review.book_author || review.author || 'N/A';
+        const bookAuthor = review.book_author || (typeof review.author === 'object' ? review.author?.name : review.author) || 'N/A';
         const reviewText = review.review_text || '';
         
         const matchesSearch = userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -373,7 +373,7 @@ const ReviewManagement = () => {
                                         <td>
                                             <div>
                                                 <div className="fw-bold">{review.book_title || review.title || 'N/A'}</div>
-                                                <small className="text-muted">Tác giả: {review.book_author || review.author || 'N/A'}</small>
+                                                <small className="text-muted">Tác giả: {review.book_author || (typeof review.author === 'object' ? review.author?.name : review.author) || 'N/A'}</small>
                                             </div>
                                         </td>
                                         <td>
@@ -543,7 +543,7 @@ const ReviewManagement = () => {
                                                     Thông tin sản phẩm
                                                 </h6>
                                                 <p><strong>Tên sách:</strong> {selectedReview.book_title || selectedReview.title || 'N/A'}</p>
-                                                <p><strong>Tác giả:</strong> {selectedReview.book_author || selectedReview.author || 'N/A'}</p>
+                                                <p><strong>Tác giả:</strong> {selectedReview.book_author || (typeof selectedReview.author === 'object' ? selectedReview.author?.name : selectedReview.author) || 'N/A'}</p>
                                                 <p><strong>ID sách:</strong> {selectedReview.book_id}</p>
                                             </div>
                                             <div className="col-12 mt-3">

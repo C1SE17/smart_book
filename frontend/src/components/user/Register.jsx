@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { validateEmail } from '../../utils';
-import { userService } from '../../services';
-import apiService from '../../services/api';
+import apiService from '../../services';
 
 const Register = ({ onToggleMode, onRegisterSuccess }) => {
   const [formData, setFormData] = useState({

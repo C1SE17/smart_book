@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faFilter, faSort, faStar, faShoppingCart, faHeart, faTimes } from '@fortawesome/free-solid-svg-icons';
-import { bookApi, categoryApi, authorApi } from '../../../services/bookApi';
+import apiService from '../../../services';
 
 const CategoriesPage = ({ onNavigateTo }) => {
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -25,9 +25,9 @@ const CategoriesPage = ({ onNavigateTo }) => {
         
         // Fetch data from real API
         const [categoriesResponse, booksResponse, authorsResponse] = await Promise.all([
-          categoryApi.getAllCategories(),
-          bookApi.getAllBooks({ limit: 1000 }), // Lấy tối đa 1000 sách
-          authorApi.getAllAuthors()
+          apiService.getCategories(),
+          apiService.getBooks({ limit: 1000 }), // Lấy tối đa 1000 sách
+          apiService.getAuthors()
         ]);
 
         console.log('📊 API Responses:', {
@@ -231,9 +231,9 @@ const CategoriesPage = ({ onNavigateTo }) => {
       console.log('🔄 Refreshing data from API...');
       
       const [categoriesResponse, booksResponse, authorsResponse] = await Promise.all([
-        categoryApi.getAllCategories(),
-        bookApi.getAllBooks({ limit: 1000 }),
-        authorApi.getAllAuthors()
+        apiService.getCategories(),
+        apiService.getBooks({ limit: 1000 }),
+        apiService.getAuthors()
       ]);
 
       if (categoriesResponse.success) {

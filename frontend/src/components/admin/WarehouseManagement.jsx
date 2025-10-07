@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import apiService from '../../services';
 
 const WarehouseManagement = () => {
     const [warehouseData, setWarehouseData] = useState([]);
@@ -19,61 +20,41 @@ const WarehouseManagement = () => {
         reason: 'Xuất bán'
     });
 
-    // Mock data
-    useEffect(() => {
-        const fetchData = async () => {
+    // Load dữ liệu từ database
+    const loadData = useCallback(async () => {
+        try {
             setLoading(true);
-            setTimeout(() => {
-                setBooks([
-                    { book_id: 1, title: 'Thanh Gươm Diệt Quỷ - Tập 1', current_stock: 45 },
-                    { book_id: 2, title: 'Harry Potter và Hòn Đá Phù Thủy', current_stock: 23 },
-                    { book_id: 3, title: 'One Piece - Tập 1', current_stock: 67 },
-                    { book_id: 4, title: 'Attack on Titan - Tập 1', current_stock: 34 },
-                    { book_id: 5, title: 'Norwegian Wood', current_stock: 12 }
-                ]);
+            console.log('🔄 Loading warehouse data from database...');
 
-                setWarehouseData([
-                    {
-                        warehouse_id: 1,
-                        book_id: 1,
-                        quantity: 45,
-                        last_updated: '2024-01-15T10:30:00Z',
-                        book_title: 'Thanh Gươm Diệt Quỷ - Tập 1',
-                        transactions: [
-                            { type: 'import', quantity: 50, date: '2024-01-10', reason: 'Nhập hàng mới' },
-                            { type: 'export', quantity: 5, date: '2024-01-12', reason: 'Xuất bán' }
-                        ]
-                    },
-                    {
-                        warehouse_id: 2,
-                        book_id: 2,
-                        quantity: 23,
-                        last_updated: '2024-01-14T15:20:00Z',
-                        book_title: 'Harry Potter và Hòn Đá Phù Thủy',
-                        transactions: [
-                            { type: 'import', quantity: 30, date: '2024-01-08', reason: 'Nhập hàng mới' },
-                            { type: 'export', quantity: 7, date: '2024-01-13', reason: 'Xuất bán' }
-                        ]
-                    },
-                    {
-                        warehouse_id: 3,
-                        book_id: 3,
-                        quantity: 67,
-                        last_updated: '2024-01-15T09:15:00Z',
-                        book_title: 'One Piece - Tập 1',
-                        transactions: [
-                            { type: 'import', quantity: 100, date: '2024-01-05', reason: 'Nhập hàng mới' },
-                            { type: 'export', quantity: 33, date: '2024-01-14', reason: 'Xuất bán' }
-                        ]
-                    }
-                ]);
+            const [warehouseRes, booksRes] = await Promise.all([
+                apiService.getWarehouseItems(),
+                apiService.getBooks({ limit: 1000 })
+            ]);
 
-                setLoading(false);
-            }, 1000);
-        };
+            if (warehouseRes.success) {
+                console.log('✅ Warehouse data loaded:', warehouseRes.data?.length, 'items');
+                setWarehouseData(warehouseRes.data);
+            } else {
+                console.error('❌ Error loading warehouse data:', warehouseRes.message);
+            }
 
-        fetchData();
+            if (booksRes.success) {
+                console.log('✅ Books data loaded:', booksRes.data?.length, 'items');
+                setBooks(booksRes.data);
+            } else {
+                console.error('❌ Error loading books data:', booksRes.message);
+            }
+
+        } catch (error) {
+            console.error('❌ Error loading data:', error);
+        } finally {
+            setLoading(false);
+        }
     }, []);
+
+    useEffect(() => {
+        loadData();
+    }, [loadData]);
 
     // Validation functions
     const validateImportForm = (data) => {

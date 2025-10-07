@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { bookApi, categoryApi, authorApi, publisherApi } from '../services/bookApi';
+import apiService from '../services';
 
 /**
  * Custom hook cho quản lý sách với Real API
@@ -20,10 +20,10 @@ export const useBookManagement = () => {
             setError(null);
 
             const [booksRes, categoriesRes, authorsRes, publishersRes] = await Promise.all([
-                bookApi.getAllBooks({ limit: 1000 }), // Lấy tối đa 1000 sách
-                categoryApi.getAllCategories(),
-                authorApi.getAllAuthors(),
-                publisherApi.getAllPublishers()
+                apiService.getBooks({ limit: 1000 }), // Lấy tất cả sách
+                apiService.getCategories(),
+                apiService.getAuthors(),
+                apiService.getPublishers()
             ]);
 
             if (booksRes.success) {
@@ -63,7 +63,7 @@ export const useBookManagement = () => {
             setLoading(true);
             setError(null);
 
-            const response = await bookApi.createBook(bookData);
+            const response = await apiService.createBook(bookData);
 
             if (response.success) {
                 console.log('✅ Book created successfully:', response.data);
@@ -89,7 +89,7 @@ export const useBookManagement = () => {
             setLoading(true);
             setError(null);
 
-            const response = await bookApi.updateBook(id, bookData);
+            const response = await apiService.updateBook(id, bookData);
 
             if (response.success) {
                 console.log('✅ Book updated successfully:', response.data);
@@ -115,7 +115,7 @@ export const useBookManagement = () => {
             setLoading(true);
             setError(null);
 
-            const response = await bookApi.deleteBook(id);
+            const response = await apiService.deleteBook(id);
 
             if (response.success) {
                 console.log('✅ Book deleted successfully');
@@ -141,7 +141,7 @@ export const useBookManagement = () => {
             setLoading(true);
             setError(null);
 
-            const response = await bookApi.searchBooks(query);
+            const response = await apiService.searchBooks(query);
 
             if (response.success) {
                 console.log('✅ Search completed:', response.data);
@@ -178,7 +178,7 @@ export const useBookManagement = () => {
         publishers,
         loading,
         error,
-
+        
         // Actions
         createBook,
         updateBook,

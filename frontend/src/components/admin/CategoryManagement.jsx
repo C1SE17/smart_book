@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { categoryApi } from '../../services/bookApi';
+import apiService from '../../services';
 
 const CategoryManagement = () => {
     const [categories, setCategories] = useState([]);
@@ -19,7 +19,7 @@ const CategoryManagement = () => {
         try {
             setLoading(true);
             setError(null);
-            const response = await categoryApi.getAllCategories();
+            const response = await apiService.getCategories();
 
             if (response.success) {
                 setCategories(response.data);
@@ -74,7 +74,7 @@ const CategoryManagement = () => {
     const handleDeleteCategory = async (categoryId) => {
         if (window.confirm('Bạn có chắc chắn muốn xóa danh mục này?')) {
             try {
-                const response = await categoryApi.deleteCategory(categoryId);
+                const response = await apiService.deleteCategory(categoryId);
                 if (response.success) {
                     setCategories(categories.filter(cat => cat.category_id !== categoryId));
                     alert('Xóa danh mục thành công!');
@@ -101,7 +101,7 @@ const CategoryManagement = () => {
         try {
             if (editingCategory) {
                 // Update category
-                const response = await categoryApi.updateCategory(editingCategory.category_id, formData);
+                const response = await apiService.updateCategory(editingCategory.category_id, formData);
                 if (response.success) {
                     setCategories(categories.map(cat =>
                         cat.category_id === editingCategory.category_id
@@ -114,7 +114,7 @@ const CategoryManagement = () => {
                 }
             } else {
                 // Add new category
-                const response = await categoryApi.createCategory(formData);
+                const response = await apiService.createCategory(formData);
                 if (response.success) {
                     const newCategory = {
                         category_id: response.data.category_id || Math.max(...categories.map(c => c.category_id)) + 1,

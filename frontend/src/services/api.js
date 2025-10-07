@@ -1,381 +1,401 @@
-// Real API Service - sử dụng backend thật
-const API_BASE_URL = 'http://localhost:3306/api';
+/**
+ * Main API Service - Kết nối trực tiếp với MySQL Database
+ * Lấy dữ liệu thật từ backend API
+ */
 
 class ApiService {
-  // Helper method để gọi API
-  async request(endpoint, options = {}) {
-    const url = `${API_BASE_URL}${endpoint}`;
-    const config = {
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
-      ...options,
-    };
+  constructor() {
+    this.baseURL = 'http://localhost:3306/api';
+  }
 
-    // Thêm token nếu có
-    const token = localStorage.getItem('userToken');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+  // Utility method để delay (giả lập network delay)
+  async delay(ms = 100) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
 
+  // Generic method để gọi API
+  async apiCall(endpoint, options = {}) {
     try {
-      console.log('Making API request to:', url, 'with config:', config);
-      const response = await fetch(url, config);
+      await this.delay();
       
-      console.log('Response status:', response.status, response.statusText);
+      // Lấy token từ localStorage
+      const token = localStorage.getItem('token');
       
+      const response = await fetch(`${this.baseURL}${endpoint}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+          ...options.headers
+        },
+        ...options
+      });
+
       if (!response.ok) {
-        let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-        try {
-          const errorData = await response.json();
-          errorMessage = errorData.error || errorData.message || errorMessage;
-          console.error('Error response data:', errorData);
-        } catch (parseError) {
-          console.error('Could not parse error response:', parseError);
-        }
-        throw new Error(errorMessage);
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
-      console.log('API response data:', data);
-      return data;
-    } catch (error) {
-      console.error('API Request failed:', error);
-      console.error('Request URL:', url);
-      console.error('Request config:', config);
       
-      // Provide more specific error messages
-      if (error.name === 'TypeError' && error.message.includes('fetch')) {
-        throw new Error('Không thể kết nối đến server. Vui lòng kiểm tra backend có đang chạy không.');
-      }
-      
-      throw error;
-    }
-  }
-
-  // Authentication APIs
-  async register(userData) {
-    const { name, email, password, phone, address } = userData;
-    
-    // Clear any cached data before registering
-    console.log('Clearing cache before registration...');
-    
-    const response = await this.request('/users/register', {
-      method: 'POST',
-      body: JSON.stringify({
-        name,
-        email,
-        password,
-        phone: phone || '',
-        address: address || '',
-        role: email.includes('admin') ? 'admin' : 'customer'
-      })
-    });
-
-    console.log('Registration response from backend:', response);
-
-    // Sử dụng dữ liệu từ backend response
-    return {
-      user: response.user || {
-        user_id: response.user_id,
-        name: name,
-        email: email,
-        phone: phone || '',
-        address: address || '',
-        role: email.includes('admin') ? 'admin' : 'customer',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      },
-      token: response.token,
-      message: response.message || 'Đăng ký thành công'
-    };
-  }
-
-  async login(credentials) {
-    const { email, password } = credentials;
-    
-    const response = await this.request('/users/login', {
-      method: 'POST',
-      body: JSON.stringify({ email, password })
-    });
-
-    // Decode JWT token để lấy thông tin user
-    let userRole = 'customer';
-    let userId = null;
-    
-    if (response.token) {
-      try {
-        const payload = JSON.parse(atob(response.token.split('.')[1]));
-        userRole = payload.role || 'customer';
-        userId = payload.userId;
-        console.log('Decoded JWT payload:', payload);
-      } catch (error) {
-        console.warn('Không thể decode token:', error);
-      }
-    }
-
-    // Override role cho admin emails (tạm thời fix)
-    if (email.includes('admin')) {
-      userRole = 'admin';
-      console.log('Overriding role to admin for email:', email);
-    }
-
-    // Lấy thông tin user từ backend API
-    let userData = {};
-    try {
-      console.log('Fetching user data for userId:', userId);
-      userData = await this.request(`/users/users/${userId}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${response.token}`
-        }
-      });
-      console.log('User data from backend API:', userData);
+      // Format response để tương thích với existing code
+      return {
+        success: true,
+        data: data,
+        message: 'Success'
+      };
     } catch (error) {
-      console.warn('Không thể lấy thông tin user từ API, sử dụng thông tin cơ bản');
-      // Fallback với thông tin cơ bản, không tạo từ email
-      userData = {
-        user_id: userId,
-        name: 'User', // Không tạo từ email
-        email: email,
-        phone: '',
-        address: '',
-        role: userRole,
-        status: 'active'
+      console.error(`API call failed for ${endpoint}:`, error);
+      return {
+        success: false,
+        data: null,
+        message: error.message
       };
     }
-
-    // Lưu token vào localStorage
-    if (response.token) {
-      localStorage.setItem('userToken', response.token);
-    }
-
-    return {
-      user: {
-        user_id: userData.user_id,
-        name: userData.name,
-        email: userData.email,
-        phone: userData.phone || '',
-        address: userData.address || '',
-        role: userRole,
-        status: userData.status || 'active',
-        created_at: userData.created_at,
-        updated_at: userData.updated_at
-      },
-      token: response.token,
-      message: response.message || 'Đăng nhập thành công'
-    };
   }
 
-  async getUserById(id) {
-    return await this.request(`/users/users/${id}`);
+  // ==================== BOOKS ====================
+  async getBooks(params = {}) {
+    const queryParams = new URLSearchParams();
+    
+    if (params.page) queryParams.append('page', params.page);
+    if (params.limit) queryParams.append('limit', params.limit);
+    if (params.category_id) queryParams.append('category_id', params.category_id);
+    if (params.author_id) queryParams.append('author_id', params.author_id);
+    if (params.publisher_id) queryParams.append('publisher_id', params.publisher_id);
+    if (params.search) queryParams.append('search', params.search);
+    if (params.sort) queryParams.append('sort', params.sort);
+    if (params.order) queryParams.append('order', params.order);
+    if (params.min_price) queryParams.append('min_price', params.min_price);
+    if (params.max_price) queryParams.append('max_price', params.max_price);
+
+    const queryString = queryParams.toString();
+    const endpoint = `/books${queryString ? `?${queryString}` : ''}`;
+    
+    return await this.apiCall(endpoint);
   }
 
-  async getAllUsers(params = {}) {
-    const queryParams = new URLSearchParams(params).toString();
-    return await this.request(`/users/users${queryParams ? `?${queryParams}` : ''}`);
+  async getBookById(id) {
+    return await this.apiCall(`/books/${id}`);
   }
 
-  async deleteUser(id) {
-    return await this.request(`/users/users/${id}`, {
+  async createBook(bookData) {
+    return await this.apiCall('/books', {
+      method: 'POST',
+      body: JSON.stringify(bookData)
+    });
+  }
+
+  async updateBook(id, bookData) {
+    return await this.apiCall(`/books/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(bookData)
+    });
+  }
+
+  async deleteBook(id) {
+    return await this.apiCall(`/books/${id}`, {
       method: 'DELETE'
     });
   }
 
-  logout() {
-    localStorage.removeItem('userToken');
-    localStorage.removeItem('user');
+  async searchBooks(query, params = {}) {
+    const searchParams = new URLSearchParams({ q: query });
+    
+    Object.keys(params).forEach(key => {
+      if (params[key]) searchParams.append(key, params[key]);
+    });
+
+    return await this.apiCall(`/books/search?${searchParams.toString()}`);
+  }
+
+  // ==================== CATEGORIES ====================
+  async getCategories() {
+    return await this.apiCall('/categories');
+  }
+
+  async getCategoryById(id) {
+    return await this.apiCall(`/categories/${id}`);
+  }
+
+  async createCategory(categoryData) {
+    return await this.apiCall('/categories', {
+      method: 'POST',
+      body: JSON.stringify(categoryData)
+    });
+  }
+
+  async updateCategory(id, categoryData) {
+    return await this.apiCall(`/categories/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(categoryData)
+    });
+  }
+
+  async deleteCategory(id) {
+    return await this.apiCall(`/categories/${id}`, {
+      method: 'DELETE'
+    });
+  }
+
+  // ==================== AUTHORS ====================
+  async getAuthors() {
+    return await this.apiCall('/authors');
+  }
+
+  async getAuthorById(id) {
+    return await this.apiCall(`/authors/${id}`);
+  }
+
+  async createAuthor(authorData) {
+    return await this.apiCall('/authors', {
+      method: 'POST',
+      body: JSON.stringify(authorData)
+    });
+  }
+
+  async updateAuthor(id, authorData) {
+    return await this.apiCall(`/authors/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(authorData)
+    });
+  }
+
+  async deleteAuthor(id) {
+    return await this.apiCall(`/authors/${id}`, {
+      method: 'DELETE'
+    });
+  }
+
+  // ==================== PUBLISHERS ====================
+  async getPublishers() {
+    return await this.apiCall('/publishers');
+  }
+
+  async getPublisherById(id) {
+    return await this.apiCall(`/publishers/${id}`);
+  }
+
+  async createPublisher(publisherData) {
+    return await this.apiCall('/publishers', {
+      method: 'POST',
+      body: JSON.stringify(publisherData)
+    });
+  }
+
+  async updatePublisher(id, publisherData) {
+    return await this.apiCall(`/publishers/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(publisherData)
+    });
+  }
+
+  async deletePublisher(id) {
+    return await this.apiCall(`/publishers/${id}`, {
+      method: 'DELETE'
+    });
+  }
+
+  // ==================== USERS ====================
+  async getUsers() {
+    return await this.apiCall('/users');
+  }
+
+  async getUserById(id) {
+    return await this.apiCall(`/users/${id}`);
+  }
+
+  async createUser(userData) {
+    return await this.apiCall('/users', {
+      method: 'POST',
+      body: JSON.stringify(userData)
+    });
   }
 
   async updateUser(id, userData) {
-    return await this.request(`/users/update`, {
+    return await this.apiCall(`/users/${id}`, {
       method: 'PUT',
-      body: JSON.stringify({ user_id: id, ...userData })
+      body: JSON.stringify(userData)
+    });
+  }
+
+  async deleteUser(id) {
+    return await this.apiCall(`/users/${id}`, {
+      method: 'DELETE'
+    });
+  }
+
+  // ==================== AUTH ====================
+  async login(credentials) {
+    return await this.apiCall('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(credentials)
+    });
+  }
+
+  async register(userData) {
+    return await this.apiCall('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(userData)
     });
   }
 
   async logout() {
-    return await this.request('/users/logout', {
+    return await this.apiCall('/auth/logout', {
       method: 'POST'
     });
   }
 
-  // Books API
-  async getBooks(params = {}) {
-    const queryParams = new URLSearchParams(params).toString();
-    return await this.request(`/books${queryParams ? `?${queryParams}` : ''}`);
+  async refreshToken() {
+    return await this.apiCall('/auth/refresh', {
+      method: 'POST'
+    });
   }
 
-  async getBookById(id) {
-    return await this.request(`/books/${id}`);
+  // ==================== REVIEWS ====================
+  async getReviews(params = {}) {
+    const queryParams = new URLSearchParams();
+    
+    if (params.book_id) queryParams.append('book_id', params.book_id);
+    if (params.user_id) queryParams.append('user_id', params.user_id);
+    if (params.page) queryParams.append('page', params.page);
+    if (params.limit) queryParams.append('limit', params.limit);
+
+    const queryString = queryParams.toString();
+    const endpoint = `/reviews${queryString ? `?${queryString}` : ''}`;
+    
+    return await this.apiCall(endpoint);
   }
 
-  // Categories API
-  async getCategories() {
-    return await this.request('/categories');
+  async getReviewById(id) {
+    return await this.apiCall(`/reviews/${id}`);
   }
 
-  async getCategoryById(id) {
-    return await this.request(`/categories/${id}`);
-  }
-
-  // Authors API
-  async getAuthors() {
-    return await this.request('/authors');
-  }
-
-  async getAuthorById(id) {
-    return await this.request(`/authors/${id}`);
-  }
-
-  // Publishers API
-  async getPublishers() {
-    return await this.request('/publishers');
-  }
-
-  async getPublisherById(id) {
-    return await this.request(`/publishers/${id}`);
-  }
-
-  // Reviews API
-  async getReviewsByBookId(bookId) {
-    return await this.request(`/reviews/book/${bookId}`);
-  }
-
-  async addReview(reviewData) {
-    return await this.request('/reviews', {
+  async createReview(reviewData) {
+    return await this.apiCall('/reviews', {
       method: 'POST',
       body: JSON.stringify(reviewData)
     });
   }
 
-  async getAllReviews() {
-    try {
-      // Gọi API admin endpoint để lấy tất cả 5000 reviews
-      console.log('🔄 Fetching all reviews from admin endpoint /reviews/admin/all...');
-      const allReviews = await this.request('/reviews/admin/all');
-      console.log(`✅ Successfully fetched ${allReviews.length} reviews from database`);
-      
-      if (allReviews.length < 5000) {
-        console.warn(`⚠️ Expected 5000 reviews but got ${allReviews.length}. This might be correct if some reviews were deleted.`);
-      }
-      
-      return allReviews;
-    } catch (error) {
-      console.error('❌ Error fetching all reviews from admin endpoint:', error);
-      console.error('Error details:', {
-        message: error.message,
-        status: error.status,
-        response: error.response
-      });
-      
-      // Kiểm tra nếu lỗi là do authentication
-      if (error.status === 401 || error.status === 403) {
-        console.error('🔐 Authentication error - user might not be admin or not logged in');
-        throw new Error('Bạn cần đăng nhập với tài khoản admin để xem tất cả đánh giá');
-      }
-      
-      // Fallback: lấy reviews từ một số sách mẫu nếu admin endpoint không hoạt động
-      console.warn('🔄 Admin reviews endpoint failed, trying fallback method...');
-      try {
-        const allReviews = [];
-        
-        // Lấy reviews từ nhiều sách hơn (book_id 1-200) để có nhiều dữ liệu hơn
-        console.log('🔄 Fetching reviews from individual books (1-200)...');
-        for (let bookId = 1; bookId <= 200; bookId++) {
-          try {
-            const reviews = await this.getReviewsByBookId(bookId);
-            if (reviews && reviews.length > 0) {
-              allReviews.push(...reviews);
-              if (bookId % 50 === 0) {
-                console.log(`📚 Processed ${bookId} books, found ${allReviews.length} reviews so far...`);
-              }
-            }
-          } catch (bookError) {
-            // Không log warning cho mỗi book không có reviews
-          }
-        }
-        
-        console.log(`✅ Fallback method fetched ${allReviews.length} reviews from individual books`);
-        return allReviews;
-      } catch (fallbackError) {
-        console.error('❌ Error in fallback method:', fallbackError);
-        return [];
-      }
-    }
+  async updateReview(id, reviewData) {
+    return await this.apiCall(`/reviews/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(reviewData)
+    });
   }
 
-  async deleteReview(reviewId) {
-    return await this.request(`/reviews/admin/${reviewId}`, {
+  async deleteReview(id) {
+    return await this.apiCall(`/reviews/${id}`, {
       method: 'DELETE'
     });
   }
 
-  async getAverageRating(bookId) {
-    return await this.request(`/reviews/book/${bookId}/average`);
+  // ==================== ORDERS ====================
+  async getOrders(params = {}) {
+    const queryParams = new URLSearchParams();
+    
+    if (params.user_id) queryParams.append('user_id', params.user_id);
+    if (params.status) queryParams.append('status', params.status);
+    if (params.page) queryParams.append('page', params.page);
+    if (params.limit) queryParams.append('limit', params.limit);
+
+    const queryString = queryParams.toString();
+    const endpoint = `/order${queryString ? `?${queryString}` : ''}`;
+    
+    return await this.apiCall(endpoint);
   }
 
-  // Cart API
-  async getCartByUserId(userId) {
-    return await this.request(`/cart/user/${userId}`);
-  }
-
-  async addToCart(userId, bookId, quantity = 1) {
-    return await this.request('/cart/add', {
-      method: 'POST',
-      body: JSON.stringify({ user_id: userId, book_id: bookId, quantity })
-    });
-  }
-
-  async removeFromCart(userId, bookId) {
-    return await this.request('/cart/remove', {
-      method: 'DELETE',
-      body: JSON.stringify({ user_id: userId, book_id: bookId })
-    });
-  }
-
-  async updateCartItemQuantity(userId, bookId, quantity) {
-    return await this.request('/cart/update', {
-      method: 'PUT',
-      body: JSON.stringify({ user_id: userId, book_id: bookId, quantity })
-    });
-  }
-
-  // Orders API
-  async getOrdersByUserId(userId) {
-    return await this.request(`/order/user/${userId}`);
-  }
-
-  async getOrderById(orderId) {
-    return await this.request(`/order/${orderId}`);
+  async getOrderById(id) {
+    return await this.apiCall(`/order/${id}`);
   }
 
   async createOrder(orderData) {
-    return await this.request('/order', {
+    return await this.apiCall('/order', {
       method: 'POST',
       body: JSON.stringify(orderData)
     });
   }
 
-  // Forgot Password API (sẽ implement sau)
-  async sendResetEmail(email) {
-    // TODO: Implement forgot password endpoint in backend
-    throw new Error('Forgot password chưa được implement trong backend');
+  async updateOrder(id, orderData) {
+    return await this.apiCall(`/order/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(orderData)
+    });
   }
 
-  async verifyResetCode(email, code) {
-    // TODO: Implement verify reset code endpoint in backend
-    throw new Error('Verify reset code chưa được implement trong backend');
+  async deleteOrder(id) {
+    return await this.apiCall(`/order/${id}`, {
+      method: 'DELETE'
+    });
   }
 
-  async resetPassword(email, newPassword, resetToken) {
-    // TODO: Implement reset password endpoint in backend
-    throw new Error('Reset password chưa được implement trong backend');
+  // ==================== CART ====================
+  async getCart(userId) {
+    return await this.apiCall(`/cart/${userId}`);
+  }
+
+  async addToCart(cartData) {
+    return await this.apiCall('/cart/add', {
+      method: 'POST',
+      body: JSON.stringify(cartData)
+    });
+  }
+
+  async updateCartItem(cartItemId, quantity) {
+    return await this.apiCall(`/cart/items/${cartItemId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ quantity })
+    });
+  }
+
+  async removeFromCart(cartItemId) {
+    return await this.apiCall(`/cart/items/${cartItemId}`, {
+      method: 'DELETE'
+    });
+  }
+
+  async clearCart(userId) {
+    return await this.apiCall(`/cart/${userId}`, {
+      method: 'DELETE'
+    });
+  }
+
+  // ==================== WAREHOUSE ====================
+  async getWarehouseItems() {
+    return await this.apiCall('/warehouse');
+  }
+
+  async getWarehouseItemByBookId(bookId) {
+    return await this.apiCall(`/warehouse/${bookId}`);
+  }
+
+  async createWarehouseItem(warehouseData) {
+    return await this.apiCall('/warehouse', {
+      method: 'POST',
+      body: JSON.stringify(warehouseData)
+    });
+  }
+
+  async updateWarehouseItem(bookId, warehouseData) {
+    return await this.apiCall(`/warehouse/${bookId}`, {
+      method: 'PUT',
+      body: JSON.stringify(warehouseData)
+    });
+  }
+
+  async deleteWarehouseItem(bookId) {
+    return await this.apiCall(`/warehouse/${bookId}`, {
+      method: 'DELETE'
+    });
+  }
+
+  // ==================== HEALTH CHECK ====================
+  async healthCheck() {
+    try {
+      return await this.apiCall('/health');
+    } catch (error) {
+      return { status: 'error', message: error.message };
+    }
   }
 }
 
-// Tạo instance duy nhất
-const apiService = new ApiService();
-
-export default apiService;
+export default new ApiService();

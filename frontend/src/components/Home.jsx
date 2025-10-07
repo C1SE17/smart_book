@@ -1,5 +1,5 @@
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
-import { bookService } from '../services';
+import apiService from '../services';
 
 const Home = ({ onNavigateTo }) => {
   // State cho dữ liệu sách
@@ -22,19 +22,39 @@ const Home = ({ onNavigateTo }) => {
       setLoading(true);
 
       try {
-        // Import real API
-        const { bookApi } = await import('../services/bookApi');
-
-        // Fetch all books, new books, and popular books
+        console.log('🏠 Home: Fetching books from API...');
+        
+        // Fetch all books, new books, and popular books using apiService
         const [booksResponse, newBooksData, popularBooksData] = await Promise.all([
-          bookApi.getAllBooks({ limit: 12 }),
-          bookApi.getAllBooks({ limit: 4 }), // New books
-          bookApi.getAllBooks({ limit: 4 })  // Popular books
+          apiService.getBooks({ limit: 12 }),
+          apiService.getBooks({ limit: 4 }), // New books
+          apiService.getBooks({ limit: 4 })  // Popular books
         ]);
 
-        setBooks(booksResponse.data);
-        setNewBooks(newBooksData.data);
-        setPopularBooks(popularBooksData.data);
+        console.log('🏠 Home: API responses:', {
+          booksResponse,
+          newBooksData,
+          popularBooksData
+        });
+
+        // Mock API returns data directly, Real API returns { success: true, data: [...] }
+        const booksData = Array.isArray(booksResponse) ? booksResponse : booksResponse.data || booksResponse;
+        const newBooksDataArray = Array.isArray(newBooksData) ? newBooksData : newBooksData.data || newBooksData;
+        const popularBooksDataArray = Array.isArray(popularBooksData) ? popularBooksData : popularBooksData.data || popularBooksData;
+
+        console.log('🏠 Home: Processed data:', {
+          booksData: booksData.length,
+          newBooksDataArray: newBooksDataArray.length,
+          popularBooksDataArray: popularBooksDataArray.length
+        });
+
+        if (booksData.length > 0) {
+          console.log('🏠 Home: First book:', booksData[0]);
+        }
+
+        setBooks(booksData);
+        setNewBooks(newBooksDataArray);
+        setPopularBooks(popularBooksDataArray);
       } catch (error) {
         console.error('Error fetching books:', error);
         setBooks([]);
@@ -397,7 +417,7 @@ const Home = ({ onNavigateTo }) => {
                       {book.title}
                     </h6>
                     <p className="card-text text-muted small mb-2" style={{ fontSize: '0.85rem' }}>
-                      {book.author || 'Tác giả chưa xác định'}
+                      {book.author?.name || 'Tác giả chưa xác định'}
                     </p>
 
                     {/* Rating */}
@@ -584,7 +604,7 @@ const Home = ({ onNavigateTo }) => {
                       {book.title}
                     </h6>
                     <p className="card-text text-muted small mb-2" style={{ fontSize: '0.85rem' }}>
-                      {book.author || 'Tác giả chưa xác định'}
+                      {book.author?.name || 'Tác giả chưa xác định'}
                     </p>
 
                     {/* Rating */}
@@ -771,7 +791,7 @@ const Home = ({ onNavigateTo }) => {
                       {book.title}
                     </h6>
                     <p className="card-text text-muted small mb-2" style={{ fontSize: '0.85rem' }}>
-                      {book.author || 'Tác giả chưa xác định'}
+                      {book.author?.name || 'Tác giả chưa xác định'}
                     </p>
 
                     {/* Rating */}

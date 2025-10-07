@@ -45,6 +45,16 @@ app.get('/', (req, res) => {
     res.send('Xin chào đén với smart book!');
 });
 
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+    res.json({ 
+        status: 'ok', 
+        message: 'Backend is running',
+        timestamp: new Date().toISOString(),
+        version: '1.0.0'
+    });
+});
+
 // Gắn tuyến API
 app.use('/api/users', userRoutes);
 app.use('/api/books', bookRoutes);

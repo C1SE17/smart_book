@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { validateEmail } from '../../utils';
-import { userService } from '../../services';
+import apiService from '../../services';
 import ListOrders from '../client/orders/ListOrders';
 import ErrorBoundary from '../common/ErrorBoundary/ErrorBoundary';
 
@@ -98,7 +98,7 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
     /*
     try {
       setLoading(true);
-      const profileData = await userService.getProfile(1, user.token);
+      const profileData = await apiService.getUserById(user.user_id);
       
       const finalProfileData = {
         ...profileData,
