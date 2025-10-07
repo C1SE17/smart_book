@@ -3,24 +3,34 @@ const db = require('../config/db');
 class Book {
     static async getAll({ page = 1, limit = 10, category_id, author_id, publisher_id, search }) {
         const offset = (page - 1) * limit; // Tính offset cho phân trang
-        let query = 'SELECT * FROM books';
+        let query = `
+            SELECT 
+                b.*,
+                a.name as author_name,
+                p.name as publisher_name,
+                c.name as category_name
+            FROM books b
+            LEFT JOIN authors a ON b.author_id = a.author_id
+            LEFT JOIN publishers p ON b.publisher_id = p.publisher_id
+            LEFT JOIN categories c ON b.category_id = c.category_id
+        `;
         let conditions = [];
         let params = [];
 
         if (category_id) { // Lọc theo danh mục
-            conditions.push('category_id = ?');
+            conditions.push('b.category_id = ?');
             params.push(category_id);
         }
         if (author_id) { // Lọc theo tác giả
-            conditions.push('author_id = ?');
+            conditions.push('b.author_id = ?');
             params.push(author_id);
         }
         if (publisher_id) { // Lọc theo nhà xuất bản
-            conditions.push('publisher_id = ?');
+            conditions.push('b.publisher_id = ?');
             params.push(publisher_id);
         }
         if (search) { // Tìm kiếm theo tên sản phẩm
-            conditions.push('title LIKE ?');
+            conditions.push('b.title LIKE ?');
             params.push(`%${search}%`);
         }
 
@@ -36,7 +46,18 @@ class Book {
     }
 
     static async getById(id) { // Lấy chi tiết sản phẩm
-        const [rows] = await db.promise().query('SELECT * FROM books WHERE book_id = ?', [id]);
+        const [rows] = await db.promise().query(`
+            SELECT 
+                b.*,
+                a.name as author_name,
+                p.name as publisher_name,
+                c.name as category_name
+            FROM books b
+            LEFT JOIN authors a ON b.author_id = a.author_id
+            LEFT JOIN publishers p ON b.publisher_id = p.publisher_id
+            LEFT JOIN categories c ON b.category_id = c.category_id
+            WHERE b.book_id = ?
+        `, [id]);
         return rows[0];
     }
 

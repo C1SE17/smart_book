@@ -11,6 +11,7 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
   const [quantity, setQuantity] = useState(1);
   const [reviews, setReviews] = useState([]);
   const [recommendations, setRecommendations] = useState([]);
+  const [recommendationsLoading, setRecommendationsLoading] = useState(true);
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
 
@@ -29,13 +30,17 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
 
       setLoading(true);
       try {
-        // TODO: Use real API
-        // const { bookApi } = await import('../../../services/bookApi');
-        // const productData = await bookApi.getBookById(productId);
-
-        // Mock data for now
-        const productData = { success: true, data: { book_id: productId, title: 'Sample Book', price: 100000 } };
-        setProduct(productData);
+        const apiService = await import('../../../services');
+        const response = await apiService.default.getBookById(productId);
+        
+        console.log('Product API response:', response);
+        
+        if (response && response.success && response.data) {
+          setProduct(response.data);
+        } else {
+          console.error('Error fetching product:', response);
+          setProduct(null);
+        }
       } catch (error) {
         console.error('Error fetching product:', error);
         setProduct(null);
@@ -50,15 +55,24 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
   // Fetch recommendations
   useEffect(() => {
     const fetchRecommendations = async () => {
+      setRecommendationsLoading(true);
       try {
-        // TODO: Use real API
-        // const { bookApi } = await import('../../../services/bookApi');
-        // const response = await bookApi.getBooks({ limit: 4 });
-        const response = { success: true, data: [] };
-        setRecommendations(response.data);
+        const apiService = await import('../../../services');
+        const response = await apiService.default.getBooks({ limit: 4 });
+        
+        console.log('Recommendations API response:', response);
+        
+        if (response && response.success && Array.isArray(response.data)) {
+          setRecommendations(response.data);
+        } else {
+          console.error('Error fetching recommendations:', response);
+          setRecommendations([]);
+        }
       } catch (error) {
         console.error('Error fetching recommendations:', error);
         setRecommendations([]);
+      } finally {
+        setRecommendationsLoading(false);
       }
     };
 
@@ -71,11 +85,17 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
 
     setReviewsLoading(true);
     try {
-      // TODO: Use real API
-      // const { reviewApi } = await import('../../../services/reviewApi');
-      // const reviewsData = await reviewApi.getReviewsByBookId(productId);
-      const reviewsData = { success: true, data: [] };
-      setReviews(reviewsData.data || []);
+      const apiService = await import('../../../services');
+      const reviewsData = await apiService.default.getReviews({ book_id: productId });
+      
+      console.log('Reviews API response:', reviewsData);
+      
+      if (reviewsData && reviewsData.success && Array.isArray(reviewsData.data)) {
+        setReviews(reviewsData.data);
+      } else {
+        console.error('Error fetching reviews:', reviewsData);
+        setReviews([]);
+      }
     } catch (error) {
       console.error('Error fetching reviews:', error);
       setReviews([]);
@@ -320,13 +340,13 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
 
             <div className="product-meta mb-2">
               <p className="text-muted mb-1 small">
-                <strong>Tác giả:</strong> {product.author}
+                <strong>Tác giả:</strong> {product.author_name || 'Chưa cập nhật'}
               </p>
               <p className="text-muted mb-1 small">
-                <strong>Nhà xuất bản:</strong> {product.publisher}
+                <strong>Nhà xuất bản:</strong> {product.publisher_name || 'Chưa cập nhật'}
               </p>
               <p className="text-muted mb-1 small">
-                <strong>Danh mục:</strong> {product.category}
+                <strong>Danh mục:</strong> {product.category_name || 'Chưa cập nhật'}
               </p>
             </div>
 
@@ -344,7 +364,9 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
 
             {/* Price */}
             <div className="product-price mb-3">
-              <h3 className="text-dark mb-0 fw-bold" style={{ fontSize: '1.5rem' }}>{formatPrice(product.price)}</h3>
+              <h3 className="text-dark mb-0 fw-bold" style={{ fontSize: '1.5rem' }}>
+                {product.price ? formatPrice(product.price) : 'Chưa cập nhật'}
+              </h3>
             </div>
 
             {/* Quantity Selector */}
@@ -360,14 +382,14 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
                 <input
                   className="form-control text-center mx-2"
                   min="1"
-                  max={product.stock}
+                  max={product.stock || 0}
                   value={quantity}
                   onChange={handleQuantityChange}
                   style={{ width: '50px', height: '35px', fontSize: '0.9rem' }}
                 />
                 <button
                   className="btn btn-outline-secondary btn-sm"
-                  onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
+                  onClick={() => setQuantity(Math.min(product.stock || 0, quantity + 1))}
                   style={{ width: '35px', height: '35px' }}
                 >
                   +
@@ -381,7 +403,7 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
                 <button
                   className="btn btn-dark"
                   onClick={handleAddToCart}
-                  disabled={product.stock === 0}
+                  disabled={(product.stock || 0) === 0}
                   style={{ height: '40px', fontSize: '1rem' }}
                 >
                   <FontAwesomeIcon icon={faShoppingCart} className="me-2" />
@@ -390,7 +412,7 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
                 <button
                   className="btn btn-success"
                   onClick={handleCheckout}
-                  disabled={product.stock === 0}
+                  disabled={(product.stock || 0) === 0}
                   style={{ height: '40px', fontSize: '1rem' }}
                 >
                   Thanh toán
@@ -403,17 +425,17 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
               <div className="row">
                 <div className="col-6">
                   <small className="text-muted">
-                    <strong>Author:</strong> {product.author}
+                    <strong>Author:</strong> {product.author_name || 'Chưa cập nhật'}
                   </small>
                 </div>
                 <div className="col-6">
                   <small className="text-muted">
-                    <strong>Company:</strong> {product.publisher}
+                    <strong>Company:</strong> {product.publisher_name || 'Chưa cập nhật'}
                   </small>
                 </div>
                 <div className="col-12 mt-1">
                   <small className="text-muted">
-                    <strong>Tags:</strong> book
+                    <strong>Tags:</strong> {product.category_name || 'book'}
                   </small>
                 </div>
               </div>
@@ -422,7 +444,7 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
             {/* Description */}
             <div className="product-description">
               <h6 className="fw-bold mb-2">Description</h6>
-              <p className="text-muted small">{product.description}</p>
+              <p className="text-muted small">{product.description || 'Chưa có mô tả'}</p>
             </div>
           </div>
         </div>
@@ -477,19 +499,19 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
                       <tbody>
                         <tr>
                           <td><strong>Tác giả:</strong></td>
-                          <td>{product.author}</td>
+                          <td>{product.author_name || 'Chưa cập nhật'}</td>
                         </tr>
                         <tr>
                           <td><strong>Nhà xuất bản:</strong></td>
-                          <td>{product.publisher}</td>
+                          <td>{product.publisher_name || 'Chưa cập nhật'}</td>
                         </tr>
                         <tr>
                           <td><strong>Danh mục:</strong></td>
-                          <td>{product.category}</td>
+                          <td>{product.category_name || 'Chưa cập nhật'}</td>
                         </tr>
                         <tr>
                           <td><strong>Ngày xuất bản:</strong></td>
-                          <td>{new Date(product.published_date).toLocaleDateString('vi-VN')}</td>
+                          <td>{product.published_date ? new Date(product.published_date).toLocaleDateString('vi-VN') : 'Chưa cập nhật'}</td>
                         </tr>
                       </tbody>
                     </table>
@@ -499,7 +521,7 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
                       <tbody>
                         <tr>
                           <td><strong>Giá:</strong></td>
-                          <td className="text-primary fw-bold">{formatPrice(product.price)}</td>
+                          <td className="text-primary fw-bold">{product.price ? formatPrice(product.price) : 'Chưa cập nhật'}</td>
                         </tr>
                         <tr>
                           <td><strong>Tình trạng:</strong></td>
@@ -511,7 +533,7 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
                         </tr>
                         <tr>
                           <td><strong>Số lượng còn lại:</strong></td>
-                          <td>{product.stock} cuốn</td>
+                          <td>{product.stock || 0} cuốn</td>
                         </tr>
                       </tbody>
                     </table>
@@ -553,7 +575,15 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
           </div>
 
           <div className="row">
-            {recommendations.map((book) => (
+            {recommendationsLoading ? (
+              <div className="col-12 text-center py-4">
+                <div className="spinner-border text-primary" role="status">
+                  <span className="visually-hidden">Đang tải...</span>
+                </div>
+                <p className="mt-2 text-muted">Đang tải sách gợi ý...</p>
+              </div>
+            ) : (recommendations || []).length > 0 ? (
+              (recommendations || []).map((book) => (
               <div key={book.book_id} className="col-lg-3 col-md-6 mb-4">
                 <div className="card h-100 border-0 shadow-sm" style={{
                   transition: 'all 0.3s ease',
@@ -569,7 +599,7 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
                     e.currentTarget.style.boxShadow = '0 15px 35px rgba(0,0,0,0.15)';
                     // Hiển thị nút thêm vào giỏ hàng nếu còn hàng
                     const addToCartBtn = e.currentTarget.querySelector('.add-to-cart-btn');
-                    if (addToCartBtn && book.stock > 0) {
+                    if (addToCartBtn && (book.stock || 0) > 0) {
                       addToCartBtn.style.opacity = '1';
                     }
                   }}
@@ -598,7 +628,7 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
                       }}
                     />
                     {/* Nút Thêm Vào Giỏ Hàng - xuất hiện khi hover và còn hàng */}
-                    {book.stock > 0 && (
+                    {(book.stock || 0) > 0 && (
                       <div
                         className="position-absolute top-0 end-0 p-2 add-to-cart-btn"
                         style={{
@@ -635,7 +665,7 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
                       {book.title}
                     </h6>
                     <p className="card-text text-muted mb-2" style={{ fontSize: '0.9rem' }}>
-                      {book.author}
+                      {book.author_name || 'Chưa cập nhật'}
                     </p>
                     <div className="d-flex align-items-center mb-2">
                       <div className="me-2">
@@ -645,7 +675,7 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
                     </div>
                     <div className="mt-auto">
                       <p className="card-text fw-bold text-primary mb-2" style={{ fontSize: '1.1rem' }}>
-                        {formatPrice(book.price)}
+                        {book.price ? formatPrice(book.price) : 'Chưa cập nhật'}
                       </p>
                       <button
                         className="btn btn-outline-primary btn-sm w-100"
@@ -660,7 +690,12 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
                   </div>
                 </div>
               </div>
-            ))}
+            ))
+            ) : (
+              <div className="col-12 text-center py-4">
+                <p className="text-muted">Không có sách gợi ý nào.</p>
+              </div>
+            )}
           </div>
         </div>
       </div>

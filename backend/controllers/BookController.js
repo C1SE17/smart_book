@@ -11,19 +11,19 @@ exports.getAllBooks = async (req, res) => { // Lấy danh sách sản phẩm
             publisher_id,
             search
         });
-        res.json(books);
+        res.json({ success: true, data: books });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ success: false, error: err.message });
     }
 };
 
 exports.getBook = async (req, res) => { // Lấy chi tiết sản phẩm
     try {
         const book = await Book.getById(req.params.id);
-        if (!book) return res.status(404).json({ error: 'Sách không tồn tại' });
-        res.json(book);
+        if (!book) return res.status(404).json({ success: false, message: 'Sách không tồn tại' });
+        res.json({ success: true, data: book });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ success: false, error: err.message });
     }
 };
 

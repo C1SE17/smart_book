@@ -36,12 +36,16 @@ class ApiService {
 
       const data = await response.json();
       
-      // Format response để tương thích với existing code
-      return {
-        success: true,
-        data: data,
-        message: 'Success'
-      };
+      // Return the data as-is if it already has success field, otherwise wrap it
+      if (data && typeof data === 'object' && 'success' in data) {
+        return data;
+      } else {
+        return {
+          success: true,
+          data: data,
+          message: 'Success'
+        };
+      }
     } catch (error) {
       console.error(`API call failed for ${endpoint}:`, error);
       return {
