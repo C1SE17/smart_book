@@ -191,6 +191,7 @@ function App() {
     const routeMap = {
       'home': '/',
       'books': '/categories',
+      'categories': '/categories',
       'profile': '/profile',
       'cart': '/cart',
       'auth': '/login',

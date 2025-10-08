@@ -32,7 +32,7 @@ const Slide = ({ onNavigateTo }) => {
       image: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=600&h=400&fit=crop",
       buttonText: "Xem tất cả",
       backgroundColor: "#f3e5f5",
-      navigationType: "books", // Chuyển đến trang danh mục sản phẩm
+      navigationType: "categories", // Chuyển đến trang danh mục sản phẩm
       productId: null
     }
   ], []);
@@ -94,31 +94,31 @@ const Slide = ({ onNavigateTo }) => {
   const currentSlideData = slides[currentSlide];
 
   return (
-    <section 
-      className="pb-5 position-relative overflow-hidden" 
+    <section
+      className="pb-5 position-relative overflow-hidden"
       style={{
         background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
-        paddingTop: '0', 
+        paddingTop: '0',
         marginTop: '-20px',
         minHeight: '500px'
       }}
     >
       {/* Background Pattern */}
-      <div 
+      <div
         className="position-absolute top-0 start-0 w-100 h-100"
         style={{
           backgroundImage: 'radial-gradient(circle at 20% 80%, rgba(0,0,0,0.05) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(0,0,0,0.05) 0%, transparent 50%)',
           zIndex: 1
         }}
       ></div>
-      
+
       <div className="container position-relative" style={{ paddingTop: '3rem', zIndex: 2 }}>
         <div className="row align-items-center min-vh-50">
           <div className="col-lg-6">
             <div className="slide-content" style={{ animation: 'slideInLeft 0.8s ease-out' }}>
-              <h1 
-                className="display-3 fw-bold text-dark mb-4" 
-                style={{ 
+              <h1
+                className="display-3 fw-bold text-dark mb-4"
+                style={{
                   lineHeight: '1.1',
                   color: '#2c3e50',
                   textShadow: '0 2px 4px rgba(0,0,0,0.1)'
@@ -126,9 +126,9 @@ const Slide = ({ onNavigateTo }) => {
               >
                 {currentSlideData.title}
               </h1>
-              <p 
-                className="lead text-dark mb-4" 
-                style={{ 
+              <p
+                className="lead text-dark mb-4"
+                style={{
                   fontSize: '1.2rem',
                   lineHeight: '1.6',
                   fontWeight: '400',
@@ -137,9 +137,9 @@ const Slide = ({ onNavigateTo }) => {
               >
                 {currentSlideData.description}
               </p>
-              <a 
+              <a
                 href="#"
-                className="text-decoration-none position-relative" 
+                className="text-decoration-none position-relative"
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -161,8 +161,8 @@ const Slide = ({ onNavigateTo }) => {
                   if (onNavigateTo) {
                     if (currentSlideData.navigationType === 'product') {
                       onNavigateTo('product')(currentSlideData.productId);
-                    } else if (currentSlideData.navigationType === 'books') {
-                      onNavigateTo('books');
+                    } else if (currentSlideData.navigationType === 'categories') {
+                      onNavigateTo('categories');
                     }
                   }
                 }}
@@ -185,7 +185,7 @@ const Slide = ({ onNavigateTo }) => {
             </div>
           </div>
           <div className="col-lg-6">
-            <div 
+            <div
               className="text-center position-relative"
               style={{ animation: 'slideInRight 0.8s ease-out 0.2s both' }}
             >
@@ -206,7 +206,7 @@ const Slide = ({ onNavigateTo }) => {
                   e.currentTarget.style.transform = 'perspective(1000px) rotateY(-5deg) rotateX(5deg) scale(1)';
                 }}
               >
-                <img 
+                <img
                   src={currentSlideData.image}
                   alt={currentSlideData.title}
                   className="img-fluid"
@@ -218,17 +218,17 @@ const Slide = ({ onNavigateTo }) => {
                   }}
                 />
                 {/* Overlay gradient */}
-                <div 
+                <div
                   className="position-absolute top-0 start-0 w-100 h-100"
-                style={{
-                  background: 'linear-gradient(135deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0) 50%, rgba(0,0,0,0.05) 100%)',
-                  borderRadius: '20px'
-                }}
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0) 50%, rgba(0,0,0,0.05) 100%)',
+                    borderRadius: '20px'
+                  }}
                 ></div>
               </div>
-              
+
               {/* Floating elements */}
-              <div 
+              <div
                 className="position-absolute"
                 style={{
                   top: '20%',
@@ -241,7 +241,7 @@ const Slide = ({ onNavigateTo }) => {
                   animation: 'float 3s ease-in-out infinite'
                 }}
               ></div>
-              <div 
+              <div
                 className="position-absolute"
                 style={{
                   bottom: '30%',
@@ -325,7 +325,7 @@ const Slide = ({ onNavigateTo }) => {
       </button>
 
       {/* Chỉ báo slide */}
-      <div 
+      <div
         className="position-absolute bottom-0 start-50 translate-middle-x mb-4"
         style={{ zIndex: 10 }}
       >
@@ -360,7 +360,7 @@ const Slide = ({ onNavigateTo }) => {
           ))}
         </div>
       </div>
-      
+
     </section>
   );
 };

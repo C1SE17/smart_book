@@ -32,9 +32,9 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
       try {
         const apiService = await import('../../../services');
         const response = await apiService.default.getBookById(productId);
-        
+
         console.log('Product API response:', response);
-        
+
         if (response && response.success && response.data) {
           setProduct(response.data);
         } else {
@@ -59,9 +59,9 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
       try {
         const apiService = await import('../../../services');
         const response = await apiService.default.getBooks({ limit: 4 });
-        
+
         console.log('Recommendations API response:', response);
-        
+
         if (response && response.success && Array.isArray(response.data)) {
           setRecommendations(response.data);
         } else {
@@ -87,9 +87,9 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
     try {
       const apiService = await import('../../../services');
       const reviewsData = await apiService.default.getReviews({ book_id: productId });
-      
+
       console.log('Reviews API response:', reviewsData);
-      
+
       if (reviewsData && reviewsData.success && Array.isArray(reviewsData.data)) {
         setReviews(reviewsData.data);
       } else {
@@ -569,9 +569,13 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
         <div className="container-fluid">
           <div className="d-flex justify-content-between align-items-center mb-4">
             <h4 className="fw-bold mb-0">Sách gợi ý</h4>
-            <a href="#" className="text-decoration-none text-dark fw-medium">
+            <button
+              className="btn btn-link text-decoration-none text-dark fw-medium p-0 border-0"
+              onClick={() => onNavigateTo('categories')}
+              style={{ background: 'none', textAlign: 'left' }}
+            >
               Xem tất cả <span className="ms-1">→</span>
-            </a>
+            </button>
           </div>
 
           <div className="row">
@@ -584,113 +588,113 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
               </div>
             ) : (recommendations || []).length > 0 ? (
               (recommendations || []).map((book) => (
-              <div key={book.book_id} className="col-lg-3 col-md-6 mb-4">
-                <div className="card h-100 border-0 shadow-sm" style={{
-                  transition: 'all 0.3s ease',
-                  cursor: 'pointer',
-                  borderRadius: '8px',
-                  overflow: 'hidden',
-                  height: '350px',
-                  backgroundColor: 'white'
-                }}
-                  onClick={() => handleBookClick(book.book_id)}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-8px)';
-                    e.currentTarget.style.boxShadow = '0 15px 35px rgba(0,0,0,0.15)';
-                    // Hiển thị nút thêm vào giỏ hàng nếu còn hàng
-                    const addToCartBtn = e.currentTarget.querySelector('.add-to-cart-btn');
-                    if (addToCartBtn && (book.stock || 0) > 0) {
-                      addToCartBtn.style.opacity = '1';
-                    }
+                <div key={book.book_id} className="col-lg-3 col-md-6 mb-4">
+                  <div className="card h-100 border-0 shadow-sm" style={{
+                    transition: 'all 0.3s ease',
+                    cursor: 'pointer',
+                    borderRadius: '8px',
+                    overflow: 'hidden',
+                    height: '350px',
+                    backgroundColor: 'white'
                   }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-                    // Ẩn nút thêm vào giỏ hàng
-                    const addToCartBtn = e.currentTarget.querySelector('.add-to-cart-btn');
-                    if (addToCartBtn) {
-                      addToCartBtn.style.opacity = '0';
-                    }
-                  }}>
-                  <div className="position-relative">
-                    <img
-                      src={book.cover_image || '/images/book1.jpg'}
-                      className="card-img-top"
-                      alt={book.title}
-                      style={{
-                        height: '220px',
-                        objectFit: 'contain',
-                        width: '100%',
-                        backgroundColor: '#f8f9fa'
-                      }}
-                      onError={(e) => {
-                        e.target.src = '/images/book1.jpg';
-                      }}
-                    />
-                    {/* Nút Thêm Vào Giỏ Hàng - xuất hiện khi hover và còn hàng */}
-                    {(book.stock || 0) > 0 && (
-                      <div
-                        className="position-absolute top-0 end-0 p-2 add-to-cart-btn"
+                    onClick={() => handleBookClick(book.book_id)}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-8px)';
+                      e.currentTarget.style.boxShadow = '0 15px 35px rgba(0,0,0,0.15)';
+                      // Hiển thị nút thêm vào giỏ hàng nếu còn hàng
+                      const addToCartBtn = e.currentTarget.querySelector('.add-to-cart-btn');
+                      if (addToCartBtn && (book.stock || 0) > 0) {
+                        addToCartBtn.style.opacity = '1';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                      // Ẩn nút thêm vào giỏ hàng
+                      const addToCartBtn = e.currentTarget.querySelector('.add-to-cart-btn');
+                      if (addToCartBtn) {
+                        addToCartBtn.style.opacity = '0';
+                      }
+                    }}>
+                    <div className="position-relative">
+                      <img
+                        src={book.cover_image || '/images/book1.jpg'}
+                        className="card-img-top"
+                        alt={book.title}
                         style={{
-                          opacity: 0,
-                          transition: 'opacity 0.3s ease'
+                          height: '220px',
+                          objectFit: 'contain',
+                          width: '100%',
+                          backgroundColor: '#f8f9fa'
                         }}
-                      >
-                        <button
-                          className="btn btn-sm btn-light rounded-circle"
+                        onError={(e) => {
+                          e.target.src = '/images/book1.jpg';
+                        }}
+                      />
+                      {/* Nút Thêm Vào Giỏ Hàng - xuất hiện khi hover và còn hàng */}
+                      {(book.stock || 0) > 0 && (
+                        <div
+                          className="position-absolute top-0 end-0 p-2 add-to-cart-btn"
                           style={{
-                            width: '40px',
-                            height: '40px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
+                            opacity: 0,
+                            transition: 'opacity 0.3s ease'
                           }}
-                          onClick={(e) => handleAddToCart(book, e)}
                         >
-                          <FontAwesomeIcon icon={faShoppingCart} />
+                          <button
+                            className="btn btn-sm btn-light rounded-circle"
+                            style={{
+                              width: '40px',
+                              height: '40px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}
+                            onClick={(e) => handleAddToCart(book, e)}
+                          >
+                            <FontAwesomeIcon icon={faShoppingCart} />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                    <div className="card-body p-3 d-flex flex-column">
+                      <h6 className="card-title fw-bold mb-2" style={{
+                        fontSize: '1rem',
+                        lineHeight: '1.3',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                        minHeight: '2.6rem'
+                      }}>
+                        {book.title}
+                      </h6>
+                      <p className="card-text text-muted mb-2" style={{ fontSize: '0.9rem' }}>
+                        {book.author_name || 'Chưa cập nhật'}
+                      </p>
+                      <div className="d-flex align-items-center mb-2">
+                        <div className="me-2">
+                          {renderStars(book.rating || 0)}
+                        </div>
+                        <small className="text-muted">({book.reviewCount || 0})</small>
+                      </div>
+                      <div className="mt-auto">
+                        <p className="card-text fw-bold text-primary mb-2" style={{ fontSize: '1.1rem' }}>
+                          {book.price ? formatPrice(book.price) : 'Chưa cập nhật'}
+                        </p>
+                        <button
+                          className="btn btn-outline-primary btn-sm w-100"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleBookClick(book.book_id);
+                          }}
+                        >
+                          Xem chi tiết
                         </button>
                       </div>
-                    )}
-                  </div>
-                  <div className="card-body p-3 d-flex flex-column">
-                    <h6 className="card-title fw-bold mb-2" style={{
-                      fontSize: '1rem',
-                      lineHeight: '1.3',
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden',
-                      minHeight: '2.6rem'
-                    }}>
-                      {book.title}
-                    </h6>
-                    <p className="card-text text-muted mb-2" style={{ fontSize: '0.9rem' }}>
-                      {book.author_name || 'Chưa cập nhật'}
-                    </p>
-                    <div className="d-flex align-items-center mb-2">
-                      <div className="me-2">
-                        {renderStars(book.rating || 0)}
-                      </div>
-                      <small className="text-muted">({book.reviewCount || 0})</small>
-                    </div>
-                    <div className="mt-auto">
-                      <p className="card-text fw-bold text-primary mb-2" style={{ fontSize: '1.1rem' }}>
-                        {book.price ? formatPrice(book.price) : 'Chưa cập nhật'}
-                      </p>
-                      <button
-                        className="btn btn-outline-primary btn-sm w-100"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleBookClick(book.book_id);
-                        }}
-                      >
-                        Xem chi tiết
-                      </button>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))
+              ))
             ) : (
               <div className="col-12 text-center py-4">
                 <p className="text-muted">Không có sách gợi ý nào.</p>

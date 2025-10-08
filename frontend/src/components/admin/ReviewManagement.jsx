@@ -12,7 +12,7 @@ const ReviewManagement = () => {
     const [selectedReview, setSelectedReview] = useState(null);
     const [actionType, setActionType] = useState(''); // 'view', 'delete'
     const [formErrors, setFormErrors] = useState({});
-    
+
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(20); // Tăng default để hiển thị nhiều hơn
@@ -24,11 +24,11 @@ const ReviewManagement = () => {
             setLoading(true);
             try {
                 console.log('Fetching reviews from backend API...');
-                
+
                 // Sử dụng apiService để lấy danh sách reviews
                 const reviewsData = await apiService.getAllReviews();
                 console.log('Fetched reviews data from backend:', reviewsData);
-                
+
                 // Sử dụng dữ liệu từ API
                 if (reviewsData && reviewsData.length > 0) {
                     console.log('✅ Using real review data from API:', reviewsData.length, 'reviews');
@@ -40,7 +40,7 @@ const ReviewManagement = () => {
                 }
             } catch (error) {
                 console.error('Error fetching reviews:', error);
-                
+
                 // Hiển thị thông báo lỗi chi tiết
                 let errorMessage = 'Không thể tải danh sách đánh giá';
                 if (error.message.includes('fetch')) {
@@ -56,14 +56,14 @@ const ReviewManagement = () => {
                 } else if (error.message && error.message.includes('admin')) {
                     errorMessage = '🔐 Bạn cần đăng nhập với tài khoản admin để xem tất cả đánh giá. Hiện tại đang sử dụng dữ liệu mẫu.';
                 }
-                
+
                 // Hiển thị thông báo lỗi
                 if (window.showToast) {
                     window.showToast(errorMessage, 'error');
                 } else {
                     alert(errorMessage);
                 }
-                
+
                 // Fallback to empty array on error
                 setReviews([]);
             } finally {
@@ -79,16 +79,16 @@ const ReviewManagement = () => {
         const userName = review.user_name || review.username || 'N/A';
         const userEmail = review.user_email || review.user_email || 'N/A';
         const bookTitle = review.book_title || review.title || 'N/A';
-        const bookAuthor = review.book_author || (typeof review.author === 'object' ? review.author?.name : review.author) || 'N/A';
+        const bookAuthor = review.book_author || review.author_name || (typeof review.author === 'object' ? review.author?.name : review.author) || 'N/A';
         const reviewText = review.review_text || '';
-        
+
         const matchesSearch = userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            userEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            bookTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            bookAuthor.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            reviewText.toLowerCase().includes(searchTerm.toLowerCase());
+            userEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            bookTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            bookAuthor.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            reviewText.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesRating = filterRating === 'all' || review.rating.toString() === filterRating;
-        
+
         return matchesSearch && matchesRating;
     });
 
@@ -118,9 +118,9 @@ const ReviewManagement = () => {
     // Pagination handlers
     const handlePageChange = (page) => {
         if (page === currentPage) return;
-        
+
         setIsPageChanging(true);
-        
+
         // Smooth transition with slight delay
         setTimeout(() => {
             setCurrentPage(page);
@@ -136,7 +136,7 @@ const ReviewManagement = () => {
     const getPageNumbers = () => {
         const pages = [];
         const maxVisiblePages = 5;
-        
+
         if (totalPages <= maxVisiblePages) {
             for (let i = 1; i <= totalPages; i++) {
                 pages.push(i);
@@ -144,18 +144,18 @@ const ReviewManagement = () => {
         } else {
             const startPage = Math.max(1, currentPage - 2);
             const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-            
+
             if (startPage > 1) {
                 pages.push(1);
                 if (startPage > 2) {
                     pages.push('...');
                 }
             }
-            
+
             for (let i = startPage; i <= endPage; i++) {
                 pages.push(i);
             }
-            
+
             if (endPage < totalPages) {
                 if (endPage < totalPages - 1) {
                     pages.push('...');
@@ -163,7 +163,7 @@ const ReviewManagement = () => {
                 pages.push(totalPages);
             }
         }
-        
+
         return pages;
     };
 
@@ -177,19 +177,19 @@ const ReviewManagement = () => {
     // Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         if (actionType === 'delete') {
             if (window.confirm(`Bạn có chắc chắn muốn xóa đánh giá này?`)) {
                 try {
                     console.log('Deleting review:', selectedReview.review_id);
-                    
+
                     // Sử dụng apiService để xóa review
                     await apiService.deleteReview(selectedReview.review_id);
 
                     // Remove review from local state
                     setReviews(prev => prev.filter(review => review.review_id !== selectedReview.review_id));
                     setShowModal(false);
-                    
+
                     if (window.showToast) {
                         window.showToast('Đánh giá đã được xóa thành công!', 'success');
                     }
@@ -331,22 +331,22 @@ const ReviewManagement = () => {
                 <div className="card-body position-relative">
                     {/* Loading overlay for page changes */}
                     {isPageChanging && (
-                        <div className="position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center" 
-                             style={{ 
-                                 backgroundColor: 'rgba(255, 255, 255, 0.8)', 
-                                 zIndex: 10,
-                                 borderRadius: '0.375rem'
-                             }}>
+                        <div className="position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
+                            style={{
+                                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                                zIndex: 10,
+                                borderRadius: '0.375rem'
+                            }}>
                             <div className="spinner-border text-primary" role="status">
                                 <span className="visually-hidden">Đang chuyển trang...</span>
                             </div>
                         </div>
                     )}
-                    
+
                     <div className="table-responsive" style={{ minHeight: '400px' }}>
-                        <table 
-                            className="table table-hover" 
-                            style={{ 
+                        <table
+                            className="table table-hover"
+                            style={{
                                 transition: 'opacity 0.2s ease-in-out',
                                 opacity: isPageChanging ? 0.7 : 1
                             }}
@@ -373,7 +373,7 @@ const ReviewManagement = () => {
                                         <td>
                                             <div>
                                                 <div className="fw-bold">{review.book_title || review.title || 'N/A'}</div>
-                                                <small className="text-muted">Tác giả: {review.book_author || (typeof review.author === 'object' ? review.author?.name : review.author) || 'N/A'}</small>
+                                                <small className="text-muted">Tác giả: {review.book_author || review.author_name || (typeof review.author === 'object' ? review.author?.name : review.author) || 'N/A'}</small>
                                             </div>
                                         </td>
                                         <td>
@@ -389,11 +389,11 @@ const ReviewManagement = () => {
                                         <td>
                                             <div style={{ maxWidth: '200px' }}>
                                                 <p className="mb-0 small">
-                                                    {review.review_text ? 
-                                                        (review.review_text.length > 100 ? 
-                                                            `${review.review_text.substring(0, 100)}...` : 
+                                                    {review.review_text ?
+                                                        (review.review_text.length > 100 ?
+                                                            `${review.review_text.substring(0, 100)}...` :
                                                             review.review_text
-                                                        ) : 
+                                                        ) :
                                                         'Không có nội dung'
                                                     }
                                                 </p>
@@ -444,10 +444,10 @@ const ReviewManagement = () => {
                                 </span>
                                 <div className="d-flex align-items-center">
                                     <label className="form-label me-2 mb-0">Hiển thị:</label>
-                                    <select 
-                                        className="form-select form-select-sm" 
-                                        style={{width: 'auto'}}
-                                        value={itemsPerPage} 
+                                    <select
+                                        className="form-select form-select-sm"
+                                        style={{ width: 'auto' }}
+                                        value={itemsPerPage}
                                         onChange={handleItemsPerPageChange}
                                     >
                                         <option value={10}>10</option>
@@ -458,13 +458,13 @@ const ReviewManagement = () => {
                                     </select>
                                 </div>
                             </div>
-                            
+
                             {totalPages > 1 && (
                                 <nav>
                                     <ul className="pagination pagination-sm mb-0">
                                         <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                                            <button 
-                                                className="page-link" 
+                                            <button
+                                                className="page-link"
                                                 onClick={() => handlePageChange(currentPage - 1)}
                                                 disabled={currentPage === 1 || isPageChanging}
                                                 style={{ transition: 'all 0.2s ease' }}
@@ -472,14 +472,14 @@ const ReviewManagement = () => {
                                                 Trước
                                             </button>
                                         </li>
-                                        
+
                                         {getPageNumbers().map((page, index) => (
                                             <li key={index} className={`page-item ${page === currentPage ? 'active' : ''} ${page === '...' ? 'disabled' : ''}`}>
                                                 {page === '...' ? (
                                                     <span className="page-link">...</span>
                                                 ) : (
-                                                    <button 
-                                                        className="page-link" 
+                                                    <button
+                                                        className="page-link"
                                                         onClick={() => handlePageChange(page)}
                                                         disabled={isPageChanging}
                                                         style={{ transition: 'all 0.2s ease' }}
@@ -489,10 +489,10 @@ const ReviewManagement = () => {
                                                 )}
                                             </li>
                                         ))}
-                                        
+
                                         <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                                            <button 
-                                                className="page-link" 
+                                            <button
+                                                className="page-link"
                                                 onClick={() => handlePageChange(currentPage + 1)}
                                                 disabled={currentPage === totalPages || isPageChanging}
                                                 style={{ transition: 'all 0.2s ease' }}
@@ -543,7 +543,7 @@ const ReviewManagement = () => {
                                                     Thông tin sản phẩm
                                                 </h6>
                                                 <p><strong>Tên sách:</strong> {selectedReview.book_title || selectedReview.title || 'N/A'}</p>
-                                                <p><strong>Tác giả:</strong> {selectedReview.book_author || (typeof selectedReview.author === 'object' ? selectedReview.author?.name : selectedReview.author) || 'N/A'}</p>
+                                                <p><strong>Tác giả:</strong> {selectedReview.book_author || selectedReview.author_name || (typeof selectedReview.author === 'object' ? selectedReview.author?.name : selectedReview.author) || 'N/A'}</p>
                                                 <p><strong>ID sách:</strong> {selectedReview.book_id}</p>
                                             </div>
                                             <div className="col-12 mt-3">

@@ -39,7 +39,7 @@ const Cart = ({ onBackToHome, onNavigateTo }) => {
             return {
               ...item,
               book_title: item.title || `Book ${item.book_id}`,
-              author: (typeof item.author === 'object' ? item.author?.name : item.author) || 'Unknown Author',
+              author: item.author_name || (typeof item.author === 'object' ? item.author?.name : item.author) || 'Unknown Author',
               price: item.price || 0,
               total_price: (item.price || 0) * item.quantity,
               image_url: item.cover_image || '/images/book1.jpg'
@@ -123,7 +123,7 @@ const Cart = ({ onBackToHome, onNavigateTo }) => {
       // Update localStorage
       const cartKey = `cart_${user.user_id}`;
       const cartItems = JSON.parse(localStorage.getItem(cartKey) || '[]');
-      const updatedCart = cartItems.map(item => 
+      const updatedCart = cartItems.map(item =>
         item.book_id === bookId ? { ...item, quantity: newQuantity } : item
       );
       localStorage.setItem(cartKey, JSON.stringify(updatedCart));

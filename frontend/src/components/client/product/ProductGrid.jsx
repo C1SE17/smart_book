@@ -155,7 +155,7 @@ const ProductGrid = ({ onNavigateTo }) => {
   const renderStars = (rating) => {
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 !== 0;
-    
+
     return Array.from({ length: 5 }, (_, index) => {
       if (index < fullStars) {
         return <i key={index} className="bi bi-star-fill text-warning" style={{ fontSize: '12px' }}></i>;
@@ -184,9 +184,9 @@ const ProductGrid = ({ onNavigateTo }) => {
       <div className="d-flex justify-content-between align-items-center mb-4">
         <p className="mb-0 text-muted">Showing 1-16 of 20 results</p>
         <div className="dropdown">
-          <button 
-            className="btn btn-outline-secondary dropdown-toggle" 
-            type="button" 
+          <button
+            className="btn btn-outline-secondary dropdown-toggle"
+            type="button"
             data-bs-toggle="dropdown"
           >
             Default sorting <i className="bi bi-chevron-down ms-1"></i>
@@ -204,15 +204,15 @@ const ProductGrid = ({ onNavigateTo }) => {
       <div className="row g-4 mb-4">
         {products.map((product) => (
           <div key={product.id} className="col-lg-3 col-md-4 col-sm-6">
-            <div 
+            <div
               className="card h-100 border-0 shadow-sm"
               style={{ cursor: 'pointer' }}
               onClick={() => handleProductClick(product.id)}
             >
               <div className="position-relative">
-                <img 
-                  src={product.image} 
-                  className="card-img-top" 
+                <img
+                  src={product.image}
+                  className="card-img-top"
                   alt={product.title}
                   style={{ height: '300px', objectFit: 'contain', backgroundColor: '#f8f9fa' }}
                 />
@@ -224,7 +224,7 @@ const ProductGrid = ({ onNavigateTo }) => {
                 <h6 className="card-title text-dark mb-2" style={{ fontSize: '14px', lineHeight: '1.3' }}>
                   {product.title}
                 </h6>
-                <p className="text-muted small mb-2">{product.author}</p>
+                <p className="text-muted small mb-2">{product.author_name || product.author || 'Tác giả chưa xác định'}</p>
                 <div className="d-flex align-items-center mb-2">
                   {renderStars(product.rating)}
                   <span className="text-muted small ms-1">({product.reviewCount})</span>

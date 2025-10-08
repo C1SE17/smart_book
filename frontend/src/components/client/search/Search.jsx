@@ -449,7 +449,7 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch 
                               {book.title}
                             </h6>
                             <p className="card-text text-muted mb-2" style={{ fontSize: '0.9rem' }}>
-                              {book.author}
+                              {book.author_name || book.author || 'Tác giả chưa xác định'}
                             </p>
                             <div className="d-flex align-items-center mb-2">
                               <div className="me-2">
