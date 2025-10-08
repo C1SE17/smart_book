@@ -8,6 +8,7 @@ const CategoriesPage = ({ onNavigateTo }) => {
   const [selectedAuthor, setSelectedAuthor] = useState('');
   const [showCategoryCards, setShowCategoryCards] = useState(false);
   const [showAuthorCards, setShowAuthorCards] = useState(false);
+  const [showAllCategories, setShowAllCategories] = useState(false);
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [authors, setAuthors] = useState([]);
@@ -199,6 +200,7 @@ const CategoriesPage = ({ onNavigateTo }) => {
     setSelectedCategory('');
     setSelectedAuthor('');
     setShowCategoryCards(true);
+    setShowAllCategories(false);
     setSearchQuery('');
   };
 
@@ -206,6 +208,7 @@ const CategoriesPage = ({ onNavigateTo }) => {
   const handleResetFilters = () => {
     setSelectedCategory('');
     setSelectedAuthor('');
+    setShowAllCategories(false);
     setSearchQuery('');
     setPriceRange({ min: 0, max: 1000000 });
     setSortBy('created_at');
@@ -216,6 +219,7 @@ const CategoriesPage = ({ onNavigateTo }) => {
   const handleToggleAuthorCards = () => {
     setShowAuthorCards(!showAuthorCards);
     setShowCategoryCards(false);
+    setShowAllCategories(false);
     setSelectedCategory('');
     setSelectedAuthor('');
     setCurrentAuthorPage(1); // Reset to first page
@@ -380,20 +384,18 @@ const CategoriesPage = ({ onNavigateTo }) => {
 
               {/* Categories */}
               <div className="mb-4">
-                <label className="form-label fw-bold mb-2" style={{ fontSize: '0.9rem' }}>Danh mục</label>
-                <div className="list-group list-group-flush" style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                  <a
-                    href="#"
-                    className={`list-group-item list-group-item-action border-0 py-1 ${!selectedCategory ? 'active bg-primary text-white' : ''}`}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleBackToCategories();
-                    }}
-                    style={{ fontSize: '0.85rem', textDecoration: 'none' }}
+                <div className="d-flex justify-content-between align-items-center mb-2">
+                  <label className="form-label fw-bold mb-0" style={{ fontSize: '0.9rem' }}>Danh mục</label>
+                  <button
+                    className="btn btn-link btn-sm p-0"
+                    onClick={() => setShowAllCategories(true)}
+                    style={{ fontSize: '0.8rem', textDecoration: 'none' }}
                   >
-                    Tất Cả ({products && Array.isArray(products) ? products.length : 0})
-                  </a>
-                  {categories && Array.isArray(categories) && categories.map((category) => {
+                    Xem Tất Cả
+                  </button>
+                </div>
+                <div className="list-group list-group-flush" style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                  {categories && Array.isArray(categories) && categories.slice(0, 18).map((category) => {
                     if (!category) return null;
                     const count = products && Array.isArray(products) ? products.filter(p => p && p.category_id === category.category_id).length : 0;
                     return (
@@ -558,7 +560,53 @@ const CategoriesPage = ({ onNavigateTo }) => {
             </div>
           </div>
 
-          {showAuthorCards ? (
+          {showAllCategories ? (
+            // All Categories Grid View - Giống như hình ảnh
+            <div>
+              <h2 className="fw-bold text-dark mb-4">Danh mục sách</h2>
+              <div className="row g-4">
+                {categories && Array.isArray(categories) && categories.map((category) => {
+                  if (!category) return null;
+                  const bookCount = products && Array.isArray(products) ? products.filter(p => p && p.category_id === category.category_id).length : 0;
+                  return (
+                    <div key={category.category_id} className="col-lg-3 col-md-4 col-sm-6">
+                      <div
+                        className="card h-100 border-0 shadow-sm"
+                        style={{
+                          cursor: 'pointer',
+                          borderRadius: '8px',
+                          transition: 'all 0.3s ease',
+                          backgroundColor: 'white',
+                          minHeight: '200px'
+                        }}
+                        onClick={() => {
+                          setSelectedCategory(category.name);
+                          setShowAllCategories(false);
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.transform = 'translateY(-8px)';
+                          e.currentTarget.style.boxShadow = '0 15px 35px rgba(0,0,0,0.15)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                        }}
+                      >
+                        <div className="card-body text-center p-4 d-flex flex-column justify-content-center">
+                          <h5 className="card-title fw-bold mb-2" style={{ fontSize: '1.1rem', lineHeight: '1.3' }}>
+                            {category.name}
+                          </h5>
+                          <p className="card-text text-muted mb-0" style={{ fontSize: '0.9rem' }}>
+                            {bookCount} sách
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ) : showAuthorCards ? (
             // Author Cards View - Giống như danh mục sách
             <div>
               <h2 className="fw-bold text-dark mb-4">Danh mục tác giả</h2>
@@ -651,36 +699,6 @@ const CategoriesPage = ({ onNavigateTo }) => {
                 </small>
               </div>
             </div>
-          ) : showCategoryCards ? (
-            // Category Cards View
-            <div>
-              <div className="d-flex justify-content-between align-items-center mb-4">
-                <h2>Danh mục sách</h2>
-              </div>
-
-              <div className="row">
-                {categories && Array.isArray(categories) && categories.map((category) => {
-                  if (!category) return null;
-                  const bookCount = products && Array.isArray(products) ? products.filter(p => p && p.category_id === category.category_id).length : 0;
-                  return (
-                    <div key={category.category_id} className="col-lg-3 col-md-4 col-sm-6 mb-4">
-                      <div
-                        className="card h-100 shadow-sm category-card"
-                        style={{ cursor: 'pointer' }}
-                        onClick={() => handleCategorySelect(category.name)}
-                      >
-                        <div className="card-body text-center">
-                          <h5 className="card-title">{category.name}</h5>
-                          <p className="card-text text-muted">
-                            {bookCount} sách
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
           ) : (
             // Products Grid View
             <div>
@@ -689,7 +707,7 @@ const CategoriesPage = ({ onNavigateTo }) => {
                   {filteredProducts && Array.isArray(filteredProducts) && filteredProducts.map((product) => {
                     if (!product) return null;
                     return (
-                    <div key={product.book_id} className="col-lg-3 col-md-6 mb-4">
+                      <div key={product.book_id} className="col-lg-3 col-md-6 mb-4">
                       <div
                         className="card h-100 border-0 shadow-sm product-card"
                         style={{

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faTrash, faSearch, faEdit, faEye, faEyeSlash, faCircle, faCircleCheck } from '@fortawesome/free-solid-svg-icons';
+import { faUser, faTrash, faSearch, faEdit, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import apiService from '../../services';
 
 const UserManagement = () => {
@@ -8,7 +8,6 @@ const UserManagement = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterRole, setFilterRole] = useState('all');
-    const [filterStatus, setFilterStatus] = useState('all');
     const [showModal, setShowModal] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
     const [actionType, setActionType] = useState(''); // 'view', 'edit', 'delete'
@@ -61,10 +60,7 @@ const UserManagement = () => {
             // Add default values for missing fields (hiển thị tất cả users bao gồm admin)
             const processedUsers = usersData.map(user => ({
                 ...user,
-                last_login: user.updated_at || user.created_at,
-                // Tạo trạng thái online/offline ảo random
-                isOnline: Math.random() > 0.3, // 70% chance online
-                lastSeen: new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000).toISOString() // Random trong 24h qua
+                last_login: user.updated_at || user.created_at
             }));
 
             console.log('Processed users:', processedUsers);
@@ -119,11 +115,7 @@ const UserManagement = () => {
         
         const matchesRole = filterRole === 'all' || user.role === filterRole;
         
-        const matchesStatus = filterStatus === 'all' || 
-                            (filterStatus === 'online' && user.isOnline) ||
-                            (filterStatus === 'offline' && !user.isOnline);
-        
-        return matchesSearch && matchesRole && matchesStatus;
+        return matchesSearch && matchesRole;
     });
 
     const currentUsers = filteredUsers;
@@ -131,7 +123,7 @@ const UserManagement = () => {
     // Reset to first page when filters change
     useEffect(() => {
         setCurrentPage(1);
-    }, [searchTerm, filterRole, filterStatus, itemsPerPage]);
+    }, [searchTerm, filterRole, itemsPerPage]);
 
     // Handle search
     const handleSearch = (e) => {
@@ -268,23 +260,6 @@ const UserManagement = () => {
         }).format(amount);
     };
 
-    // Format last seen time
-    const formatLastSeen = (lastSeen) => {
-        const now = new Date();
-        const lastSeenDate = new Date(lastSeen);
-        const diffInMinutes = Math.floor((now - lastSeenDate) / (1000 * 60));
-        
-        if (diffInMinutes < 1) return 'Vừa xong';
-        if (diffInMinutes < 60) return `${diffInMinutes} phút trước`;
-        
-        const diffInHours = Math.floor(diffInMinutes / 60);
-        if (diffInHours < 24) return `${diffInHours} giờ trước`;
-        
-        const diffInDays = Math.floor(diffInHours / 24);
-        if (diffInDays < 7) return `${diffInDays} ngày trước`;
-        
-        return lastSeenDate.toLocaleDateString('vi-VN');
-    };
 
     // Format date
     const formatDate = (dateString) => {
@@ -358,18 +333,6 @@ const UserManagement = () => {
                             </select>
                         </div>
                         <div className="col-md-2">
-                            <label className="form-label">Trạng thái</label>
-                            <select
-                                className="form-select"
-                                value={filterStatus}
-                                onChange={(e) => setFilterStatus(e.target.value)}
-                            >
-                                <option value="all">Tất cả</option>
-                                <option value="online">Online</option>
-                                <option value="offline">Offline</option>
-                            </select>
-                        </div>
-                        <div className="col-md-2">
                             <label className="form-label">&nbsp;</label>
                             <div className="d-grid">
                                 <button
@@ -377,7 +340,6 @@ const UserManagement = () => {
                                     onClick={() => {
                                         setSearchTerm('');
                                         setFilterRole('all');
-                                        setFilterStatus('all');
                                     }}
                                 >
                                     Xóa bộ lọc
@@ -416,7 +378,6 @@ const UserManagement = () => {
                             <thead className="table-light">
                                 <tr>
                                     <th>Thông tin</th>
-                                    <th>Trạng thái</th>
                                     <th>Liên hệ</th>
                                     <th>Thao tác</th>
                                 </tr>
@@ -432,26 +393,6 @@ const UserManagement = () => {
                                                 <small className="text-muted">
                                                     ID: {user.user_id} | {formatDate(user.created_at)}
                                                 </small>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div>
-                                                <div className="d-flex align-items-center mb-1">
-                                                    <span className={`badge ${user.isOnline ? 'bg-success' : 'bg-secondary'} me-2`}>
-                                                        {user.isOnline ? 'Online' : 'Offline'}
-                                                    </span>
-                                                    {user.isOnline ? (
-                                                        <>
-                                                            <FontAwesomeIcon icon={faCircleCheck} className="text-success me-1" />
-                                                            <span className="small text-muted">Đang hoạt động</span>
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <FontAwesomeIcon icon={faCircle} className="text-danger me-1" />
-                                                            <span className="small text-muted">{formatLastSeen(user.lastSeen)}</span>
-                                                        </>
-                                                    )}
-                                                </div>
                                             </div>
                                         </td>
                                         <td>
@@ -595,24 +536,6 @@ const UserManagement = () => {
                                                     <span className={`badge ms-2 ${selectedUser?.role === 'admin' ? 'bg-danger' : 'bg-primary'}`}>
                                                         {selectedUser?.role === 'admin' ? 'Admin' : 'Khách hàng'}
                                                     </span>
-                                                </p>
-                                                <p><strong>Trạng thái:</strong> 
-                                                    <span className={`badge ms-2 ${selectedUser?.isOnline ? 'bg-success' : 'bg-secondary'}`}>
-                                                        {selectedUser?.isOnline ? 'Online' : 'Offline'}
-                                                    </span>
-                                                </p>
-                                                <p><strong>Hoạt động cuối:</strong> 
-                                                    {selectedUser?.isOnline ? (
-                                                        <>
-                                                            <FontAwesomeIcon icon={faCircleCheck} className="text-success me-1" />
-                                                            Đang hoạt động
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <FontAwesomeIcon icon={faCircle} className="text-danger me-1" />
-                                                            {formatLastSeen(selectedUser?.lastSeen)}
-                                                        </>
-                                                    )}
                                                 </p>
                                             </div>
                                             <div className="col-md-6">
