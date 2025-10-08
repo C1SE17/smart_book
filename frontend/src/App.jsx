@@ -190,7 +190,7 @@ function App() {
   const handleNavigateTo = useCallback((page, params = {}) => {
     const routeMap = {
       'home': '/',
-      'books': '/books',
+      'books': '/categories',
       'profile': '/profile',
       'cart': '/cart',
       'auth': '/login',

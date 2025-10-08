@@ -8,6 +8,10 @@ const Home = ({ onNavigateTo }) => {
   const [popularBooks, setPopularBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // State cho danh mục
+  const [categories, setCategories] = useState([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
 
   // Ghi nhớ dữ liệu để tránh tạo lại mỗi lần render
   const blogPosts = useMemo(() => [
@@ -66,6 +70,57 @@ const Home = ({ onNavigateTo }) => {
     };
 
     fetchBooks();
+  }, []);
+
+  // Lấy danh mục từ API và đếm số sách cho mỗi danh mục
+  useEffect(() => {
+    const fetchCategoriesWithBookCount = async () => {
+      setCategoriesLoading(true);
+      try {
+        console.log('🏠 Home: Fetching categories and book counts...');
+        
+        const categoriesResponse = await apiService.getCategories();
+        
+        if (categoriesResponse.success) {
+          const categoriesData = categoriesResponse.data || [];
+          console.log('🏠 Home: Categories loaded:', categoriesData.length);
+          
+          // Fetch tất cả sách để đếm số lượng cho mỗi danh mục
+          const booksResponse = await apiService.getBooks({ limit: 1000 });
+          const allBooks = booksResponse.success ? (booksResponse.data || []) : [];
+          
+          // Đếm số sách cho mỗi danh mục và lấy hình ảnh từ sách đầu tiên
+          const categoriesWithCount = categoriesData.map(category => {
+            const categoryBooks = allBooks.filter(book => book.category_id === category.category_id);
+            const bookCount = categoryBooks.length;
+            
+            // Lấy hình ảnh từ sách đầu tiên trong danh mục, hoặc sử dụng hình mặc định
+            const coverImage = categoryBooks.length > 0 && categoryBooks[0].cover_image 
+              ? categoryBooks[0].cover_image 
+              : '/images/book1.jpg';
+            
+            return {
+              ...category,
+              book_count: bookCount,
+              cover_image: coverImage
+            };
+          });
+          
+          console.log('🏠 Home: Categories with book counts:', categoriesWithCount);
+          setCategories(categoriesWithCount);
+        } else {
+          console.error('Failed to fetch categories:', categoriesResponse);
+          setCategories([]);
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+        setCategories([]);
+      } finally {
+        setCategoriesLoading(false);
+      }
+    };
+
+    fetchCategoriesWithBookCount();
   }, []);
 
   // Ghi nhớ các event handlers
@@ -210,43 +265,34 @@ const Home = ({ onNavigateTo }) => {
           </div>
 
           <div className="row g-4">
-            {[
-              {
-                category_id: 1,
-                name: "Sách Theo Tác Giả",
-                book_count: 15,
-                image: "https://cafefcdn.com/203337114487263232/2023/2/3/photo-4-1675433065659292646649.jpg",
-                description: "Danh mục sách theo tác giả"
-              },
-              {
-                category_id: 2,
-                name: "Truyện Tranh",
-                book_count: 25,
-                image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300&h=200&fit=crop",
-                description: "Truyện Manga, comic"
-              },
-              {
-                category_id: 3,
-                name: "Tiểu Thuyết",
-                book_count: 10,
-                image: "https://upload.wikimedia.org/wikipedia/vi/2/22/B%C3%ACa_ti%E1%BB%83u_thuy%E1%BA%BFt_C%C3%B4_th%C3%A0nh_trong_g%C6%B0%C6%A1ng.jpg",
-                description: "Tiểu thuyết các thể loại"
-              },
-              {
-                category_id: 4,
-                name: "Đồ Chơi",
-                book_count: 20,
-                image: "https://product.hstatic.net/1000237375/product/dk81020_-_1_b4b0a4cc00da4d52814c03722f2be17d.jpg",
-                description: "Đồ chơi trẻ em"
-              }
-            ].map((category, index) => (
-              <div key={index} className="col-lg-3 col-md-6">
+            {categoriesLoading ? (
+              // Loading state
+              Array.from({ length: 4 }).map((_, index) => (
+                <div key={index} className="col-lg-3 col-md-6">
+                  <div className="card h-100 border-0 shadow-sm" style={{
+                    borderRadius: '8px',
+                    overflow: 'visible',
+                    minHeight: '400px',
+                    backgroundColor: '#f8f9fa'
+                  }}>
+                    <div className="card-body d-flex align-items-center justify-content-center">
+                      <div className="spinner-border text-primary" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : categories.length > 0 ? (
+              // Render categories from API
+              categories.slice(0, 4).map((category, index) => (
+                <div key={index} className="col-lg-3 col-md-6">
                 <div className="card h-100 border-0 shadow-sm" style={{
                   transition: 'all 0.3s ease',
                   cursor: 'pointer',
                   borderRadius: '8px',
-                  overflow: 'hidden',
-                  height: '450px',
+                  overflow: 'visible',
+                  minHeight: '400px',
                   backgroundColor: 'white'
                 }}
                   onClick={() => {
@@ -262,35 +308,54 @@ const Home = ({ onNavigateTo }) => {
                     e.currentTarget.style.transform = 'translateY(0)';
                     e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
                   }}>
-                  <div className="position-relative">
+                  <div className="position-relative" style={{ height: '250px', overflow: 'hidden' }}>
                     <img
-                      src={category.image}
+                      src={category.cover_image || '/images/book1.jpg'}
                       className="card-img-top"
                       alt={category.name}
                       style={{
-                        height: '200px',
-                        objectFit: 'contain',
+                        height: '100%',
+                        objectFit: 'cover',
                         width: '100%'
+                      }}
+                      onError={(e) => {
+                        e.target.src = '/images/book1.jpg';
                       }}
                     />
                     <div className="position-absolute top-0 end-0 m-3">
                       <span className="badge bg-primary px-3 py-2" style={{ fontSize: '0.8rem' }}>
-                        {category.book_count} books
+                        {category.book_count || 0} sách
                       </span>
                     </div>
                   </div>
 
-                  <div className="card-body p-4 text-center">
-                    <h5 className="card-title fw-bold mb-2" style={{ fontSize: '1.2rem' }}>
+                  <div className="card-body p-3 text-center" style={{ minHeight: '120px' }}>
+                    <h5 className="card-title fw-bold mb-2" style={{ fontSize: '1.1rem', lineHeight: '1.3' }}>
                       {category.name}
                     </h5>
-                    <p className="card-text text-muted mb-3" style={{ fontSize: '0.9rem' }}>
-                      {category.description}
+                    <p className="card-text text-muted mb-0" style={{ 
+                      fontSize: '0.85rem', 
+                      lineHeight: '1.4',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden'
+                    }}>
+                      {category.description || 'Khám phá các sách trong danh mục này'}
                     </p>
                   </div>
                 </div>
               </div>
-            ))}
+            ))
+            ) : (
+              // Fallback when no categories
+              <div className="col-12">
+                <div className="text-center py-5">
+                  <h5>Không có danh mục nào</h5>
+                  <p className="text-muted">Vui lòng thử lại sau</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -992,3 +1057,5 @@ const Home = ({ onNavigateTo }) => {
 };
 
 export default Home;
+
+

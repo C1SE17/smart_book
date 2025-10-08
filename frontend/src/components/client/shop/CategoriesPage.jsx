@@ -7,11 +7,16 @@ const CategoriesPage = ({ onNavigateTo }) => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedAuthor, setSelectedAuthor] = useState('');
   const [showCategoryCards, setShowCategoryCards] = useState(false);
+  const [showAuthorCards, setShowAuthorCards] = useState(false);
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [authors, setAuthors] = useState([]);
   const [loading, setLoading] = useState(false);
   const [sortBy, setSortBy] = useState('created_at');
+  
+  // Pagination states for authors
+  const [currentAuthorPage, setCurrentAuthorPage] = useState(1);
+  const [authorsPerPage] = useState(12); // 12 authors per page (3 rows x 4 columns)
   const [sortOrder, setSortOrder] = useState('desc');
   const [priceRange, setPriceRange] = useState({ min: 0, max: 1000000 });
   const [searchQuery, setSearchQuery] = useState('');
@@ -48,8 +53,15 @@ const CategoriesPage = ({ onNavigateTo }) => {
         }
 
         if (authorsResponse.success) {
-          setAuthors(authorsResponse.data || []);
-          console.log('✅ Authors loaded:', authorsResponse.data?.length || 0);
+          const authorsData = authorsResponse.data || [];
+          // Tính số lượng sách cho mỗi tác giả
+          const authorsWithBookCount = authorsData.map(author => {
+            const bookCount = booksResponse.success ? 
+              (booksResponse.data || []).filter(book => book.author_id === author.author_id).length : 0;
+            return { ...author, book_count: bookCount };
+          });
+          setAuthors(authorsWithBookCount);
+          console.log('✅ Authors loaded with book counts:', authorsWithBookCount.length);
         }
 
         console.log('🎉 All data loaded successfully from real API!');
@@ -72,6 +84,20 @@ const CategoriesPage = ({ onNavigateTo }) => {
 
     fetchData();
   }, []);
+
+  // Pagination logic for authors
+  const paginatedAuthors = useMemo(() => {
+    if (!authors || !Array.isArray(authors)) return [];
+    
+    const startIndex = (currentAuthorPage - 1) * authorsPerPage;
+    const endIndex = startIndex + authorsPerPage;
+    return authors.slice(startIndex, endIndex);
+  }, [authors, currentAuthorPage, authorsPerPage]);
+
+  const totalAuthorPages = useMemo(() => {
+    if (!authors || !Array.isArray(authors)) return 0;
+    return Math.ceil(authors.length / authorsPerPage);
+  }, [authors, authorsPerPage]);
 
   // Filter products based on selected category and search
   const filteredProducts = useMemo(() => {
@@ -184,6 +210,20 @@ const CategoriesPage = ({ onNavigateTo }) => {
     setPriceRange({ min: 0, max: 1000000 });
     setSortBy('created_at');
     setSortOrder('desc');
+  };
+
+  // Handle toggle author cards
+  const handleToggleAuthorCards = () => {
+    setShowAuthorCards(!showAuthorCards);
+    setShowCategoryCards(false);
+    setSelectedCategory('');
+    setSelectedAuthor('');
+    setCurrentAuthorPage(1); // Reset to first page
+  };
+
+  // Handle author page change
+  const handleAuthorPageChange = (page) => {
+    setCurrentAuthorPage(page);
   };
 
   // Handle product click
@@ -312,14 +352,14 @@ const CategoriesPage = ({ onNavigateTo }) => {
       <div className="row justify-content-center">
         {/* Sidebar */}
         <div className="col-lg-3 col-md-4">
-          <div className="card">
+          <div className="card" style={{ minHeight: '800px' }}>
             <div className="card-header">
               <h5 className="mb-0">
                 <FontAwesomeIcon icon={faFilter} className="me-2" />
                 Bộ lọc
               </h5>
             </div>
-            <div className="card-body">
+            <div className="card-body" style={{ minHeight: '700px' }}>
               {/* Search */}
               <div className="mb-3">
                 <label className="form-label fw-bold mb-2" style={{ fontSize: '0.9rem' }}>Tìm kiếm</label>
@@ -339,9 +379,9 @@ const CategoriesPage = ({ onNavigateTo }) => {
               </div>
 
               {/* Categories */}
-              <div className="mb-3">
+              <div className="mb-4">
                 <label className="form-label fw-bold mb-2" style={{ fontSize: '0.9rem' }}>Danh mục</label>
-                <div className="list-group list-group-flush" style={{ maxHeight: '250px', overflowY: 'auto' }}>
+                <div className="list-group list-group-flush" style={{ maxHeight: '400px', overflowY: 'auto' }}>
                   <a
                     href="#"
                     className={`list-group-item list-group-item-action border-0 py-1 ${!selectedCategory ? 'active bg-primary text-white' : ''}`}
@@ -375,20 +415,19 @@ const CategoriesPage = ({ onNavigateTo }) => {
               </div>
 
               {/* Authors */}
-              <div className="mb-3">
-                <label className="form-label fw-bold mb-2" style={{ fontSize: '0.9rem' }}>Tác Giả</label>
-                <div className="list-group list-group-flush" style={{ maxHeight: '250px', overflowY: 'auto' }}>
-                  <a
-                    href="#"
-                    className={`list-group-item list-group-item-action border-0 py-1 ${!selectedAuthor ? 'active bg-primary text-white' : ''}`}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setSelectedAuthor('');
-                    }}
-                    style={{ fontSize: '0.85rem', textDecoration: 'none' }}
+              <div className="mb-4">
+                <div className="d-flex justify-content-between align-items-center mb-2">
+                  <label className="form-label fw-bold mb-0" style={{ fontSize: '0.9rem' }}>Tác Giả</label>
+                  <button
+                    className="btn btn-link btn-sm p-0"
+                    onClick={handleToggleAuthorCards}
+                    style={{ fontSize: '0.8rem', textDecoration: 'none' }}
                   >
-                    Tất Cả ({products && Array.isArray(products) ? products.length : 0})
-                  </a>
+                    Xem Tất Cả
+                  </button>
+                </div>
+                <div className="list-group list-group-flush" style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                  
                   {authors && Array.isArray(authors) && authors.map((author) => {
                     if (!author) return null;
                     const count = products && Array.isArray(products) ? products.filter(p => p && p.author_id === author.author_id).length : 0;
@@ -411,7 +450,7 @@ const CategoriesPage = ({ onNavigateTo }) => {
               </div>
 
               {/* Price Range */}
-              <div className="mb-3">
+              <div className="mb-4">
                 <label className="form-label fw-bold mb-2" style={{ fontSize: '0.9rem' }}>Khoảng Giá</label>
                 <div className="row g-2">
                   <div className="col-6">
@@ -519,7 +558,100 @@ const CategoriesPage = ({ onNavigateTo }) => {
             </div>
           </div>
 
-          {showCategoryCards ? (
+          {showAuthorCards ? (
+            // Author Cards View - Giống như danh mục sách
+            <div>
+              <h2 className="fw-bold text-dark mb-4">Danh mục tác giả</h2>
+              <div className="row g-4">
+                {paginatedAuthors && Array.isArray(paginatedAuthors) && paginatedAuthors.map((author) => {
+                  if (!author) return null;
+                  return (
+                    <div key={author.author_id} className="col-lg-3 col-md-4 col-sm-6">
+                      <div
+                        className="card h-100 border-0 shadow-sm"
+                        style={{
+                          cursor: 'pointer',
+                          borderRadius: '8px',
+                          transition: 'all 0.3s ease',
+                          backgroundColor: 'white',
+                          minHeight: '200px'
+                        }}
+                        onClick={() => {
+                          setSelectedAuthor(author.name);
+                          setShowAuthorCards(false);
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.transform = 'translateY(-8px)';
+                          e.currentTarget.style.boxShadow = '0 15px 35px rgba(0,0,0,0.15)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                        }}
+                      >
+                        <div className="card-body text-center p-4 d-flex flex-column justify-content-center">
+                          <h5 className="card-title fw-bold mb-2" style={{ fontSize: '1.1rem', lineHeight: '1.3' }}>
+                            {author.name}
+                          </h5>
+                          <p className="card-text text-muted mb-0" style={{ fontSize: '0.9rem' }}>
+                            {author.book_count || 0} sách
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              
+              {/* Author Pagination */}
+              {totalAuthorPages > 1 && (
+                <div className="d-flex justify-content-center mt-4">
+                  <nav aria-label="Author pagination">
+                    <ul className="pagination">
+                      <li className={`page-item ${currentAuthorPage === 1 ? 'disabled' : ''}`}>
+                        <button
+                          className="page-link"
+                          onClick={() => handleAuthorPageChange(currentAuthorPage - 1)}
+                          disabled={currentAuthorPage === 1}
+                        >
+                          Trước
+                        </button>
+                      </li>
+                      
+                      {Array.from({ length: totalAuthorPages }, (_, i) => i + 1).map((page) => (
+                        <li key={page} className={`page-item ${currentAuthorPage === page ? 'active' : ''}`}>
+                          <button
+                            className="page-link"
+                            onClick={() => handleAuthorPageChange(page)}
+                          >
+                            {page}
+                          </button>
+                        </li>
+                      ))}
+                      
+                      <li className={`page-item ${currentAuthorPage === totalAuthorPages ? 'disabled' : ''}`}>
+                        <button
+                          className="page-link"
+                          onClick={() => handleAuthorPageChange(currentAuthorPage + 1)}
+                          disabled={currentAuthorPage === totalAuthorPages}
+                        >
+                          Sau
+                        </button>
+                      </li>
+                    </ul>
+                  </nav>
+                </div>
+              )}
+              
+              {/* Author count info */}
+              <div className="text-center mt-3">
+                <small className="text-muted">
+                  Hiển thị {((currentAuthorPage - 1) * authorsPerPage) + 1}-{Math.min(currentAuthorPage * authorsPerPage, authors.length)} 
+                  trong tổng số {authors.length} tác giả
+                </small>
+              </div>
+            </div>
+          ) : showCategoryCards ? (
             // Category Cards View
             <div>
               <div className="d-flex justify-content-between align-items-center mb-4">
