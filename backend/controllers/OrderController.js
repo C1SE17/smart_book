@@ -81,6 +81,53 @@ class OrderController {
             res.status(500).json({ error: 'Lỗi khi cập nhật trạng thái đơn hàng: ' + err.message });
         }
     }
+    // API tổng doanh thu và tổng đơn theo ngày/tháng
+    static async getRevenueStats(req, res) {
+        const { type, date } = req.query; // type: 'day' hoặc 'month', date: '2025-10-07' hoặc '2025-10'
+        if (!type || !date) return res.status(400).json({ error: 'Thiếu tham số type hoặc date' });
+        try {
+            const stats = await OrderModel.getRevenue({ type, date });
+            res.json(stats);
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    }
+
+    // API thống kê số lượng sản phẩm bán được theo ngày/tháng
+    static async getProductStats(req, res) {
+        const { type, date } = req.query;
+        if (!type || !date) return res.status(400).json({ error: 'Thiếu tham số type hoặc date' });
+        try {
+            const stats = await OrderModel.getProductStats({ type, date });
+            res.json(stats);
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    }
+
+    // API doanh thu từng ngày trong tháng (cho biểu đồ)
+    static async getDailyRevenueOfMonth(req, res) {
+        const { month } = req.query; // month: '2025-10'
+        if (!month) return res.status(400).json({ error: 'Thiếu tham số month' });
+        try {
+            const stats = await OrderModel.getDailyRevenueOfMonth(month);
+            res.json(stats);
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    }
+
+    // API doanh thu từng tháng trong năm (cho biểu đồ)
+    static async getMonthlyRevenueOfYear(req, res) {
+        const { year } = req.query; // year: '2025'
+        if (!year) return res.status(400).json({ error: 'Thiếu tham số year' });
+        try {
+            const stats = await OrderModel.getMonthlyRevenueOfYear(year);
+            res.json(stats);
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    }
 }
 
 module.exports = OrderController;
