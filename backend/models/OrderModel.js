@@ -129,17 +129,20 @@ class OrderModel {
     }
 
     static async getPendingOrders() {
-        try {
-            const [rows] = await db.promise().query(
-                'SELECT o.order_id, o.user_id, o.shipping_address, o.total_price, o.status, u.email AS user_email FROM orders o JOIN users u ON o.user_id = u.user_id WHERE o.status = ?',
-                ['pending']
-            );
-            return rows;
-        } catch (err) {
-            console.error('Lỗi lấy danh sách đơn hàng cần giao:', err.message);
-            throw err;
-        }
+    try {
+        const [rows] = await db.promise().query(
+            `SELECT o.order_id, u.name AS user_name, o.shipping_address, o.total_price, o.status, u.email AS user_email
+             FROM orders o
+             JOIN users u ON o.user_id = u.user_id
+             WHERE o.status = ?`,
+            ['pending']
+        );
+        return rows;
+    } catch (err) {
+        console.error('Lỗi lấy danh sách đơn hàng cần giao:', err.message);
+        throw err;
     }
+}
 
     static async updateOrderStatus(orderId, status) {
         try {
@@ -237,6 +240,17 @@ class OrderModel {
                        ORDER BY month ASC`;
         const [rows] = await db.promise().query(query, [year]);
         return rows;
+    }
+    //lấy danh sách đơn hàng của user
+    static async getUserOrders(userId) {
+        const [rows] = await db.promise().query(
+                `SELECT o.order_id, o.status, o.total_price, o.shipping_address, o.created_at
+                 FROM orders o
+                 WHERE o.user_id = ?
+                 ORDER BY o.created_at DESC`,
+                [userId]
+        );
+            return rows;
     }
 }
 

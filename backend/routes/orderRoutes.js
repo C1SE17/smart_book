@@ -19,4 +19,6 @@ router.get('/stats/products', auth, adminOnly, OrderController.getProductStats);
 router.get('/stats/daily-revenue', auth, adminOnly, OrderController.getDailyRevenueOfMonth); // ?month=2025-10
 router.get('/stats/monthly-revenue', auth, adminOnly, OrderController.getMonthlyRevenueOfYear); // ?year=2025
 
+// lấy danh sách đơn hàng của user
+ router.get('/my-orders', auth, userOnly, OrderController.getUserOrders); // User xem đơn hàng của mình
 module.exports = router;

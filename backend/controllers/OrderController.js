@@ -2,6 +2,9 @@ const OrderModel = require('../models/OrderModel');
 
 class OrderController {
     static async purchase(req, res) {
+        if (req.user.role === 'admin') {
+        return res.status(403).json({ error: 'Admin không được phép đặt hàng' });
+        }
         const userId = req.user.userId;
         const { book_id, quantity, shipping_address } = req.body;
 
@@ -16,6 +19,9 @@ class OrderController {
     }
 
     static async checkout(req, res) {
+        if (req.user.role === 'admin') {
+        return res.status(403).json({ error: 'Admin không được phép đặt hàng' });
+        }
         const userId = req.user.userId;
         const { selected_cart_item_ids, shipping_address } = req.body;
 
@@ -126,6 +132,16 @@ class OrderController {
             res.json(stats);
         } catch (err) {
             res.status(500).json({ error: err.message });
+        }
+    }
+    //lấy danh sách đơn hàng của user
+    static async getUserOrders(req, res) {
+        const userId = req.user.userId;
+        try {
+            const orders = await OrderModel.getUserOrders(userId);
+        res.status(200).json(orders);
+        } catch (err) {
+            res.status(500).json({ error: 'Lỗi khi lấy danh sách đơn hàng của bạn: ' + err.message });
         }
     }
 }
