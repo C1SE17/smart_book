@@ -39,7 +39,7 @@ const Cart = ({ onBackToHome, onNavigateTo }) => {
             return {
               ...item,
               book_title: item.title || `Book ${item.book_id}`,
-              author: item.author_name || (typeof item.author === 'object' ? item.author?.name : item.author) || 'Unknown Author',
+              author: item.author_name || item.author || 'Unknown Author',
               price: item.price || 0,
               total_price: (item.price || 0) * item.quantity,
               image_url: item.cover_image || '/images/book1.jpg'
@@ -266,7 +266,11 @@ const Cart = ({ onBackToHome, onNavigateTo }) => {
     }
 
     // Lưu các sản phẩm đã chọn vào sessionStorage để checkout
-    const selectedCartItems = cartItems.filter(item => selectedItems.includes(item.book_id));
+    const selectedCartItems = cartItems.filter(item => selectedItems.includes(item.book_id)).map(item => ({
+      ...item,
+      cart_item_id: item.book_id, // Add cart_item_id to identify items from cart
+      source: 'cart' // Mark as coming from cart
+    }));
     sessionStorage.setItem('checkoutItems', JSON.stringify(selectedCartItems));
 
     // Hiển thị thông báo thành công

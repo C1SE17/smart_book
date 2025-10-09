@@ -12,6 +12,9 @@ const Home = ({ onNavigateTo }) => {
   // State cho danh mục
   const [categories, setCategories] = useState([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
+  
+  // State cho user role
+  const [userRole, setUserRole] = useState(null);
 
   // Ghi nhớ dữ liệu để tránh tạo lại mỗi lần render
   const blogPosts = useMemo(() => [
@@ -123,6 +126,12 @@ const Home = ({ onNavigateTo }) => {
     fetchCategoriesWithBookCount();
   }, []);
 
+  // Lấy user role để kiểm tra quyền đặt hàng
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    setUserRole(user?.role || null);
+  }, []);
+
   // Ghi nhớ các event handlers
   const handleBookClick = useCallback((bookId) => {
     // Chuyển đến trang chi tiết sản phẩm khi click vào sách
@@ -199,7 +208,11 @@ const Home = ({ onNavigateTo }) => {
           title: book.title,
           price: book.price,
           quantity: 1,
-          cover_image: book.cover_image
+          cover_image: book.cover_image,
+          author_name: book.author_name,
+          author: book.author,
+          category_name: book.category_name,
+          publisher_name: book.publisher_name
         };
 
         // Thêm vào localStorage
@@ -448,7 +461,7 @@ const Home = ({ onNavigateTo }) => {
                     </div>
 
                     {/* Shopping Cart Icon - góc trên phải */}
-                    {book.stock > 0 && (
+                    {book.stock > 0 && userRole !== 'admin' && (
                       <div className="position-absolute top-0 end-0 m-2">
                         <button
                           className="btn btn-sm rounded-circle"
@@ -635,7 +648,7 @@ const Home = ({ onNavigateTo }) => {
                     </div>
 
                     {/* Shopping Cart Icon - góc trên phải */}
-                    {book.stock > 0 && (
+                    {book.stock > 0 && userRole !== 'admin' && (
                       <div className="position-absolute top-0 end-0 m-2">
                         <button
                           className="btn btn-sm rounded-circle"
@@ -822,7 +835,7 @@ const Home = ({ onNavigateTo }) => {
                     </div>
 
                     {/* Shopping Cart Icon - góc trên phải */}
-                    {book.stock > 0 && (
+                    {book.stock > 0 && userRole !== 'admin' && (
                       <div className="position-absolute top-0 end-0 m-2">
                         <button
                           className="btn btn-sm rounded-circle"

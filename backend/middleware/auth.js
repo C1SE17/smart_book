@@ -51,9 +51,18 @@ const userOnly = (req, res, next) => {
     next();
 };
 
+// Ngăn admin đặt hàng
+const preventAdminOrdering = (req, res, next) => {
+    if (req.user.role === 'admin') {
+        return res.status(403).json({ error: 'Admin không thể đặt hàng. Vui lòng sử dụng tài khoản user để đặt hàng.' });
+    }
+    next();
+};
+
 // Hàm thêm token vào blacklist
 const addToBlacklist = (token) => {
     tokenBlacklist.add(token);
 };
 
-module.exports = { auth, adminOnly, userOnly, addToBlacklist };
+// Ngăn admin xem đơn hàng
+module.exports = { auth, adminOnly, userOnly, preventAdminOrdering, addToBlacklist };

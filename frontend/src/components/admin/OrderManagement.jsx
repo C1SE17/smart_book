@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import apiService from '../../services/api';
 
 const OrderManagement = () => {
     const [orders, setOrders] = useState([]);
@@ -6,97 +7,171 @@ const OrderManagement = () => {
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [formErrors, setFormErrors] = useState({});
+    const [error, setError] = useState(null);
+    const [successMessage, setSuccessMessage] = useState('');
+    const [stats, setStats] = useState({
+        totalRevenue: 0,
+        totalOrders: 0,
+        pendingOrders: 0,
+        paidOrders: 0,
+        shippedOrders: 0,
+        completedOrders: 0,
+        cancelledOrders: 0
+    });
+    
+    // Multiple selection states
+    const [selectedOrders, setSelectedOrders] = useState(new Set());
+    const [selectAll, setSelectAll] = useState(false);
 
-    // Mock data
-    useEffect(() => {
         const fetchOrders = async () => {
             setLoading(true);
-            setTimeout(() => {
-                setOrders([
-                    {
-                        order_id: 1,
-                        user_id: 1,
-                        customer_name: 'Nguyễn Văn A',
-                        customer_email: 'nguyenvana@email.com',
-                        customer_phone: '0123456789',
-                        status: 'pending',
-                        total_price: 450000,
-                        shipping_address: '123 Đường ABC, Quận 1, TP.HCM',
-                        created_at: '2024-01-15T10:30:00Z',
-                        updated_at: '2024-01-15T10:30:00Z',
-                        items: [
-                            { book_id: 1, title: 'Thanh Gươm Diệt Quỷ - Tập 1', quantity: 2, price: 815000 },
-                            { book_id: 2, title: 'Harry Potter và Hòn Đá Phù Thủy', quantity: 1, price: 320000 }
-                        ]
-                    },
-                    {
-                        order_id: 2,
-                        user_id: 2,
-                        customer_name: 'Trần Thị B',
-                        customer_email: 'tranthib@email.com',
-                        customer_phone: '0987654321',
-                        status: 'processing',
-                        total_price: 680000,
-                        shipping_address: '456 Đường XYZ, Quận 2, TP.HCM',
-                        created_at: '2024-01-14T15:20:00Z',
-                        updated_at: '2024-01-15T09:15:00Z',
-                        items: [
-                            { book_id: 3, title: 'One Piece - Tập 1', quantity: 3, price: 200000 },
-                            { book_id: 4, title: 'Attack on Titan - Tập 1', quantity: 1, price: 220000 }
-                        ]
-                    },
-                    {
-                        order_id: 3,
-                        user_id: 3,
-                        customer_name: 'Lê Văn C',
-                        customer_email: 'levanc@email.com',
-                        customer_phone: '0369852147',
-                        status: 'shipped',
-                        total_price: 250000,
-                        shipping_address: '789 Đường DEF, Quận 3, TP.HCM',
-                        created_at: '2024-01-13T08:45:00Z',
-                        updated_at: '2024-01-14T14:30:00Z',
-                        items: [
-                            { book_id: 5, title: 'Norwegian Wood', quantity: 1, price: 350000 }
-                        ]
-                    },
-                    {
-                        order_id: 4,
-                        user_id: 4,
-                        customer_name: 'Phạm Thị D',
-                        customer_email: 'phamthid@email.com',
-                        customer_phone: '0741852963',
-                        status: 'completed',
-                        total_price: 890000,
-                        shipping_address: '321 Đường GHI, Quận 4, TP.HCM',
-                        created_at: '2024-01-12T16:10:00Z',
-                        updated_at: '2024-01-13T11:20:00Z',
-                        items: [
-                            { book_id: 1, title: 'Thanh Gươm Diệt Quỷ - Tập 1', quantity: 1, price: 815000 },
-                            { book_id: 2, title: 'Harry Potter và Hòn Đá Phù Thủy', quantity: 1, price: 320000 }
-                        ]
-                    },
-                    {
-                        order_id: 5,
-                        user_id: 5,
-                        customer_name: 'Hoàng Văn E',
-                        customer_email: 'hoangvane@email.com',
-                        customer_phone: '0852741963',
-                        status: 'cancelled',
-                        total_price: 320000,
-                        shipping_address: '654 Đường JKL, Quận 5, TP.HCM',
-                        created_at: '2024-01-11T12:30:00Z',
-                        updated_at: '2024-01-12T09:45:00Z',
-                        items: [
-                            { book_id: 2, title: 'Harry Potter và Hòn Đá Phù Thủy', quantity: 1, price: 320000 }
-                        ]
+        setError(null);
+        
+            try {
+                // Check if user is admin before calling admin API
+                const user = JSON.parse(localStorage.getItem('user') || 'null');
+                if (!user) {
+                    setError('Bạn chưa đăng nhập. Vui lòng đăng nhập để truy cập trang quản lý đơn hàng.');
+                    setLoading(false);
+                    return;
+                }
+                
+                if (user.role !== 'admin') {
+                    setError('Bạn không có quyền truy cập trang quản lý đơn hàng. Chỉ admin mới có thể truy cập. Vui lòng đăng nhập bằng tài khoản admin.');
+                    setLoading(false);
+                    return;
+                }
+                
+                // Fetch all orders (not just pending)
+                const allOrdersResponse = await apiService.getAllOrders();
+                
+                if (allOrdersResponse.success) {
+                    const allOrders = allOrdersResponse.data || [];
+                    
+                    // Use data directly from getAllOrders (now includes user info)
+                    console.log('Processing orders with user data from backend:', allOrders);
+                    const ordersWithUserDetails = allOrders.map((order) => {
+                        console.log(`Processing order ${order.order_id}:`, order);
+                        console.log(`Order ${order.order_id} money fields:`, {
+                            total_price: order.total_price,
+                            total_amount: order.total_amount,
+                            total: order.total,
+                            amount: order.amount
+                        });
+                        
+                        // Use user data from backend query
+                        const customer_name = order.user_name || `User ${order.user_id}`;
+                        const customer_phone = order.user_phone || 'N/A';
+                        const customer_email = order.user_email || 'N/A';
+                        
+                        console.log(`✅ Using customer name: ${customer_name} for user_id: ${order.user_id}`);
+                        
+                        const finalOrder = {
+                            ...order,
+                            customer_name,
+                            customer_phone,
+                            customer_email,
+                            created_at: order.created_at || new Date().toISOString(),
+                            updated_at: order.updated_at || new Date().toISOString()
+                        };
+                        
+                        console.log(`Final order data for ${order.order_id}:`, finalOrder);
+                        return finalOrder;
+                    });
+                    
+                    // Sort by order_id from low to high (ascending)
+                    ordersWithUserDetails.sort((a, b) => a.order_id - b.order_id);
+                    console.log('Orders sorted by order_id (low to high):', ordersWithUserDetails.map(o => o.order_id));
+                    
+                    // Set orders for display
+                    setOrders(ordersWithUserDetails);
+                    
+                    // Calculate statistics from pending orders
+                    console.log('Calculating statistics from orders:', ordersWithUserDetails);
+                    
+                    const totalRevenue = ordersWithUserDetails.reduce((sum, order) => {
+                        const orderTotal = parseFloat(order.total_price) || 0;
+                        console.log(`Order ${order.order_id}: total_price = ${order.total_price}, parsed = ${orderTotal}`);
+                        return sum + orderTotal;
+                    }, 0);
+                    
+                    console.log(`Total revenue calculated: ${totalRevenue}`);
+                    
+                    const totalOrders = ordersWithUserDetails.length;
+                    const pendingOrdersCount = ordersWithUserDetails.filter(o => o.status === 'pending').length;
+                    const paidOrdersCount = ordersWithUserDetails.filter(o => o.status === 'paid').length;
+                    const shippedOrdersCount = ordersWithUserDetails.filter(o => o.status === 'shipped').length;
+                    const completedOrdersCount = ordersWithUserDetails.filter(o => o.status === 'completed').length;
+                    const cancelledOrdersCount = ordersWithUserDetails.filter(o => o.status === 'cancelled').length;
+                    
+                    const statsData = {
+                        totalRevenue,
+                        totalOrders,
+                        pendingOrders: pendingOrdersCount,
+                        paidOrders: paidOrdersCount,
+                        shippedOrders: shippedOrdersCount,
+                        completedOrders: completedOrdersCount,
+                        cancelledOrders: cancelledOrdersCount
+                    };
+                    
+                    console.log('Final stats data:', statsData);
+                    setStats(statsData);
+                } else {
+                    // Handle specific error cases
+                    if (allOrdersResponse.message && allOrdersResponse.message.includes('403')) {
+                        setError('Bạn không có quyền truy cập. Vui lòng đăng nhập bằng tài khoản admin.');
+                    } else {
+                        setError(allOrdersResponse.message || 'Không thể tải danh sách đơn hàng');
                     }
-                ]);
+                }
+        } catch (err) {
+            console.error('Error fetching orders:', err);
+            // Handle 403 Forbidden error specifically
+            if (err.message && err.message.includes('403')) {
+                setError('Bạn không có quyền truy cập trang quản lý đơn hàng. Vui lòng đăng nhập bằng tài khoản admin.');
+            } else {
+                setError('Có lỗi xảy ra khi tải dữ liệu đơn hàng. Vui lòng kiểm tra kết nối mạng và thử lại.');
+            }
+        } finally {
                 setLoading(false);
-            }, 1000);
+        }
         };
 
+    // Fetch revenue statistics
+    const fetchRevenueStats = async () => {
+        try {
+            // Check if user is admin before calling admin API
+            const user = JSON.parse(localStorage.getItem('user') || 'null');
+            if (!user || user.role !== 'admin') {
+                console.log('User is not admin, skipping revenue stats fetch');
+                return;
+            }
+            
+            console.log('Fetching revenue statistics...');
+            const revenueResponse = await apiService.getTotalRevenue();
+            
+            if (revenueResponse.success) {
+                console.log('Revenue stats received:', revenueResponse.data);
+                const revenueData = revenueResponse.data;
+                
+                // Update stats with revenue data
+                setStats(prevStats => ({
+                    ...prevStats,
+                    totalRevenue: revenueData.totalRevenue,
+                    totalOrders: revenueData.orderCount
+                }));
+            } else {
+                console.error('Failed to get revenue stats:', revenueResponse.message);
+            }
+        } catch (error) {
+            console.error('Error fetching revenue stats:', error);
+        }
+    };
+
+    // Fetch orders from real API
+    useEffect(() => {
         fetchOrders();
+        fetchRevenueStats(); // Also fetch revenue stats
     }, []);
 
     // Validation function
@@ -110,7 +185,7 @@ const OrderManagement = () => {
         return errors;
     };
 
-    const handleStatusChange = (orderId, newStatus) => {
+    const handleStatusChange = async (orderId, newStatus) => {
         // Validate status change
         const errors = validateStatusChange(newStatus);
         if (Object.keys(errors).length > 0) {
@@ -119,29 +194,268 @@ const OrderManagement = () => {
         }
 
         try {
-            setOrders(orders.map(order =>
-                order.order_id === orderId
-                    ? { ...order, status: newStatus, updated_at: new Date().toISOString() }
-                    : order
-            ));
             setFormErrors({});
+            setError(null);
+            setSuccessMessage('');
+
+            // Check if user is admin before calling admin API
+            const user = JSON.parse(localStorage.getItem('user') || 'null');
+            if (!user || user.role !== 'admin') {
+                setError('Bạn không có quyền cập nhật trạng thái đơn hàng. Chỉ admin mới có thể thực hiện.');
+                return;
+            }
+            
+            // Call API to update order status
+            const response = await apiService.updateOrderStatus(orderId, newStatus);
+            
+            if (response.success) {
+                // Update local state with current timestamp
+                const currentTime = new Date().toISOString();
+            setOrders(prevOrders => 
+                prevOrders.map(order =>
+                order.order_id === orderId
+                        ? { ...order, status: newStatus, updated_at: currentTime }
+                    : order
+                )
+            );
+
+                // Dispatch event to notify user orders page about status update
+                window.dispatchEvent(new CustomEvent('orderStatusUpdated', {
+                    detail: {
+                        orderId: orderId,
+                        newStatus: newStatus,
+                        updatedAt: currentTime
+                    }
+                }));
+                
+                setSuccessMessage('Cập nhật trạng thái đơn hàng thành công!');
+                
+                // Clear success message after 3 seconds
+                setTimeout(() => setSuccessMessage(''), 3000);
+            } else {
+                setError(response.message || 'Không thể cập nhật trạng thái đơn hàng');
+            }
         } catch (error) {
             console.error('Error updating order status:', error);
-            alert('Có lỗi xảy ra khi cập nhật trạng thái đơn hàng. Vui lòng thử lại.');
+            setError('Có lỗi xảy ra khi cập nhật trạng thái đơn hàng. Vui lòng thử lại.');
         }
     };
 
-    const handleViewDetails = (order) => {
-        setSelectedOrder(order);
-        setShowDetailModal(true);
+    const handleViewDetails = async (order) => {
+        try {
+            setError(null);
+            
+            // Check if user is admin before calling admin API
+            const user = JSON.parse(localStorage.getItem('user') || 'null');
+            if (!user || user.role !== 'admin') {
+                setError('Bạn không có quyền xem chi tiết đơn hàng. Chỉ admin mới có thể truy cập.');
+                return;
+            }
+            
+            // Fetch detailed order information including items (admin API)
+            const response = await apiService.getAdminOrderDetails(order.order_id);
+            
+            if (response.success) {
+                // Fetch user details for the order
+                console.log(`Fetching user details for order ${order.order_id}, user_id: ${order.user_id}`);
+                const userResponse = await apiService.getUserById(order.user_id);
+                console.log(`User response for order ${order.order_id}:`, userResponse);
+                
+                let customer_name = `User ${order.user_id}`;
+                let customer_phone = 'N/A';
+                let customer_email = 'N/A';
+                
+                if (userResponse.success && userResponse.data) {
+                    customer_name = userResponse.data.name || userResponse.data.fullName || `User ${order.user_id}`;
+                    customer_phone = userResponse.data.phone || 'N/A';
+                    customer_email = userResponse.data.email || 'N/A';
+                    console.log(`✅ Successfully resolved customer name: ${customer_name} for order ${order.order_id}`);
+                } else {
+                    console.log(`❌ Failed to get user details for order ${order.order_id}`, userResponse);
+                }
+                
+                // Combine order data with user details
+                const orderWithUserDetails = {
+                    ...response.data,
+                    customer_name,
+                    customer_phone,
+                    customer_email
+                };
+                
+                console.log(`Final order data for modal:`, orderWithUserDetails);
+                setSelectedOrder(orderWithUserDetails);
+                setShowDetailModal(true);
+            } else {
+                // Fallback: Use existing order data if API fails
+                console.log('API failed, using existing order data as fallback');
+                const fallbackOrderData = {
+                    ...order,
+                    items: [], // No items available from fallback
+                    customer_name: order.user_name || `User ${order.user_id}`,
+                    customer_phone: order.user_phone || 'N/A',
+                    customer_email: order.user_email || 'N/A'
+                };
+                
+                setSelectedOrder(fallbackOrderData);
+                setShowDetailModal(true);
+                setError('Đã tải thông tin cơ bản (Một số chi tiết có thể không khả dụng)');
+            }
+        } catch (error) {
+            console.error('Error fetching order details:', error);
+            
+            // Show detailed error message
+            let errorMessage = 'Có lỗi xảy ra khi tải chi tiết đơn hàng';
+            
+            if (error.message && error.message.includes('404')) {
+                errorMessage = 'Không tìm thấy đơn hàng này';
+            } else if (error.message && error.message.includes('403')) {
+                errorMessage = 'Bạn không có quyền xem chi tiết đơn hàng này';
+            } else if (error.message && error.message.includes('500')) {
+                errorMessage = 'Lỗi server. Vui lòng thử lại sau';
+            } else if (error.message) {
+                errorMessage = `Lỗi: ${error.message}`;
+            }
+            
+            setError(errorMessage);
+            
+            // Try fallback with existing order data
+            try {
+                console.log('Trying fallback with existing order data');
+                const fallbackOrderData = {
+                    ...order,
+                    items: [], // No items available from fallback
+                    customer_name: order.user_name || `User ${order.user_id}`,
+                    customer_phone: order.user_phone || 'N/A',
+                    customer_email: order.user_email || 'N/A'
+                };
+                
+                setSelectedOrder(fallbackOrderData);
+                setShowDetailModal(true);
+                setError('Đã tải thông tin cơ bản (Một số chi tiết có thể không khả dụng)');
+            } catch (fallbackError) {
+                console.error('Fallback also failed:', fallbackError);
+                setError('Không thể tải chi tiết đơn hàng. Vui lòng thử lại sau.');
+            }
+        }
+    };
+
+    // Handle individual order selection
+    const handleOrderSelect = (orderId) => {
+        setSelectedOrders(prev => {
+            const newSelected = new Set(prev);
+            if (newSelected.has(orderId)) {
+                newSelected.delete(orderId);
+            } else {
+                newSelected.add(orderId);
+            }
+            
+            // Update selectAll state based on current selection
+            const allOrderIds = orders.map(order => order.order_id);
+            const allSelected = allOrderIds.every(id => newSelected.has(id));
+            setSelectAll(allSelected);
+            
+            return newSelected;
+        });
+    };
+
+    // Handle select all orders
+    const handleSelectAll = () => {
+        if (selectAll) {
+            setSelectedOrders(new Set());
+            setSelectAll(false);
+        } else {
+            const allOrderIds = orders.map(order => order.order_id);
+            setSelectedOrders(new Set(allOrderIds));
+            setSelectAll(true);
+        }
+    };
+
+    // Handle delete single order
+    const handleDeleteOrder = async (orderId) => {
+        if (!window.confirm('Bạn có chắc chắn muốn xóa đơn hàng này? Hành động này không thể hoàn tác.')) {
+            return;
+        }
+
+        try {
+            setLoading(true);
+            setError(null);
+            
+            const response = await apiService.deleteOrder(orderId);
+            
+            if (response.success) {
+                // Remove order from local state
+                setOrders(prevOrders => prevOrders.filter(order => order.order_id !== orderId));
+                
+                // Remove from selection if selected
+                setSelectedOrders(prev => {
+                    const newSelected = new Set(prev);
+                    newSelected.delete(orderId);
+                    return newSelected;
+                });
+                
+                setSuccessMessage('Xóa đơn hàng thành công!');
+                setTimeout(() => setSuccessMessage(''), 3000);
+            } else {
+                setError(response.message || 'Không thể xóa đơn hàng');
+            }
+        } catch (err) {
+            console.error('Error deleting order:', err);
+            setError('Có lỗi xảy ra khi xóa đơn hàng');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Handle delete multiple orders
+    const handleDeleteMultiple = async () => {
+        if (selectedOrders.size === 0) {
+            alert('Vui lòng chọn ít nhất một đơn hàng để xóa');
+            return;
+        }
+
+        if (!window.confirm(`Bạn có chắc chắn muốn xóa ${selectedOrders.size} đơn hàng đã chọn? Hành động này không thể hoàn tác.`)) {
+            return;
+        }
+
+        try {
+            setLoading(true);
+            setError(null);
+            
+            // Delete orders one by one
+            const deletePromises = Array.from(selectedOrders).map(orderId => 
+                apiService.deleteOrder(orderId)
+            );
+            
+            const results = await Promise.all(deletePromises);
+            const successCount = results.filter(result => result.success).length;
+            
+            if (successCount > 0) {
+                // Remove deleted orders from local state
+                setOrders(prevOrders => prevOrders.filter(order => !selectedOrders.has(order.order_id)));
+                
+                // Clear selection
+                setSelectedOrders(new Set());
+                setSelectAll(false);
+                
+                setSuccessMessage(`Xóa thành công ${successCount}/${selectedOrders.size} đơn hàng!`);
+                setTimeout(() => setSuccessMessage(''), 3000);
+            } else {
+                setError('Không thể xóa đơn hàng nào');
+            }
+        } catch (err) {
+            console.error('Error deleting orders:', err);
+            setError('Có lỗi xảy ra khi xóa đơn hàng');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const getStatusBadge = (status) => {
         const statusMap = {
             'pending': { class: 'bg-warning', text: 'Chờ xử lý' },
-            'processing': { class: 'bg-primary', text: 'Đang xử lý' },
-            'shipped': { class: 'bg-info', text: 'Đã giao' },
+            'paid': { class: 'bg-info', text: 'Đã thanh toán' },
             'completed': { class: 'bg-success', text: 'Hoàn thành' },
+            'shipped': { class: 'bg-primary', text: 'Đã giao' },
             'cancelled': { class: 'bg-danger', text: 'Đã hủy' }
         };
 
@@ -164,7 +478,7 @@ const OrderManagement = () => {
     const getStatusOptions = (currentStatus) => {
         const allStatuses = [
             { value: 'pending', text: 'Chờ xử lý' },
-            { value: 'processing', text: 'Đang xử lý' },
+            { value: 'paid', text: 'Đã thanh toán' },
             { value: 'shipped', text: 'Đã giao' },
             { value: 'completed', text: 'Hoàn thành' },
             { value: 'cancelled', text: 'Đã hủy' }
@@ -187,18 +501,113 @@ const OrderManagement = () => {
         <div>
             {/* Header */}
             <div className="d-flex justify-content-between align-items-center mb-4">
+                <div>
                 <h2 className="fw-bold text-dark">Quản lý đơn hàng</h2>
+                    <p className="text-muted mb-0">Hiển thị đơn hàng chờ xử lý - Nhấn "Làm mới" để cập nhật đơn hàng mới</p>
+                </div>
+                <div className="d-flex align-items-center gap-3">
+                    <button 
+                        className="btn btn-outline-primary btn-sm"
+                        onClick={() => {
+                            fetchOrders();
+                            fetchRevenueStats();
+                        }}
+                        disabled={loading}
+                    >
+                        <i className={`fas fa-sync-alt ${loading ? 'fa-spin' : ''} me-1`}></i>
+                        Làm mới
+                    </button>
+                    <button 
+                        className="btn btn-outline-danger btn-sm"
+                        onClick={handleDeleteMultiple}
+                        disabled={loading || selectedOrders.size === 0}
+                        title={selectedOrders.size === 0 ? "Chọn đơn hàng để xóa" : `Xóa ${selectedOrders.size} đơn hàng đã chọn`}
+                    >
+                        <i className="fas fa-trash me-1"></i>
+                        Xóa nhiều ({selectedOrders.size})
+                    </button>
                 <div className="text-muted">
-                    Tổng cộng: {orders.length} đơn hàng
+                        Tổng cộng: {stats.totalOrders} đơn hàng
+                    </div>
                 </div>
             </div>
+
+            {/* Error Message */}
+            {error && (
+                <div className="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i className="fas fa-exclamation-triangle me-2"></i>
+                    {error}
+                    {error.includes('admin') && (
+                        <div className="mt-2">
+                            <div className="mb-2">
+                                <small className="text-muted">
+                                    <i className="fas fa-lightbulb me-1"></i>
+                                    <strong>Hướng dẫn:</strong> Để truy cập trang quản lý đơn hàng, bạn cần đăng nhập bằng tài khoản có quyền admin. 
+                                    Nếu chưa có tài khoản admin, vui lòng liên hệ quản trị viên hệ thống.
+                                </small>
+                            </div>
+                            <button 
+                                className="btn btn-outline-primary btn-sm me-2"
+                                onClick={() => {
+                                    // Redirect to login page
+                                    window.location.href = '/login';
+                                }}
+                            >
+                                <i className="fas fa-sign-in-alt me-1"></i>
+                                Đăng nhập Admin
+                            </button>
+                            <button 
+                                className="btn btn-outline-secondary btn-sm"
+                                onClick={() => {
+                                    // Redirect to home page
+                                    window.location.href = '/';
+                                }}
+                            >
+                                <i className="fas fa-home me-1"></i>
+                                Về trang chủ
+                            </button>
+                        </div>
+                    )}
+                    <button 
+                        type="button" 
+                        className="btn-close" 
+                        onClick={() => setError(null)}
+                    ></button>
+                </div>
+            )}
+
+            {/* Success Message */}
+            {successMessage && (
+                <div className="alert alert-success alert-dismissible fade show" role="alert">
+                    <i className="fas fa-check-circle me-2"></i>
+                    {successMessage}
+                    <button 
+                        type="button" 
+                        className="btn-close" 
+                        onClick={() => setSuccessMessage('')}
+                    ></button>
+                </div>
+            )}
+
+            {/* Info Message - Only show if user is admin */}
+            {!error && (
+            <div className="alert alert-info alert-dismissible fade show" role="alert">
+                <i className="fas fa-info-circle me-2"></i>
+                <strong>Lưu ý:</strong> Khi khách hàng đặt hàng thành công từ trang chủ, đơn hàng sẽ xuất hiện trong danh sách này với trạng thái "Chờ xử lý". Nhấn nút "Làm mới" để cập nhật danh sách đơn hàng mới nhất.
+                <button 
+                    type="button" 
+                    className="btn-close" 
+                    data-bs-dismiss="alert"
+                ></button>
+            </div>
+            )}
 
             {/* Stats Cards */}
             <div className="row mb-4">
                 <div className="col-md-2 mb-3">
                     <div className="card border-0 shadow-sm text-center">
                         <div className="card-body">
-                            <h4 className="fw-bold text-warning">{orders.filter(o => o.status === 'pending').length}</h4>
+                            <h4 className="fw-bold text-warning">{stats.pendingOrders}</h4>
                             <p className="text-muted mb-0 small">Chờ xử lý</p>
                         </div>
                     </div>
@@ -206,15 +615,15 @@ const OrderManagement = () => {
                 <div className="col-md-2 mb-3">
                     <div className="card border-0 shadow-sm text-center">
                         <div className="card-body">
-                            <h4 className="fw-bold text-primary">{orders.filter(o => o.status === 'processing').length}</h4>
-                            <p className="text-muted mb-0 small">Đang xử lý</p>
+                            <h4 className="fw-bold text-info">{stats.paidOrders}</h4>
+                            <p className="text-muted mb-0 small">Đã thanh toán</p>
                         </div>
                     </div>
                 </div>
                 <div className="col-md-2 mb-3">
                     <div className="card border-0 shadow-sm text-center">
                         <div className="card-body">
-                            <h4 className="fw-bold text-info">{orders.filter(o => o.status === 'shipped').length}</h4>
+                            <h4 className="fw-bold text-primary">{stats.shippedOrders}</h4>
                             <p className="text-muted mb-0 small">Đã giao</p>
                         </div>
                     </div>
@@ -222,7 +631,7 @@ const OrderManagement = () => {
                 <div className="col-md-2 mb-3">
                     <div className="card border-0 shadow-sm text-center">
                         <div className="card-body">
-                            <h4 className="fw-bold text-success">{orders.filter(o => o.status === 'completed').length}</h4>
+                            <h4 className="fw-bold text-success">{stats.completedOrders}</h4>
                             <p className="text-muted mb-0 small">Hoàn thành</p>
                         </div>
                     </div>
@@ -230,7 +639,7 @@ const OrderManagement = () => {
                 <div className="col-md-2 mb-3">
                     <div className="card border-0 shadow-sm text-center">
                         <div className="card-body">
-                            <h4 className="fw-bold text-danger">{orders.filter(o => o.status === 'cancelled').length}</h4>
+                            <h4 className="fw-bold text-danger">{stats.cancelledOrders}</h4>
                             <p className="text-muted mb-0 small">Đã hủy</p>
                         </div>
                     </div>
@@ -239,7 +648,7 @@ const OrderManagement = () => {
                     <div className="card border-0 shadow-sm text-center">
                         <div className="card-body">
                             <h4 className="fw-bold text-dark">
-                                {formatCurrency(orders.reduce((sum, order) => sum + order.total_price, 0))}
+                                {formatCurrency(stats.totalRevenue)}
                             </h4>
                             <p className="text-muted mb-0 small">Tổng doanh thu</p>
                         </div>
@@ -254,6 +663,14 @@ const OrderManagement = () => {
                         <table className="table table-hover">
                             <thead>
                                 <tr>
+                                    <th>
+                                        <input 
+                                            type="checkbox" 
+                                            className="form-check-input"
+                                            checked={selectAll}
+                                            onChange={handleSelectAll}
+                                        />
+                                    </th>
                                     <th>Mã đơn</th>
                                     <th>Khách hàng</th>
                                     <th>Liên hệ</th>
@@ -264,23 +681,35 @@ const OrderManagement = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {orders.map((order) => (
-                                    <tr key={order.order_id}>
+                                {orders && orders.length > 0 ? orders.map((order, index) => (
+                                    <tr key={`order-${order.order_id}-${index}`}>
+                                        <td>
+                                            <input 
+                                                type="checkbox" 
+                                                className="form-check-input"
+                                                checked={selectedOrders.has(order.order_id)}
+                                                onChange={() => handleOrderSelect(order.order_id)}
+                                            />
+                                        </td>
                                         <td>
                                             <span className="fw-bold">#{order.order_id.toString().padStart(6, '0')}</span>
                                         </td>
                                         <td>
-                                            <div className="fw-medium text-dark">{order.customer_name}</div>
-                                            <div className="text-muted small">{order.shipping_address}</div>
+                                            <div className="fw-medium text-dark">{order.customer_name || `User ${order.user_id}`}</div>
+                                            <div className="text-muted small">{order.shipping_address || 'Chưa có địa chỉ'}</div>
                                         </td>
                                         <td>
                                             <div className="small">
-                                                <div>{order.customer_email}</div>
-                                                <div className="text-muted">{order.customer_phone}</div>
+                                                <div>{order.user_email || 'N/A'}</div>
+                                                <div className="text-muted">{order.customer_phone || 'N/A'}</div>
                                             </div>
                                         </td>
                                         <td className="text-end fw-bold">
-                                            {formatCurrency(order.total_price)}
+                                            {(() => {
+                                                const amount = order.total_price || order.total_amount || order.total || 0;
+                                                console.log(`Order ${order.order_id} amount:`, amount, 'type:', typeof amount);
+                                                return formatCurrency(amount);
+                                            })()}
                                         </td>
                                         <td>
                                             <div className="d-flex align-items-center">
@@ -303,9 +732,17 @@ const OrderManagement = () => {
                                             </div>
                                         </td>
                                         <td className="text-muted small">
-                                            {new Date(order.created_at).toLocaleDateString('vi-VN')}
+                                            {order.created_at ? new Date(order.created_at).toLocaleString('vi-VN', {
+                                                year: 'numeric',
+                                                month: '2-digit',
+                                                day: '2-digit',
+                                                hour: '2-digit',
+                                                minute: '2-digit',
+                                                second: '2-digit'
+                                            }) : 'N/A'}
                                         </td>
                                         <td className="text-center">
+                                            <div className="d-flex gap-2 justify-content-center">
                                             <button
                                                 className="btn btn-outline-primary btn-sm"
                                                 onClick={() => handleViewDetails(order)}
@@ -313,9 +750,25 @@ const OrderManagement = () => {
                                                 <i className="fas fa-eye me-1"></i>
                                                 Chi tiết
                                             </button>
+                                                <button
+                                                    className="btn btn-outline-danger btn-sm"
+                                                    onClick={() => handleDeleteOrder(order.order_id)}
+                                                    disabled={loading}
+                                                >
+                                                    <i className="fas fa-trash me-1"></i>
+                                                    Xóa
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
-                                ))}
+                                )) : (
+                                    <tr>
+                                        <td colSpan="7" className="text-center text-muted py-4">
+                                            <i className="fas fa-inbox fa-2x mb-2"></i>
+                                            <div>Không có đơn hàng nào</div>
+                                        </td>
+                                    </tr>
+                                )}
                             </tbody>
                         </table>
                     </div>
@@ -329,7 +782,7 @@ const OrderManagement = () => {
                         <div className="modal-content">
                             <div className="modal-header">
                                 <h5 className="modal-title">
-                                    Chi tiết đơn hàng #{selectedOrder.order_id.toString().padStart(6, '0')}
+                                    Chi tiết đơn hàng #{orders.findIndex(o => o.order_id === selectedOrder.order_id) + 1}
                                 </h5>
                                 <button
                                     type="button"
@@ -341,17 +794,31 @@ const OrderManagement = () => {
                                 <div className="row">
                                     <div className="col-md-6">
                                         <h6 className="fw-bold">Thông tin khách hàng</h6>
-                                        <p><strong>Tên:</strong> {selectedOrder.customer_name}</p>
-                                        <p><strong>Email:</strong> {selectedOrder.customer_email}</p>
-                                        <p><strong>Số điện thoại:</strong> {selectedOrder.customer_phone}</p>
-                                        <p><strong>Địa chỉ giao hàng:</strong><br />{selectedOrder.shipping_address}</p>
+                                        <p><strong>Tên:</strong> {selectedOrder.customer_name || `User ${selectedOrder.user_id}`}</p>
+                                        <p><strong>Email:</strong> {selectedOrder.customer_email || selectedOrder.user_email || 'N/A'}</p>
+                                        <p><strong>Số điện thoại:</strong> {selectedOrder.customer_phone || 'N/A'}</p>
+                                        <p><strong>Địa chỉ giao hàng:</strong><br />{selectedOrder.shipping_address || 'Chưa có địa chỉ'}</p>
                                     </div>
                                     <div className="col-md-6">
                                         <h6 className="fw-bold">Thông tin đơn hàng</h6>
                                         <p><strong>Trạng thái:</strong> {getStatusBadge(selectedOrder.status)}</p>
-                                        <p><strong>Ngày tạo:</strong> {new Date(selectedOrder.created_at).toLocaleString('vi-VN')}</p>
-                                        <p><strong>Cập nhật cuối:</strong> {new Date(selectedOrder.updated_at).toLocaleString('vi-VN')}</p>
-                                        <p><strong>Tổng tiền:</strong> <span className="fw-bold text-primary">{formatCurrency(selectedOrder.total_price)}</span></p>
+                                        <p><strong>Ngày tạo:</strong> {selectedOrder.created_at ? new Date(selectedOrder.created_at).toLocaleString('vi-VN', {
+                                            year: 'numeric',
+                                            month: '2-digit',
+                                            day: '2-digit',
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                            second: '2-digit'
+                                        }) : 'N/A'}</p>
+                                        <p><strong>Cập nhật cuối:</strong> {selectedOrder.updated_at ? new Date(selectedOrder.updated_at).toLocaleString('vi-VN', {
+                                            year: 'numeric',
+                                            month: '2-digit',
+                                            day: '2-digit',
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                            second: '2-digit'
+                                        }) : 'N/A'}</p>
+                                        <p><strong>Tổng tiền:</strong> <span className="fw-bold text-primary">{formatCurrency(selectedOrder.total_price || 0)}</span></p>
                                     </div>
                                 </div>
 
@@ -369,19 +836,25 @@ const OrderManagement = () => {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {selectedOrder.items.map((item, index) => (
+                                            {selectedOrder.items && selectedOrder.items.length > 0 ? (
+                                                selectedOrder.items.map((item, index) => (
                                                 <tr key={index}>
-                                                    <td>{item.title}</td>
+                                                        <td>{item.book_title || `Book ID: ${item.book_id}`}</td>
                                                     <td className="text-center">{item.quantity}</td>
-                                                    <td className="text-end">{formatCurrency(item.price)}</td>
-                                                    <td className="text-end fw-bold">{formatCurrency(item.price * item.quantity)}</td>
+                                                        <td className="text-end">{formatCurrency(item.price_at_order || item.price || 0)}</td>
+                                                        <td className="text-end fw-bold">{formatCurrency((item.price_at_order || item.price || 0) * item.quantity)}</td>
+                                                    </tr>
+                                                ))
+                                            ) : (
+                                                <tr>
+                                                    <td colSpan="4" className="text-center text-muted">Không có sản phẩm nào</td>
                                                 </tr>
-                                            ))}
+                                            )}
                                         </tbody>
                                         <tfoot>
                                             <tr>
                                                 <th colSpan="3">Tổng cộng</th>
-                                                <th className="text-end">{formatCurrency(selectedOrder.total_price)}</th>
+                                                <th className="text-end">{formatCurrency(selectedOrder.total_price || 0)}</th>
                                             </tr>
                                         </tfoot>
                                     </table>

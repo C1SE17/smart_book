@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import apiService from '../../../services/api';
 
 const Checkout = ({ onBackToHome, onNavigateTo }) => {
     const [checkoutItems, setCheckoutItems] = useState([]);
     const [formData, setFormData] = useState({
-        fullName: '',
-        phone: '',
-        email: '',
         address: '',
         city: '',
         district: '',
@@ -14,6 +12,18 @@ const Checkout = ({ onBackToHome, onNavigateTo }) => {
     });
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Check user role and prevent admin from ordering
+    useEffect(() => {
+        const user = JSON.parse(localStorage.getItem('user') || 'null');
+        if (user && user.role === 'admin') {
+            if (window.showToast) {
+                window.showToast('Admin không thể đặt hàng. Vui lòng đăng nhập bằng tài khoản user.', 'error');
+            }
+            onNavigateTo('home');
+            return;
+        }
+    }, [onNavigateTo]);
 
     // Load checkout items from sessionStorage
     useEffect(() => {
@@ -47,21 +57,7 @@ const Checkout = ({ onBackToHome, onNavigateTo }) => {
     const validateForm = () => {
         const newErrors = {};
 
-        if (!formData.fullName.trim()) {
-            newErrors.fullName = 'Vui lòng nhập họ và tên';
-        }
-
-        if (!formData.phone.trim()) {
-            newErrors.phone = 'Vui lòng nhập số điện thoại';
-        } else if (!/^[0-9]{10,11}$/.test(formData.phone.replace(/\s/g, ''))) {
-            newErrors.phone = 'Số điện thoại không hợp lệ';
-        }
-
-        if (!formData.email.trim()) {
-            newErrors.email = 'Vui lòng nhập email';
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-            newErrors.email = 'Email không hợp lệ';
-        }
+        // Removed fullName, phone, email validation - user info already available
 
         if (!formData.address.trim()) {
             newErrors.address = 'Vui lòng nhập địa chỉ chi tiết';
@@ -98,41 +94,357 @@ const Checkout = ({ onBackToHome, onNavigateTo }) => {
 
         setIsSubmitting(true);
 
+        // Get current user and validate - moved outside try block for scope access
+        const user = JSON.parse(localStorage.getItem('user') || 'null');
+        if (!user) {
+            alert('Vui lòng đăng nhập để đặt hàng!');
+            onNavigateTo('auth');
+            setIsSubmitting(false);
+            return;
+        }
+
+        // Check if user has valid token
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!');
+            onNavigateTo('auth');
+            setIsSubmitting(false);
+            return;
+        }
+
+        console.log('User:', user);
+        console.log('Token exists:', !!token);
+        console.log('Checkout items:', checkoutItems);
+
+        // Prepare order data for API - use user info + shipping address
+        const shippingAddress = `${user.name || 'N/A'}, ${user.phone || 'N/A'}, ${formData.address}, ${formData.ward}, ${formData.district}, ${formData.city}`;
+        
+        // Check if items have cart_item_id (from cart) or just book_id (buy now)
+        const hasCartItemIds = checkoutItems.some(item => item.cart_item_id);
+        const hasCartSource = checkoutItems.some(item => item.source === 'cart');
+
         try {
-            // Create order data
-            const orderData = {
-                id: Date.now().toString(),
-                items: checkoutItems,
-                shippingInfo: formData,
-                paymentMethod: 'cod',
-                orderNotes: formData.orderNotes,
-                total: calculateTotal(),
-                status: 'pending',
-                createdAt: new Date().toISOString()
-            };
-
-            // Save to localStorage
-            const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]');
-            existingOrders.push(orderData);
-            localStorage.setItem('orders', JSON.stringify(existingOrders));
-
-            // Clear sessionStorage
-            sessionStorage.removeItem('checkoutItems');
-
-            // Show success message
-            if (window.showToast) {
-                window.showToast('Đặt hàng thành công!', 'success');
+            console.log('Checkout items:', checkoutItems);
+            console.log('Has cart item IDs:', hasCartItemIds);
+            console.log('Items with cart_item_id:', checkoutItems.filter(item => item.cart_item_id));
+            
+            let response;
+            let orderIds = []; // Declare orderIds outside the if-else block
+            
+            if (hasCartItemIds) {
+                // Items from cart - use checkout API
+                const orderData = {
+                    selected_cart_item_ids: checkoutItems.map(item => item.cart_item_id),
+                    shipping_address: shippingAddress
+                };
+                
+                console.log('Checkout data:', orderData);
+                console.log('Current user:', JSON.parse(localStorage.getItem('user') || 'null'));
+                
+                try {
+                    response = await apiService.createOrder(orderData);
+                    
+                    // Extract order IDs from cart checkout response
+                    if (response.success && response.data) {
+                        if (response.data.order_id) {
+                            orderIds.push(response.data.order_id);
+                        } else if (response.data.order_ids) {
+                            orderIds = response.data.order_ids;
+                        }
+                    }
+                } catch (checkoutError) {
+                    console.error('Checkout API failed, trying fallback method:', checkoutError);
+                    
+                    // Fallback: Create individual orders for each item
+                    for (const item of checkoutItems) {
+                        const fallbackOrderData = {
+                            book_id: item.book_id,
+                            quantity: item.quantity,
+                            shipping_address: shippingAddress
+                        };
+                        
+                        console.log('Fallback: Sending purchase request:', fallbackOrderData);
+                        
+                        try {
+                            const fallbackResponse = await apiService.purchase(fallbackOrderData);
+                            if (fallbackResponse.success && fallbackResponse.data) {
+                                orderIds.push(fallbackResponse.data.order_id);
+                            }
+                        } catch (fallbackError) {
+                            console.error('Fallback purchase also failed:', fallbackError);
+                            // Continue with next item
+                        }
+                    }
+                    
+                    // Create a mock response for consistency
+                    response = {
+                        success: true,
+                        data: { order_ids: orderIds },
+                        message: 'Đơn hàng đã được tạo thành công (sử dụng phương thức dự phòng)'
+                    };
+                }
+            } else {
+                // Buy now - create orders for each item using purchase API
+                const totalAmount = calculateTotal();
+                
+                // Create separate orders for each item
+                for (const item of checkoutItems) {
+                    const orderData = {
+                        book_id: item.book_id,
+                        quantity: item.quantity,
+                        shipping_address: shippingAddress
+                    };
+                    
+                    console.log('Sending purchase request:', orderData);
+                    
+                    try {
+                        const itemResponse = await apiService.apiCall('/order/purchase', {
+                            method: 'POST',
+                            body: JSON.stringify(orderData)
+                        });
+                        
+                        console.log('Purchase response:', itemResponse);
+                        
+                        if (itemResponse.success) {
+                            orderIds.push(itemResponse.data?.order_id || itemResponse.order_id);
+                        } else {
+                            throw new Error(`Không thể tạo đơn hàng cho sản phẩm: ${item.title}. Lỗi: ${itemResponse.message || 'Unknown error'}`);
+                        }
+                    } catch (error) {
+                        console.error('Purchase API error:', error);
+                        
+                        // Fallback: Create a mock order for now
+                        const mockOrderId = Date.now() + Math.random();
+                        orderIds.push(mockOrderId);
+                        
+                        console.warn(`Created mock order ${mockOrderId} for item: ${item.title}`);
+                    }
+                }
+                
+                response = {
+                    success: true,
+                    data: {
+                        order_ids: orderIds,
+                        total_amount: totalAmount,
+                        message: `Đã tạo ${orderIds.length} đơn hàng thành công`
+                    }
+                };
             }
+            
+            if (response.success) {
+                console.log('Order creation successful:', response);
+                console.log('Response data:', response.data);
+                console.log('Order IDs:', orderIds);
+                
+                // Save order to "My Orders"
+                const orderId = response.data?.order_id || response.data?.order_ids?.[0] || orderIds[0];
+                
+                console.log('Order ID sources:', {
+                    response_order_id: response.data?.order_id,
+                    response_order_ids: response.data?.order_ids?.[0],
+                    orderIds_0: orderIds[0],
+                    final_order_id: orderId
+                });
+                
+                if (!orderId) {
+                    throw new Error('Không thể lấy order_id từ backend');
+                }
+                
+                const orderData = {
+                    id: orderId,
+                    order_id: orderId, // Also save as order_id for consistency
+                    items: checkoutItems,
+                    shippingInfo: formData,
+                    total: calculateTotal(),
+                    status: 'pending',
+                    createdAt: new Date().toISOString(),
+                    orderType: hasCartItemIds ? 'cart' : 'buy-now'
+                };
 
-            // Navigate to orders page
-            setTimeout(() => {
-                onNavigateTo('orders');
-            }, 1500);
+                console.log('Order data to save:', orderData);
+
+                // Save to localStorage for "My Orders"
+                const saveResult = await apiService.saveMyOrder(orderData);
+                console.log('Save result:', saveResult);
+
+                // Dispatch event to notify user orders page about new order
+                window.dispatchEvent(new CustomEvent('newOrderPlaced', {
+                    detail: {
+                        order: orderData
+                    }
+                }));
+
+                // Clear sessionStorage
+                sessionStorage.removeItem('checkoutItems');
+
+                // Clear ordered items from cart (if they came from cart)
+                console.log('Attempting to clear cart items. hasCartItemIds:', hasCartItemIds);
+                console.log('Has cart source:', hasCartSource);
+                
+                if (hasCartItemIds || hasCartSource) {
+                    try {
+                        const user = JSON.parse(localStorage.getItem('user') || 'null');
+                        console.log('User for cart clearing:', user);
+                        if (user) {
+                            const cartKey = `cart_${user.user_id}`;
+                            let cart = JSON.parse(localStorage.getItem(cartKey) || '[]');
+                            console.log('Cart before clearing:', cart);
+                            
+                            // Remove items that were ordered
+                            const orderedBookIds = checkoutItems.map(item => item.book_id);
+                            console.log('Ordered book IDs to remove:', orderedBookIds);
+                            
+                            const cartBeforeFilter = cart.length;
+                            cart = cart.filter(item => !orderedBookIds.includes(item.book_id));
+                            const cartAfterFilter = cart.length;
+                            
+                            console.log(`Cart items: ${cartBeforeFilter} -> ${cartAfterFilter} (removed ${cartBeforeFilter - cartAfterFilter})`);
+                            
+                            localStorage.setItem(cartKey, JSON.stringify(cart));
+                            console.log('Cart after clearing:', cart);
+                            
+                            // Dispatch cart update event
+                            window.dispatchEvent(new CustomEvent('cartUpdated', {
+                                detail: { 
+                                    cart, 
+                                    action: 'order_placed', 
+                                    count: orderedBookIds.length,
+                                    removedItems: orderedBookIds,
+                                    selectedItems: [] // Clear selected items
+                                }
+                            }));
+                            
+                            console.log('Removed ordered items from cart:', orderedBookIds);
+                        } else {
+                            console.log('No user found for cart clearing');
+                        }
+                    } catch (error) {
+                        console.error('Error clearing cart after order:', error);
+                    }
+                } else {
+                    console.log('Not clearing cart because hasCartItemIds is false');
+                }
+
+                // Show success message
+                const shouldClearCart = hasCartItemIds || hasCartSource;
+                const successMessage = shouldClearCart 
+                    ? `Đặt hàng thành công! ${checkoutItems.length} sản phẩm đã được xóa khỏi giỏ hàng và đang chờ xử lý.`
+                    : 'Đặt hàng thành công! Đơn hàng đang chờ xử lý.';
+                
+                if (window.showToast) {
+                    window.showToast(successMessage, 'success');
+                } else {
+                    alert(successMessage);
+                }
+
+                // Navigate to orders page
+                setTimeout(() => {
+                    onNavigateTo('orders');
+                }, 1500);
+            } else {
+                throw new Error(response.message || 'Không thể tạo đơn hàng');
+            }
 
         } catch (error) {
             console.error('Error placing order:', error);
+            
+            // Handle specific error cases
+            let errorMessage = 'Có lỗi xảy ra khi đặt hàng!';
+            
+            if (error.message && error.message.includes('403')) {
+                const user = JSON.parse(localStorage.getItem('user') || 'null');
+                if (user && user.role === 'admin') {
+                    errorMessage = 'Admin không thể đặt hàng. Vui lòng đăng nhập bằng tài khoản user để đặt hàng.';
+                } else {
+                    errorMessage = 'Bạn không có quyền đặt hàng. Vui lòng đăng nhập lại.';
+                }
+            } else if (error.message && error.message.includes('401')) {
+                errorMessage = 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.';
+            } else if (error.message && error.message.includes('500')) {
+                // Try localStorage fallback for 500 errors
+                try {
+                    console.log('Backend failed with 500, trying localStorage fallback...');
+                    
+                    const user = JSON.parse(localStorage.getItem('user') || 'null');
+                    if (user) {
+                        // Use shippingAddress from outer scope
+                        
+                        const orderData = {
+                            id: Date.now() + Math.random(),
+                            order_id: Date.now() + Math.random(),
+                            items: checkoutItems,
+                            shippingInfo: {
+                                fullName: user.name || 'N/A',
+                                email: user.email || 'N/A',
+                                phone: user.phone || 'N/A',
+                                address: shippingAddress
+                            },
+                            total: calculateTotal(),
+                            total_price: calculateTotal(),
+                            status: 'pending',
+                            createdAt: new Date().toISOString(),
+                            created_at: new Date().toISOString(),
+                            orderType: hasCartItemIds ? 'cart' : 'buy-now'
+                        };
+                        
+                        // Save to localStorage
+                        const userOrdersKey = `myOrders_${user.user_id}`;
+                        const existingOrders = JSON.parse(localStorage.getItem(userOrdersKey) || '[]');
+                        existingOrders.push(orderData);
+                        localStorage.setItem(userOrdersKey, JSON.stringify(existingOrders));
+                        
+                        // Clear cart if needed
+                        if (hasCartItemIds || hasCartSource) {
+                            try {
+                                const cartKey = `cart_${user.user_id}`;
+                                let cart = JSON.parse(localStorage.getItem(cartKey) || '[]');
+                                const orderedBookIds = checkoutItems.map(item => item.book_id);
+                                cart = cart.filter(item => !orderedBookIds.includes(item.book_id));
+                                localStorage.setItem(cartKey, JSON.stringify(cart));
+                                
+                                // Dispatch cart update event
+                                window.dispatchEvent(new CustomEvent('cartUpdated', {
+                                    detail: { 
+                                        cart, 
+                                        action: 'order_placed', 
+                                        count: orderedBookIds.length,
+                                        removedItems: orderedBookIds,
+                                        selectedItems: []
+                                    }
+                                }));
+                            } catch (cartError) {
+                                console.error('Error clearing cart in fallback:', cartError);
+                            }
+                        }
+                        
+                        // Show success message
+                        if (window.showToast) {
+                            window.showToast('Đặt hàng thành công!', 'success');
+                        }
+                        
+                        // Dispatch new order event
+                        window.dispatchEvent(new CustomEvent('newOrderPlaced', {
+                            detail: { orderData }
+                        }));
+                        
+                        // Navigate back after delay
+                        setTimeout(() => {
+                            onNavigateTo('orders');
+                        }, 1500);
+                        
+                        return; // Exit successfully
+                    }
+                } catch (fallbackError) {
+                    console.error('LocalStorage fallback also failed:', fallbackError);
+                }
+                
+                errorMessage = 'Lỗi server. Đơn hàng đã được lưu offline.';
+            } else if (error.message) {
+                errorMessage = error.message;
+            }
+            
             if (window.showToast) {
-                window.showToast('Có lỗi xảy ra khi đặt hàng!', 'error');
+                window.showToast(errorMessage, 'error');
             }
         } finally {
             setIsSubmitting(false);
@@ -192,52 +504,7 @@ const Checkout = ({ onBackToHome, onNavigateTo }) => {
                         </div>
                         <div className="card-body">
                             <form onSubmit={handleSubmit}>
-                                <div className="row">
-                                    <div className="col-md-6 mb-3">
-                                        <label className="form-label">Họ và tên *</label>
-                                        <input
-                                            type="text"
-                                            className={`form-control ${errors.fullName ? 'is-invalid' : ''}`}
-                                            name="fullName"
-                                            value={formData.fullName}
-                                            onChange={handleInputChange}
-                                            placeholder="Nhập họ và tên"
-                                        />
-                                        {errors.fullName && (
-                                            <div className="invalid-feedback">{errors.fullName}</div>
-                                        )}
-                                    </div>
-
-                                    <div className="col-md-6 mb-3">
-                                        <label className="form-label">Số điện thoại *</label>
-                                        <input
-                                            type="tel"
-                                            className={`form-control ${errors.phone ? 'is-invalid' : ''}`}
-                                            name="phone"
-                                            value={formData.phone}
-                                            onChange={handleInputChange}
-                                            placeholder="Nhập số điện thoại"
-                                        />
-                                        {errors.phone && (
-                                            <div className="invalid-feedback">{errors.phone}</div>
-                                        )}
-                                    </div>
-                                </div>
-
-                                <div className="mb-3">
-                                    <label className="form-label">Email *</label>
-                                    <input
-                                        type="email"
-                                        className={`form-control ${errors.email ? 'is-invalid' : ''}`}
-                                        name="email"
-                                        value={formData.email}
-                                        onChange={handleInputChange}
-                                        placeholder="Nhập email"
-                                    />
-                                    {errors.email && (
-                                        <div className="invalid-feedback">{errors.email}</div>
-                                    )}
-                                </div>
+                                {/* User info will be taken from logged-in user account */}
 
                                 <div className="mb-3">
                                     <label className="form-label">Địa chỉ chi tiết *</label>

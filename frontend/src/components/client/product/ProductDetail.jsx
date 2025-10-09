@@ -134,9 +134,36 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
 
     try {
       console.log('Adding to cart:', { userId: user.user_id, bookId: product.book_id, quantity });
-      // TODO: Use real cart API
-      // const { cartApi } = await import('../../../services/cartApi');
-      // await cartApi.addToCart(user.user_id, product.book_id, quantity);
+      
+      // Add to cart using localStorage
+      const cartKey = `cart_${user.user_id}`;
+      const existingCart = JSON.parse(localStorage.getItem(cartKey) || '[]');
+      const existingItem = existingCart.find(item => item.book_id === product.book_id);
+
+      if (existingItem) {
+        // Update existing item quantity
+        existingItem.quantity += quantity;
+        const updatedCart = existingCart.map(item =>
+          item.book_id === product.book_id ? existingItem : item
+        );
+        localStorage.setItem(cartKey, JSON.stringify(updatedCart));
+      } else {
+        // Add new item to cart
+        const newItem = {
+          book_id: product.book_id,
+          title: product.title,
+          price: product.price,
+          quantity: quantity,
+          cover_image: product.cover_image,
+          author_name: product.author_name,
+          author: product.author,
+          category_name: product.category_name,
+          publisher_name: product.publisher_name
+        };
+        const updatedCart = [...existingCart, newItem];
+        localStorage.setItem(cartKey, JSON.stringify(updatedCart));
+      }
+
       console.log('Successfully added to cart');
       showToast(`${quantity} x "${product.title}" đã được thêm vào giỏ hàng!`, 'success');
 

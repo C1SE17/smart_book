@@ -320,7 +320,13 @@ function App() {
         />
       )}
       {currentPage === 'checkout' && (
-        <Layout onViewAllNotifications={handleViewAllNotifications}>
+        <Layout 
+          onViewAllNotifications={handleViewAllNotifications}
+          onNavigateTo={handleNavigateTo}
+          onBackToHome={handleBackToHome}
+          user={user}
+          onLogout={handleLogout}
+        >
           <Checkout
             onBackToHome={handleBackToHome}
             onNavigateTo={handleNavigateTo}

@@ -240,8 +240,6 @@ const CategoriesPage = ({ onNavigateTo }) => {
     e.stopPropagation();
 
     try {
-      // TODO: Implement real cart API
-      // const { cartApi } = await import('../../../services/cartApi');
       const user = JSON.parse(localStorage.getItem('user'));
 
       if (!user) {
@@ -249,7 +247,41 @@ const CategoriesPage = ({ onNavigateTo }) => {
         return;
       }
 
-      // await cartApi.addToCart(user.user_id, bookId, 1);
+      // Find the product details
+      const product = filteredProducts.find(p => p.book_id === bookId);
+      if (!product) {
+        alert('Không tìm thấy thông tin sản phẩm!');
+        return;
+      }
+
+      // Add to cart using localStorage
+      const cartKey = `cart_${user.user_id}`;
+      const existingCart = JSON.parse(localStorage.getItem(cartKey) || '[]');
+      const existingItem = existingCart.find(item => item.book_id === bookId);
+
+      if (existingItem) {
+        // Update existing item quantity
+        existingItem.quantity += 1;
+        const updatedCart = existingCart.map(item =>
+          item.book_id === bookId ? existingItem : item
+        );
+        localStorage.setItem(cartKey, JSON.stringify(updatedCart));
+      } else {
+        // Add new item to cart
+        const newItem = {
+          book_id: product.book_id,
+          title: product.title,
+          price: product.price,
+          quantity: 1,
+          cover_image: product.cover_image,
+          author_name: product.author_name,
+          author: product.author,
+          category_name: product.category_name,
+          publisher_name: product.publisher_name
+        };
+        const updatedCart = [...existingCart, newItem];
+        localStorage.setItem(cartKey, JSON.stringify(updatedCart));
+      }
 
       // Dispatch cart updated event
       window.dispatchEvent(new CustomEvent('cartUpdated'));
