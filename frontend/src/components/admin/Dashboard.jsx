@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import apiService from '../../services/api';
 
 const Dashboard = () => {
     const [stats, setStats] = useState({
@@ -12,46 +13,112 @@ const Dashboard = () => {
     });
 
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    // Mock data - trong thực tế sẽ fetch từ API
+    // Fetch real data from API
     useEffect(() => {
         const fetchDashboardData = async () => {
             setLoading(true);
-            // Simulate API call
-            setTimeout(() => {
-                setStats({
-                    totalRevenue: 125000000,
-                    totalOrders: 1247,
-                    totalBooks: 342,
-                    totalUsers: 892,
-                    monthlyRevenue: [
-                        { month: 'Tháng 1', revenue: 15000000 },
-                        { month: 'Tháng 2', revenue: 18000000 },
-                        { month: 'Tháng 3', revenue: 22000000 },
-                        { month: 'Tháng 4', revenue: 19000000 },
-                        { month: 'Tháng 5', revenue: 25000000 },
-                        { month: 'Tháng 6', revenue: 26000000 }
-                    ],
-                    topSellingBooks: [
-                        { id: 1, title: 'Thanh Gươm Diệt Quỷ - Tập 1', sales: 156, revenue: 127140000 },
-                        { id: 2, title: 'Harry Potter và Hòn Đá Phù Thủy', sales: 134, revenue: 42880000 },
-                        { id: 3, title: 'One Piece - Tập 1', sales: 98, revenue: 19600000 },
-                        { id: 4, title: 'Attack on Titan - Tập 1', sales: 87, revenue: 19140000 },
-                        { id: 5, title: 'Norwegian Wood', sales: 76, revenue: 26600000 }
-                    ],
-                    recentOrders: [
-                        { id: 1, customer: 'Nguyễn Văn A', amount: 450000, status: 'completed', date: '2024-01-15' },
-                        { id: 2, customer: 'Trần Thị B', amount: 320000, status: 'pending', date: '2024-01-15' },
-                        { id: 3, customer: 'Lê Văn C', amount: 680000, status: 'shipped', date: '2024-01-14' },
-                        { id: 4, customer: 'Phạm Thị D', amount: 250000, status: 'completed', date: '2024-01-14' },
-                        { id: 5, customer: 'Hoàng Văn E', amount: 890000, status: 'processing', date: '2024-01-13' }
-                    ]
-                });
+            setError(null);
+            
+            try {
+                // Check if user is admin
+                const user = JSON.parse(localStorage.getItem('user') || 'null');
+                if (!user || user.role !== 'admin') {
+                    setError('Bạn không có quyền truy cập dashboard admin');
+                    setLoading(false);
+                    return;
+                }
+
+                // Fetch all data in parallel
+                const [ordersResponse, booksResponse, usersResponse] = await Promise.all([
+                    apiService.getAllOrders(),
+                    apiService.getBooks({ limit: 1000 }), // Get all books for count
+                    apiService.getAllUsers({ limit: 1000 }) // Get all users for count
+                ]);
+
+                if (ordersResponse.success) {
+                    const orders = ordersResponse.data || [];
+                    
+                    // Calculate total revenue from orders
+                    const totalRevenue = orders.reduce((sum, order) => {
+                        return sum + (parseFloat(order.total_price) || 0);
+                    }, 0);
+
+                    // Get recent orders (last 5)
+                    const recentOrders = orders
+                        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+                        .slice(0, 5)
+                        .map(order => ({
+                            id: order.order_id,
+                            customer: order.user_name || `User ${order.user_id}`,
+                            amount: parseFloat(order.total_price) || 0,
+                            status: order.status,
+                            date: order.created_at
+                        }));
+
+                    // Calculate monthly revenue (last 6 months)
+                    const monthlyRevenue = [];
+                    const currentDate = new Date();
+                    for (let i = 5; i >= 0; i--) {
+                        const monthDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
+                        const monthName = monthDate.toLocaleDateString('vi-VN', { month: 'long' });
+                        
+                        const monthOrders = orders.filter(order => {
+                            const orderDate = new Date(order.created_at);
+                            return orderDate.getMonth() === monthDate.getMonth() && 
+                                   orderDate.getFullYear() === monthDate.getFullYear();
+                        });
+                        
+                        const monthRevenue = monthOrders.reduce((sum, order) => {
+                            return sum + (parseFloat(order.total_price) || 0);
+                        }, 0);
+                        
+                        monthlyRevenue.push({
+                            month: monthName,
+                            revenue: monthRevenue
+                        });
+                    }
+
+                    // Mock top selling books (since we don't have sales data yet)
+                    const topSellingBooks = [
+                        { id: 1, title: 'Sách bán chạy nhất', sales: 0, revenue: 0 },
+                        { id: 2, title: 'Sách phổ biến', sales: 0, revenue: 0 },
+                        { id: 3, title: 'Sách được yêu thích', sales: 0, revenue: 0 }
+                    ];
+
+                    setStats({
+                        totalRevenue,
+                        totalOrders: orders.length,
+                        totalBooks: booksResponse.success ? (booksResponse.data?.length || 0) : 0,
+                        totalUsers: usersResponse.success ? (usersResponse.data?.length || 0) : 0,
+                        monthlyRevenue,
+                        topSellingBooks,
+                        recentOrders
+                    });
+                } else {
+                    setError('Không thể tải dữ liệu dashboard');
+                }
+            } catch (err) {
+                console.error('Error fetching dashboard data:', err);
+                setError('Có lỗi xảy ra khi tải dữ liệu dashboard');
+            } finally {
                 setLoading(false);
-            }, 1000);
+            }
         };
 
         fetchDashboardData();
+
+        // Listen for new order events
+        const handleNewOrder = () => {
+            fetchDashboardData(); // Refresh data when new order is created
+        };
+
+        window.addEventListener('newOrderPlaced', handleNewOrder);
+        
+        return () => {
+            window.removeEventListener('newOrderPlaced', handleNewOrder);
+        };
     }, []);
 
     const formatCurrency = (amount) => {
@@ -88,15 +155,52 @@ const Dashboard = () => {
         );
     }
 
+    if (error) {
+        return (
+            <div className="alert alert-danger" role="alert">
+                <i className="fas fa-exclamation-triangle me-2"></i>
+                {error}
+                <button 
+                    className="btn btn-outline-primary btn-sm ms-3"
+                    onClick={() => window.location.reload()}
+                >
+                    <i className="fas fa-sync-alt me-1"></i>
+                    Thử lại
+                </button>
+            </div>
+        );
+    }
+
     return (
         <div>
             {/* Header */}
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <h2 className="fw-bold text-dark">Tổng Quan</h2>
-                <div className="text-muted">
-                    <i className="fas fa-calendar me-2"></i>
-                    {new Date().toLocaleDateString('vi-VN')}
+                <div className="d-flex align-items-center gap-3">
+                    <button 
+                        className="btn btn-outline-primary btn-sm"
+                        onClick={() => window.location.reload()}
+                        disabled={loading}
+                    >
+                        <i className={`fas fa-sync-alt ${loading ? 'fa-spin' : ''} me-1`}></i>
+                        Làm mới
+                    </button>
+                    <div className="text-muted">
+                        <i className="fas fa-calendar me-2"></i>
+                        {new Date().toLocaleDateString('vi-VN')}
+                    </div>
                 </div>
+            </div>
+
+            {/* Info Message */}
+            <div className="alert alert-info alert-dismissible fade show" role="alert">
+                <i className="fas fa-info-circle me-2"></i>
+                <strong>Lưu ý:</strong> Khi khách hàng đặt hàng thành công từ trang chủ, đơn hàng sẽ xuất hiện trong dashboard này với trạng thái "Chờ xử lý". Dữ liệu sẽ tự động cập nhật khi có đơn hàng mới.
+                <button 
+                    type="button" 
+                    className="btn-close" 
+                    data-bs-dismiss="alert"
+                ></button>
             </div>
 
             {/* Stats Cards */}

@@ -13,13 +13,15 @@ class OrderController {
         quantity || 1,
         shipping_address || ""
       );
-      res
-        .status(200)
-        .json({
-          message: "Đơn hàng tạm đã được tạo",
+      res.status(200).json({
+        success: true,
+        message: "Đơn hàng tạm đã được tạo",
+        data: {
           order_id: result.order_id,
-          total_amount: result.total_amount,
-        });
+          total_amount: result.total_amount
+        }
+      });
+      
     } catch (err) {
       console.error("Lỗi khi đặt hàng:", err.message);
       res.status(500).json({ error: "Lỗi khi đặt hàng: " + err.message });
@@ -40,13 +42,15 @@ class OrderController {
         selected_cart_item_ids,
         shipping_address || ""
       );
-      res
-        .status(200)
-        .json({
-          message: "Đơn hàng đã được đặt thành công, đang chờ xử lý",
+      res.status(200).json({
+        success: true,
+        message: "Đơn hàng đã được đặt thành công, đang chờ xử lý",
+        data: {
           order_id: result.order_id,
-          total_amount: result.total_amount,
-        });
+          total_amount: result.total_amount
+        }
+      });
+      
     } catch (err) {
       console.error("Lỗi khi đặt hàng từ giỏ:", err.message);
       res.status(500).json({ error: "Lỗi khi đặt hàng: " + err.message });
@@ -59,7 +63,7 @@ class OrderController {
 
     try {
       const order = await OrderModel.getOrderDetails(order_id, userId);
-      res.status(200).json(order);
+      res.status(200).json({ success: true, data: order });
     } catch (err) {
       console.error("Lỗi khi lấy chi tiết đơn hàng:", err.message);
       res
@@ -89,11 +93,9 @@ class OrderController {
       const orders = await OrderModel.getUserOrders(userId);
       res.status(200).json(orders);
     } catch (err) {
-      res
-        .status(500)
-        .json({
-          error: "Lỗi khi lấy danh sách đơn hàng của bạn: " + err.message,
-        });
+      res.status(500).json({
+        error: "Lỗi khi lấy danh sách đơn hàng của bạn: " + err.message,
+      });
     }
   }
   // API tổng doanh thu và tổng đơn theo ngày/tháng
@@ -168,11 +170,9 @@ class OrderController {
       res.status(200).json(orders);
     } catch (err) {
       console.error("Lỗi khi lấy danh sách đơn hàng cần giao:", err.message);
-      res
-        .status(500)
-        .json({
-          error: "Lỗi khi lấy danh sách đơn hàng cần giao: " + err.message,
-        });
+      res.status(500).json({
+        error: "Lỗi khi lấy danh sách đơn hàng cần giao: " + err.message,
+      });
     }
   }
 
@@ -181,12 +181,9 @@ class OrderController {
       const orders = await OrderModel.getAllOrders();
       res.status(200).json(orders);
     } catch (err) {
-      console.error("Lỗi khi lấy danh sách tất cả đơn hàng:", err.message);
       res
         .status(500)
-        .json({
-          error: "Lỗi khi lấy danh sách tất cả đơn hàng: " + err.message,
-        });
+        .json({ error: "Lỗi khi lấy danh sách đơn hàng: " + err.message });
     }
   }
 
@@ -207,11 +204,9 @@ class OrderController {
         .json({ message: "Cập nhật trạng thái đơn hàng thành công" });
     } catch (err) {
       console.error("Lỗi khi cập nhật trạng thái đơn hàng:", err.message);
-      res
-        .status(500)
-        .json({
-          error: "Lỗi khi cập nhật trạng thái đơn hàng: " + err.message,
-        });
+      res.status(500).json({
+        error: "Lỗi khi cập nhật trạng thái đơn hàng: " + err.message,
+      });
     }
   }
 
@@ -224,56 +219,6 @@ class OrderController {
     } catch (err) {
       console.error("Lỗi khi xóa đơn hàng:", err.message);
       res.status(500).json({ error: "Lỗi khi xóa đơn hàng: " + err.message });
-    }
-  }
-
-  // API tổng doanh thu và tổng đơn theo ngày/tháng
-  static async getRevenueStats(req, res) {
-    const { type, date } = req.query; // type: 'day' hoặc 'month', date: '2025-10-07' hoặc '2025-10'
-    if (!type || !date)
-      return res.status(400).json({ error: "Thiếu tham số type hoặc date" });
-    try {
-      const stats = await OrderModel.getRevenue({ type, date });
-      res.json(stats);
-    } catch (err) {
-      res.status(500).json({ error: err.message });
-    }
-  }
-
-  // API thống kê số lượng sản phẩm bán được theo ngày/tháng
-  static async getProductStats(req, res) {
-    const { type, date } = req.query;
-    if (!type || !date)
-      return res.status(400).json({ error: "Thiếu tham số type hoặc date" });
-    try {
-      const stats = await OrderModel.getProductStats({ type, date });
-      res.json(stats);
-    } catch (err) {
-      res.status(500).json({ error: err.message });
-    }
-  }
-
-  // API doanh thu từng ngày trong tháng (cho biểu đồ)
-  static async getDailyRevenueOfMonth(req, res) {
-    const { month } = req.query; // month: '2025-10'
-    if (!month) return res.status(400).json({ error: "Thiếu tham số month" });
-    try {
-      const stats = await OrderModel.getDailyRevenueOfMonth(month);
-      res.json(stats);
-    } catch (err) {
-      res.status(500).json({ error: err.message });
-    }
-  }
-
-  // API doanh thu từng tháng trong năm (cho biểu đồ)
-  static async getMonthlyRevenueOfYear(req, res) {
-    const { year } = req.query; // year: '2025'
-    if (!year) return res.status(400).json({ error: "Thiếu tham số year" });
-    try {
-      const stats = await OrderModel.getMonthlyRevenueOfYear(year);
-      res.json(stats);
-    } catch (err) {
-      res.status(500).json({ error: err.message });
     }
   }
 }

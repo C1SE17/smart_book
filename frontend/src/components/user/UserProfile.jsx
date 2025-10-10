@@ -94,16 +94,19 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
 
     setLoading(false);
 
-    // Code gọi backend (đã tắt)
-    /*
+    // Code gọi backend
     try {
       setLoading(true);
       const profileData = await apiService.getUserById(user.user_id);
+      console.log('Profile data from API:', profileData);
       
       const finalProfileData = {
         ...profileData,
         role: user.role || profileData.role || 'customer'
       };
+      
+      console.log('Final profile data:', finalProfileData);
+      console.log('Phone in final profile data:', finalProfileData.phone);
       
       setUserProfile(finalProfileData);
       setFormData({
@@ -126,7 +129,6 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
     } finally {
       setLoading(false);
     }
-    */
   }, [user, displayUser]);
 
   // Load profile data on mount
@@ -225,21 +227,45 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
     setLoading(true);
 
     try {
-      // TODO: Implement real user API
-      // const { userApi } = await import('../../services/userApi');
-      // const updatedProfile = await userApi.updateUser(user.user_id, formData, user);
+      // Gọi API backend để cập nhật thông tin user
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:3306/api/user/update', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          phone: formData.phone,
+          address: formData.address
+        })
+      });
 
-      // Mock response for now
-      const updatedProfile = { ...formData };
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('Update user result:', result);
+      console.log('Updated phone:', formData.phone);
 
       // Cập nhật user trong localStorage
       const updatedUser = {
         ...user,
-        ...updatedProfile
+        name: formData.name,
+        phone: formData.phone,
+        address: formData.address
       };
       localStorage.setItem('user', JSON.stringify(updatedUser));
 
-      setUserProfile(updatedProfile);
+      setUserProfile({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
+        role: formData.role
+      });
 
       if (onUpdateProfile) {
         onUpdateProfile(updatedUser);

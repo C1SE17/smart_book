@@ -604,16 +604,16 @@ const MyOrders = ({ onBackToHome, onNavigateTo }) => {
                                                     const orderId = order.order_id || order.id;
                                                     console.log(`Order ID for display: ${orderId} (type: ${typeof orderId})`);
                                                     
-                                                    // If it's a number (from database), format as sequential number
+                                                    // Always use database order_id as sequential number
                                                     if (typeof orderId === 'number') {
-                                                        return orderId.toString().padStart(6, '0');
+                                                        return orderId.toString();
                                                     }
-                                                    // If it's a string that looks like a number, try to parse it
+                                                    // If it's a string that looks like a number, use it directly
                                                     if (typeof orderId === 'string' && /^\d+$/.test(orderId)) {
-                                                        return parseInt(orderId).toString().padStart(6, '0');
+                                                        return orderId;
                                                     }
-                                                    // If it's a timestamp or other format, use as is
-                                                    return orderId.toString();
+                                                    // For other formats, try to extract number or use as is
+                                                    return orderId?.toString() || 'N/A';
                                                 })()}
                                             </h6>
                                         </div>
@@ -778,15 +778,15 @@ const MyOrders = ({ onBackToHome, onNavigateTo }) => {
                                         const orderId = selectedOrder.order_id || selectedOrder.id;
                                         console.log(`Modal Order ID for display: ${orderId} (type: ${typeof orderId})`);
                                         
-                                        // If it's a number (from database), format as sequential number
+                                        // Always use database order_id as sequential number
                                         if (typeof orderId === 'number') {
-                                            return orderId.toString().padStart(6, '0');
+                                            return orderId.toString();
                                         }
-                                        // If it's a string that looks like a number, try to parse it
+                                        // If it's a string that looks like a number, use it directly
                                         if (typeof orderId === 'string' && /^\d+$/.test(orderId)) {
-                                            return parseInt(orderId).toString().padStart(6, '0');
+                                            return orderId;
                                         }
-                                        // If it's a timestamp or other format, use as is
+                                        // For other formats, try to extract number or use as is
                                         return orderId?.toString() || 'N/A';
                                     })()}
                                 </h5>
@@ -811,7 +811,12 @@ const MyOrders = ({ onBackToHome, onNavigateTo }) => {
                                                         <p><strong>Email:</strong> {selectedOrder.shippingInfo.email || 'N/A'}</p>
                                                         <p><strong>Số điện thoại:</strong> {selectedOrder.shippingInfo.phone || 'N/A'}</p>
                                                         <p><strong>Địa chỉ:</strong><br />
-                                                            {selectedOrder.shippingInfo.address || ''}, {selectedOrder.shippingInfo.ward || ''}, {selectedOrder.shippingInfo.district || ''}, {selectedOrder.shippingInfo.city || ''}
+                                                            {[
+                                                                selectedOrder.shippingInfo.address,
+                                                                selectedOrder.shippingInfo.ward,
+                                                                selectedOrder.shippingInfo.district,
+                                                                selectedOrder.shippingInfo.city
+                                                            ].filter(part => part && part.trim() !== '').join(', ') || 'Chưa có địa chỉ'}
                                                         </p>
                                                     </>
                                                 );
@@ -847,20 +852,32 @@ const MyOrders = ({ onBackToHome, onNavigateTo }) => {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {selectedOrder.items && selectedOrder.items.length > 0 ? (
-                                                selectedOrder.items.map((item, index) => (
-                                                    <tr key={index}>
-                                                        <td>{item.title || item.book_title}</td>
-                                                        <td className="text-center">{item.quantity}</td>
-                                                        <td className="text-end">{formatCurrency(item.price || 0)}</td>
-                                                        <td className="text-end fw-bold">{formatCurrency((item.price || 0) * item.quantity)}</td>
-                                                    </tr>
-                                                ))
-                                            ) : (
-                                                <tr>
-                                                    <td colSpan="4" className="text-center text-muted">Không có sản phẩm nào</td>
-                                                </tr>
-                                            )}
+                                            {(() => {
+                                                console.log('Selected order items:', selectedOrder.items);
+                                                console.log('Items length:', selectedOrder.items ? selectedOrder.items.length : 0);
+                                                console.log('Selected order shippingInfo:', selectedOrder.shippingInfo);
+                                                console.log('Phone number in selectedOrder:', selectedOrder.shippingInfo?.phone);
+                                                
+                                                if (selectedOrder.items && selectedOrder.items.length > 0) {
+                                                    return selectedOrder.items.map((item, index) => {
+                                                        console.log(`Item ${index}:`, item);
+                                                        return (
+                                                            <tr key={index}>
+                                                                <td>{item.title || item.book_title}</td>
+                                                                <td className="text-center">{item.quantity}</td>
+                                                                <td className="text-end">{formatCurrency(item.price || 0)}</td>
+                                                                <td className="text-end fw-bold">{formatCurrency((item.price || 0) * item.quantity)}</td>
+                                                            </tr>
+                                                        );
+                                                    });
+                                                } else {
+                                                    return (
+                                                        <tr>
+                                                            <td colSpan="4" className="text-center text-muted">Không có sản phẩm nào</td>
+                                                        </tr>
+                                                    );
+                                                }
+                                            })()}
                                         </tbody>
                                         <tfoot>
                                             <tr>

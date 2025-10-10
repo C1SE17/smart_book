@@ -116,8 +116,8 @@ const Checkout = ({ onBackToHome, onNavigateTo }) => {
         console.log('Token exists:', !!token);
         console.log('Checkout items:', checkoutItems);
 
-        // Prepare order data for API - use user info + shipping address
-        const shippingAddress = `${user.name || 'N/A'}, ${user.phone || 'N/A'}, ${formData.address}, ${formData.ward}, ${formData.district}, ${formData.city}`;
+        // Prepare order data for API - use structured shipping address
+        const shippingAddress = `${formData.address}, ${formData.ward}, ${formData.district}, ${formData.city}`;
         
         // Check if items have cart_item_id (from cart) or just book_id (buy now)
         const hasCartItemIds = checkoutItems.some(item => item.cart_item_id);
@@ -126,10 +126,9 @@ const Checkout = ({ onBackToHome, onNavigateTo }) => {
         try {
             console.log('Checkout items:', checkoutItems);
             console.log('Has cart item IDs:', hasCartItemIds);
-            console.log('Items with cart_item_id:', checkoutItems.filter(item => item.cart_item_id));
             
             let response;
-            let orderIds = []; // Declare orderIds outside the if-else block
+            let orderId = null;
             
             if (hasCartItemIds) {
                 // Items from cart - use checkout API
@@ -139,125 +138,54 @@ const Checkout = ({ onBackToHome, onNavigateTo }) => {
                 };
                 
                 console.log('Checkout data:', orderData);
-                console.log('Current user:', JSON.parse(localStorage.getItem('user') || 'null'));
+                response = await apiService.createOrder(orderData);
                 
-                try {
-                    response = await apiService.createOrder(orderData);
-                    
-                    // Extract order IDs from cart checkout response
-                    if (response.success && response.data) {
-                        if (response.data.order_id) {
-                            orderIds.push(response.data.order_id);
-                        } else if (response.data.order_ids) {
-                            orderIds = response.data.order_ids;
-                        }
-                    }
-                } catch (checkoutError) {
-                    console.error('Checkout API failed, trying fallback method:', checkoutError);
-                    
-                    // Fallback: Create individual orders for each item
-                    for (const item of checkoutItems) {
-                        const fallbackOrderData = {
-                            book_id: item.book_id,
-                            quantity: item.quantity,
-                            shipping_address: shippingAddress
-                        };
-                        
-                        console.log('Fallback: Sending purchase request:', fallbackOrderData);
-                        
-                        try {
-                            const fallbackResponse = await apiService.purchase(fallbackOrderData);
-                            if (fallbackResponse.success && fallbackResponse.data) {
-                                orderIds.push(fallbackResponse.data.order_id);
-                            }
-                        } catch (fallbackError) {
-                            console.error('Fallback purchase also failed:', fallbackError);
-                            // Continue with next item
-                        }
-                    }
-                    
-                    // Create a mock response for consistency
-                    response = {
-                        success: true,
-                        data: { order_ids: orderIds },
-                        message: 'Đơn hàng đã được tạo thành công (sử dụng phương thức dự phòng)'
-                    };
+                if (response.success && response.data) {
+                    orderId = response.data.order_id;
                 }
             } else {
-                // Buy now - create orders for each item using purchase API
-                const totalAmount = calculateTotal();
-                
-                // Create separate orders for each item
-                for (const item of checkoutItems) {
-                    const orderData = {
-                        book_id: item.book_id,
-                        quantity: item.quantity,
-                        shipping_address: shippingAddress
-                    };
-                    
-                    console.log('Sending purchase request:', orderData);
-                    
-                    try {
-                        const itemResponse = await apiService.apiCall('/order/purchase', {
-                            method: 'POST',
-                            body: JSON.stringify(orderData)
-                        });
-                        
-                        console.log('Purchase response:', itemResponse);
-                        
-                        if (itemResponse.success) {
-                            orderIds.push(itemResponse.data?.order_id || itemResponse.order_id);
-                        } else {
-                            throw new Error(`Không thể tạo đơn hàng cho sản phẩm: ${item.title}. Lỗi: ${itemResponse.message || 'Unknown error'}`);
-                        }
-                    } catch (error) {
-                        console.error('Purchase API error:', error);
-                        
-                        // Fallback: Create a mock order for now
-                        const mockOrderId = Date.now() + Math.random();
-                        orderIds.push(mockOrderId);
-                        
-                        console.warn(`Created mock order ${mockOrderId} for item: ${item.title}`);
-                    }
-                }
-                
-                response = {
-                    success: true,
-                    data: {
-                        order_ids: orderIds,
-                        total_amount: totalAmount,
-                        message: `Đã tạo ${orderIds.length} đơn hàng thành công`
-                    }
+                // Buy now - create single order for all items using purchase API
+                // For simplicity, we'll create one order per item
+                const orderData = {
+                    book_id: checkoutItems[0].book_id, // Take first item for now
+                    quantity: checkoutItems[0].quantity,
+                    shipping_address: shippingAddress
                 };
+                
+                console.log('Purchase data:', orderData);
+                response = await apiService.purchase(orderData);
+                
+                if (response.success && response.data) {
+                    orderId = response.data.order_id;
+                }
             }
             
-            if (response.success) {
+            if (response.success && orderId) {
                 console.log('Order creation successful:', response);
-                console.log('Response data:', response.data);
-                console.log('Order IDs:', orderIds);
-                
-                // Save order to "My Orders"
-                const orderId = response.data?.order_id || response.data?.order_ids?.[0] || orderIds[0];
-                
-                console.log('Order ID sources:', {
-                    response_order_id: response.data?.order_id,
-                    response_order_ids: response.data?.order_ids?.[0],
-                    orderIds_0: orderIds[0],
-                    final_order_id: orderId
-                });
-                
-                if (!orderId) {
-                    throw new Error('Không thể lấy order_id từ backend');
-                }
+                console.log('Order ID:', orderId);
                 
                 const orderData = {
                     id: orderId,
-                    order_id: orderId, // Also save as order_id for consistency
-                    items: checkoutItems,
-                    shippingInfo: formData,
+                    order_id: orderId,
+                    items: checkoutItems.map(item => ({
+                        book_id: item.book_id,
+                        title: item.title || item.book_title || 'Unknown Book',
+                        book_title: item.title || item.book_title || 'Unknown Book',
+                        quantity: item.quantity || 1,
+                        price: item.price || 0,
+                        price_at_order: item.price || 0
+                    })),
+                    shippingInfo: {
+                        address: formData.address,
+                        ward: formData.ward,
+                        district: formData.district,
+                        city: formData.city
+                    },
                     total: calculateTotal(),
+                    total_price: calculateTotal(),
                     status: 'pending',
                     createdAt: new Date().toISOString(),
+                    created_at: new Date().toISOString(),
                     orderType: hasCartItemIds ? 'cart' : 'buy-now'
                 };
 
@@ -348,7 +276,6 @@ const Checkout = ({ onBackToHome, onNavigateTo }) => {
         } catch (error) {
             console.error('Error placing order:', error);
             
-            // Handle specific error cases
             let errorMessage = 'Có lỗi xảy ra khi đặt hàng!';
             
             if (error.message && error.message.includes('403')) {
@@ -360,85 +287,6 @@ const Checkout = ({ onBackToHome, onNavigateTo }) => {
                 }
             } else if (error.message && error.message.includes('401')) {
                 errorMessage = 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.';
-            } else if (error.message && error.message.includes('500')) {
-                // Try localStorage fallback for 500 errors
-                try {
-                    console.log('Backend failed with 500, trying localStorage fallback...');
-                    
-                    const user = JSON.parse(localStorage.getItem('user') || 'null');
-                    if (user) {
-                        // Use shippingAddress from outer scope
-                        
-                        const orderData = {
-                            id: Date.now() + Math.random(),
-                            order_id: Date.now() + Math.random(),
-                            items: checkoutItems,
-                            shippingInfo: {
-                                fullName: user.name || 'N/A',
-                                email: user.email || 'N/A',
-                                phone: user.phone || 'N/A',
-                                address: shippingAddress
-                            },
-                            total: calculateTotal(),
-                            total_price: calculateTotal(),
-                            status: 'pending',
-                            createdAt: new Date().toISOString(),
-                            created_at: new Date().toISOString(),
-                            orderType: hasCartItemIds ? 'cart' : 'buy-now'
-                        };
-                        
-                        // Save to localStorage
-                        const userOrdersKey = `myOrders_${user.user_id}`;
-                        const existingOrders = JSON.parse(localStorage.getItem(userOrdersKey) || '[]');
-                        existingOrders.push(orderData);
-                        localStorage.setItem(userOrdersKey, JSON.stringify(existingOrders));
-                        
-                        // Clear cart if needed
-                        if (hasCartItemIds || hasCartSource) {
-                            try {
-                                const cartKey = `cart_${user.user_id}`;
-                                let cart = JSON.parse(localStorage.getItem(cartKey) || '[]');
-                                const orderedBookIds = checkoutItems.map(item => item.book_id);
-                                cart = cart.filter(item => !orderedBookIds.includes(item.book_id));
-                                localStorage.setItem(cartKey, JSON.stringify(cart));
-                                
-                                // Dispatch cart update event
-                                window.dispatchEvent(new CustomEvent('cartUpdated', {
-                                    detail: { 
-                                        cart, 
-                                        action: 'order_placed', 
-                                        count: orderedBookIds.length,
-                                        removedItems: orderedBookIds,
-                                        selectedItems: []
-                                    }
-                                }));
-                            } catch (cartError) {
-                                console.error('Error clearing cart in fallback:', cartError);
-                            }
-                        }
-                        
-                        // Show success message
-                        if (window.showToast) {
-                            window.showToast('Đặt hàng thành công!', 'success');
-                        }
-                        
-                        // Dispatch new order event
-                        window.dispatchEvent(new CustomEvent('newOrderPlaced', {
-                            detail: { orderData }
-                        }));
-                        
-                        // Navigate back after delay
-                        setTimeout(() => {
-                            onNavigateTo('orders');
-                        }, 1500);
-                        
-                        return; // Exit successfully
-                    }
-                } catch (fallbackError) {
-                    console.error('LocalStorage fallback also failed:', fallbackError);
-                }
-                
-                errorMessage = 'Lỗi server. Đơn hàng đã được lưu offline.';
             } else if (error.message) {
                 errorMessage = error.message;
             }

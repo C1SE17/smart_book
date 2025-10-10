@@ -674,6 +674,7 @@ const OrderManagement = () => {
                                     <th>Mã đơn</th>
                                     <th>Khách hàng</th>
                                     <th>Liên hệ</th>
+                                    <th>Loại đơn hàng</th>
                                     <th className="text-end">Tổng tiền</th>
                                     <th>Trạng thái</th>
                                     <th>Ngày tạo</th>
@@ -692,7 +693,7 @@ const OrderManagement = () => {
                                             />
                                         </td>
                                         <td>
-                                            <span className="fw-bold">#{order.order_id.toString().padStart(6, '0')}</span>
+                                            <span className="fw-bold">#{order.order_id}</span>
                                         </td>
                                         <td>
                                             <div className="fw-medium text-dark">{order.customer_name || `User ${order.user_id}`}</div>
@@ -703,6 +704,11 @@ const OrderManagement = () => {
                                                 <div>{order.user_email || 'N/A'}</div>
                                                 <div className="text-muted">{order.customer_phone || 'N/A'}</div>
                                             </div>
+                                        </td>
+                                        <td>
+                                            <span className={`badge ${order.order_type === 'cart' ? 'bg-info' : 'bg-secondary'}`}>
+                                                {order.order_type === 'cart' ? 'Từ giỏ hàng' : 'Mua ngay'}
+                                            </span>
                                         </td>
                                         <td className="text-end fw-bold">
                                             {(() => {

@@ -10,7 +10,6 @@ router.post('/checkout', auth, userOnly, preventAdminOrdering, OrderController.c
 router.get('/confirmation/:order_id', auth, userOnly, OrderController.getOrderConfirmation); // Lấy chi tiết để xác nhận
 router.post('/confirmation/:order_id', auth, userOnly, OrderController.confirmOrder); // Xác nhận đơn
 router.get('/my-orders', auth, userOnly, OrderController.getUserOrders); // Lấy đơn hàng của user
-
 // Route cho admin
 router.get('/pending', auth, adminOnly, OrderController.getPendingOrders); // Xem đơn cần giao
 router.get('/all', auth, adminOnly, OrderController.getAllOrders); // Xem tất cả đơn hàng

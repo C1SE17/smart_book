@@ -390,119 +390,127 @@ class ApiService {
       
       if (response.success) {
         console.log('Retrieved orders from backend:', response.data);
-        return response;
-      } else {
-        // Fallback to localStorage if backend fails
-        console.log('Backend failed, falling back to localStorage...');
-        const user = JSON.parse(localStorage.getItem('user') || 'null');
-        const userOrdersKey = user ? `myOrders_${user.user_id}` : 'myOrders';
-        const localOrders = JSON.parse(localStorage.getItem(userOrdersKey) || '[]');
-        console.log('Retrieved orders from localStorage:', localOrders);
         
-        // Transform localStorage data to ensure consistency
-        const transformedOrders = localOrders.map(order => ({
-          id: order.id || order.order_id,
-          order_id: order.order_id || order.id,
-          items: order.items || [],
-          shippingInfo: order.shippingInfo || {
-            fullName: 'N/A',
-            email: 'N/A',
-            phone: 'N/A',
-            address: 'N/A'
-          },
-          total: order.total || order.total_price || 0,
-          total_price: order.total_price || order.total || 0,
-          status: order.status || 'pending',
-          createdAt: order.createdAt || order.created_at,
-          created_at: order.created_at || order.createdAt,
-          orderType: order.orderType || 'buy-now'
+        // Transform orders to ensure consistent structure
+        const transformedOrders = response.data.map(order => ({
+          ...order,
+          items: (order.items || []).map(item => ({
+            book_id: item.book_id,
+            title: item.book_title || item.title || 'Unknown Book',
+            book_title: item.book_title || item.title || 'Unknown Book',
+            quantity: item.quantity || 1,
+            price: item.price_at_order || item.price || 0,
+            price_at_order: item.price_at_order || item.price || 0
+          }))
         }));
-        
-        console.log('Transformed orders for frontend:', transformedOrders);
         
         return {
           success: true,
-          data: transformedOrders,
-          message: 'Orders loaded from local storage'
+          data: transformedOrders
         };
+      } else {
+        console.error('Backend returned error:', response.error);
+        throw new Error(response.error || 'Failed to get orders from backend');
       }
     } catch (error) {
       console.error('Error getting user orders:', error);
-      // Fallback to localStorage on error
-      try {
-        const user = JSON.parse(localStorage.getItem('user') || 'null');
-        const userOrdersKey = user ? `myOrders_${user.user_id}` : 'myOrders';
-        const localOrders = JSON.parse(localStorage.getItem(userOrdersKey) || '[]');
-        const transformedOrders = localOrders.map(order => ({
-          id: order.id || order.order_id,
-          order_id: order.order_id || order.id,
-          items: order.items || [],
-          shippingInfo: order.shippingInfo || {
-            fullName: 'N/A',
-            email: 'N/A',
-            phone: 'N/A',
-            address: 'N/A'
-          },
-          total: order.total || order.total_price || 0,
-          total_price: order.total_price || order.total || 0,
-          status: order.status || 'pending',
-          createdAt: order.createdAt || order.created_at,
-          created_at: order.created_at || order.createdAt,
-          orderType: order.orderType || 'buy-now'
-        }));
-        
-        return {
-          success: true,
-          data: transformedOrders,
-          message: 'Orders loaded from local storage'
-        };
-      } catch (localError) {
-        console.error('Error with localStorage fallback:', localError);
-        return {
-          success: false,
-          data: [],
-          message: 'No orders found'
-        };
-      }
+      throw error; // Re-throw error instead of fallback
     }
   }
 
   async getMyOrderById(orderId) {
     try {
-      console.log('Getting order by ID from localStorage:', orderId);
+      console.log('Getting order by ID from backend:', orderId);
       
-      // For user orders, we'll use localStorage since there's no dedicated user orders API
-      // The /order/confirmation API might require admin permissions
-      const user = JSON.parse(localStorage.getItem('user') || 'null');
-      const userOrdersKey = user ? `myOrders_${user.user_id}` : 'myOrders';
-      const localOrders = JSON.parse(localStorage.getItem(userOrdersKey) || '[]');
-      console.log('Searching in localStorage orders:', localOrders);
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${this.baseURL}/order/confirmation/${orderId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` })
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('Backend order response:', result);
       
-      const order = localOrders.find(o => o.id === orderId || o.order_id === orderId);
-      console.log('Found order in localStorage:', order);
-      
-      if (order) {
-        console.log('Order shipping info from localStorage:', order.shippingInfo);
-        console.log('Shipping info type:', typeof order.shippingInfo);
-        console.log('Shipping info keys:', order.shippingInfo ? Object.keys(order.shippingInfo) : 'null');
+      if (result.success && result.data) {
+        const order = result.data;
         
-        // Transform localStorage data to ensure consistency
+        console.log('Raw order data from backend:', order);
+        
+        // Parse address string into components
+        const parseAddress = (addressString) => {
+          if (!addressString || addressString === 'N/A') {
+            return { address: '', ward: '', district: '', city: '' };
+          }
+          
+          const parts = addressString.split(',').map(p => p.trim());
+          
+          // Handle different address formats
+          if (parts.length >= 4) {
+            // Check if first parts look like name and phone (old format)
+            if (parts.length > 4 && (parts[1].match(/^\d+$/) || parts[1].includes('@'))) {
+              // Old format: "name, phone, address, ward, district, city"
+              return {
+                address: parts[2] || '',
+                ward: parts[3] || '',
+                district: parts[4] || '',
+                city: parts[5] || ''
+              };
+            } else {
+              // New format: "address, ward, district, city"
+              return {
+                address: parts[0] || '',
+                ward: parts[1] || '',
+                district: parts[2] || '',
+                city: parts[3] || ''
+              };
+            }
+          }
+          
+          // Fallback for shorter addresses
+          return {
+            address: parts[0] || '',
+            ward: parts[1] || '',
+            district: parts[2] || '',
+            city: parts[3] || ''
+          };
+        };
+        
+        const addressParts = parseAddress(order.shipping_address);
+        
+        // Transform backend data to match frontend expectations
         const transformedOrder = {
-          id: order.id || order.order_id,
-          order_id: order.order_id || order.id,
-          items: order.items || [],
-          shippingInfo: order.shippingInfo || {
-            fullName: 'N/A',
-            email: 'N/A',
-            phone: 'N/A',
-            address: 'N/A'
+          id: order.order_id,
+          order_id: order.order_id,
+          items: (order.items || []).map(item => ({
+            book_id: item.book_id,
+            title: item.book_title || item.title || 'Unknown Book',
+            book_title: item.book_title || item.title || 'Unknown Book',
+            quantity: item.quantity || 1,
+            price: item.price_at_order || item.price || 0,
+            price_at_order: item.price_at_order || item.price || 0
+          })),
+          shippingInfo: {
+            fullName: order.user_name || 'N/A',
+            email: order.user_email || 'N/A',
+            phone: order.user_phone || 'N/A',
+            address: addressParts.address,
+            ward: addressParts.ward,
+            district: addressParts.district,
+            city: addressParts.city
           },
-          total: order.total || order.total_price || 0,
-          total_price: order.total_price || order.total || 0,
+          total: order.total_price || 0,
+          total_price: order.total_price || 0,
           status: order.status || 'pending',
-          createdAt: order.createdAt || order.created_at,
-          created_at: order.created_at || order.createdAt,
-          orderType: order.orderType || 'buy-now'
+          createdAt: order.created_at,
+          created_at: order.created_at,
+          orderType: order.order_type || 'buy-now'
         };
         
         console.log('Transformed order for frontend:', transformedOrder);
@@ -515,11 +523,51 @@ class ApiService {
         return {
           success: false,
           data: null,
-          message: 'Order not found'
+          message: result.error || 'Order not found'
         };
       }
     } catch (error) {
       console.error('Error getting order by ID:', error);
+      
+      // Fallback to localStorage if backend fails
+      console.log('Falling back to localStorage for order:', orderId);
+      const user = JSON.parse(localStorage.getItem('user') || 'null');
+      const userOrdersKey = user ? `myOrders_${user.user_id}` : 'myOrders';
+      const localOrders = JSON.parse(localStorage.getItem(userOrdersKey) || '[]');
+      
+      const order = localOrders.find(o => o.id === orderId || o.order_id === orderId);
+      
+      if (order) {
+        // Get user info from localStorage to fill missing data
+        const user = JSON.parse(localStorage.getItem('user') || 'null');
+        
+        const transformedOrder = {
+          id: order.id || order.order_id,
+          order_id: order.order_id || order.id,
+          items: order.items || [],
+          shippingInfo: {
+            fullName: order.shippingInfo?.fullName || user?.name || 'N/A',
+            email: order.shippingInfo?.email || user?.email || 'N/A',
+            phone: order.shippingInfo?.phone || user?.phone || 'N/A',
+            address: order.shippingInfo?.address,
+            ward: order.shippingInfo?.ward,
+            district: order.shippingInfo?.district,
+            city: order.shippingInfo?.city
+          },
+          total: order.total || order.total_price || 0,
+          total_price: order.total_price || order.total || 0,
+          status: order.status || 'pending',
+          createdAt: order.createdAt || order.created_at,
+          created_at: order.created_at || order.createdAt,
+          orderType: order.orderType || 'buy-now'
+        };
+        
+        return {
+          success: true,
+          data: transformedOrder
+        };
+      }
+      
       return {
         success: false,
         data: null,
@@ -568,7 +616,6 @@ class ApiService {
       // Tính tổng doanh thu từ các đơn hàng
       const totalRevenue = localOrders.reduce((sum, order) => {
         const orderTotal = parseFloat(order.total || order.total_price) || 0;
-        console.log(`Order ${order.id || order.order_id}: total = ${order.total}, total_price = ${order.total_price}, parsed = ${orderTotal} ₫`);
         return sum + orderTotal;
       }, 0);
       
