@@ -2,17 +2,32 @@ const OrderModel = require("../models/OrderModel");
 
 class OrderController {
   static async purchase(req, res) {
+    console.log('🛒 [OrderController] purchase - Bắt đầu xử lý đơn hàng');
     const userId = req.user.userId;
     const { book_id, quantity, shipping_address } = req.body;
 
+    console.log('📋 [OrderController] purchase - Dữ liệu đầu vào:', {
+      userId,
+      book_id,
+      quantity,
+      shipping_address
+    });
+
     try {
-      if (!book_id) throw new Error("Thiếu book_id");
+      if (!book_id) {
+        console.log('❌ [OrderController] purchase - Thiếu book_id');
+        throw new Error("Thiếu book_id");
+      }
+      console.log('📞 [OrderController] purchase - Gọi OrderModel.createDraftOrder');
       const result = await OrderModel.createDraftOrder(
         userId,
         book_id,
         quantity || 1,
         shipping_address || ""
       );
+      
+      console.log('✅ [OrderController] purchase - Kết quả từ OrderModel:', result);
+      
       res.status(200).json({
         success: true,
         message: "Đơn hàng tạm đã được tạo",
@@ -23,8 +38,20 @@ class OrderController {
       });
       
     } catch (err) {
-      console.error("Lỗi khi đặt hàng:", err.message);
-      res.status(500).json({ error: "Lỗi khi đặt hàng: " + err.message });
+      console.error('💥 [OrderController] purchase - Lỗi:', {
+        message: err.message,
+        stack: err.stack,
+        userId,
+        book_id,
+        quantity,
+        shipping_address
+      });
+      
+      res.status(500).json({
+        success: false,
+        error: "Lỗi khi đặt hàng: " + err.message,
+        data: null
+      });
     }
   }
 
@@ -88,13 +115,54 @@ class OrderController {
   }
   //lấy danh sách đơn hàng của user
   static async getUserOrders(req, res) {
-    const userId = req.user.userId;
+    console.log('📋 [OrderController] getUserOrders - Bắt đầu lấy đơn hàng của user');
+    
     try {
+      // Kiểm tra req.user
+      if (!req.user) {
+        console.log('❌ [OrderController] getUserOrders - Thiếu thông tin xác thực người dùng');
+        return res.status(401).json({
+          success: false,
+          error: "Thiếu thông tin xác thực người dùng"
+        });
+      }
+
+      const userId = req.user.userId;
+      console.log('👤 [OrderController] getUserOrders - userId:', userId);
+      console.log('👤 [OrderController] getUserOrders - req.user:', req.user);
+
+      if (!userId) {
+        console.log('❌ [OrderController] getUserOrders - Thiếu thông tin user ID');
+        return res.status(400).json({
+          success: false,
+          error: "Thiếu thông tin user ID"
+        });
+      }
+
+      console.log('📞 [OrderController] getUserOrders - Gọi OrderModel.getUserOrders');
       const orders = await OrderModel.getUserOrders(userId);
-      res.status(200).json(orders);
+      
+      console.log('✅ [OrderController] getUserOrders - Kết quả từ OrderModel:', {
+        ordersCount: orders ? orders.length : 0,
+        orders: orders
+      });
+      
+      res.status(200).json({
+        success: true,
+        data: orders,
+        message: "Lấy danh sách đơn hàng thành công"
+      });
     } catch (err) {
+      console.error('💥 [OrderController] getUserOrders - Lỗi:', {
+        message: err.message,
+        stack: err.stack,
+        userId: req.user ? req.user.userId : 'unknown'
+      });
+      
       res.status(500).json({
+        success: false,
         error: "Lỗi khi lấy danh sách đơn hàng của bạn: " + err.message,
+        data: null
       });
     }
   }

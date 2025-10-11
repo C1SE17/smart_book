@@ -45,17 +45,17 @@ const Home = ({ onNavigateTo }) => {
         });
 
         // Mock API returns data directly, Real API returns { success: true, data: [...] }
-        const booksData = Array.isArray(booksResponse) ? booksResponse : booksResponse.data || booksResponse;
-        const newBooksDataArray = Array.isArray(newBooksData) ? newBooksData : newBooksData.data || newBooksData;
-        const popularBooksDataArray = Array.isArray(popularBooksData) ? popularBooksData : popularBooksData.data || popularBooksData;
+        const booksData = Array.isArray(booksResponse) ? booksResponse : (booksResponse?.data || booksResponse || []);
+        const newBooksDataArray = Array.isArray(newBooksData) ? newBooksData : (newBooksData?.data || newBooksData || []);
+        const popularBooksDataArray = Array.isArray(popularBooksData) ? popularBooksData : (popularBooksData?.data || popularBooksData || []);
 
         console.log('🏠 Home: Processed data:', {
-          booksData: booksData.length,
-          newBooksDataArray: newBooksDataArray.length,
-          popularBooksDataArray: popularBooksDataArray.length
+          booksData: booksData?.length || 0,
+          newBooksDataArray: newBooksDataArray?.length || 0,
+          popularBooksDataArray: popularBooksDataArray?.length || 0
         });
 
-        if (booksData.length > 0) {
+        if (booksData && booksData.length > 0) {
           console.log('🏠 Home: First book:', booksData[0]);
         }
 
@@ -296,9 +296,9 @@ const Home = ({ onNavigateTo }) => {
                   </div>
                 </div>
               ))
-            ) : categories.length > 0 ? (
+            ) : (categories && categories.length > 0) ? (
               // Render categories from API
-              categories.slice(0, 4).map((category, index) => (
+              (categories || []).slice(0, 4).map((category, index) => (
                 <div key={index} className="col-lg-3 col-md-6">
                   <div className="card h-100 border-0 shadow-sm" style={{
                     transition: 'all 0.3s ease',
@@ -397,7 +397,7 @@ const Home = ({ onNavigateTo }) => {
                   {error}
                 </div>
               </div>
-            ) : books.slice(0, 4).map((book, index) => (
+            ) : (books || []).slice(0, 4).map((book, index) => (
               <div key={index} className="col-lg-3 col-md-6">
                 <div className="card h-100 border-0 shadow-sm" style={{
                   transition: 'all 0.3s ease',

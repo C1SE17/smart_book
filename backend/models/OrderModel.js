@@ -23,41 +23,54 @@ class OrderModel {
       const orderId = orderResult.insertId;
 
       // Thêm item vào order_items
-      console.log(`Thêm order_item: order_id=${orderId}, book_id=${bookId}, quantity=${quantity}, price=${price}`);
+      console.log(
+        `Thêm order_item: order_id=${orderId}, book_id=${bookId}, quantity=${quantity}, price=${price}`
+      );
       await db
         .promise()
         .query(
           "INSERT INTO order_items (order_id, book_id, quantity, price_at_order) VALUES (?, ?, ?, ?)",
           [orderId, bookId, quantity, price]
         );
-      console.log(`Thêm order_item thành công: order_id=${orderId}, book_id=${bookId}, quantity=${quantity}, price=${price}`);
+      console.log(
+        `Thêm order_item thành công: order_id=${orderId}, book_id=${bookId}, quantity=${quantity}, price=${price}`
+      );
       // Trừ kho - kiểm tra và cập nhật warehouse
       const [warehouseRows] = await db
         .promise()
         .query("SELECT quantity FROM warehouse WHERE book_id = ?", [bookId]);
-      
+
       if (warehouseRows.length === 0) {
         // Nếu chưa có trong warehouse, tạo mới với số lượng 100 (đủ để đặt hàng)
         await db
           .promise()
-          .query("INSERT INTO warehouse (book_id, quantity) VALUES (?, ?)", [bookId, 100]);
-        console.log(`Tạo warehouse entry mới cho book_id: ${bookId} với số lượng: 100`);
+          .query("INSERT INTO warehouse (book_id, quantity) VALUES (?, ?)", [
+            bookId,
+            100,
+          ]);
+        console.log(
+          `Tạo warehouse entry mới cho book_id: ${bookId} với số lượng: 100`
+        );
       }
-      
+
       // Kiểm tra số lượng tồn kho (cho phép âm để đặt hàng nhiều lần)
       const [currentStock] = await db
         .promise()
         .query("SELECT quantity FROM warehouse WHERE book_id = ?", [bookId]);
-      
+
       const availableStock = currentStock[0].quantity;
-      console.log(`Số lượng tồn kho hiện tại: ${availableStock}, đặt hàng: ${quantity}`);
-      
+      console.log(
+        `Số lượng tồn kho hiện tại: ${availableStock}, đặt hàng: ${quantity}`
+      );
+
       // Cho phép đặt hàng ngay cả khi tồn kho âm (để xử lý đặt hàng nhiều lần)
       // Chỉ cảnh báo nếu tồn kho âm
       if (availableStock < quantity) {
-        console.log(`⚠️ Cảnh báo: Tồn kho không đủ (${availableStock} < ${quantity}), nhưng vẫn cho phép đặt hàng`);
+        console.log(
+          `⚠️ Cảnh báo: Tồn kho không đủ (${availableStock} < ${quantity}), nhưng vẫn cho phép đặt hàng`
+        );
       }
-      
+
       // Trừ kho (có thể âm)
       await db
         .promise()
@@ -65,8 +78,12 @@ class OrderModel {
           "UPDATE warehouse SET quantity = quantity - ? WHERE book_id = ?",
           [quantity, bookId]
         );
-      
-      console.log(`Đã trừ kho: ${quantity} sản phẩm, tồn kho mới: ${availableStock - quantity}`);
+
+      console.log(
+        `Đã trừ kho: ${quantity} sản phẩm, tồn kho mới: ${
+          availableStock - quantity
+        }`
+      );
       console.log("Tạo đơn tạm thành công, orderId:", orderId);
       return { order_id: orderId, total_amount: totalAmount };
     } catch (err) {
@@ -86,7 +103,7 @@ class OrderModel {
       let [cartRows] = await db
         .promise()
         .query("SELECT cart_id FROM carts WHERE user_id = ? LIMIT 1", [userId]);
-      
+
       let cartId;
       if (!cartRows.length) {
         // Tạo giỏ hàng mới nếu chưa có
@@ -151,8 +168,10 @@ class OrderModel {
         // Tạm thời tạo một order_item mặc định
         const [bookRows] = await db
           .promise()
-          .query("SELECT book_id, price FROM books WHERE book_id = ? LIMIT 1", [selectedCartItemIds[0]]);
-        
+          .query("SELECT book_id, price FROM books WHERE book_id = ? LIMIT 1", [
+            selectedCartItemIds[0],
+          ]);
+
         if (bookRows.length > 0) {
           const book = bookRows[0];
           await db
@@ -175,19 +194,24 @@ class OrderModel {
             "SELECT book_id, quantity FROM cart_items WHERE cart_id = ? AND cart_item_id IN (?)",
             [cartId, selectedCartItemIds]
           );
-        
+
         for (const item of items) {
           // Kiểm tra và cập nhật warehouse
           const [warehouseRows] = await db
             .promise()
-            .query("SELECT quantity FROM warehouse WHERE book_id = ?", [item.book_id]);
-          
+            .query("SELECT quantity FROM warehouse WHERE book_id = ?", [
+              item.book_id,
+            ]);
+
           if (warehouseRows.length === 0) {
             await db
               .promise()
-              .query("INSERT INTO warehouse (book_id, quantity) VALUES (?, ?)", [item.book_id, 0]);
+              .query(
+                "INSERT INTO warehouse (book_id, quantity) VALUES (?, ?)",
+                [item.book_id, 0]
+              );
           }
-          
+
           await db
             .promise()
             .query(
@@ -200,24 +224,25 @@ class OrderModel {
         console.log("Không thể trừ kho từ cart_items, sử dụng fallback");
         // Fallback: trừ kho cho book_id đầu tiên
         const bookId = selectedCartItemIds[0];
-        
+
         // Kiểm tra và cập nhật warehouse
         const [warehouseRows] = await db
           .promise()
           .query("SELECT quantity FROM warehouse WHERE book_id = ?", [bookId]);
-        
+
         if (warehouseRows.length === 0) {
           await db
             .promise()
-            .query("INSERT INTO warehouse (book_id, quantity) VALUES (?, ?)", [bookId, 0]);
+            .query("INSERT INTO warehouse (book_id, quantity) VALUES (?, ?)", [
+              bookId,
+              0,
+            ]);
         }
-        
-        await db
-          .promise()
-          .query(
-            "UPDATE warehouse SET quantity = quantity - ? WHERE book_id = ?",
-            [1, bookId] // Mặc định quantity = 1
-          );
+
+        await db.promise().query(
+          "UPDATE warehouse SET quantity = quantity - ? WHERE book_id = ?",
+          [1, bookId] // Mặc định quantity = 1
+        );
         console.log("Đã trừ kho fallback cho book_id:", bookId);
       }
       // Xóa cart_items đã chọn
@@ -421,18 +446,50 @@ class OrderModel {
   // Lấy đơn hàng của user
   static async getUserOrders(userId) {
     try {
+      console.log("📋 [OrderModel] getUserOrders - userId:", userId);
+
+      // Kiểm tra userId hợp lệ
+      if (!userId || isNaN(userId)) {
+        console.log(
+          "❌ [OrderModel] getUserOrders - User ID không hợp lệ:",
+          userId
+        );
+        throw new Error("User ID không hợp lệ");
+      }
+
+      console.log("📞 [OrderModel] getUserOrders - Thực hiện SQL query");
       const [rows] = await db.promise().query(
-        `SELECT o.order_id, o.user_id, o.shipping_address, o.total_price, o.status, o.created_at, o.updated_at,
-                        oi.book_id, oi.quantity, oi.price_at_order,
-                        b.title AS book_title, b.author AS book_author, b.image_url AS book_image,
-                        u.name AS user_name, u.email AS user_email, u.phone AS user_phone
-                 FROM orders o 
-                 LEFT JOIN order_items oi ON o.order_id = oi.order_id
-                 LEFT JOIN books b ON oi.book_id = b.book_id
-                 LEFT JOIN users u ON o.user_id = u.user_id
-                 WHERE o.user_id = ? 
-                 ORDER BY o.created_at DESC`,
+        `SELECT 
+            o.order_id, 
+            o.user_id, 
+            o.shipping_address, 
+            o.total_price, 
+            o.status, 
+            o.created_at, 
+            o.updated_at,
+            oi.book_id, 
+            oi.quantity, 
+            oi.price_at_order,
+            b.title AS book_title, 
+            a.name AS book_author, 
+            b.cover_image AS book_image,
+            u.name AS user_name, 
+            u.email AS user_email, 
+            u.phone AS user_phone
+         FROM smart_book.orders o
+         LEFT JOIN smart_book.order_items oi ON o.order_id = oi.order_id
+         LEFT JOIN smart_book.books b ON oi.book_id = b.book_id
+         LEFT JOIN smart_book.authors a ON b.author_id = a.author_id
+         LEFT JOIN smart_book.users u ON o.user_id = u.user_id
+         WHERE o.user_id = ?
+         ORDER BY o.created_at DESC`,
         [userId]
+      );
+      
+
+      console.log(
+        "📊 [OrderModel] getUserOrders - Raw rows từ database:",
+        rows.length
       );
 
       // Group order items by order_id
@@ -464,10 +521,21 @@ class OrderModel {
       });
 
       const orders = Array.from(ordersMap.values());
-      console.log("Backend getUserOrders result:", orders);
+      console.log(
+        "✅ [OrderModel] getUserOrders - Processed orders:",
+        orders.length
+      );
+      console.log("📋 [OrderModel] getUserOrders - Orders data:", orders);
       return orders;
     } catch (err) {
-      console.error("Lỗi lấy đơn hàng của user:", err.message);
+      console.error("💥 [OrderModel] getUserOrders - Lỗi chi tiết:", {
+        message: err.message,
+        code: err.code,
+        errno: err.errno,
+        sqlState: err.sqlState,
+        sqlMessage: err.sqlMessage,
+        userId: userId,
+      });
       throw err;
     }
   }

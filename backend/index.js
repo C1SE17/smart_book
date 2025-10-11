@@ -14,10 +14,13 @@ const reviewRoutes = require('./routes/reviewRoutes');
 
 // Tải biến môi trường
 dotenv.config();
+console.log('🔧 [Server] Đã tải biến môi trường');
 
 // Khởi tạo ứng dụng Express
 const app = express(); // Đảm bảo app được khai báo trước khi sử dụng
 const port = process.env.PORT || 3306;
+console.log('🚀 [Server] Khởi tạo Express app');
+console.log('📡 [Server] Port:', port);
 
 // Cấu hình CORS
 app.use(cors({
@@ -26,17 +29,21 @@ app.use(cors({
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
+console.log('🌐 [Server] Đã cấu hình CORS');
 
 // Phân tích JSON từ body
 app.use(express.json());
+console.log('📝 [Server] Đã cấu hình JSON parser');
 
 // Middleware kiểm tra header
 app.use((req, res, next) => {
-    console.log('Headers:', req.headers); // In header
+    console.log(`📨 [Request] ${req.method} ${req.path}`);
+    console.log('📋 [Request] Headers:', req.headers);
     if (req.method === 'POST' && req.headers['content-type'] !== 'application/json') {
+        console.log('❌ [Request] Invalid Content-Type');
         return res.status(400).json({ error: 'Yêu cầu phải có Content-Type: application/json' });
     }
-    console.log('Parsed body:', req.body); // In body sau khi phân tích
+    console.log('📦 [Request] Body:', req.body);
     next();
 });
 
@@ -56,17 +63,57 @@ app.get('/api/health', (req, res) => {
 });
 
 // Gắn tuyến API
+console.log('🔗 [Server] Đang gắn routes...');
 app.use('/api/users', userRoutes);
+console.log('✅ [Server] Users routes loaded');
 app.use('/api/books', bookRoutes);
+console.log('✅ [Server] Books routes loaded');
 app.use('/api/categories', categoryRoutes);
+console.log('✅ [Server] Categories routes loaded');
 app.use('/api/authors', authorRoutes);
+console.log('✅ [Server] Authors routes loaded');
 app.use('/api/publishers', publisherRoutes);
+console.log('✅ [Server] Publishers routes loaded');
 app.use('/api/cart', cartRoutes);
+console.log('✅ [Server] Cart routes loaded');
 app.use('/api/order', orderRoutes);
+console.log('✅ [Server] Order routes loaded');
 app.use('/api/warehouse', warehouseRoutes);
+console.log('✅ [Server] Warehouse routes loaded');
 app.use('/api/reviews', reviewRoutes);
+console.log('✅ [Server] Reviews routes loaded');
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error('💥 [Error] Unhandled error:', {
+        message: err.message,
+        stack: err.stack,
+        url: req.url,
+        method: req.method,
+        body: req.body
+    });
+    res.status(500).json({
+        success: false,
+        error: 'Internal Server Error',
+        message: err.message
+    });
+});
+
+// 404 handler - phải đặt cuối cùng
+app.use((req, res) => {
+    console.log('❌ [404] Route not found:', req.method, req.originalUrl);
+    res.status(404).json({
+        success: false,
+        error: 'Route not found',
+        message: `Cannot ${req.method} ${req.originalUrl}`
+    });
+});
 
 // Chạy máy chủ
 app.listen(port, () => {
-    console.log(`Máy chủ chạy tại cổng: ${port}`);
+    console.log('🎉 [Server] ===========================================');
+    console.log(`🚀 [Server] Máy chủ chạy tại cổng: ${port}`);
+    console.log(`📡 [Server] API Base URL: http://localhost:${port}/api`);
+    console.log(`🔍 [Server] Health check: http://localhost:${port}/api/health`);
+    console.log('🎉 [Server] ===========================================');
 });

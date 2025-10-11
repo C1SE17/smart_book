@@ -445,7 +445,15 @@ const MyOrders = ({ onBackToHome, onNavigateTo }) => {
     const handleViewDetails = async (order) => {
         try {
             console.log('Viewing details for order:', order);
-            const response = await apiService.getMyOrderById(order.id);
+            const orderId = order.order_id || order.id;
+            console.log('Order ID to fetch:', orderId);
+            
+            if (!orderId) {
+                console.error('Order ID is undefined:', order);
+                return;
+            }
+            
+            const response = await apiService.getMyOrderById(orderId);
             console.log('Order details response:', response);
             
             if (response.success) {
@@ -585,8 +593,8 @@ const MyOrders = ({ onBackToHome, onNavigateTo }) => {
                 </div>
             ) : (
                 <div className="row">
-                    {currentOrders.map((order) => (
-                        <div key={order.id} className="col-12 col-md-6 col-lg-4 col-xl-3 mb-4">
+                    {currentOrders.map((order, index) => (
+                        <div key={order.order_id || order.id || `order-${index}`} className="col-12 col-md-6 col-lg-4 col-xl-3 mb-4">
                             <div className="card border-0 shadow-sm h-100 d-flex flex-column">
                                 <div className="card-body d-flex flex-column">
                                     <div className="d-flex justify-content-between align-items-start mb-3">

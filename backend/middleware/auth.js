@@ -5,28 +5,33 @@ const jwt = require('jsonwebtoken');
 const tokenBlacklist = new Set();
 
 const auth = (req, res, next) => {
+    console.log('🔐 [Auth] Middleware auth - Bắt đầu xác thực');
     const authHeader = req.headers['authorization'];
-    console.log('Received token header:', authHeader); // In header thô
+    console.log('🔐 [Auth] Received token header:', authHeader);
 
     if (!authHeader) {
+        console.log('❌ [Auth] Thiếu token trong header');
         return res.status(401).json({ error: 'Thiếu token' });
     }
 
     const token = authHeader.split(' ')[1];  
-    console.log('Extracted token:', token); // In token đã tách
+    console.log('🔐 [Auth] Extracted token:', token ? 'Có token' : 'Không có token');
 
     // Kiểm tra token có trong blacklist không
     if (tokenBlacklist.has(token)) {
+        console.log('❌ [Auth] Token đã bị vô hiệu hóa (trong blacklist)');
         return res.status(401).json({ error: 'Token đã bị vô hiệu hóa' });
     }
 
     try {
+        console.log('🔐 [Auth] Đang verify token...');
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'default_jwt_secret_key');
-        console.log('Decoded user:', decoded); // In thông tin decoded
+        console.log('✅ [Auth] Token verification thành công:', decoded);
         req.user = decoded; // Lưu thông tin user (userId, role)
+        console.log('✅ [Auth] req.user đã được set:', req.user);
         next();
     } catch (err) {
-        console.log('Token verification error:', err.message); 
+        console.log('❌ [Auth] Token verification error:', err.message); 
         return res.status(403).json({ error: 'Token không hợp lệ' });
     }
 };
