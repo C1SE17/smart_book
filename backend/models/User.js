@@ -6,16 +6,49 @@ const bcrypt = require('bcrypt');
 class User {
     // Tạo người dùng mới, kiểm tra email Gmail
     static create(userData, callback) {
-        const { name, email, password, phone, address } = userData;
+        const { name, email, password, phone, address, role = 'customer' } = userData;
+        
+        console.log('👤 [User Model] Bắt đầu tạo user:', { name, email, phone, address, role });
+        
         if (!email.endsWith('@gmail.com')) {
             return callback(new Error('Email phải là @gmail.com'), null);
         }
+        
         // Mã hóa mật khẩu
         bcrypt.hash(password, 10, (err, hash) => {
-            if (err) return callback(err, null);
-            const query = 'INSERT INTO users (name, email, password_hash, phone, address) VALUES (?, ?, ?, ?, ?)';
-            db.query(query, [name, email, hash, phone, address], (err, result) => {
-                callback(err, result);
+            if (err) {
+                console.error('💥 [User Model] Lỗi mã hóa mật khẩu:', err);
+                return callback(err, null);
+            }
+            
+            console.log('🔐 [User Model] Mật khẩu đã được mã hóa');
+            
+            const query = 'INSERT INTO users (name, email, password_hash, phone, address, role) VALUES (?, ?, ?, ?, ?, ?)';
+            const values = [name, email, hash, phone, address, role];
+            
+            console.log('📝 [User Model] Thực hiện query:', query);
+            console.log('📝 [User Model] Values:', values);
+            
+            db.query(query, values, (err, result) => {
+                if (err) {
+                    console.error('💥 [User Model] Lỗi database khi tạo user:', err);
+                    return callback(err, null);
+                }
+                
+                console.log('✅ [User Model] User đã được tạo thành công:', result);
+                console.log('🆔 [User Model] User ID:', result.insertId);
+                
+                // Trả về thông tin user vừa tạo
+                const newUser = {
+                    user_id: result.insertId,
+                    name: name,
+                    email: email,
+                    phone: phone,
+                    address: address,
+                    role: role
+                };
+                
+                callback(null, newUser);
             });
         });
     }

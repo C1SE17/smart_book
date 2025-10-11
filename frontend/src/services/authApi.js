@@ -24,7 +24,7 @@ class AuthApiService extends BaseApiService {
   async register(userData) {
     try {
       console.log(`🔐 [AuthAPI] Đang đăng ký tài khoản mới với dữ liệu:`, userData);
-      const result = await this.apiCall('/auth/register', {
+      const result = await this.apiCall('/users/register', {
         method: 'POST',
         body: JSON.stringify(userData)
       });
@@ -39,7 +39,7 @@ class AuthApiService extends BaseApiService {
   async logout() {
     try {
       console.log(`🔐 [AuthAPI] Đang đăng xuất`);
-      const result = await this.apiCall('/auth/logout', {
+      const result = await this.apiCall('/users/logout', {
         method: 'POST'
       });
       console.log(`🔐 [AuthAPI] Kết quả đăng xuất:`, result);
@@ -53,7 +53,7 @@ class AuthApiService extends BaseApiService {
   async refreshToken() {
     try {
       console.log(`🔐 [AuthAPI] Đang làm mới token`);
-      const result = await this.apiCall('/auth/refresh', {
+      const result = await this.apiCall('/users/refresh', {
         method: 'POST'
       });
       console.log(`🔐 [AuthAPI] Kết quả làm mới token:`, result);

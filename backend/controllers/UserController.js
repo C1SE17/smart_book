@@ -12,10 +12,12 @@ const db = require("../config/db");
 class UserController {
   // Đăng ký người dùng
   static register(req, res) {
-    console.log("req.body:", req.body);
+    console.log("📝 [UserController] Bắt đầu đăng ký user:", req.body);
+    
     if (!req.body) {
       return res.status(400).json({ error: "Body yêu cầu không hợp lệ" });
     }
+    
     const {
       name,
       email,
@@ -24,23 +26,50 @@ class UserController {
       address,
       role = "customer",
     } = req.body;
+    
     if (!name || !email || !password) {
       return res.status(400).json({ error: "Thiếu tên, email hoặc mật khẩu" });
     }
+    
+    console.log("🔍 [UserController] Kiểm tra email tồn tại:", email);
+    
     User.findByEmail(email, (err, existingUser) => {
-      if (err) return res.status(500).json({ error: "Lỗi cơ sở dữ liệu" });
-      if (existingUser)
+      if (err) {
+        console.error("💥 [UserController] Lỗi kiểm tra email:", err);
+        return res.status(500).json({ error: "Lỗi cơ sở dữ liệu" });
+      }
+      
+      if (existingUser) {
+        console.log("⚠️ [UserController] Email đã tồn tại:", email);
         return res.status(400).json({ error: "Email đã tồn tại" });
+      }
+      
+      console.log("✅ [UserController] Email chưa tồn tại, bắt đầu tạo user");
+      
       User.create(
         { name, email, password, phone, address, role },
-        (err, result) => {
+        (err, newUser) => {
           if (err) {
+            console.error("💥 [UserController] Lỗi tạo user:", err);
             if (err.message === "Email phải là @gmail.com") {
               return res.status(400).json({ error: err.message });
             }
             return res.status(500).json({ error: "Lỗi tạo người dùng" });
           }
-          res.status(201).json({ message: "Đăng ký thành công" });
+          
+          console.log("🎉 [UserController] Đăng ký thành công:", newUser);
+          res.status(201).json({ 
+            success: true,
+            message: "Đăng ký thành công",
+            user: {
+              user_id: newUser.user_id,
+              name: newUser.name,
+              email: newUser.email,
+              phone: newUser.phone,
+              address: newUser.address,
+              role: newUser.role
+            }
+          });
         }
       );
     });
