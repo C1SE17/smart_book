@@ -100,9 +100,10 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
       const profileData = await apiService.getUserById(user.user_id);
       console.log('Profile data from API:', profileData);
       
+      // Sửa: sử dụng profileData.data thay vì profileData
       const finalProfileData = {
-        ...profileData,
-        role: user.role || profileData.role || 'customer'
+        ...profileData.data, // ✅ Thay đổi từ profileData thành profileData.data
+        role: user.role || profileData.data?.role || 'customer'
       };
       
       console.log('Final profile data:', finalProfileData);
@@ -229,7 +230,7 @@ const UserProfile = ({ user, onBackToHome, onUpdateProfile, activeTab: propActiv
     try {
       // Gọi API backend để cập nhật thông tin user
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3306/api/user/update', {
+      const response = await fetch('http://localhost:3306/api/users/update', { // ✅ Thêm 's' vào 'users'
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

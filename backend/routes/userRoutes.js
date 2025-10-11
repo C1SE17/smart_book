@@ -22,5 +22,8 @@ router.delete('/:user_id', auth, adminOnly, UserController.deleteUser); // Chỉ
 // Tuyến đăng xuất
 router.post('/logout', auth, UserController.logout); // Yêu cầu auth
 
+
+console.log("✅ Check UserController:", UserController);
+console.log("✅ Check Auth:", auth);
 // Xuất router
 module.exports = router;
