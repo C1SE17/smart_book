@@ -620,6 +620,7 @@ class OrderModel {
          LEFT JOIN smart_book.authors a ON b.author_id = a.author_id
          LEFT JOIN smart_book.users u ON o.user_id = u.user_id
          WHERE o.user_id = ?
+         GROUP BY o.order_id, o.user_id, o.shipping_address, o.status, o.created_at, o.updated_at, oi.book_id, oi.quantity, oi.price_at_order, b.title, a.name, b.cover_image, u.name, u.email, u.phone
          ORDER BY o.created_at DESC`,
         [userId]
       );

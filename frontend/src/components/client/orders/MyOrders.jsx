@@ -298,20 +298,42 @@ const MyOrders = ({ onBackToHome, onNavigateTo }) => {
     useEffect(() => {
         fetchOrders();
         
+        // Request notification permission
+        if (Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+        
         // Listen for order status updates from admin dashboard
         const handleOrderStatusUpdate = (event) => {
-            console.log('Received order status update:', event.detail);
+            console.log('📢 [MyOrders] Received order status update:', event.detail);
             if (event.detail && event.detail.orderId && event.detail.newStatus) {
                 setOrders(prevOrders => {
-                    const updatedOrders = prevOrders.map(order => 
-                        order.order_id === event.detail.orderId || order.id === event.detail.orderId
-                            ? { 
+                    console.log('🔍 [MyOrders] Current orders before update:', prevOrders.map(o => ({ 
+                        id: o.order_id || o.id, 
+                        status: o.status 
+                    })));
+                    
+                    const updatedOrders = prevOrders.map(order => {
+                        const orderId = order.order_id || order.id;
+                        const eventOrderId = event.detail.orderId;
+                        
+                        console.log(`🔍 [MyOrders] Comparing order ID: ${orderId} (${typeof orderId}) with event ID: ${eventOrderId} (${typeof eventOrderId})`);
+                        
+                        if (orderId == eventOrderId) { // Use == for type coercion
+                            console.log(`✅ [MyOrders] Found matching order ${orderId}, updating status from ${order.status} to ${event.detail.newStatus}`);
+                            return { 
                                 ...order, 
                                 status: event.detail.newStatus,
                                 updated_at: event.detail.updatedAt || new Date().toISOString()
-                              }
-                            : order
-                    );
+                            };
+                        }
+                        return order;
+                    });
+                    
+                    console.log('🔍 [MyOrders] Orders after update:', updatedOrders.map(o => ({ 
+                        id: o.order_id || o.id, 
+                        status: o.status 
+                    })));
                     
                     // Sort orders to put recently updated ones at the top
                     return updatedOrders.sort((a, b) => {
@@ -320,19 +342,28 @@ const MyOrders = ({ onBackToHome, onNavigateTo }) => {
                         return dateB.getTime() - dateA.getTime();
                     });
                 });
-                console.log(`✅ Updated order ${event.detail.orderId} status to: ${event.detail.newStatus}`);
+                console.log(`✅ [MyOrders] Updated order ${event.detail.orderId} status to: ${event.detail.newStatus}`);
                 
                 // Show notification to user
                 const statusText = {
                     'pending': 'Chờ xử lý',
+                    'paid': 'Đã thanh toán',
                     'processing': 'Đang xử lý', 
                     'shipped': 'Đã giao',
+                    'completed': 'Hoàn thành',
                     'delivered': 'Đã giao',
                     'cancelled': 'Đã hủy'
                 }[event.detail.newStatus] || event.detail.newStatus;
                 
-                // You can add a toast notification here if you have a toast library
-                console.log(`📢 Thông báo: Đơn hàng #${event.detail.orderId} đã được cập nhật trạng thái thành "${statusText}"`);
+                // Show browser notification if permission granted
+                if (Notification.permission === 'granted') {
+                    new Notification(`Đơn hàng #${event.detail.orderId}`, {
+                        body: `Trạng thái đã được cập nhật thành "${statusText}"`,
+                        icon: '/favicon.ico'
+                    });
+                }
+                
+                console.log(`📢 [MyOrders] Thông báo: Đơn hàng #${event.detail.orderId} đã được cập nhật trạng thái thành "${statusText}"`);
             }
         };
 
@@ -515,6 +546,22 @@ const MyOrders = ({ onBackToHome, onNavigateTo }) => {
                         >
                             <i className={`fas fa-sync-alt ${loading ? 'fa-spin' : ''} me-1`}></i>
                             Làm mới
+                        </button>
+                        <button 
+                            className="btn btn-outline-warning btn-sm"
+                            onClick={() => {
+                                console.log('🧪 [MyOrders] Test event dispatch');
+                                window.dispatchEvent(new CustomEvent('orderStatusUpdated', {
+                                    detail: {
+                                        orderId: 1112,
+                                        newStatus: 'completed',
+                                        updatedAt: new Date().toISOString()
+                                    }
+                                }));
+                            }}
+                        >
+                            <i className="fas fa-bug me-1"></i>
+                            Test Event
                         </button>
                         <div className="text-muted">
                             Tổng cộng: {filteredOrders.length} đơn hàng
