@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faStar, faUser, faThumbsUp, faThumbsDown, faTrash } from '@fortawesome/free-solid-svg-icons';
+import apiService from '../../../services/api';
 
 const ReviewSection = ({ productId, reviews = [], loading = false, user = null, onAddReview = null }) => {
   const [newReview, setNewReview] = useState({
@@ -20,23 +21,94 @@ const ReviewSection = ({ productId, reviews = [], loading = false, user = null, 
   const [replySubmitting, setReplySubmitting] = useState(false);
   const [filterRating, setFilterRating] = useState('all'); // 'all', '5', '4', '3', '2', '1'
   const [sortBy, setSortBy] = useState('newest'); // 'newest', 'oldest', 'highest', 'lowest'
+  
+  // State cho dữ liệu thật từ API
+  const [realReviews, setRealReviews] = useState([]);
+  const [realLoading, setRealLoading] = useState(false);
+  const [averageRating, setAverageRating] = useState(0);
+  const [totalReviews, setTotalReviews] = useState(0);
 
-  // Calculate average rating and total reviews
-  const averageRating = reviews && reviews.length > 0
-    ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length
-    : 0;
-  const totalReviews = reviews ? reviews.length : 0;
+  // Load dữ liệu thật từ API khi component mount hoặc productId thay đổi
+  useEffect(() => {
+    if (productId) {
+      loadRealReviews();
+      loadAverageRating();
+    }
+  }, [productId]);
 
-  // Filter and sort reviews
+  // Load reviews thật từ API
+  const loadRealReviews = async () => {
+    try {
+      setRealLoading(true);
+      console.log('📝 [ReviewSection] Đang load reviews cho productId:', productId);
+      
+      const response = await apiService.getReviews({ book_id: productId });
+      console.log('📝 [ReviewSection] Response từ API:', response);
+      
+      // Kiểm tra response structure từ baseApi
+      if (response && response.success && Array.isArray(response.data)) {
+        setRealReviews(response.data);
+        console.log('📝 [ReviewSection] Đã set realReviews:', response.data.length, 'reviews');
+      } else if (response && Array.isArray(response)) {
+        // Fallback: nếu response trực tiếp là array
+        setRealReviews(response);
+        console.log('📝 [ReviewSection] Đã set realReviews (fallback):', response.length, 'reviews');
+      } else {
+        console.log('📝 [ReviewSection] Response không hợp lệ, set empty array');
+        console.log('📝 [ReviewSection] Response structure:', typeof response, response);
+        setRealReviews([]);
+      }
+    } catch (error) {
+      console.error('💥 [ReviewSection] Lỗi khi load reviews:', error);
+      setRealReviews([]);
+    } finally {
+      setRealLoading(false);
+    }
+  };
+
+  // Load average rating từ API
+  const loadAverageRating = async () => {
+    try {
+      console.log('⭐ [ReviewSection] Đang load average rating cho productId:', productId);
+      
+      const response = await apiService.getAverageRating(productId);
+      console.log('⭐ [ReviewSection] Average rating response:', response);
+      
+      // Kiểm tra response structure từ baseApi
+      if (response && response.success && response.data) {
+        setAverageRating(parseFloat(response.data.average_rating) || 0);
+        setTotalReviews(parseInt(response.data.total_reviews) || 0);
+        console.log('⭐ [ReviewSection] Set average rating:', response.data.average_rating, 'total reviews:', response.data.total_reviews);
+      } else if (response && response.average_rating !== undefined) {
+        // Fallback: nếu response trực tiếp có average_rating
+        setAverageRating(parseFloat(response.average_rating) || 0);
+        setTotalReviews(parseInt(response.total_reviews) || 0);
+        console.log('⭐ [ReviewSection] Set average rating (fallback):', response.average_rating, 'total reviews:', response.total_reviews);
+      } else {
+        console.log('⭐ [ReviewSection] Average rating response không hợp lệ:', response);
+        setAverageRating(0);
+        setTotalReviews(0);
+      }
+    } catch (error) {
+      console.error('💥 [ReviewSection] Lỗi khi load average rating:', error);
+      setAverageRating(0);
+      setTotalReviews(0);
+    }
+  };
+
+  // Filter and sort reviews - chỉ sử dụng dữ liệu thật từ API
   const filteredAndSortedReviews = React.useMemo(() => {
-    if (!reviews || reviews.length === 0) return [];
+    // Chỉ sử dụng dữ liệu thật từ API, không fallback về props mock
+    const reviewsToUse = realReviews;
+    
+    if (!reviewsToUse || reviewsToUse.length === 0) return [];
 
-    let filtered = reviews;
+    let filtered = reviewsToUse;
 
     // Filter by rating
     if (filterRating !== 'all') {
       const rating = parseInt(filterRating);
-      filtered = reviews.filter(review => review.rating === rating);
+      filtered = reviewsToUse.filter(review => review.rating === rating);
     }
 
     // Sort reviews
@@ -56,7 +128,7 @@ const ReviewSection = ({ productId, reviews = [], loading = false, user = null, 
     });
 
     return sorted;
-  }, [reviews, filterRating, sortBy]);
+  }, [realReviews, reviews, filterRating, sortBy]);
 
   // Auto-fill name when user is logged in
   useEffect(() => {
@@ -67,6 +139,50 @@ const ReviewSection = ({ productId, reviews = [], loading = false, user = null, 
       }));
     }
   }, [user]);
+
+  // Submit review thật lên API
+  const handleSubmitRealReview = async () => {
+    if (!user) {
+      alert('Vui lòng đăng nhập để đánh giá sản phẩm');
+      return;
+    }
+
+    if (!newReview.review_text.trim()) {
+      alert('Vui lòng nhập nội dung đánh giá');
+      return;
+    }
+
+    try {
+      setReviewSubmitting(true);
+      console.log('📝 [ReviewSection] Đang submit review:', {
+        book_id: productId,
+        rating: newReview.rating,
+        review_text: newReview.review_text
+      });
+
+      const response = await apiService.createReview({
+        book_id: productId,
+        rating: newReview.rating,
+        review_text: newReview.review_text
+      });
+
+      console.log('📝 [ReviewSection] Submit review response:', response);
+
+      if (response) {
+        alert('Đánh giá đã được gửi thành công!');
+        setNewReview({ rating: 5, review_text: '' });
+        
+        // Reload reviews và average rating
+        await loadRealReviews();
+        await loadAverageRating();
+      }
+    } catch (error) {
+      console.error('💥 [ReviewSection] Lỗi khi submit review:', error);
+      alert('Có lỗi xảy ra khi gửi đánh giá. Vui lòng thử lại.');
+    } finally {
+      setReviewSubmitting(false);
+    }
+  };
 
   // Handle review submission
   const handleSubmitReview = async (e) => {
@@ -83,7 +199,7 @@ const ReviewSection = ({ productId, reviews = [], loading = false, user = null, 
     }
 
     // Check if user already reviewed this product
-    const existingReview = reviews.find(review =>
+    const existingReview = realReviews.find(review =>
       review.user_id === user.user_id && review.book_id === parseInt(productId)
     );
 
@@ -98,31 +214,38 @@ const ReviewSection = ({ productId, reviews = [], loading = false, user = null, 
 
     setReviewSubmitting(true);
     try {
-      // TODO: Implement real review API
-      // const { reviewApi } = await import('../../../services/reviewApi');
-      // const reviewData = {
-      //   book_id: parseInt(productId),
-      //   user_id: user.user_id,
-      //   rating: newReview.rating,
-      //   review_text: newReview.review_text.trim(),
-      //   user_name: user.name
-      // };
-      // const result = await reviewApi.addReview(reviewData);
-
-      // Mock response for now
-      const result = { success: true };
-
-      // Reset form
-      setNewReview({
-        rating: 5,
-        review_text: ''
+      // Sử dụng API thật
+      console.log('📝 [ReviewSection] Đang submit review:', {
+        book_id: productId,
+        rating: newReview.rating,
+        review_text: newReview.review_text
       });
 
-      // Show success message
-      if (window.showToast) {
-        window.showToast('Đánh giá đã được gửi thành công!', 'success');
-      } else {
-        alert('Đánh giá đã được gửi thành công!');
+      const response = await apiService.createReview({
+        book_id: productId,
+        rating: newReview.rating,
+        review_text: newReview.review_text
+      });
+
+      console.log('📝 [ReviewSection] Submit review response:', response);
+
+      if (response) {
+        // Reset form
+        setNewReview({
+          rating: 5,
+          review_text: ''
+        });
+
+        // Show success message
+        if (window.showToast) {
+          window.showToast('Đánh giá đã được gửi thành công!', 'success');
+        } else {
+          alert('Đánh giá đã được gửi thành công!');
+        }
+
+        // Reload reviews và average rating
+        await loadRealReviews();
+        await loadAverageRating();
       }
 
       // Call parent callback to refresh reviews
@@ -332,7 +455,7 @@ const ReviewSection = ({ productId, reviews = [], loading = false, user = null, 
     return stars;
   };
 
-  if (loading) {
+  if (loading || realLoading) {
     return (
       <div className="text-center py-4">
         <div className="spinner-border text-primary" role="status">
@@ -365,7 +488,7 @@ const ReviewSection = ({ productId, reviews = [], loading = false, user = null, 
           <div className="col-md-8">
             <div className="rating-breakdown">
               {[5, 4, 3, 2, 1].map((star) => {
-                const count = reviews ? reviews.filter(r => r.rating === star).length : 0;
+                const count = realReviews ? realReviews.filter(r => r.rating === star).length : 0;
                 const percentage = totalReviews > 0 ? (count / totalReviews) * 100 : 0;
                 return (
                   <div key={star} className="d-flex align-items-center mb-2">
@@ -400,7 +523,7 @@ const ReviewSection = ({ productId, reviews = [], loading = false, user = null, 
                   Tất cả ({totalReviews})
                 </button>
                 {[5, 4, 3, 2, 1].map((rating) => {
-                  const count = reviews ? reviews.filter(r => r.rating === rating).length : 0;
+                  const count = realReviews ? realReviews.filter(r => r.rating === rating).length : 0;
                   return (
                     <button
                       key={rating}
@@ -459,7 +582,7 @@ const ReviewSection = ({ productId, reviews = [], loading = false, user = null, 
                     <div className="flex-grow-1">
                       <div className="d-flex align-items-center mb-1">
                         <strong className="me-2">
-                          {review.user?.name || 'Người dùng ẩn danh'}
+                          {review.username || review.user?.name || 'Người dùng ẩn danh'}
                         </strong>
                         <div className="me-2">
                           {renderStars(review.rating)}
@@ -487,7 +610,7 @@ const ReviewSection = ({ productId, reviews = [], loading = false, user = null, 
         )}
 
         {/* Review Status Message */}
-        {user && reviews.find(review => review.user_id === user.user_id && review.book_id === parseInt(productId)) && (
+        {user && realReviews.find(review => review.user_id === user.user_id && review.book_id === parseInt(productId)) && (
           <div className="card mt-4" style={{ backgroundColor: '#e8f5e8', border: '1px solid #28a745' }}>
             <div className="card-body text-center">
               <FontAwesomeIcon icon={faStar} className="text-success me-2" />
@@ -497,7 +620,7 @@ const ReviewSection = ({ productId, reviews = [], loading = false, user = null, 
         )}
 
         {/* Review Form - Only show for non-admin users */}
-        {user && user.role !== 'admin' && !reviews.find(review => review.user_id === user.user_id && review.book_id === parseInt(productId)) && (
+        {user && user.role !== 'admin' && !realReviews.find(review => review.user_id === user.user_id && review.book_id === parseInt(productId)) && (
           <div className="card mt-4" style={{ backgroundColor: '#f8f9fa', border: 'none' }}>
             <div className="card-body">
               <h6 className="mb-3 fw-bold">Viết đánh giá của bạn</h6>

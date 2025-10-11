@@ -81,6 +81,8 @@ const apiService = {
   createReview: reviewApi.createReview.bind(reviewApi),
   updateReview: reviewApi.updateReview.bind(reviewApi),
   deleteReview: reviewApi.deleteReview.bind(reviewApi),
+  getAverageRating: reviewApi.getAverageRating.bind(reviewApi),
+  getAllReviews: reviewApi.getAllReviews.bind(reviewApi),
   
   // Order APIs
   orders: orderApi,

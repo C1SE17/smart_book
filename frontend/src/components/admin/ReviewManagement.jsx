@@ -26,20 +26,32 @@ const ReviewManagement = () => {
                 console.log('Fetching reviews from backend API...');
 
                 // Sử dụng apiService để lấy danh sách reviews
-                const reviewsData = await apiService.getAllReviews();
-                console.log('Fetched reviews data from backend:', reviewsData);
+                const response = await apiService.getAllReviews();
+                console.log('Fetched reviews response from backend:', response);
 
-                // Sử dụng dữ liệu từ API
-                if (reviewsData && reviewsData.length > 0) {
+                // Xử lý response structure từ baseApi
+                let reviewsData = [];
+                if (response && response.success && Array.isArray(response.data)) {
+                    reviewsData = response.data;
                     console.log('✅ Using real review data from API:', reviewsData.length, 'reviews');
                     console.log('📊 Sample review data:', reviewsData[0]);
-                    setReviews(reviewsData);
+                } else if (response && Array.isArray(response)) {
+                    // Fallback: nếu response trực tiếp là array
+                    reviewsData = response;
+                    console.log('✅ Using real review data from API (fallback):', reviewsData.length, 'reviews');
                 } else {
-                    console.log('⚠️ No reviews found in database');
-                    setReviews([]);
+                    console.log('⚠️ No reviews found in database or invalid response structure');
+                    console.log('Response structure:', typeof response, response);
                 }
+                
+                setReviews(reviewsData);
             } catch (error) {
-                console.error('Error fetching reviews:', error);
+                console.error('💥 [ReviewManagement] Error fetching reviews:', error);
+                console.error('💥 [ReviewManagement] Error details:', {
+                    message: error.message,
+                    stack: error.stack,
+                    name: error.name
+                });
 
                 // Hiển thị thông báo lỗi chi tiết
                 let errorMessage = 'Không thể tải danh sách đánh giá';
@@ -266,11 +278,6 @@ const ReviewManagement = () => {
                     <span className="badge bg-warning">
                         Tổng: {reviews.length.toLocaleString()} đánh giá
                     </span>
-                    {reviews.length >= 1000 && (
-                        <span className="badge bg-success ms-2">
-                            Dữ liệu thật từ database
-                        </span>
-                    )}
                 </div>
             </div>
 
@@ -381,7 +388,7 @@ const ReviewManagement = () => {
                                                 <div className="me-2">
                                                     {renderStars(review.rating)}
                                                 </div>
-                                                <span className="badge bg-warning text-dark">
+                                                <span className="badge bg-warning text-white">
                                                     {review.rating}/5
                                                 </span>
                                             </div>

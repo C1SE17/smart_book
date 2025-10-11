@@ -10,11 +10,18 @@ const ReviewModel = {
     },
     // Thêm đánh giá
     create: async (user_id, book_id, rating, review_text) => {
-        const [result] = await db.promise().query(
-            'INSERT INTO reviews (user_id, book_id, rating, review_text) VALUES (?, ?, ?, ?)',
-            [user_id, book_id, rating, review_text]
-        );
-        return result.insertId;
+        console.log('📝 [ReviewModel] Tạo đánh giá mới - User ID:', user_id, 'Book ID:', book_id, 'Rating:', rating);
+        try {
+            const [result] = await db.promise().query(
+                'INSERT INTO reviews (user_id, book_id, rating, review_text) VALUES (?, ?, ?, ?)',
+                [user_id, book_id, rating, review_text]
+            );
+            console.log('✅ [ReviewModel] Tạo đánh giá thành công - Review ID:', result.insertId);
+            return result.insertId;
+        } catch (error) {
+            console.error('💥 [ReviewModel] Lỗi khi tạo đánh giá:', error);
+            throw error;
+        }
     },
     // Sửa đánh giá
     update: async (review_id, user_id, rating, review_text) => {
@@ -40,14 +47,21 @@ const ReviewModel = {
     },
     // Lấy tất cả đánh giá của sách
     getByBook: async (book_id) => {
-    const [rows] = await db.promise().query(
-        `SELECT r.*, u.name AS username, u.email AS user_email
-         FROM reviews r
-         JOIN users u ON r.user_id = u.user_id
-         WHERE r.book_id = ?
-         ORDER BY r.created_at DESC`, [book_id]
-        );
-    return rows;
+        console.log('📝 [ReviewModel] Lấy đánh giá theo sách - Book ID:', book_id);
+        try {
+            const [rows] = await db.promise().query(
+                `SELECT r.*, u.name AS username, u.email AS user_email
+                 FROM reviews r
+                 JOIN users u ON r.user_id = u.user_id
+                 WHERE r.book_id = ?
+                 ORDER BY r.created_at DESC`, [book_id]
+            );
+            console.log('📝 [ReviewModel] Tìm thấy', rows.length, 'đánh giá cho sách');
+            return rows;
+        } catch (error) {
+            console.error('💥 [ReviewModel] Lỗi khi lấy đánh giá theo sách:', error);
+            throw error;
+        }
     },
     // Lấy đánh giá theo id
     getById: async (review_id) => {
@@ -56,12 +70,39 @@ const ReviewModel = {
         );
         return rows[0];
     },
+    // Lấy tất cả đánh giá (chỉ admin)
+    getAllReviews: async () => {
+        console.log('📝 [ReviewModel] Lấy tất cả đánh giá - Admin request');
+        try {
+            const [rows] = await db.promise().query(
+                `SELECT r.*, u.name AS username, u.email AS user_email, b.title AS book_title, a.name AS book_author
+                 FROM reviews r
+                 JOIN users u ON r.user_id = u.user_id
+                 JOIN books b ON r.book_id = b.book_id
+                 LEFT JOIN authors a ON b.author_id = a.author_id
+                 ORDER BY r.created_at DESC`
+            );
+            console.log('📝 [ReviewModel] Tìm thấy', rows.length, 'đánh giá tổng cộng');
+            return rows;
+        } catch (error) {
+            console.error('💥 [ReviewModel] Lỗi khi lấy tất cả đánh giá:', error);
+            throw error;
+        }
+    },
+
     // số sao trung bình vào Model
     getAverageRating: async (book_id) => {
-    const [rows] = await db.promise().query(
-        'SELECT AVG(rating) AS avg_rating, COUNT(*) AS total_reviews FROM reviews WHERE book_id = ?', [book_id]
-        );
-    return rows[0];
+        console.log('⭐ [ReviewModel] Tính đánh giá trung bình - Book ID:', book_id);
+        try {
+            const [rows] = await db.promise().query(
+                'SELECT AVG(rating) AS avg_rating, COUNT(*) AS total_reviews FROM reviews WHERE book_id = ?', [book_id]
+            );
+            console.log('⭐ [ReviewModel] Kết quả đánh giá trung bình:', rows[0]);
+            return rows[0];
+        } catch (error) {
+            console.error('💥 [ReviewModel] Lỗi khi tính đánh giá trung bình:', error);
+            throw error;
+        }
     }
 };
 

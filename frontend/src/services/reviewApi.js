@@ -89,6 +89,31 @@ class ReviewApiService extends BaseApiService {
       throw error;
     }
   }
+
+  async getAverageRating(bookId) {
+    try {
+      console.log(`⭐ [ReviewAPI] Đang lấy đánh giá trung bình cho book ID: ${bookId}`);
+      const result = await this.apiCall(`/reviews/book/${bookId}/average`);
+      console.log(`⭐ [ReviewAPI] Kết quả đánh giá trung bình:`, result);
+      return result;
+    } catch (error) {
+      console.error(`💥 [ReviewAPI] Lỗi khi lấy đánh giá trung bình cho book ${bookId}:`, error);
+      throw error;
+    }
+  }
+
+  async getAllReviews() {
+    try {
+      console.log(`📝 [ReviewAPI] Đang lấy tất cả đánh giá (admin)`);
+      const result = await this.apiCall('/reviews/all');
+      console.log(`📝 [ReviewAPI] Kết quả lấy tất cả đánh giá:`, result);
+      return result;
+    } catch (error) {
+      console.error(`💥 [ReviewAPI] Lỗi khi lấy tất cả đánh giá:`, error);
+      throw error;
+    }
+  }
+
 }
 
 export default new ReviewApiService();

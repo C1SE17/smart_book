@@ -3,6 +3,9 @@ const router = express.Router();
 const ReviewController = require('../controllers/ReviewController');
 const { auth, adminOnly } = require('../middleware/auth');
 
+// Lấy tất cả đánh giá (chỉ admin)
+router.get('/all', auth, adminOnly, ReviewController.getAllReviews);
+
 // Lấy tất cả đánh giá của sách
 router.get('/book/:book_id', ReviewController.getReviews);
 

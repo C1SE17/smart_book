@@ -5,11 +5,26 @@ class ReviewController {
     static async createReview(req, res) {
         const user_id = req.user.userId;
         const { book_id, rating, review_text } = req.body;
-        if (!book_id || !rating) return res.status(400).json({ error: 'Thiếu thông tin' });
-        if (req.user.role !== 'admin' && await ReviewModel.hasReviewed(user_id, book_id))
-            return res.status(400).json({ error: 'Bạn đã đánh giá sản phẩm này' });
-        const review_id = await ReviewModel.create(user_id, book_id, rating, review_text || '');
-        res.status(201).json({ message: 'Đã đánh giá', review_id });
+        console.log('📝 [ReviewController] Tạo đánh giá - User ID:', user_id, 'Book ID:', book_id, 'Rating:', rating);
+        
+        if (!book_id || !rating) {
+            console.log('💥 [ReviewController] Thiếu thông tin bắt buộc - book_id hoặc rating');
+            return res.status(400).json({ error: 'Thiếu thông tin' });
+        }
+        
+        try {
+            if (req.user.role !== 'admin' && await ReviewModel.hasReviewed(user_id, book_id)) {
+                console.log('💥 [ReviewController] User đã đánh giá sản phẩm này rồi');
+                return res.status(400).json({ error: 'Bạn đã đánh giá sản phẩm này' });
+            }
+            
+            const review_id = await ReviewModel.create(user_id, book_id, rating, review_text || '');
+            console.log('✅ [ReviewController] Tạo đánh giá thành công - Review ID:', review_id);
+            res.status(201).json({ message: 'Đã đánh giá', review_id });
+        } catch (error) {
+            console.error('💥 [ReviewController] Lỗi khi tạo đánh giá:', error);
+            res.status(500).json({ error: 'Lỗi khi tạo đánh giá' });
+        }
     }
 
     // Sửa đánh giá (chỉ user chủ sở hữu)
@@ -46,11 +61,21 @@ class ReviewController {
     // Lấy tất cả đánh giá của sách (ai cũng xem được)
     static async getReviews(req, res) {
         const book_id = req.params.book_id;
-        const reviews = await ReviewModel.getByBook(book_id);
-        for (const review of reviews) {
-            review.replies = await ReplyModel.getByReview(review.review_id);
+        console.log('📝 [ReviewController] Lấy danh sách đánh giá - Book ID:', book_id);
+        try {
+            const reviews = await ReviewModel.getByBook(book_id);
+            console.log('📝 [ReviewController] Tìm thấy', reviews.length, 'đánh giá');
+            
+            for (const review of reviews) {
+                review.replies = await ReplyModel.getByReview(review.review_id);
+            }
+            
+            console.log('📝 [ReviewController] Trả về danh sách đánh giá kèm phản hồi');
+            res.json(reviews);
+        } catch (error) {
+            console.error('💥 [ReviewController] Lỗi khi lấy đánh giá:', error);
+            res.status(500).json({ error: 'Lỗi khi lấy đánh giá' });
         }
-        res.json(reviews);
     }
 
     // Thêm phản hồi cho bình luận (chỉ admin)
@@ -83,15 +108,46 @@ class ReviewController {
         res.json({ message: 'Admin đã xóa phản hồi' });
     }
 
+    // Lấy tất cả đánh giá (chỉ admin)
+    static async getAllReviews(req, res) {
+        console.log('📝 [ReviewController] Lấy tất cả đánh giá - Admin request');
+        try {
+            const reviews = await ReviewModel.getAllReviews();
+            console.log('📝 [ReviewController] Tìm thấy', reviews.length, 'đánh giá tổng cộng');
+            
+            // Không load replies để tránh lỗi và tăng performance
+            // for (const review of reviews) {
+            //     review.replies = await ReplyModel.getByReview(review.review_id);
+            // }
+            
+            console.log('📝 [ReviewController] Trả về tất cả đánh giá');
+            res.json(reviews);
+        } catch (error) {
+            console.error('💥 [ReviewController] Lỗi khi lấy tất cả đánh giá:', error);
+            res.status(500).json({ error: 'Lỗi khi lấy danh sách đánh giá' });
+        }
+    }
+
     // Số sao trung bình
     static async getAverageRating(req, res) {
         const book_id = req.params.book_id;
-        const result = await ReviewModel.getAverageRating(book_id);
-        res.json({
-            book_id,
-            average_rating: result.avg_rating ? Number(result.avg_rating).toFixed(2) : null,
-            total_reviews: result.total_reviews
-        });
+        console.log('⭐ [ReviewController] Lấy đánh giá trung bình - Book ID:', book_id);
+        try {
+            const result = await ReviewModel.getAverageRating(book_id);
+            console.log('⭐ [ReviewController] Kết quả đánh giá trung bình:', result);
+            
+            const response = {
+                book_id,
+                average_rating: result.avg_rating ? Number(result.avg_rating).toFixed(2) : null,
+                total_reviews: result.total_reviews
+            };
+            
+            console.log('⭐ [ReviewController] Trả về đánh giá trung bình:', response);
+            res.json(response);
+        } catch (error) {
+            console.error('💥 [ReviewController] Lỗi khi lấy đánh giá trung bình:', error);
+            res.status(500).json({ error: 'Lỗi khi lấy đánh giá trung bình' });
+        }
     }
 }
 

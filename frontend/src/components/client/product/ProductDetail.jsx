@@ -10,6 +10,7 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [reviews, setReviews] = useState([]);
+  const [totalReviews, setTotalReviews] = useState(0);
   const [recommendations, setRecommendations] = useState([]);
   const [recommendationsLoading, setRecommendationsLoading] = useState(true);
   const [reviewsLoading, setReviewsLoading] = useState(false);
@@ -92,9 +93,12 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
 
       if (reviewsData && reviewsData.success && Array.isArray(reviewsData.data)) {
         setReviews(reviewsData.data);
+        setTotalReviews(reviewsData.data.length);
+        console.log('Set total reviews:', reviewsData.data.length);
       } else {
         console.error('Error fetching reviews:', reviewsData);
         setReviews([]);
+        setTotalReviews(0);
       }
     } catch (error) {
       console.error('Error fetching reviews:', error);
@@ -384,7 +388,7 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
                   {renderStars(product.rating || 0)}
                 </div>
                 <span className="text-muted small">
-                  {product.rating || 0} ({product.reviewCount || 0} đánh giá)
+                  {product.rating || 0} ({totalReviews} đánh giá)
                 </span>
               </div>
             </div>
@@ -506,7 +510,7 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
                 aria-controls="reviews"
                 aria-selected="false"
               >
-                Đánh giá ({product.reviewCount || 0})
+                Đánh giá ({totalReviews})
               </button>
             </li>
           </ul>
