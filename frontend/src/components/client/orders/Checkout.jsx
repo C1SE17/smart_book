@@ -133,8 +133,14 @@ const Checkout = ({ onBackToHome, onNavigateTo }) => {
             if (hasCartItemIds) {
                 // Items from cart - use checkout API
                 const orderData = {
-                    selected_cart_item_ids: checkoutItems.map(item => item.cart_item_id),
-                    shipping_address: shippingAddress
+                    selected_cart_item_ids: checkoutItems.map(item => item.book_id), // Use book_id as cart_item_id
+                    shipping_address: shippingAddress,
+                    // Thêm thông tin về số lượng để backend biết
+                    items_info: checkoutItems.map(item => ({
+                        book_id: item.book_id,
+                        quantity: item.quantity || 1,
+                        price: item.price || 0
+                    }))
                 };
                 
                 console.log('Checkout data:', orderData);

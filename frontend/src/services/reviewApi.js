@@ -9,17 +9,21 @@ class ReviewApiService extends BaseApiService {
   async getReviews(params = {}) {
     try {
       console.log(`⭐ [ReviewAPI] Đang lấy danh sách đánh giá với tham số:`, params);
-      
+
+      // ✅ Nếu có book_id thì gọi endpoint RESTful /book/:book_id
+      let endpoint = '/reviews';
+      if (params.book_id) {
+        endpoint = `/reviews/book/${params.book_id}`;
+      }
+
+      // (Nếu cần thêm phân trang hoặc filter, bạn có thể nối thêm query phía sau)
       const queryParams = new URLSearchParams();
-      
-      if (params.book_id) queryParams.append('book_id', params.book_id);
-      if (params.user_id) queryParams.append('user_id', params.user_id);
       if (params.page) queryParams.append('page', params.page);
       if (params.limit) queryParams.append('limit', params.limit);
+      if (queryParams.toString()) {
+        endpoint += `?${queryParams.toString()}`;
+      }
 
-      const queryString = queryParams.toString();
-      const endpoint = `/reviews${queryString ? `?${queryString}` : ''}`;
-      
       console.log(`⭐ [ReviewAPI] Endpoint cuối cùng: ${endpoint}`);
       const result = await this.apiCall(endpoint);
       console.log(`⭐ [ReviewAPI] Kết quả lấy danh sách đánh giá:`, result);

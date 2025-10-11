@@ -18,14 +18,15 @@ class OrderController {
         console.log('❌ [OrderController] purchase - Thiếu book_id');
         throw new Error("Thiếu book_id");
       }
+      const validQuantity = Number.isInteger(quantity) && quantity > 0 ? quantity : 1;
       console.log('📞 [OrderController] purchase - Gọi OrderModel.createDraftOrder');
       const result = await OrderModel.createDraftOrder(
         userId,
         book_id,
-        quantity || 1,
+        validQuantity,
         shipping_address || ""
       );
-      
+      console.log("📦 Số lượng nhận từ FE:", quantity);
       console.log('✅ [OrderController] purchase - Kết quả từ OrderModel:', result);
       
       res.status(200).json({
@@ -57,7 +58,7 @@ class OrderController {
 
   static async checkout(req, res) {
     const userId = req.user.userId;
-    const { selected_cart_item_ids, shipping_address } = req.body;
+    const { selected_cart_item_ids, shipping_address, items_info } = req.body;
 
     try {
       if (!selected_cart_item_ids || !Array.isArray(selected_cart_item_ids))
@@ -67,7 +68,8 @@ class OrderController {
       const result = await OrderModel.createOrderFromCart(
         userId,
         selected_cart_item_ids,
-        shipping_address || ""
+        shipping_address || "",
+        items_info
       );
       res.status(200).json({
         success: true,
@@ -88,11 +90,20 @@ class OrderController {
     const { order_id } = req.params;
     const userId = req.user.userId;
 
+    console.log('📋 [OrderController] getOrderConfirmation - order_id:', order_id);
+    console.log('📋 [OrderController] getOrderConfirmation - userId:', userId);
+
     try {
       const order = await OrderModel.getOrderDetails(order_id, userId);
+      console.log('✅ [OrderController] getOrderConfirmation - order found:', order);
       res.status(200).json({ success: true, data: order });
     } catch (err) {
-      console.error("Lỗi khi lấy chi tiết đơn hàng:", err.message);
+      console.error('💥 [OrderController] getOrderConfirmation - Lỗi:', {
+        message: err.message,
+        stack: err.stack,
+        order_id,
+        userId
+      });
       res
         .status(500)
         .json({ error: "Lỗi khi lấy chi tiết đơn hàng: " + err.message });

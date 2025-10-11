@@ -94,7 +94,8 @@ class OrderModel {
   static async createOrderFromCart(
     userId,
     selectedCartItemIds,
-    shippingAddress
+    shippingAddress,
+    itemsInfo = null
   ) {
     try {
       console.log("Bắt đầu tạo đơn từ giỏ hàng cho userId:", userId);
@@ -127,7 +128,10 @@ class OrderModel {
 
       // Tính total_amount từ cart_items đã chọn (nếu có)
       let totalAmount = 0;
+      let cartItemsData = [];
+
       try {
+        // Thử tìm cart_items với cart_item_id trước
         const [totalResult] = await db
           .promise()
           .query(
@@ -135,11 +139,44 @@ class OrderModel {
             [cartId, selectedCartItemIds]
           );
         totalAmount = totalResult[0].total || 0;
+
+        // Lấy dữ liệu cart_items
+        const [cartItemsRows] = await db
+          .promise()
+          .query(
+            "SELECT ci.cart_item_id, ci.book_id, ci.quantity, b.price FROM cart_items ci JOIN books b ON ci.book_id = b.book_id WHERE ci.cart_id = ? AND ci.cart_item_id IN (?)",
+            [cartId, selectedCartItemIds]
+          );
+        cartItemsData = cartItemsRows;
+        console.log("Tìm thấy cart_items:", cartItemsData.length);
       } catch (err) {
-        console.log("Không tìm thấy cart_items, sử dụng fallback method");
-        // Fallback: tạo order với dữ liệu từ frontend
-        // Trong trường hợp này, selectedCartItemIds có thể chứa book_id thay vì cart_item_id
-        totalAmount = 0; // Sẽ được tính lại dưới đây
+        console.log(
+          "Không tìm thấy cart_items với cart_item_id, thử tìm với book_id"
+        );
+
+        // Fallback: tìm cart_items với book_id
+        try {
+          const [totalResult] = await db
+            .promise()
+            .query(
+              "SELECT SUM(ci.quantity * b.price) as total FROM cart_items ci JOIN books b ON ci.book_id = b.book_id WHERE ci.cart_id = ? AND ci.book_id IN (?)",
+              [cartId, selectedCartItemIds]
+            );
+          totalAmount = totalResult[0].total || 0;
+
+          // Lấy dữ liệu cart_items với book_id
+          const [cartItemsRows] = await db
+            .promise()
+            .query(
+              "SELECT ci.cart_item_id, ci.book_id, ci.quantity, b.price FROM cart_items ci JOIN books b ON ci.book_id = b.book_id WHERE ci.cart_id = ? AND ci.book_id IN (?)",
+              [cartId, selectedCartItemIds]
+            );
+          cartItemsData = cartItemsRows;
+          console.log("Tìm thấy cart_items với book_id:", cartItemsData.length);
+        } catch (err2) {
+          console.log("Không tìm thấy cart_items, sử dụng fallback method");
+          totalAmount = 0; // Sẽ được tính lại dưới đây
+        }
       }
 
       // Tạo đơn hàng (pending)
@@ -152,48 +189,94 @@ class OrderModel {
       const orderId = orderResult.insertId;
 
       // Chuyển cart_items sang order_items hoặc tạo từ dữ liệu frontend
-      try {
-        // Thử chuyển từ cart_items trước
-        await db
-          .promise()
-          .query(
-            "INSERT INTO order_items (order_id, book_id, quantity, price_at_order) SELECT ?, ci.book_id, quantity, b.price FROM cart_items ci JOIN books b ON ci.book_id = b.book_id WHERE ci.cart_id = ? AND ci.cart_item_id IN (?)",
-            [orderId, cartId, selectedCartItemIds]
+      if (cartItemsData.length > 0) {
+        try {
+          // Sử dụng dữ liệu cart_items đã lấy được
+          for (const item of cartItemsData) {
+            await db
+              .promise()
+              .query(
+                "INSERT INTO order_items (order_id, book_id, quantity, price_at_order) VALUES (?, ?, ?, ?)",
+                [orderId, item.book_id, item.quantity, item.price]
+              );
+          }
+          console.log(
+            "Đã chuyển cart_items sang order_items:",
+            cartItemsData.length,
+            "items"
           );
-        console.log("Đã chuyển cart_items sang order_items");
-      } catch (err) {
-        console.log("Không thể chuyển từ cart_items, sử dụng fallback method");
-        // Fallback: tạo order_items trực tiếp từ selectedCartItemIds (có thể là book_ids)
-        // Trong trường hợp này, chúng ta cần dữ liệu từ frontend
-        // Tạm thời tạo một order_item mặc định
-        const [bookRows] = await db
-          .promise()
-          .query("SELECT book_id, price FROM books WHERE book_id = ? LIMIT 1", [
-            selectedCartItemIds[0],
-          ]);
+        } catch (err) {
+          console.error("Lỗi khi chuyển cart_items sang order_items:", err);
+          throw err;
+        }
+      } else {
+        console.log("Không có cart_items data, sử dụng fallback method");
 
-        if (bookRows.length > 0) {
-          const book = bookRows[0];
-          await db
+        if (itemsInfo && itemsInfo.length > 0) {
+          // Sử dụng thông tin từ frontend
+          console.log("Sử dụng items_info từ frontend:", itemsInfo);
+          for (const item of itemsInfo) {
+            await db
+              .promise()
+              .query(
+                "INSERT INTO order_items (order_id, book_id, quantity, price_at_order) VALUES (?, ?, ?, ?)",
+                [orderId, item.book_id, item.quantity, item.price]
+              );
+            totalAmount += item.quantity * item.price;
+          }
+          console.log(
+            "Đã tạo order_items từ items_info:",
+            itemsInfo.length,
+            "items"
+          );
+        } else {
+          // Fallback: tạo order_items trực tiếp từ selectedCartItemIds (có thể là book_ids)
+          // Trong trường hợp này, chúng ta cần dữ liệu từ frontend
+          // Tạm thời tạo một order_item mặc định
+          const [bookRows] = await db
             .promise()
             .query(
-              "INSERT INTO order_items (order_id, book_id, quantity, price_at_order) VALUES (?, ?, ?, ?)",
-              [orderId, book.book_id, 1, book.price]
+              "SELECT book_id, price FROM books WHERE book_id = ? LIMIT 1",
+              [selectedCartItemIds[0]]
             );
-          totalAmount = book.price;
-          console.log("Đã tạo order_item fallback cho book_id:", book.book_id);
-        } else {
-          throw new Error("Không tìm thấy sản phẩm để tạo đơn hàng");
+
+          if (bookRows.length > 0) {
+            const book = bookRows[0];
+            await db
+              .promise()
+              .query(
+                "INSERT INTO order_items (order_id, book_id, quantity, price_at_order) VALUES (?, ?, ?, ?)",
+                [orderId, book.book_id, 1, book.price]
+              );
+            totalAmount = book.price;
+            console.log(
+              "Đã tạo order_item fallback cho book_id:",
+              book.book_id
+            );
+          } else {
+            throw new Error("Không tìm thấy sản phẩm để tạo đơn hàng");
+          }
         }
       }
       // Trừ kho cho từng sản phẩm
       try {
-        const [items] = await db
-          .promise()
-          .query(
-            "SELECT book_id, quantity FROM cart_items WHERE cart_id = ? AND cart_item_id IN (?)",
-            [cartId, selectedCartItemIds]
-          );
+        let items = [];
+        if (cartItemsData.length > 0) {
+          // Sử dụng dữ liệu đã lấy được
+          items = cartItemsData.map((item) => ({
+            book_id: item.book_id,
+            quantity: item.quantity,
+          }));
+        } else {
+          // Fallback: tìm cart_items với book_id
+          const [itemsRows] = await db
+            .promise()
+            .query(
+              "SELECT book_id, quantity FROM cart_items WHERE cart_id = ? AND book_id IN (?)",
+              [cartId, selectedCartItemIds]
+            );
+          items = itemsRows;
+        }
 
         for (const item of items) {
           // Kiểm tra và cập nhật warehouse
@@ -246,12 +329,30 @@ class OrderModel {
         console.log("Đã trừ kho fallback cho book_id:", bookId);
       }
       // Xóa cart_items đã chọn
-      await db
-        .promise()
-        .query(
-          "DELETE FROM cart_items WHERE cart_id = ? AND cart_item_id IN (?)",
-          [cartId, selectedCartItemIds]
+      if (cartItemsData.length > 0) {
+        // Xóa bằng cart_item_id
+        const cartItemIds = cartItemsData.map((item) => item.cart_item_id);
+        await db
+          .promise()
+          .query(
+            "DELETE FROM cart_items WHERE cart_id = ? AND cart_item_id IN (?)",
+            [cartId, cartItemIds]
+          );
+        console.log("Đã xóa cart_items:", cartItemIds.length, "items");
+      } else {
+        // Fallback: xóa bằng book_id
+        await db
+          .promise()
+          .query(
+            "DELETE FROM cart_items WHERE cart_id = ? AND book_id IN (?)",
+            [cartId, selectedCartItemIds]
+          );
+        console.log(
+          "Đã xóa cart_items bằng book_id:",
+          selectedCartItemIds.length,
+          "items"
         );
+      }
 
       // Xóa cart nếu trống
       const [remainingItems] = await db
@@ -275,24 +376,50 @@ class OrderModel {
 
   static async getOrderDetails(orderId, userId) {
     try {
-      const [rows] = await db
-        .promise()
-        .query(
-          "SELECT o.*, u.name AS user_name, u.email AS user_email, u.phone AS user_phone FROM orders o JOIN users u ON o.user_id = u.user_id WHERE o.order_id = ? AND o.user_id = ?",
-          [orderId, userId]
-        );
+      const [rows] = await db.promise().query(
+        `
+        SELECT 
+          o.order_id,
+          o.user_id,
+          o.shipping_address,
+          COALESCE(SUM(oi.quantity * oi.price_at_order), 0) AS total_price,
+          o.status,
+          o.created_at,
+          o.updated_at,
+          u.name AS user_name,
+          u.email AS user_email,
+          u.phone AS user_phone
+        FROM orders o
+        JOIN users u ON o.user_id = u.user_id
+        LEFT JOIN order_items oi ON o.order_id = oi.order_id
+        WHERE o.order_id = ? AND o.user_id = ?
+        GROUP BY o.order_id`,
+        [orderId, userId]
+      );
+
       if (!rows.length) throw new Error("Đơn hàng không tồn tại");
       const order = rows[0];
-      const [items] = await db
-        .promise()
-        .query(
-          "SELECT oi.order_item_id, oi.order_id, oi.book_id, oi.quantity, oi.price_at_order, b.title AS book_title, b.price FROM order_items oi JOIN books b ON oi.book_id = b.book_id WHERE oi.order_id = ?",
-          [orderId]
-        );
+
+      const [items] = await db.promise().query(
+        `SELECT 
+          oi.order_item_id, 
+          oi.order_id, 
+          oi.book_id, 
+          oi.quantity, 
+          oi.price_at_order, 
+          b.title AS book_title, 
+          b.cover_image, 
+          b.price
+        FROM order_items oi
+        JOIN books b ON oi.book_id = b.book_id
+        WHERE oi.order_id = ?`,
+        [orderId]
+      );
       order.items = items;
+      console.log("✅ Order details:", order);
       return order;
     } catch (err) {
-      console.error("Lỗi lấy chi tiết đơn hàng:", err.message);
+      console.error("❌ Lỗi lấy chi tiết đơn hàng:", err.message);
       throw err;
     }
   }
@@ -358,11 +485,22 @@ class OrderModel {
   static async getAllOrders() {
     try {
       const [rows] = await db.promise().query(
-        `SELECT o.order_id, o.user_id, o.shipping_address, o.total_price, o.status, o.created_at, o.updated_at,
-                        u.email AS user_email, u.name AS user_name, u.phone AS user_phone
-                 FROM orders o 
-                 JOIN users u ON o.user_id = u.user_id 
-                 ORDER BY o.created_at DESC`
+        `SELECT 
+          o.order_id,
+          o.user_id,
+          o.shipping_address,
+          COALESCE(SUM(oi.quantity * oi.price_at_order), 0) AS total_price, 
+          o.status,
+          o.created_at,
+          o.updated_at,
+          u.email AS user_email,
+          u.name AS user_name,
+          u.phone AS user_phone
+        FROM orders o
+        LEFT JOIN order_items oi ON o.order_id = oi.order_id
+        JOIN users u ON o.user_id = u.user_id
+        GROUP BY o.order_id
+        ORDER BY o.created_at DESC`
       );
       console.log("Backend getAllOrders result:", rows);
       return rows;
@@ -463,7 +601,7 @@ class OrderModel {
             o.order_id, 
             o.user_id, 
             o.shipping_address, 
-            o.total_price, 
+            COALESCE(SUM(oi.quantity * oi.price_at_order), 0) AS total_price,
             o.status, 
             o.created_at, 
             o.updated_at,
@@ -485,7 +623,6 @@ class OrderModel {
          ORDER BY o.created_at DESC`,
         [userId]
       );
-      
 
       console.log(
         "📊 [OrderModel] getUserOrders - Raw rows từ database:",

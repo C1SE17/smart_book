@@ -445,6 +445,8 @@ const MyOrders = ({ onBackToHome, onNavigateTo }) => {
     const handleViewDetails = async (order) => {
         try {
             console.log('Viewing details for order:', order);
+            console.log('Order order_id:', order.order_id);
+            console.log('Order id:', order.id);
             const orderId = order.order_id || order.id;
             console.log('Order ID to fetch:', orderId);
             
@@ -455,10 +457,27 @@ const MyOrders = ({ onBackToHome, onNavigateTo }) => {
             
             const response = await apiService.getMyOrderById(orderId);
             console.log('Order details response:', response);
+            console.log('Response success:', response.success);
+            console.log('Response data:', response.data);
+            console.log('Response data total_price:', response.data?.total_price);
+            console.log('Response data items:', response.data?.items);
             
             if (response.success) {
                 console.log('Selected order data:', response.data);
-                setSelectedOrder(response.data);
+                
+                // Tính lại total_price nếu nó bằng 0 nhưng có items
+                let orderData = response.data;
+                if ((orderData.total === 0 || orderData.total_price === 0) && orderData.items && orderData.items.length > 0) {
+                    const calculatedTotal = orderData.items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+                    console.log('Tính lại total_price trong MyOrders:', calculatedTotal);
+                    orderData = {
+                        ...orderData,
+                        total: calculatedTotal,
+                        total_price: calculatedTotal
+                    };
+                }
+                
+                setSelectedOrder(orderData);
                 setShowDetailModal(true);
             } else {
                 setError('Không thể tải chi tiết đơn hàng');

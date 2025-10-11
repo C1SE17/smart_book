@@ -105,6 +105,8 @@ class OrderApiService extends BaseApiService {
         // Transform orders to ensure consistent structure
         const transformedOrders = response.data.map(order => ({
           ...order,
+          id: order.order_id || order.id, // Ensure id is set
+          order_id: order.order_id || order.id, // Ensure order_id is set
           items: (order.items || []).map(item => ({
             book_id: item.book_id,
             title: item.book_title || item.title || 'Unknown Book',
@@ -155,6 +157,8 @@ class OrderApiService extends BaseApiService {
         const order = result.data;
         
         console.log('Raw order data from backend:', order);
+        console.log('Order total_price from backend:', order.total_price);
+        console.log('Order items from backend:', order.items);
         
         // Parse address string into components
         const parseAddress = (addressString) => {
@@ -198,17 +202,26 @@ class OrderApiService extends BaseApiService {
         const addressParts = parseAddress(order.shipping_address);
         
         // Transform backend data to match frontend expectations
+        const items = (order.items || []).map(item => ({
+          book_id: item.book_id,
+          title: item.book_title || item.title || 'Unknown Book',
+          book_title: item.book_title || item.title || 'Unknown Book',
+          quantity: item.quantity || 1,
+          price: item.price_at_order || item.price || 0,
+          price_at_order: item.price_at_order || item.price || 0
+        }));
+        
+        // Tính lại total_price nếu nó bằng 0 nhưng có items
+        let calculatedTotal = order.total_price || 0;
+        if (calculatedTotal === 0 && items.length > 0) {
+          calculatedTotal = items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+          console.log('Tính lại total_price trong frontend:', calculatedTotal);
+        }
+        
         const transformedOrder = {
           id: order.order_id,
           order_id: order.order_id,
-          items: (order.items || []).map(item => ({
-            book_id: item.book_id,
-            title: item.book_title || item.title || 'Unknown Book',
-            book_title: item.book_title || item.title || 'Unknown Book',
-            quantity: item.quantity || 1,
-            price: item.price_at_order || item.price || 0,
-            price_at_order: item.price_at_order || item.price || 0
-          })),
+          items: items,
           shippingInfo: {
             fullName: order.user_name || 'N/A',
             email: order.user_email || 'N/A',
@@ -218,8 +231,8 @@ class OrderApiService extends BaseApiService {
             district: addressParts.district,
             city: addressParts.city
           },
-          total: order.total_price || 0,
-          total_price: order.total_price || 0,
+          total: calculatedTotal,
+          total_price: calculatedTotal,
           status: order.status || 'pending',
           createdAt: order.created_at,
           created_at: order.created_at,
