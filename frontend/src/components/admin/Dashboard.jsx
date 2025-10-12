@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import apiService from '../../services/api';
+import { RevenueChart, OrdersChart } from './charts';
+import BestsellingBooks from './charts/BestsellingBooks';
+import TopRatedBooks from './charts/TopRatedBooks';
 
 const Dashboard = () => {
     const [stats, setStats] = useState({
@@ -7,8 +10,10 @@ const Dashboard = () => {
         totalOrders: 0,
         totalBooks: 0,
         totalUsers: 0,
-        monthlyRevenue: [],
+        monthlyRevenue: [], // Đảm bảo có array rỗng
+        monthlyOrders: [],  // Đảm bảo có array rỗng
         topSellingBooks: [],
+        topRatedBooks: [], // Thêm mới
         recentOrders: []
     });
 
@@ -32,15 +37,17 @@ const Dashboard = () => {
 
                 // Fetch all data in parallel
                 console.log('🔄 [Dashboard] Fetching dashboard data...');
-                const [ordersResponse, booksResponse, usersCountResponse] = await Promise.all([
+                const [ordersResponse, booksResponse, usersCountResponse, reviewsResponse] = await Promise.all([
                     apiService.getAllOrders({ suppressWarning: true }), // Admin context - suppress warning
                     apiService.getBooks({ limit: 1000 }), // Get all books for count
-                    apiService.getTotalUsersCount() // Get total users count
+                    apiService.getTotalUsersCount(), // Get total users count
+                    apiService.getAllReviews() // Thêm API lấy reviews
                 ]);
                 
                 console.log('📊 [Dashboard] Orders response:', ordersResponse);
                 console.log('📚 [Dashboard] Books response:', booksResponse);
                 console.log('👥 [Dashboard] Users count response:', usersCountResponse);
+                console.log('📝 [Dashboard] Reviews response:', reviewsResponse);
 
                 if (ordersResponse.success) {
                     const orders = ordersResponse.data || [];
@@ -62,12 +69,14 @@ const Dashboard = () => {
                             date: order.created_at
                         }));
 
-                    // Calculate monthly revenue (last 6 months)
+                    // Calculate monthly revenue and orders (last 6 months)
                     const monthlyRevenue = [];
+                    const monthlyOrders = []; // Thêm dòng này
                     const currentDate = new Date();
+                    
                     for (let i = 5; i >= 0; i--) {
                         const monthDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
-                        const monthName = monthDate.toLocaleDateString('vi-VN', { month: 'long' });
+                        const monthName = monthDate.toLocaleDateString('vi-VN', { month: 'short' });
                         
                         const monthOrders = orders.filter(order => {
                             const orderDate = new Date(order.created_at);
@@ -83,22 +92,101 @@ const Dashboard = () => {
                             month: monthName,
                             revenue: monthRevenue
                         });
+                        
+                        monthlyOrders.push({ // Sử dụng monthlyOrders đã khai báo
+                            month: monthName,
+                            orders: monthOrders.length
+                        });
                     }
 
-                    // Mock top selling books (since we don't have sales data yet)
-                    const topSellingBooks = [
-                        { id: 1, title: 'Sách bán chạy nhất', sales: 0, revenue: 0 },
-                        { id: 2, title: 'Sách phổ biến', sales: 0, revenue: 0 },
-                        { id: 3, title: 'Sách được yêu thích', sales: 0, revenue: 0 }
-                    ];
+                    // Calculate top selling books from orders
+                    const bookSales = {};
+                    orders.forEach(order => {
+                        if (order.items && order.items.length > 0) {
+                            order.items.forEach(item => {
+                                const bookId = item.book_id;
+                                const bookTitle = item.book_title || `Book ${bookId}`;
+                                const quantity = item.quantity || 0;
+                                const price = item.price_at_order || item.price || 0;
+                                
+                                if (!bookSales[bookId]) {
+                                    bookSales[bookId] = {
+                                        id: bookId,
+                                        title: bookTitle,
+                                        sales: 0,
+                                        revenue: 0
+                                    };
+                                }
+                                
+                                bookSales[bookId].sales += quantity;
+                                bookSales[bookId].revenue += quantity * price;
+                            });
+                        }
+                    });
 
+                    // Convert to array and sort by sales (lượt mua) - DESCENDING
+                    const topSellingBooks = Object.values(bookSales)
+                        .sort((a, b) => b.sales - a.sales) // Sắp xếp giảm dần theo số lượng bán
+                        .slice(0, 5) // Top 5 books
+                        .map((book, index) => ({
+                            ...book,
+                            rank: index + 1 // Thêm rank để hiển thị thứ hạng
+                        }));
+
+                    // Calculate top rated books (5 stars)
+                    let topRatedBooks = [];
+                    if (reviewsResponse.success && reviewsResponse.data) {
+                        const reviews = reviewsResponse.data;
+                        const bookRatings = {};
+                        
+                        // Group reviews by book_id
+                        reviews.forEach(review => {
+                            const bookId = review.book_id;
+                            if (!bookRatings[bookId]) {
+                                bookRatings[bookId] = {
+                                    id: bookId,
+                                    title: review.book_title || `Book ${bookId}`,
+                                    ratings: [],
+                                    fiveStarCount: 0,
+                                    totalRatings: 0,
+                                    averageRating: 0
+                                };
+                            }
+                            
+                            bookRatings[bookId].ratings.push(review.rating);
+                            bookRatings[bookId].totalRatings++;
+                            
+                            if (review.rating === 5) {
+                                bookRatings[bookId].fiveStarCount++;
+                            }
+                        });
+                        
+                        // Calculate average rating for each book
+                        Object.values(bookRatings).forEach(book => {
+                            const sum = book.ratings.reduce((a, b) => a + b, 0);
+                            book.averageRating = (sum / book.totalRatings).toFixed(1);
+                        });
+                        
+                        // Sort by five star count and get top 3
+                        topRatedBooks = Object.values(bookRatings)
+                            .sort((a, b) => b.fiveStarCount - a.fiveStarCount)
+                            .slice(0, 3)
+                            .map((book, index) => ({
+                                ...book,
+                                rank: index + 1
+                            }));
+                    }
+
+                    // Trong useEffect, đảm bảo setStats luôn có đầy đủ data
                     setStats({
                         totalRevenue,
                         totalOrders: orders.length,
                         totalBooks: booksResponse.success ? (booksResponse.data?.length || 0) : 0,
                         totalUsers: usersCountResponse.success ? (usersCountResponse.data || 0) : 0,
-                        monthlyRevenue,
+                        monthlyRevenue: monthlyRevenue || [], // Đảm bảo không undefined
+                        monthlyOrders: monthlyOrders || [],   // Đảm bảo không undefined
                         topSellingBooks,
+                        topRatedBooks, // Thêm mới
                         recentOrders
                     });
                 } else {
@@ -284,106 +372,124 @@ const Dashboard = () => {
             </div>
 
             <div className="row">
-                {/* Revenue Chart */}
+                {/* Revenue Chart - Line Chart */}
                 <div className="col-xl-8 mb-4">
                     <div className="card border-0 shadow-sm h-100">
                         <div className="card-header bg-white border-0">
-                            <h5 className="fw-bold text-dark mb-0">Doanh thu theo tháng</h5>
+                            <h5 className="fw-bold text-dark mb-0">
+                                <i className="fas fa-chart-line me-2 text-primary"></i>
+                                Doanh thu theo tháng
+                            </h5>
                         </div>
                         <div className="card-body">
-                            <div className="table-responsive">
-                                <table className="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Tháng</th>
-                                            <th className="text-end">Doanh thu</th>
-                                            <th className="text-end">Tăng trưởng</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {stats.monthlyRevenue.map((item, index) => {
-                                            const prevRevenue = index > 0 ? stats.monthlyRevenue[index - 1].revenue : 0;
-                                            const growth = prevRevenue > 0 ? ((item.revenue - prevRevenue) / prevRevenue * 100) : 0;
-
-                                            return (
-                                                <tr key={index}>
-                                                    <td className="fw-medium">{item.month}</td>
-                                                    <td className="text-end fw-bold">{formatCurrency(item.revenue)}</td>
-                                                    <td className="text-end">
-                                                        <span className={`badge ${growth >= 0 ? 'bg-success' : 'bg-danger'}`}>
-                                                            {growth >= 0 ? '+' : ''}{growth.toFixed(1)}%
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            );
-                                        })}
-                                    </tbody>
-                                </table>
-                            </div>
+                            <RevenueChart data={stats.monthlyRevenue || []} height={300} />
                         </div>
                     </div>
                 </div>
 
-                {/* Top Selling Books */}
+                {/* Orders Chart - Bar Chart */}
                 <div className="col-xl-4 mb-4">
                     <div className="card border-0 shadow-sm h-100">
                         <div className="card-header bg-white border-0">
-                            <h5 className="fw-bold text-dark mb-0">Sách bán chạy</h5>
+                            <h5 className="fw-bold text-dark mb-0">
+                                <i className="fas fa-chart-bar me-2 text-success"></i>
+                                Số đơn hàng theo tháng
+                            </h5>
                         </div>
                         <div className="card-body">
-                            <div className="list-group list-group-flush">
-                                {stats.topSellingBooks.map((book, index) => (
-                                    <div key={book.id} className="list-group-item border-0 px-0 py-3">
-                                        <div className="d-flex align-items-center">
-                                            <div className="flex-shrink-0">
-                                                <div className="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style={{ width: '32px', height: '32px' }}>
-                                                    {index + 1}
-                                                </div>
-                                            </div>
-                                            <div className="flex-grow-1 ms-3">
-                                                <div className="fw-medium text-dark small" style={{ lineHeight: '1.3' }}>
-                                                    {book.title}
-                                                </div>
-                                                <div className="text-muted small">
-                                                    {book.sales} bản - {formatCurrency(book.revenue)}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
+                            <OrdersChart data={stats.monthlyOrders || []} height={300} />
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Recent Orders */}
+            {/* Top Selling Books and Top Rated Books */}
             <div className="row">
-                <div className="col-12">
+                {/* Top Selling Books */}
+                <div className="col-xl-6 mb-4">
+                    <BestsellingBooks data={stats.topSellingBooks || []} height={400} />
+                </div>
+
+                {/* Top Rated Books */}
+                <div className="col-xl-6 mb-4">
+                    <TopRatedBooks data={stats.topRatedBooks || []} height={400} />
+                </div>
+            </div>
+
+            {/* Recent Orders - Full Width */}
+            <div className="row">
+                <div className="col-12 mb-4">
                     <div className="card border-0 shadow-sm">
                         <div className="card-header bg-white border-0">
-                            <h5 className="fw-bold text-dark mb-0">Đơn hàng gần đây</h5>
+                            <h5 className="fw-bold text-dark mb-0">
+                                <i className="fas fa-clock me-2 text-info"></i>
+                                Đơn hàng gần đây
+                            </h5>
                         </div>
-                        <div className="card-body">
+                        <div className="card-body p-0">
                             <div className="table-responsive">
-                                <table className="table table-hover">
-                                    <thead>
+                                <table className="table table-hover mb-0 align-middle">
+                                    <thead className="table-light">
                                         <tr>
-                                            <th>Mã đơn</th>
-                                            <th>Khách hàng</th>
-                                            <th className="text-end">Giá trị</th>
-                                            <th>Trạng thái</th>
-                                            <th>Ngày</th>
+                                            <th className="border-0 py-3 text-center" style={{ width: '15%' }}>
+                                                <span className="fw-bold text-dark">Mã đơn</span>
+                                            </th>
+                                            <th className="border-0 py-3" style={{ width: '20%' }}>
+                                                <span className="fw-bold text-dark">Khách hàng</span>
+                                            </th>
+                                            <th className="border-0 py-3 text-center" style={{ width: '20%' }}>
+                                                <span className="fw-bold text-dark">Giá trị</span>
+                                            </th>
+                                            <th className="border-0 py-3 text-center" style={{ width: '25%' }}>
+                                                <span className="fw-bold text-dark">Trạng thái</span>
+                                            </th>
+                                            <th className="border-0 py-3 text-center" style={{ width: '20%' }}>
+                                                <span className="fw-bold text-dark">Ngày tạo</span>
+                                            </th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {stats.recentOrders.map((order) => (
-                                            <tr key={order.id}>
-                                                <td className="fw-medium">#{order.id.toString().padStart(6, '0')}</td>
-                                                <td>{order.customer}</td>
-                                                <td className="text-end fw-bold">{formatCurrency(order.amount)}</td>
-                                                <td>{getStatusBadge(order.status)}</td>
-                                                <td className="text-muted">{new Date(order.date).toLocaleDateString('vi-VN')}</td>
+                                        {stats.recentOrders.map((order, index) => (
+                                            <tr key={order.id} className={`border-0 ${index % 2 === 0 ? 'bg-light' : 'bg-white'}`}>
+                                                <td className="py-3 text-center">
+                                                    <span className="badge bg-primary bg-opacity-10 text-primary fw-bold px-3 py-2" style={{ fontSize: '14px' }}>
+                                                        #{order.id.toString().padStart(6, '0')}
+                                                    </span>
+                                                </td>
+                                                <td className="py-3">
+                                                    <div className="fw-semibold text-dark">{order.customer}</div>
+                                                </td>
+                                                <td className="py-3 text-center">
+                                                    <div className="fw-bold text-success fs-5">
+                                                        {formatCurrency(order.amount)}
+                                                    </div>
+                                                </td>
+                                                <td className="py-3 text-center">
+                                                    <span className={`badge px-3 py-2 fw-semibold ${
+                                                        order.status === 'completed' ? 'bg-success text-white' :
+                                                        order.status === 'shipped' ? 'bg-info text-white' :
+                                                        order.status === 'pending' ? 'bg-warning text-dark' :
+                                                        order.status === 'cancelled' ? 'bg-danger text-white' :
+                                                        'bg-secondary text-white'
+                                                    }`}>
+                                                        {order.status === 'completed' ? 'Hoàn thành' :
+                                                         order.status === 'shipped' ? 'Đã giao' :
+                                                         order.status === 'pending' ? 'Chờ xử lý' :
+                                                         order.status === 'cancelled' ? 'Đã hủy' :
+                                                         order.status}
+                                                    </span>
+                                                </td>
+                                                <td className="py-3 text-center">
+                                                    <div className="text-muted fw-semibold" style={{ fontSize: '15px' }}>
+                                                        {new Date(order.date).toLocaleDateString('vi-VN')}
+                                                    </div>
+                                                    <div className="text-muted" style={{ fontSize: '13px' }}>
+                                                        {new Date(order.date).toLocaleTimeString('vi-VN', { 
+                                                            hour: '2-digit', 
+                                                            minute: '2-digit' 
+                                                        })}
+                                                    </div>
+                                                </td>
                                             </tr>
                                         ))}
                                     </tbody>

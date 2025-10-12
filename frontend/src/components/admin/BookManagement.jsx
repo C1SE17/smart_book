@@ -198,160 +198,92 @@ const BookManagement = () => {
     };
 
     return (
-        <div>
-            {/* Header */}
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <h2 className="fw-bold text-dark">Quản lý sách (Real API)</h2>
-                <button
-                    className="btn btn-primary"
-                    onClick={handleAddBook}
-                >
-                    <i className="fas fa-plus me-2"></i>
-                    Thêm sách mới
-                </button>
-            </div>
-
-            {/* Search Bar */}
-            <div className="row mb-4">
-                <div className="col-md-6">
-                    <form onSubmit={handleSearch} className="d-flex">
-                        <input
-                            type="text"
-                            className="form-control me-2"
-                            placeholder="Tìm kiếm sách theo tên hoặc mô tả..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
-                        <button type="submit" className="btn btn-outline-primary me-2">
-                            <i className="fas fa-search"></i>
-                        </button>
-                        {searchQuery && (
-                            <button
-                                type="button"
-                                className="btn btn-outline-secondary"
-                                onClick={handleClearSearch}
-                            >
-                                <i className="fas fa-times"></i>
-                            </button>
-                        )}
-                    </form>
-                </div>
-                <div className="col-md-6 text-end">
-                    <button
-                        className="btn btn-outline-success me-2"
-                        onClick={refreshData}
-                        disabled={loading}
-                    >
-                        <i className="fas fa-sync-alt me-1"></i>
-                        Làm mới
-                    </button>
-                    <span className="text-muted">
-                        Tổng: {books.length} sách
-                    </span>
-                </div>
-            </div>
-
-            {/* Error Message */}
-            {error && (
-                <div className="alert alert-danger" role="alert">
-                    <i className="fas fa-exclamation-triangle me-2"></i>
-                    {error}
-                </div>
-            )}
-
-            {/* Books Table */}
-            <div className="card border-0 shadow-sm">
-                <div className="card-body">
-                    <div className="table-responsive">
-                        {loading ? (
-                            <div className="text-center py-5">
-                                <div className="spinner-border text-primary" role="status">
-                                    <span className="visually-hidden">Loading...</span>
-                                </div>
-                                <p className="mt-2 text-muted">Đang tải dữ liệu từ database...</p>
-                            </div>
-                        ) : books.length === 0 ? (
-                            <div className="text-center py-5">
-                                <i className="fas fa-book-open fa-3x text-muted mb-3"></i>
-                                <h5 className="text-muted">Không có sách nào</h5>
-                                <p className="text-muted">
-                                    {searchQuery ? 'Không tìm thấy sách phù hợp với từ khóa tìm kiếm' : 'Database trống hoặc có lỗi kết nối'}
-                                </p>
-                                {!searchQuery && (
-                                    <button className="btn btn-primary" onClick={handleAddBook}>
-                                        <i className="fas fa-plus me-2"></i>
-                                        Thêm sách đầu tiên
-                                    </button>
-                                )}
-                            </div>
-                        ) : (
-                            <table className="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Tên sách</th>
-                                        <th>Giá</th>
-                                        <th>Tồn kho</th>
-                                        <th>Danh mục</th>
-                                        <th>Tác giả</th>
-                                        <th>Nhà xuất bản</th>
-                                        <th className="text-center">Thao tác</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {books.map(book => (
-                                        <tr key={book.book_id}>
-                                            <td>{book.book_id}</td>
-                                            <td>
-                                                <div>
-                                                    <strong>{book.title}</strong>
-                                                    {book.description && (
-                                                        <div className="text-muted small">
-                                                            {book.description.length > 50
-                                                                ? book.description.substring(0, 50) + '...'
-                                                                : book.description
-                                                            }
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </td>
-                                            <td className="text-end">{formatCurrency(book.price)}</td>
-                                            <td className="text-center">
-                                                <span className={`badge ${book.stock > 10 ? 'bg-success' : book.stock > 0 ? 'bg-warning' : 'bg-danger'}`}>
-                                                    {book.stock}
-                                                </span>
-                                            </td>
-                                            <td>{book.category_id}</td>
-                                            <td>{book.author_id}</td>
-                                            <td>{book.publisher_id}</td>
-                                            <td className="text-center">
-                                                <div className="btn-group" role="group">
-                                                    <button
-                                                        className="btn btn-outline-primary btn-sm"
-                                                        onClick={() => handleEditBook(book)}
-                                                        title="Chỉnh sửa"
-                                                    >
-                                                        <i className="fas fa-edit"></i>
-                                                    </button>
-                                                    <button
-                                                        className="btn btn-outline-danger btn-sm"
-                                                        onClick={() => handleDeleteBook(book.book_id)}
-                                                        title="Xóa"
-                                                    >
-                                                        <i className="fas fa-trash"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        )}
-                    </div>
-                </div>
-            </div>
-
+        <div className="card border-0 shadow-sm rounded-3">
+        <div className="card-header bg-white border-0 d-flex align-items-center justify-content-between">
+          <h5 className="fw-bold text-dark mb-0">
+            <i className="fas fa-book-open text-primary me-2"></i>
+            Danh sách sách
+          </h5>
+          <button className="btn btn-primary btn-sm">
+            <i className="fas fa-plus me-1"></i> Thêm sách mới
+          </button>
         </div>
+      
+        <div className="card-body p-0">
+          <div className="table-responsive">
+            <table
+              className="table table-hover mb-0 align-middle text-center"
+              style={{ tableLayout: "fixed", width: "100%" }}
+            >
+              <thead className="bg-light">
+                <tr>
+                  <th style={{ width: "5%" }} className="py-3 fw-semibold text-secondary">ID</th>
+                  <th style={{ width: "25%" }} className="py-3 fw-semibold text-secondary text-start ps-3">Tên sách</th>
+                  <th style={{ width: "10%" }} className="py-3 fw-semibold text-secondary">Giá</th>
+                  <th style={{ width: "10%" }} className="py-3 fw-semibold text-secondary">Tồn kho</th>
+                  <th style={{ width: "10%" }} className="py-3 fw-semibold text-secondary">Danh mục</th>
+                  <th style={{ width: "10%" }} className="py-3 fw-semibold text-secondary">Tác giả</th>
+                  <th style={{ width: "10%" }} className="py-3 fw-semibold text-secondary">NXB</th>
+                  <th style={{ width: "15%" }} className="py-3 fw-semibold text-secondary">Thao tác</th>
+                </tr>
+              </thead>
+      
+              <tbody>
+                {books.length > 0 ? (
+                  books.map((book) => (
+                    <tr key={book.book_id} className="border-bottom">
+                      <td className="fw-semibold text-dark">{book.book_id}</td>
+                      <td className="text-start ps-3">
+                        <div className="fw-bold text-primary text-truncate" title={book.title}>
+                          {book.title}
+                        </div>
+                        <small className="text-muted text-truncate d-block">{book.description}</small>
+                      </td>
+                      <td className="fw-bold text-success">
+                        {new Intl.NumberFormat("vi-VN").format(book.price)} ₫
+                      </td>
+                      <td>
+                        <span
+                          className={`${
+                            book.stock > 100
+                              ? "text-dark "
+                              : book.stock > 50
+                              ? " text-dark "
+                              : " text-dark "
+                          }`}
+                        >
+                          {book.stock}
+                        </span>
+                      </td>
+                      <td>{book.category_id}</td>
+                      <td>{book.author_id}</td>
+                      <td>{book.publisher_id}</td>
+                      <td>
+                        <div className="d-flex justify-content-center gap-2">
+                          <button className="btn btn-outline-primary btn-sm">
+                            <i className="fas fa-edit"></i>
+                          </button>
+                          <button className="btn btn-outline-danger btn-sm">
+                            <i className="fas fa-trash"></i>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="8" className="text-muted py-4">
+                      <i className="fas fa-inbox fa-2x mb-2"></i>
+                      <div>Không có dữ liệu sách</div>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      
     );
 };
 

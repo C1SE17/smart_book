@@ -334,63 +334,149 @@ function App() {
         </Layout>
       )}
       {currentPage === 'orders' && (
-        <ErrorBoundary>
-          <ListOrders
-            onNavigateTo={handleNavigateTo}
-          />
-        </ErrorBoundary>
+        <Layout 
+          onViewAllNotifications={handleViewAllNotifications}
+          onNavigateTo={handleNavigateTo}
+          onBackToHome={handleBackToHome}
+          user={user}
+          onLogout={handleLogout}
+        >
+          <ErrorBoundary>
+            <ListOrders
+              onNavigateTo={handleNavigateTo}
+            />
+          </ErrorBoundary>
+        </Layout>
       )}
       {currentPage === 'blog' && (
-        <BlogPage onNavigateTo={handleNavigateTo} />
+        <Layout 
+          onViewAllNotifications={handleViewAllNotifications}
+          onNavigateTo={handleNavigateTo}
+          onBackToHome={handleBackToHome}
+          user={user}
+          onLogout={handleLogout}
+        >
+          <BlogPage onNavigateTo={handleNavigateTo} />
+        </Layout>
       )}
       {currentPage === 'blog-detail' && (
-        <ErrorBoundary>
-          <BlogDetail onNavigateTo={handleNavigateTo} blogId={blogId} />
-        </ErrorBoundary>
+        <Layout 
+          onViewAllNotifications={handleViewAllNotifications}
+          onNavigateTo={handleNavigateTo}
+          onBackToHome={handleBackToHome}
+          user={user}
+          onLogout={handleLogout}
+        >
+          <ErrorBoundary>
+            <BlogDetail onNavigateTo={handleNavigateTo} blogId={blogId} />
+          </ErrorBoundary>
+        </Layout>
       )}
       {currentPage === 'books' && (
-        <ErrorBoundary>
-          <CategoriesPage onNavigateTo={handleNavigateTo} />
-        </ErrorBoundary>
+        <Layout 
+          onViewAllNotifications={handleViewAllNotifications}
+          onNavigateTo={handleNavigateTo}
+          onBackToHome={handleBackToHome}
+          user={user}
+          onLogout={handleLogout}
+        >
+          <ErrorBoundary>
+            <CategoriesPage onNavigateTo={handleNavigateTo} />
+          </ErrorBoundary>
+        </Layout>
       )}
       {currentPage === 'categories' && (
-        <ErrorBoundary>
-          <CategoriesPage onNavigateTo={handleNavigateTo} />
-        </ErrorBoundary>
+        <Layout 
+          onViewAllNotifications={handleViewAllNotifications}
+          onNavigateTo={handleNavigateTo}
+          onBackToHome={handleBackToHome}
+          user={user}
+          onLogout={handleLogout}
+        >
+          <ErrorBoundary>
+            <CategoriesPage onNavigateTo={handleNavigateTo} />
+          </ErrorBoundary>
+        </Layout>
       )}
       {currentPage === 'product' && (
-        <ProductDetail productId={productId} onNavigateTo={handleNavigateTo} onNavigateToProduct={handleNavigateToProduct} user={user} />
+        <Layout 
+          onViewAllNotifications={handleViewAllNotifications}
+          onNavigateTo={handleNavigateTo}
+          onBackToHome={handleBackToHome}
+          user={user}
+          onLogout={handleLogout}
+        >
+          <ProductDetail productId={productId} onNavigateTo={handleNavigateTo} onNavigateToProduct={handleNavigateToProduct} user={user} />
+        </Layout>
       )}
       {currentPage === 'home' && (
-        <>
+        <Layout 
+          onViewAllNotifications={handleViewAllNotifications}
+          onNavigateTo={handleNavigateTo}
+          onBackToHome={handleBackToHome}
+          user={user}
+          onLogout={handleLogout}
+        >
           {/* Slide Section */}
           <Slide onNavigateTo={handleNavigateTo} />
           {/* Home Page Content */}
           <Home onNavigateTo={handleNavigateTo} />
-        </>
+        </Layout>
       )}
       {currentPage === 'contact' && (
-        <ErrorBoundary>
-          <Contact onBackToHome={handleBackToHome} onNavigateTo={handleNavigateTo} />
-        </ErrorBoundary>
+        <Layout 
+          onViewAllNotifications={handleViewAllNotifications}
+          onNavigateTo={handleNavigateTo}
+          onBackToHome={handleBackToHome}
+          user={user}
+          onLogout={handleLogout}
+        >
+          <ErrorBoundary>
+            <Contact onBackToHome={handleBackToHome} onNavigateTo={handleNavigateTo} />
+          </ErrorBoundary>
+        </Layout>
       )}
       {currentPage === 'about' && (
-        <ErrorBoundary>
-          <AboutUs onBackToHome={handleBackToHome} onNavigateTo={handleNavigateTo} />
-        </ErrorBoundary>
+        <Layout 
+          onViewAllNotifications={handleViewAllNotifications}
+          onNavigateTo={handleNavigateTo}
+          onBackToHome={handleBackToHome}
+          user={user}
+          onLogout={handleLogout}
+        >
+          <ErrorBoundary>
+            <AboutUs onBackToHome={handleBackToHome} onNavigateTo={handleNavigateTo} />
+          </ErrorBoundary>
+        </Layout>
       )}
       {currentPage === 'author' && (
-        <ErrorBoundary>
-          <AuthorPage onNavigateTo={handleNavigateTo} onNavigateToAuthorDetail={handleNavigateToAuthorDetail} />
-        </ErrorBoundary>
+        <Layout 
+          onViewAllNotifications={handleViewAllNotifications}
+          onNavigateTo={handleNavigateTo}
+          onBackToHome={handleBackToHome}
+          user={user}
+          onLogout={handleLogout}
+        >
+          <ErrorBoundary>
+            <AuthorPage onNavigateTo={handleNavigateTo} onNavigateToAuthorDetail={handleNavigateToAuthorDetail} />
+          </ErrorBoundary>
+        </Layout>
       )}
       {currentPage === 'author-detail' && (
-        <ErrorBoundary>
-          <AuthorDetail onNavigateTo={handleNavigateTo} authorId={authorId} />
-        </ErrorBoundary>
+        <Layout 
+          onViewAllNotifications={handleViewAllNotifications}
+          onNavigateTo={handleNavigateTo}
+          onBackToHome={handleBackToHome}
+          user={user}
+          onLogout={handleLogout}
+        >
+          <ErrorBoundary>
+            <AuthorDetail onNavigateTo={handleNavigateTo} authorId={authorId} />
+          </ErrorBoundary>
+        </Layout>
       )}
 
-      {/* Admin Pages */}
+      {/* Admin Pages - Không sử dụng Layout để không có footer */}
       {currentPage === 'admin-dashboard' && (
         <ErrorBoundary>
           <AdminLayout onNavigateTo={handleNavigateTo} onLogout={handleLogout} onBackToHome={handleAdminBackToHome} currentPage="admin-dashboard">
@@ -458,7 +544,6 @@ function App() {
           </AdminLayout>
         </ErrorBoundary>
       )}
-
 
       <ToastContainer />
     </div>

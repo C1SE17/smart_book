@@ -18,15 +18,21 @@ const OrderManagement = () => {
         completedOrders: 0,
         cancelledOrders: 0
     });
-    
+
     // Multiple selection states
     const [selectedOrders, setSelectedOrders] = useState(new Set());
     const [selectAll, setSelectAll] = useState(false);
 
+    // Pagination states
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalItems, setTotalItems] = useState(0);
+
     const fetchOrders = async () => {
         setLoading(true);
         setError(null);
-        
+
         try {
             // Check if user is admin before calling admin API
             const user = JSON.parse(localStorage.getItem('user') || 'null');
@@ -35,19 +41,19 @@ const OrderManagement = () => {
                 setLoading(false);
                 return;
             }
-            
+
             if (user.role !== 'admin') {
                 setError('Bạn không có quyền truy cập trang quản lý đơn hàng. Chỉ admin mới có thể truy cập. Vui lòng đăng nhập bằng tài khoản admin.');
                 setLoading(false);
                 return;
             }
-            
+
             // Fetch all orders (not just pending)
             const allOrdersResponse = await apiService.getAllOrders({ suppressWarning: true }); // Admin context - suppress warning
-            
+
             if (allOrdersResponse.success) {
                 const allOrders = allOrdersResponse.data || [];
-                
+
                 // Use data directly from getAllOrders (now includes user info)
                 console.log('Processing orders with user data from backend:', allOrders);
                 const ordersWithUserDetails = allOrders.map((order) => {
@@ -58,14 +64,14 @@ const OrderManagement = () => {
                         total: order.total,
                         amount: order.amount
                     });
-                    
+
                     // Use user data from backend query
                     const customer_name = order.user_name || `User ${order.user_id}`;
                     const customer_phone = order.user_phone || 'N/A';
                     const customer_email = order.user_email || 'N/A';
-                    
+
                     console.log(`✅ Using customer name: ${customer_name} for user_id: ${order.user_id}`);
-                    
+
                     const finalOrder = {
                         ...order,
                         customer_name,
@@ -74,37 +80,48 @@ const OrderManagement = () => {
                         created_at: order.created_at || new Date().toISOString(),
                         updated_at: order.updated_at || new Date().toISOString()
                     };
-                    
+
                     console.log(`Final order data for ${order.order_id}:`, finalOrder);
                     return finalOrder;
                 });
-                
+
                 // Sort by order_id from low to high (ascending)
                 ordersWithUserDetails.sort((a, b) => a.order_id - b.order_id);
                 console.log('Orders sorted by order_id (low to high):', ordersWithUserDetails.map(o => o.order_id));
-                
+
                 // Set orders for display
                 setOrders(ordersWithUserDetails);
-                
+
+                // Calculate pagination
+                const total = ordersWithUserDetails.length;
+                const pages = Math.ceil(total / itemsPerPage);
+                setTotalItems(total);
+                setTotalPages(pages);
+
+                // Reset to first page if current page is out of range
+                if (currentPage > pages) {
+                    setCurrentPage(1);
+                }
+
                 // Calculate statistics from all orders
                 console.log('Calculating statistics from orders:', ordersWithUserDetails);
-                
+
                 const totalRevenue = ordersWithUserDetails.reduce((sum, order) => {
                     // Try multiple possible fields for total price
                     const orderTotal = parseFloat(order.total_price || order.total_amount || order.total || order.amount || 0);
                     console.log(`Order ${order.order_id}: total_price = ${order.total_price}, total_amount = ${order.total_amount}, total = ${order.total}, amount = ${order.amount}, parsed = ${orderTotal}`);
                     return sum + orderTotal;
                 }, 0);
-                
+
                 console.log(`Total revenue calculated from ${ordersWithUserDetails.length} orders: ${totalRevenue}`);
-                
+
                 const totalOrders = ordersWithUserDetails.length;
                 const pendingOrdersCount = ordersWithUserDetails.filter(o => o.status === 'pending').length;
                 const paidOrdersCount = ordersWithUserDetails.filter(o => o.status === 'paid').length;
                 const shippedOrdersCount = ordersWithUserDetails.filter(o => o.status === 'shipped').length;
                 const completedOrdersCount = ordersWithUserDetails.filter(o => o.status === 'completed').length;
                 const cancelledOrdersCount = ordersWithUserDetails.filter(o => o.status === 'cancelled').length;
-                
+
                 const statsData = {
                     totalRevenue,
                     totalOrders,
@@ -114,7 +131,7 @@ const OrderManagement = () => {
                     completedOrders: completedOrdersCount,
                     cancelledOrders: cancelledOrdersCount
                 };
-                
+
                 console.log('Final stats data:', statsData);
                 setStats(statsData);
             } else {
@@ -147,14 +164,14 @@ const OrderManagement = () => {
                 console.log('User is not admin, skipping revenue stats fetch');
                 return;
             }
-            
+
             console.log('Fetching revenue statistics...');
             const revenueResponse = await apiService.getTotalRevenue();
-            
+
             if (revenueResponse.success) {
                 console.log('Revenue stats received:', revenueResponse.data);
                 const revenueData = revenueResponse.data;
-                
+
                 // Update stats with revenue data
                 setStats(prevStats => ({
                     ...prevStats,
@@ -205,14 +222,14 @@ const OrderManagement = () => {
                 setError('Bạn không có quyền cập nhật trạng thái đơn hàng. Chỉ admin mới có thể thực hiện.');
                 return;
             }
-            
+
             // Call API to update order status
             const response = await apiService.updateOrderStatus(orderId, newStatus);
-            
+
             if (response.success) {
                 // Update local state with current timestamp
                 const currentTime = new Date().toISOString();
-                setOrders(prevOrders => 
+                setOrders(prevOrders =>
                     prevOrders.map(order =>
                         order.order_id === orderId
                             ? { ...order, status: newStatus, updated_at: currentTime }
@@ -228,9 +245,9 @@ const OrderManagement = () => {
                         updatedAt: currentTime
                     }
                 }));
-                
+
                 setSuccessMessage('Cập nhật trạng thái đơn hàng thành công!');
-                
+
                 // Clear success message after 3 seconds
                 setTimeout(() => setSuccessMessage(''), 3000);
             } else {
@@ -245,27 +262,27 @@ const OrderManagement = () => {
     const handleViewDetails = async (order) => {
         try {
             setError(null);
-            
+
             // Check if user is admin before calling admin API
             const user = JSON.parse(localStorage.getItem('user') || 'null');
             if (!user || user.role !== 'admin') {
                 setError('Bạn không có quyền xem chi tiết đơn hàng. Chỉ admin mới có thể truy cập.');
                 return;
             }
-            
+
             // Fetch detailed order information including items (admin API)
             const response = await apiService.getAdminOrderDetails(order.order_id);
-            
+
             if (response.success) {
                 // Fetch user details for the order
                 console.log(`Fetching user details for order ${order.order_id}, user_id: ${order.user_id}`);
                 const userResponse = await apiService.getUserById(order.user_id);
                 console.log(`User response for order ${order.order_id}:`, userResponse);
-                
+
                 let customer_name = `User ${order.user_id}`;
                 let customer_phone = 'N/A';
                 let customer_email = 'N/A';
-                
+
                 if (userResponse.success && userResponse.data) {
                     customer_name = userResponse.data.name || userResponse.data.fullName || `User ${order.user_id}`;
                     customer_phone = userResponse.data.phone || 'N/A';
@@ -274,7 +291,7 @@ const OrderManagement = () => {
                 } else {
                     console.log(`❌ Failed to get user details for order ${order.order_id}`, userResponse);
                 }
-                
+
                 // Combine order data with user details
                 const orderWithUserDetails = {
                     ...response.data,
@@ -282,7 +299,7 @@ const OrderManagement = () => {
                     customer_phone,
                     customer_email
                 };
-                
+
                 console.log(`Final order data for modal:`, orderWithUserDetails);
                 setSelectedOrder(orderWithUserDetails);
                 setShowDetailModal(true);
@@ -296,17 +313,17 @@ const OrderManagement = () => {
                     customer_phone: order.user_phone || 'N/A',
                     customer_email: order.user_email || 'N/A'
                 };
-                
+
                 setSelectedOrder(fallbackOrderData);
                 setShowDetailModal(true);
                 setError('Đã tải thông tin cơ bản (Một số chi tiết có thể không khả dụng)');
             }
         } catch (error) {
             console.error('Error fetching order details:', error);
-            
+
             // Show detailed error message
             let errorMessage = 'Có lỗi xảy ra khi tải chi tiết đơn hàng';
-            
+
             if (error.message && error.message.includes('404')) {
                 errorMessage = 'Không tìm thấy đơn hàng này';
             } else if (error.message && error.message.includes('403')) {
@@ -316,9 +333,9 @@ const OrderManagement = () => {
             } else if (error.message) {
                 errorMessage = `Lỗi: ${error.message}`;
             }
-            
+
             setError(errorMessage);
-            
+
             // Try fallback with existing order data
             try {
                 console.log('Trying fallback with existing order data');
@@ -329,7 +346,7 @@ const OrderManagement = () => {
                     customer_phone: order.user_phone || 'N/A',
                     customer_email: order.user_email || 'N/A'
                 };
-                
+
                 setSelectedOrder(fallbackOrderData);
                 setShowDetailModal(true);
                 setError('Đã tải thông tin cơ bản (Một số chi tiết có thể không khả dụng)');
@@ -349,12 +366,12 @@ const OrderManagement = () => {
             } else {
                 newSelected.add(orderId);
             }
-            
+
             // Update selectAll state based on current selection
             const allOrderIds = orders.map(order => order.order_id);
             const allSelected = allOrderIds.every(id => newSelected.has(id));
             setSelectAll(allSelected);
-            
+
             return newSelected;
         });
     };
@@ -380,20 +397,20 @@ const OrderManagement = () => {
         try {
             setLoading(true);
             setError(null);
-            
+
             const response = await apiService.deleteOrder(orderId);
-            
+
             if (response.success) {
                 // Remove order from local state
                 setOrders(prevOrders => prevOrders.filter(order => order.order_id !== orderId));
-                
+
                 // Remove from selection if selected
                 setSelectedOrders(prev => {
                     const newSelected = new Set(prev);
                     newSelected.delete(orderId);
                     return newSelected;
                 });
-                
+
                 setSuccessMessage('Xóa đơn hàng thành công!');
                 setTimeout(() => setSuccessMessage(''), 3000);
             } else {
@@ -421,23 +438,23 @@ const OrderManagement = () => {
         try {
             setLoading(true);
             setError(null);
-            
+
             // Delete orders one by one
-            const deletePromises = Array.from(selectedOrders).map(orderId => 
+            const deletePromises = Array.from(selectedOrders).map(orderId =>
                 apiService.deleteOrder(orderId)
             );
-            
+
             const results = await Promise.all(deletePromises);
             const successCount = results.filter(result => result.success).length;
-            
+
             if (successCount > 0) {
                 // Remove deleted orders from local state
                 setOrders(prevOrders => prevOrders.filter(order => !selectedOrders.has(order.order_id)));
-                
+
                 // Clear selection
                 setSelectedOrders(new Set());
                 setSelectAll(false);
-                
+
                 setSuccessMessage(`Xóa thành công ${successCount}/${selectedOrders.size} đơn hàng!`);
                 setTimeout(() => setSuccessMessage(''), 3000);
             } else {
@@ -488,6 +505,40 @@ const OrderManagement = () => {
         return allStatuses.filter(status => status.value !== currentStatus);
     };
 
+    // Pagination functions
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+        setSelectAll(false);
+        setSelectedOrders(new Set());
+    };
+
+    const handleItemsPerPageChange = (newItemsPerPage) => {
+        setItemsPerPage(newItemsPerPage);
+        setCurrentPage(1);
+        setSelectAll(false);
+        setSelectedOrders(new Set());
+    };
+
+    // Get current page orders
+    const getCurrentPageOrders = () => {
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        return orders.slice(startIndex, endIndex);
+    };
+
+    // Get page numbers for pagination
+    const getPageNumbers = () => {
+        const pages = [];
+        const maxVisiblePages = 5;
+        const startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+        const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+        for (let i = startPage; i <= endPage; i++) {
+            pages.push(i);
+        }
+        return pages;
+    };
+
     if (loading) {
         return (
             <div className="d-flex justify-content-center align-items-center" style={{ height: '400px' }}>
@@ -510,7 +561,7 @@ const OrderManagement = () => {
                     <p className="text-muted mb-0">Hiển thị đơn hàng chờ xử lý - Nhấn "Làm mới" để cập nhật đơn hàng mới</p>
                 </div>
                 <div className="d-flex align-items-center gap-3">
-                    <button 
+                    <button
                         className="btn btn-primary"
                         onClick={() => {
                             fetchOrders();
@@ -521,7 +572,7 @@ const OrderManagement = () => {
                         <i className={`fas fa-sync-alt ${loading ? 'fa-spin' : ''} me-2`}></i>
                         Làm mới
                     </button>
-                    <button 
+                    <button
                         className="btn btn-outline-danger"
                         onClick={handleDeleteMultiple}
                         disabled={loading || selectedOrders.size === 0}
@@ -530,7 +581,6 @@ const OrderManagement = () => {
                         <i className="fas fa-trash me-2"></i>
                         Xóa nhiều ({selectedOrders.size})
                     </button>
-                    
                 </div>
             </div>
 
@@ -544,11 +594,11 @@ const OrderManagement = () => {
                             <div className="mb-2">
                                 <small className="text-muted">
                                     <i className="fas fa-lightbulb me-1"></i>
-                                    <strong>Hướng dẫn:</strong> Để truy cập trang quản lý đơn hàng, bạn cần đăng nhập bằng tài khoản có quyền admin. 
+                                    <strong>Hướng dẫn:</strong> Để truy cập trang quản lý đơn hàng, bạn cần đăng nhập bằng tài khoản có quyền admin.
                                     Nếu chưa có tài khoản admin, vui lòng liên hệ quản trị viên hệ thống.
                                 </small>
                             </div>
-                            <button 
+                            <button
                                 className="btn btn-outline-primary btn-sm me-2"
                                 onClick={() => {
                                     // Redirect to login page
@@ -558,7 +608,7 @@ const OrderManagement = () => {
                                 <i className="fas fa-sign-in-alt me-1"></i>
                                 Đăng nhập Admin
                             </button>
-                            <button 
+                            <button
                                 className="btn btn-outline-secondary btn-sm"
                                 onClick={() => {
                                     // Redirect to home page
@@ -570,9 +620,9 @@ const OrderManagement = () => {
                             </button>
                         </div>
                     )}
-                    <button 
-                        type="button" 
-                        className="btn-close" 
+                    <button
+                        type="button"
+                        className="btn-close"
                         onClick={() => setError(null)}
                     ></button>
                 </div>
@@ -583,9 +633,9 @@ const OrderManagement = () => {
                 <div className="alert alert-success alert-dismissible fade show" role="alert">
                     <i className="fas fa-check-circle me-2"></i>
                     {successMessage}
-                    <button 
-                        type="button" 
-                        className="btn-close" 
+                    <button
+                        type="button"
+                        className="btn-close"
                         onClick={() => setSuccessMessage('')}
                     ></button>
                 </div>
@@ -599,9 +649,9 @@ const OrderManagement = () => {
                         <div className="flex-grow-1">
                             <strong>Lưu ý:</strong> Khi khách hàng đặt hàng thành công từ trang chủ, đơn hàng sẽ xuất hiện trong danh sách này với trạng thái "Chờ xử lý". Nhấn nút "Làm mới" để cập nhật danh sách đơn hàng mới nhất.
                         </div>
-                        <button 
-                            type="button" 
-                            className="btn-close" 
+                        <button
+                            type="button"
+                            className="btn-close"
                             data-bs-dismiss="alert"
                         ></button>
                     </div>
@@ -726,76 +776,89 @@ const OrderManagement = () => {
             {/* Orders Table */}
             <div className="card border-0 shadow-sm">
                 <div className="card-header bg-white border-0">
-                    <h5 className="fw-bold text-dark mb-0">
-                        <i className="fas fa-list me-2 text-secondary"></i>
-                        Danh sách đơn hàng
-                    </h5>
+                    <div className="d-flex justify-content-between align-items-center">
+                        <h5 className="fw-bold text-dark mb-0">
+                            <i className="fas fa-list me-2 text-secondary"></i>
+                            Danh sách đơn hàng
+                        </h5>
+                        <div className="d-flex align-items-center gap-3">
+                            <div className="d-flex align-items-center">
+                                <label className="form-label me-2 mb-0 small">Hiển thị:</label>
+                                <select
+                                    className="form-select form-select-sm"
+                                    style={{ width: '80px' }}
+                                    value={itemsPerPage}
+                                    onChange={(e) => handleItemsPerPageChange(parseInt(e.target.value))}
+                                >
+                                    <option value={5}>5</option>
+                                    <option value={10}>10</option>
+                                    <option value={20}>20</option>
+                                    <option value={50}>50</option>
+                                </select>
+                            </div>
+                            <div className="text-muted small">
+                                Hiển thị {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, totalItems)} của {totalItems} đơn hàng
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div className="card-body p-0">
                     <div className="table-responsive">
-                        <table className="table table-hover mb-0">
+                        <table className="table table-hover mb-0 align-middle text-center" style={{ tableLayout: 'fixed', width: '100%' }}>
                             <thead className="table-light">
                                 <tr>
-                                    <th className="border-0 py-3">
-                                        <input 
-                                            type="checkbox" 
+                                    <th style={{ width: '40px' }}>
+                                        <input
+                                            type="checkbox"
                                             className="form-check-input"
                                             checked={selectAll}
                                             onChange={handleSelectAll}
                                         />
                                     </th>
-                                    <th className="border-0 py-3">Mã đơn</th>
-                                    <th className="border-0 py-3">Khách hàng</th>
-                                    <th className="border-0 py-3">Liên hệ</th>
-                                    <th className="border-0 py-3">Loại đơn hàng</th>
-                                    <th className="border-0 py-3 text-end">Tổng tiền</th>
-                                    <th className="border-0 py-3">Trạng thái</th>
-                                    <th className="border-0 py-3">Ngày tạo</th>
-                                    <th className="border-0 py-3 text-center">Thao tác</th>
+                                    <th style={{ width: '80px' }}>Mã đơn</th>
+                                    <th style={{ width: '200px' }}>Khách hàng</th>
+                                    <th style={{ width: '220px' }}>Liên hệ</th>
+                                    <th style={{ width: '120px' }}>Loại đơn hàng</th>
+                                    <th style={{ width: '120px' }}>Tổng tiền</th>
+                                    <th style={{ width: '150px' }}>Trạng thái</th>
+                                    <th style={{ width: '180px' }}>Ngày tạo</th>
+                                    <th style={{ width: '150px' }}>Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {orders && orders.length > 0 ? orders.map((order, index) => (
+                                {getCurrentPageOrders().length > 0 ? getCurrentPageOrders().map((order, index) => (
                                     <tr key={`order-${order.order_id}-${index}`} className="border-0">
-                                        <td className="py-3">
-                                            <input 
-                                                type="checkbox" 
+                                        <td>
+                                            <input
+                                                type="checkbox"
                                                 className="form-check-input"
                                                 checked={selectedOrders.has(order.order_id)}
                                                 onChange={() => handleOrderSelect(order.order_id)}
                                             />
                                         </td>
-                                        <td className="py-3">
-                                            <span className="fw-bold">#{order.order_id}</span>
-                                        </td>
-                                        <td className="py-3">
+                                        <td className="fw-bold">#{order.order_id}</td>
+                                        <td>
                                             <div className="fw-medium text-dark">{order.customer_name || `User ${order.user_id}`}</div>
-                                            <div className="text-muted small">{order.shipping_address || 'Chưa có địa chỉ'}</div>
-                                        </td>
-                                        <td className="py-3">
-                                            <div className="small">
-                                                <div>{order.user_email || 'N/A'}</div>
-                                                <div className="text-muted">{order.customer_phone || 'N/A'}</div>
+                                            <div className="text-muted small text-truncate" title={order.shipping_address}>
+                                                {order.shipping_address || 'Chưa có địa chỉ'}
                                             </div>
                                         </td>
-                                        <td className="py-3">
+                                        <td>
+                                            <div>{order.user_email || 'N/A'}</div>
+                                            <div className="text-muted small">{order.customer_phone || 'N/A'}</div>
+                                        </td>
+                                        <td>
                                             <span className={`badge ${order.order_type === 'cart' ? 'bg-info' : 'bg-secondary'}`}>
                                                 {order.order_type === 'cart' ? 'Từ giỏ hàng' : 'Mua ngay'}
                                             </span>
                                         </td>
-                                        <td className="text-end fw-bold py-3">
-                                            {(() => {
-                                                const amount = order.total_price || order.total_amount || order.total || 0;
-                                                console.log(`Order ${order.order_id} amount:`, amount, 'type:', typeof amount);
-                                                return formatCurrency(amount);
-                                            })()}
-                                        </td>
-                                        <td className="py-3">
-                                            <div className="d-flex align-items-center">
+                                        <td className="fw-bold text-end">{formatCurrency(order.total_price || 0)}</td>
+                                        <td>
+                                            <div className="d-flex justify-content-center align-items-center gap-2">
                                                 {getStatusBadge(order.status)}
                                                 <select
-                                                    className={`form-select form-select-sm ms-2 ${formErrors.status ? 'is-invalid' : ''}`}
-                                                    style={{ width: '120px' }}
+                                                    className="form-select form-select-sm"
+                                                    style={{ width: '110px' }}
                                                     value={order.status}
                                                     onChange={(e) => handleStatusChange(order.order_id, e.target.value)}
                                                 >
@@ -805,43 +868,24 @@ const OrderManagement = () => {
                                                         </option>
                                                     ))}
                                                 </select>
-                                                {formErrors.status && (
-                                                    <div className="invalid-feedback">{formErrors.status}</div>
-                                                )}
                                             </div>
                                         </td>
-                                        <td className="text-muted small py-3">
-                                            {order.created_at ? new Date(order.created_at).toLocaleString('vi-VN', {
-                                                year: 'numeric',
-                                                month: '2-digit',
-                                                day: '2-digit',
-                                                hour: '2-digit',
-                                                minute: '2-digit',
-                                                second: '2-digit'
-                                            }) : 'N/A'}
+                                        <td className="text-muted small">
+                                            {order.created_at ? new Date(order.created_at).toLocaleString('vi-VN') : 'N/A'}
                                         </td>
-                                        <td className="text-center py-3">
-                                            <div className="d-flex gap-2 justify-content-center">
-                                                <button
-                                                    className="btn btn-outline-primary btn-sm"
-                                                    onClick={() => handleViewDetails(order)}
-                                                >
-                                                    <i className="fas fa-eye me-1"></i>
-                                                    Chi tiết
+                                        <td>
+                                            <div className="d-flex justify-content-center gap-2">
+                                                <button className="btn btn-outline-primary btn-sm" onClick={() => handleViewDetails(order)}>
+                                                    <i className="fas fa-eye me-1"></i>Chi tiết
                                                 </button>
-                                                <button
-                                                    className="btn btn-outline-danger btn-sm"
-                                                    onClick={() => handleDeleteOrder(order.order_id)}
-                                                    disabled={loading}
-                                                >
-                                                    <i className="fas fa-trash me-1"></i>
-                                                    Xóa
+                                                <button className="btn btn-outline-danger btn-sm" onClick={() => handleDeleteOrder(order.order_id)} disabled={loading}>
+                                                    <i className="fas fa-trash me-1"></i>Xóa
                                                 </button>
                                             </div>
                                         </td>
                                     </tr>
                                 )) : (
-                                    <tr className="border-0">
+                                    <tr>
                                         <td colSpan="9" className="text-center text-muted py-4">
                                             <i className="fas fa-inbox fa-2x mb-2"></i>
                                             <div>Không có đơn hàng nào</div>
@@ -850,9 +894,82 @@ const OrderManagement = () => {
                                 )}
                             </tbody>
                         </table>
+
                     </div>
                 </div>
             </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+                <div className="d-flex justify-content-between align-items-center mt-4">
+                    <div className="text-muted small">
+                        Hiển thị {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, totalItems)} của {totalItems} đơn hàng
+                    </div>
+                    <nav aria-label="Page navigation">
+                        <ul className="pagination pagination-sm mb-0">
+                            {/* First page button */}
+                            <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                                <button
+                                    className="page-link"
+                                    onClick={() => handlePageChange(1)}
+                                    disabled={currentPage === 1}
+                                    title="Trang đầu"
+                                >
+                                    <i className="fas fa-angle-double-left"></i>
+                                </button>
+                            </li>
+
+                            {/* Previous button */}
+                            <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                                <button
+                                    className="page-link"
+                                    onClick={() => handlePageChange(currentPage - 1)}
+                                    disabled={currentPage === 1}
+                                    title="Trang trước"
+                                >
+                                    <i className="fas fa-chevron-left"></i>
+                                </button>
+                            </li>
+
+                            {/* Page numbers */}
+                            {getPageNumbers().map(page => (
+                                <li key={page} className={`page-item ${currentPage === page ? 'active' : ''}`}>
+                                    <button
+                                        className="page-link"
+                                        onClick={() => handlePageChange(page)}
+                                    >
+                                        {page}
+                                    </button>
+                                </li>
+                            ))}
+
+                            {/* Next button */}
+                            <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                                <button
+                                    className="page-link"
+                                    onClick={() => handlePageChange(currentPage + 1)}
+                                    disabled={currentPage === totalPages}
+                                    title="Trang sau"
+                                >
+                                    <i className="fas fa-chevron-right"></i>
+                                </button>
+                            </li>
+
+                            {/* Last page button */}
+                            <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                                <button
+                                    className="page-link"
+                                    onClick={() => handlePageChange(totalPages)}
+                                    disabled={currentPage === totalPages}
+                                    title="Trang cuối"
+                                >
+                                    <i className="fas fa-angle-double-right"></i>
+                                </button>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            )}
 
             {/* Order Detail Modal */}
             {showDetailModal && selectedOrder && (
@@ -917,9 +1034,9 @@ const OrderManagement = () => {
                                         <tbody>
                                             {selectedOrder.items && selectedOrder.items.length > 0 ? (
                                                 selectedOrder.items.map((item, index) => (
-                                                <tr key={index}>
+                                                    <tr key={index}>
                                                         <td>{item.book_title || `Book ID: ${item.book_id}`}</td>
-                                                    <td className="text-center">{item.quantity}</td>
+                                                        <td className="text-center">{item.quantity}</td>
                                                         <td className="text-end">{formatCurrency(item.price_at_order || item.price || 0)}</td>
                                                         <td className="text-end fw-bold">{formatCurrency((item.price_at_order || item.price || 0) * item.quantity)}</td>
                                                     </tr>
