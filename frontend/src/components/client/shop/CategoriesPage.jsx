@@ -14,10 +14,15 @@ const CategoriesPage = ({ onNavigateTo }) => {
   const [authors, setAuthors] = useState([]);
   const [loading, setLoading] = useState(false);
   const [sortBy, setSortBy] = useState('created_at');
-  
+
   // Pagination states for authors
   const [currentAuthorPage, setCurrentAuthorPage] = useState(1);
   const [authorsPerPage] = useState(12); // 12 authors per page (3 rows x 4 columns)
+
+  // Pagination states for products
+  const [currentProductPage, setCurrentProductPage] = useState(1);
+  const [productsPerPage] = useState(12); // 12 products per page (3 rows x 4 columns)
+
   const [sortOrder, setSortOrder] = useState('desc');
   const [priceRange, setPriceRange] = useState({ min: 0, max: 1000000 });
   const [searchQuery, setSearchQuery] = useState('');
@@ -28,7 +33,7 @@ const CategoriesPage = ({ onNavigateTo }) => {
       setLoading(true);
       try {
         console.log('🔄 Fetching real data from API...');
-        
+
         // Fetch data from real API
         const [categoriesResponse, booksResponse, authorsResponse] = await Promise.all([
           apiService.getCategories(),
@@ -57,7 +62,7 @@ const CategoriesPage = ({ onNavigateTo }) => {
           const authorsData = authorsResponse.data || [];
           // Tính số lượng sách cho mỗi tác giả
           const authorsWithBookCount = authorsData.map(author => {
-            const bookCount = booksResponse.success ? 
+            const bookCount = booksResponse.success ?
               (booksResponse.data || []).filter(book => book.author_id === author.author_id).length : 0;
             return { ...author, book_count: bookCount };
           });
@@ -68,12 +73,12 @@ const CategoriesPage = ({ onNavigateTo }) => {
         console.log('🎉 All data loaded successfully from real API!');
       } catch (error) {
         console.error('❌ Error fetching data from API:', error);
-        
+
         // Fallback to empty arrays on error
         setCategories([]);
         setProducts([]);
         setAuthors([]);
-        
+
         // Show error message to user
         if (window.showToast) {
           window.showToast('Không thể tải dữ liệu từ server. Vui lòng thử lại sau.', 'error');
@@ -89,7 +94,7 @@ const CategoriesPage = ({ onNavigateTo }) => {
   // Pagination logic for authors
   const paginatedAuthors = useMemo(() => {
     if (!authors || !Array.isArray(authors)) return [];
-    
+
     const startIndex = (currentAuthorPage - 1) * authorsPerPage;
     const endIndex = startIndex + authorsPerPage;
     return authors.slice(startIndex, endIndex);
@@ -103,7 +108,7 @@ const CategoriesPage = ({ onNavigateTo }) => {
   // Filter products based on selected category and search
   const filteredProducts = useMemo(() => {
     if (!products || !Array.isArray(products)) return [];
-    
+
     let filtered = [...products];
 
     // Filter by category
@@ -127,17 +132,17 @@ const CategoriesPage = ({ onNavigateTo }) => {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(product => {
         if (!product) return false;
-        
+
         // Search in title
         const titleMatch = product.title && product.title.toLowerCase().includes(query);
-        
+
         // Search in author name
         const author = authors.find(a => a && a.author_id === product.author_id);
         const authorMatch = author && author.name && author.name.toLowerCase().includes(query);
-        
+
         // Search in description
         const descriptionMatch = product.description && product.description.toLowerCase().includes(query);
-        
+
         return titleMatch || authorMatch || descriptionMatch;
       });
     }
@@ -150,7 +155,7 @@ const CategoriesPage = ({ onNavigateTo }) => {
     // Sort products
     filtered.sort((a, b) => {
       if (!a || !b) return 0;
-      
+
       let aValue, bValue;
 
       switch (sortBy) {
@@ -183,16 +188,32 @@ const CategoriesPage = ({ onNavigateTo }) => {
     return filtered;
   }, [products, selectedCategory, selectedAuthor, searchQuery, priceRange, sortBy, sortOrder, categories, authors]);
 
+  // Pagination logic for products
+  const paginatedProducts = useMemo(() => {
+    if (!filteredProducts || !Array.isArray(filteredProducts)) return [];
+
+    const startIndex = (currentProductPage - 1) * productsPerPage;
+    const endIndex = startIndex + productsPerPage;
+    return filteredProducts.slice(startIndex, endIndex);
+  }, [filteredProducts, currentProductPage, productsPerPage]);
+
+  const totalProductPages = useMemo(() => {
+    if (!filteredProducts || !Array.isArray(filteredProducts)) return 0;
+    return Math.ceil(filteredProducts.length / productsPerPage);
+  }, [filteredProducts, productsPerPage]);
+
   // Handle category selection
   const handleCategorySelect = (categoryName) => {
     setSelectedCategory(categoryName);
     setShowCategoryCards(false);
+    setCurrentProductPage(1); // Reset to first page
   };
 
   // Handle author selection
   const handleAuthorSelect = (authorName) => {
     setSelectedAuthor(authorName);
     setShowCategoryCards(false);
+    setCurrentProductPage(1); // Reset to first page
   };
 
   // Handle back to categories
@@ -213,6 +234,7 @@ const CategoriesPage = ({ onNavigateTo }) => {
     setPriceRange({ min: 0, max: 1000000 });
     setSortBy('created_at');
     setSortOrder('desc');
+    setCurrentProductPage(1); // Reset to first page
   };
 
   // Handle toggle author cards
@@ -228,6 +250,11 @@ const CategoriesPage = ({ onNavigateTo }) => {
   // Handle author page change
   const handleAuthorPageChange = (page) => {
     setCurrentAuthorPage(page);
+  };
+
+  // Handle product page change
+  const handleProductPageChange = (page) => {
+    setCurrentProductPage(page);
   };
 
   // Handle product click
@@ -305,7 +332,7 @@ const CategoriesPage = ({ onNavigateTo }) => {
     setLoading(true);
     try {
       console.log('🔄 Refreshing data from API...');
-      
+
       const [categoriesResponse, booksResponse, authorsResponse] = await Promise.all([
         apiService.getCategories(),
         apiService.getBooks({ limit: 1000 }),
@@ -405,7 +432,10 @@ const CategoriesPage = ({ onNavigateTo }) => {
                     className="form-control"
                     placeholder="Tìm sách hoặc tác giả..."
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setCurrentProductPage(1); // Reset to first page when searching
+                    }}
                     style={{ fontSize: '0.85rem' }}
                   />
                   <button className="btn btn-outline-secondary" type="button" style={{ fontSize: '0.8rem' }}>
@@ -434,7 +464,7 @@ const CategoriesPage = ({ onNavigateTo }) => {
                       <a
                         key={category.category_id}
                         href="#"
-                        className={`list-group-item list-group-item-action border-0 py-1 ${selectedCategory === category.name ? 'active bg-primary text-white' : ''}`}
+                        className={`list-group-item list-group-item-action border-0 py-1 ${selectedCategory === category.name ? 'active bg-dark text-white' : ''}`}
                         onClick={(e) => {
                           e.preventDefault();
                           handleCategorySelect(category.name);
@@ -461,7 +491,7 @@ const CategoriesPage = ({ onNavigateTo }) => {
                   </button>
                 </div>
                 <div className="list-group list-group-flush" style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                  
+
                   {authors && Array.isArray(authors) && authors.map((author) => {
                     if (!author) return null;
                     const count = products && Array.isArray(products) ? products.filter(p => p && p.author_id === author.author_id).length : 0;
@@ -469,7 +499,7 @@ const CategoriesPage = ({ onNavigateTo }) => {
                       <a
                         key={author.author_id}
                         href="#"
-                        className={`list-group-item list-group-item-action border-0 py-1 ${selectedAuthor === author.name ? 'active bg-primary text-white' : ''}`}
+                        className={`list-group-item list-group-item-action border-0 py-1 ${selectedAuthor === author.name ? 'active bg-dark text-white' : ''}`}
                         onClick={(e) => {
                           e.preventDefault();
                           handleAuthorSelect(author.name);
@@ -542,7 +572,7 @@ const CategoriesPage = ({ onNavigateTo }) => {
               {/* Refresh Data Button */}
               <div className="d-grid">
                 <button
-                  className="btn btn-outline-primary btn-sm"
+                  className="btn btn-outline-dark btn-sm"
                   onClick={handleRefreshData}
                   disabled={loading}
                   style={{ fontSize: '0.8rem' }}
@@ -579,6 +609,7 @@ const CategoriesPage = ({ onNavigateTo }) => {
                   const [newSortBy, newSortOrder] = e.target.value.split('-');
                   setSortBy(newSortBy);
                   setSortOrder(newSortOrder);
+                  setCurrentProductPage(1); // Reset to first page when sorting
                 }}
               >
                 <option value="created_at-desc">Mặc định</option>
@@ -682,7 +713,7 @@ const CategoriesPage = ({ onNavigateTo }) => {
                   );
                 })}
               </div>
-              
+
               {/* Author Pagination */}
               {totalAuthorPages > 1 && (
                 <div className="d-flex justify-content-center mt-4">
@@ -697,7 +728,7 @@ const CategoriesPage = ({ onNavigateTo }) => {
                           Trước
                         </button>
                       </li>
-                      
+
                       {Array.from({ length: totalAuthorPages }, (_, i) => i + 1).map((page) => (
                         <li key={page} className={`page-item ${currentAuthorPage === page ? 'active' : ''}`}>
                           <button
@@ -708,7 +739,7 @@ const CategoriesPage = ({ onNavigateTo }) => {
                           </button>
                         </li>
                       ))}
-                      
+
                       <li className={`page-item ${currentAuthorPage === totalAuthorPages ? 'disabled' : ''}`}>
                         <button
                           className="page-link"
@@ -722,11 +753,11 @@ const CategoriesPage = ({ onNavigateTo }) => {
                   </nav>
                 </div>
               )}
-              
+
               {/* Author count info */}
               <div className="text-center mt-3">
                 <small className="text-muted">
-                  Hiển thị {((currentAuthorPage - 1) * authorsPerPage) + 1}-{Math.min(currentAuthorPage * authorsPerPage, authors.length)} 
+                  Hiển thị {((currentAuthorPage - 1) * authorsPerPage) + 1}-{Math.min(currentAuthorPage * authorsPerPage, authors.length)}
                   trong tổng số {authors.length} tác giả
                 </small>
               </div>
@@ -735,146 +766,391 @@ const CategoriesPage = ({ onNavigateTo }) => {
             // Products Grid View
             <div>
               {filteredProducts.length > 0 ? (
-                <div className="row">
-                  {filteredProducts && Array.isArray(filteredProducts) && filteredProducts.map((product) => {
-                    if (!product) return null;
-                    return (
-                      <div key={product.book_id} className="col-lg-3 col-md-6 mb-4">
-                      <div
-                        className="card h-100 border-0 shadow-sm product-card"
-                        style={{
-                          cursor: 'pointer',
-                          borderRadius: '8px',
-                          height: '350px',
-                          backgroundColor: 'white',
-                          transition: 'all 0.3s ease'
-                        }}
-                        onClick={() => handleProductClick(product.book_id)}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.transform = 'translateY(-8px)';
-                          e.currentTarget.style.boxShadow = '0 15px 35px rgba(0,0,0,0.15)';
-                          // Hiển thị nút thêm vào giỏ hàng nếu còn hàng
-                          const addToCartBtn = e.currentTarget.querySelector('.add-to-cart-btn');
-                          if (addToCartBtn && product.stock > 0) {
-                            addToCartBtn.style.opacity = '1';
-                          }
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.transform = 'translateY(0)';
-                          e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-                          // Ẩn nút thêm vào giỏ hàng
-                          const addToCartBtn = e.currentTarget.querySelector('.add-to-cart-btn');
-                          if (addToCartBtn) {
-                            addToCartBtn.style.opacity = '0';
-                          }
-                        }}
-                      >
-                        <div className="position-relative">
-                          <img
-                            src={product.cover_image}
-                            className="card-img-top"
-                            alt={product.title}
+                <>
+                  <div className="row">
+                    {paginatedProducts && Array.isArray(paginatedProducts) && paginatedProducts.map((product) => {
+                      if (!product) return null;
+                      return (
+                        <div key={product.book_id} className="col-lg-3 col-md-6 mb-4">
+                          <div
+                            className="card h-100 border-0 shadow-sm product-card"
                             style={{
-                              height: '220px',
-                              objectFit: 'contain',
-                              width: '100%',
-                              backgroundColor: '#f8f9fa'
+                              cursor: 'pointer',
+                              borderRadius: '8px',
+                              height: '350px',
+                              backgroundColor: 'white',
+                              transition: 'all 0.3s ease'
                             }}
-                            onError={(e) => {
-                              e.target.src = '/images/book1.jpg';
+                            onClick={() => handleProductClick(product.book_id)}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.transform = 'translateY(-8px)';
+                              e.currentTarget.style.boxShadow = '0 15px 35px rgba(0,0,0,0.15)';
+                              // Hiển thị nút thêm vào giỏ hàng nếu còn hàng
+                              const addToCartBtn = e.currentTarget.querySelector('.add-to-cart-btn');
+                              if (addToCartBtn && product.stock > 0) {
+                                addToCartBtn.style.opacity = '1';
+                              }
                             }}
-                          />
-                          {/* Sale Tag */}
-                          <div className="position-absolute top-0 end-0 p-1">
-                            <span className="badge bg-dark">Sale</span>
-                          </div>
-                          <div className="position-absolute top-0 start-0 p-2">
-                            <button
-                              className="btn btn-sm btn-light rounded-circle"
-                              onClick={(e) => handleAddToWishlist(e, product.book_id)}
-                              title="Thêm vào yêu thích"
-                            >
-                              <FontAwesomeIcon icon={faHeart} />
-                            </button>
-                          </div>
-                          {/* Nút Thêm Vào Giỏ Hàng - xuất hiện khi hover và còn hàng */}
-                          {product.stock > 0 && (
-                            <div
-                              className="position-absolute top-0 end-0 p-2 add-to-cart-btn"
-                              style={{
-                                opacity: 0,
-                                transition: 'opacity 0.3s ease'
-                              }}
-                            >
-                              <button
-                                className="btn btn-primary btn-sm rounded-circle"
-                                onClick={(e) => handleAddToCart(e, product.book_id)}
-                                title="Thêm vào giỏ hàng"
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.transform = 'translateY(0)';
+                              e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                              // Ẩn nút thêm vào giỏ hàng
+                              const addToCartBtn = e.currentTarget.querySelector('.add-to-cart-btn');
+                              if (addToCartBtn) {
+                                addToCartBtn.style.opacity = '0';
+                              }
+                            }}
+                          >
+                            <div className="position-relative">
+                              <img
+                                src={product.cover_image}
+                                className="card-img-top"
+                                alt={product.title}
                                 style={{
-                                  width: '40px',
-                                  height: '40px',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center'
+                                  height: '220px',
+                                  objectFit: 'contain',
+                                  width: '100%',
+                                  backgroundColor: '#f8f9fa'
                                 }}
-                              >
-                                <FontAwesomeIcon icon={faShoppingCart} />
-                              </button>
+                                onError={(e) => {
+                                  e.target.src = '/images/book1.jpg';
+                                }}
+                              />
+                              {/* Sale Tag */}
+                              <div className="position-absolute top-0 end-0 p-1">
+                                <span className="badge bg-dark">Sale</span>
+                              </div>
+                              <div className="position-absolute top-0 start-0 p-2">
+                                <button
+                                  className="btn btn-sm btn-light rounded-circle"
+                                  onClick={(e) => handleAddToWishlist(e, product.book_id)}
+                                  title="Thêm vào yêu thích"
+                                >
+                                  <FontAwesomeIcon icon={faHeart} />
+                                </button>
+                              </div>
+                              {/* Nút Thêm Vào Giỏ Hàng - xuất hiện khi hover và còn hàng */}
+                              {product.stock > 0 && (
+                                <div
+                                  className="position-absolute top-0 end-0 p-2 add-to-cart-btn"
+                                  style={{
+                                    opacity: 0,
+                                    transition: 'opacity 0.3s ease'
+                                  }}
+                                >
+                                  <button
+                                    className="btn btn-dark btn-sm rounded-circle"
+                                    onClick={(e) => handleAddToCart(e, product.book_id)}
+                                    title="Thêm vào giỏ hàng"
+                                    style={{
+                                      width: '40px',
+                                      height: '40px',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center'
+                                    }}
+                                  >
+                                    <FontAwesomeIcon icon={faShoppingCart} />
+                                  </button>
+                                </div>
+                              )}
                             </div>
-                          )}
-                        </div>
 
-                        <div className="card-body p-3 d-flex flex-column">
-                          <h6 className="card-title fw-bold mb-2" style={{
-                            fontSize: '1rem',
-                            lineHeight: '1.3',
-                            display: '-webkit-box',
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: 'vertical',
-                            overflow: 'hidden',
-                            minHeight: '2.6rem'
-                          }}>
-                            {product.title}
-                          </h6>
-                          <p className="card-text text-muted mb-2" style={{ fontSize: '0.9rem' }}>
-                            {(() => {
-                              const author = authors.find(a => a && a.author_id === product.author_id);
-                              return author ? author.name : `Tác giả ID: ${product.author_id}`;
-                            })()}
-                          </p>
-                          <div className="d-flex align-items-center mb-2">
-                            <div className="me-2">
-                              {Array.from({ length: 5 }, (_, i) => (
-                                <FontAwesomeIcon
-                                  key={i}
-                                  icon={faStar}
-                                  className={i < (product.rating || 0) ? 'text-warning' : 'text-muted'}
-                                  size="sm"
-                                />
-                              ))}
+                            <div className="card-body p-3 d-flex flex-column">
+                              <h6 className="card-title fw-bold mb-2" style={{
+                                fontSize: '1rem',
+                                lineHeight: '1.3',
+                                display: '-webkit-box',
+                                WebkitLineClamp: 2,
+                                WebkitBoxOrient: 'vertical',
+                                overflow: 'hidden',
+                                minHeight: '2.6rem'
+                              }}>
+                                {product.title}
+                              </h6>
+                              <p className="card-text text-muted mb-2" style={{ fontSize: '0.9rem' }}>
+                                {(() => {
+                                  const author = authors.find(a => a && a.author_id === product.author_id);
+                                  return author ? author.name : `Tác giả ID: ${product.author_id}`;
+                                })()}
+                              </p>
+                              <div className="d-flex align-items-center mb-2">
+                                <div className="me-2">
+                                  {Array.from({ length: 5 }, (_, i) => (
+                                    <FontAwesomeIcon
+                                      key={i}
+                                      icon={faStar}
+                                      className={i < (product.rating || 0) ? 'text-warning' : 'text-muted'}
+                                      size="sm"
+                                    />
+                                  ))}
+                                </div>
+                                <small className="text-muted">({product.reviewCount || 0})</small>
+                              </div>
+                              <div className="mt-auto">
+                                <p className="card-text fw-bold text-dark mb-2" style={{ fontSize: '1.1rem' }}>
+                                  {formatPrice(product.price)}
+                                </p>
+                                <button
+                                  className="btn btn-outline-dark btn-sm w-100"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleProductClick(product.book_id);
+                                  }}
+                                >
+                                  Xem chi tiết
+                                </button>
+                              </div>
                             </div>
-                            <small className="text-muted">({product.reviewCount || 0})</small>
                           </div>
-                          <div className="mt-auto">
-                            <p className="card-text fw-bold text-dark mb-2" style={{ fontSize: '1.1rem' }}>
-                              {formatPrice(product.price)}
-                            </p>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Products Pagination */}
+                  {totalProductPages > 1 && (
+                    <div className="d-flex justify-content-center mt-4 mb-3">
+                      <nav aria-label="Products pagination">
+                        <ul className="pagination" style={{
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                          borderRadius: '8px',
+                          overflow: 'hidden',
+                          backgroundColor: 'white'
+                        }}>
+                          {/* Previous Button */}
+                          <li className={`page-item ${currentProductPage === 1 ? 'disabled' : ''}`}>
                             <button
-                              className="btn btn-outline-primary btn-sm w-100"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleProductClick(product.book_id);
+                              className="page-link border-0"
+                              onClick={() => handleProductPageChange(currentProductPage - 1)}
+                              disabled={currentProductPage === 1}
+                              style={{
+                                backgroundColor: currentProductPage === 1 ? '#f8f9fa' : 'white',
+                                color: currentProductPage === 1 ? '#6c757d' : '#212529',
+                                fontWeight: '500',
+                                padding: '8px 12px',
+                                transition: 'all 0.3s ease',
+                                border: 'none'
+                              }}
+                              onMouseEnter={(e) => {
+                                if (currentProductPage !== 1) {
+                                  e.target.style.backgroundColor = '#212529';
+                                  e.target.style.color = 'white';
+                                  e.target.style.transform = 'translateY(-1px)';
+                                }
+                              }}
+                              onMouseLeave={(e) => {
+                                if (currentProductPage !== 1) {
+                                  e.target.style.backgroundColor = 'white';
+                                  e.target.style.color = '#212529';
+                                  e.target.style.transform = 'translateY(0)';
+                                }
                               }}
                             >
-                              Xem chi tiết
+                              <i className="fas fa-chevron-left me-1"></i>
+                              Trước
                             </button>
-                          </div>
-                        </div>
-                      </div>
+                          </li>
+
+                          {/* Page Numbers with Smart Display */}
+                          {(() => {
+                            const pages = [];
+                            const maxVisiblePages = 7;
+                            let startPage = Math.max(1, currentProductPage - Math.floor(maxVisiblePages / 2));
+                            let endPage = Math.min(totalProductPages, startPage + maxVisiblePages - 1);
+
+                            if (endPage - startPage + 1 < maxVisiblePages) {
+                              startPage = Math.max(1, endPage - maxVisiblePages + 1);
+                            }
+
+                            // Add first page and ellipsis if needed
+                            if (startPage > 1) {
+                              pages.push(
+                                <li key={1} className="page-item">
+                                  <button
+                                    className="page-link border-0"
+                                    onClick={() => handleProductPageChange(1)}
+                                    style={{
+                                      backgroundColor: 'white',
+                                      color: '#212529',
+                                      fontWeight: '500',
+                                      padding: '8px 12px',
+                                      transition: 'all 0.3s ease',
+                                      border: 'none'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                      e.target.style.backgroundColor = '#212529';
+                                      e.target.style.color = 'white';
+                                      e.target.style.transform = 'translateY(-1px)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                      e.target.style.backgroundColor = 'white';
+                                      e.target.style.color = '#212529';
+                                      e.target.style.transform = 'translateY(0)';
+                                    }}
+                                  >
+                                    1
+                                  </button>
+                                </li>
+                              );
+
+                              if (startPage > 2) {
+                                pages.push(
+                                  <li key="ellipsis1" className="page-item disabled">
+                                    <span className="page-link border-0" style={{
+                                      backgroundColor: 'white',
+                                      color: '#6c757d',
+                                      padding: '12px 8px',
+                                      border: 'none'
+                                    }}>
+                                      ...
+                                    </span>
+                                  </li>
+                                );
+                              }
+                            }
+
+                            // Add visible pages
+                            for (let i = startPage; i <= endPage; i++) {
+                              pages.push(
+                                <li key={i} className={`page-item ${currentProductPage === i ? 'active' : ''}`}>
+                                  <button
+                                    className="page-link border-0"
+                                    onClick={() => handleProductPageChange(i)}
+                                    style={{
+                                      backgroundColor: currentProductPage === i ? '#212529' : 'white',
+                                      color: currentProductPage === i ? 'white' : '#212529',
+                                      fontWeight: currentProductPage === i ? '600' : '500',
+                                      padding: '8px 12px',
+                                      transition: 'all 0.3s ease',
+                                      border: 'none',
+                                      boxShadow: currentProductPage === i ? '0 4px 8px rgba(0,123,255,0.3)' : 'none'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                      if (currentProductPage !== i) {
+                                        e.target.style.backgroundColor = '#212529';
+                                        e.target.style.color = 'white';
+                                        e.target.style.transform = 'translateY(-1px)';
+                                        e.target.style.boxShadow = '0 4px 8px rgba(0,123,255,0.3)';
+                                      }
+                                    }}
+                                    onMouseLeave={(e) => {
+                                      if (currentProductPage !== i) {
+                                        e.target.style.backgroundColor = 'white';
+                                        e.target.style.color = '#212529';
+                                        e.target.style.transform = 'translateY(0)';
+                                        e.target.style.boxShadow = 'none';
+                                      }
+                                    }}
+                                  >
+                                    {i}
+                                  </button>
+                                </li>
+                              );
+                            }
+
+                            // Add last page and ellipsis if needed
+                            if (endPage < totalProductPages) {
+                              if (endPage < totalProductPages - 1) {
+                                pages.push(
+                                  <li key="ellipsis2" className="page-item disabled">
+                                    <span className="page-link border-0" style={{
+                                      backgroundColor: 'white',
+                                      color: '#6c757d',
+                                      padding: '12px 8px',
+                                      border: 'none'
+                                    }}>
+                                      ...
+                                    </span>
+                                  </li>
+                                );
+                              }
+
+                              pages.push(
+                                <li key={totalProductPages} className="page-item">
+                                  <button
+                                    className="page-link border-0"
+                                    onClick={() => handleProductPageChange(totalProductPages)}
+                                    style={{
+                                      backgroundColor: 'white',
+                                      color: '#212529',
+                                      fontWeight: '500',
+                                      padding: '8px 12px',
+                                      transition: 'all 0.3s ease',
+                                      border: 'none'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                      e.target.style.backgroundColor = '#212529';
+                                      e.target.style.color = 'white';
+                                      e.target.style.transform = 'translateY(-1px)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                      e.target.style.backgroundColor = 'white';
+                                      e.target.style.color = '#212529';
+                                      e.target.style.transform = 'translateY(0)';
+                                    }}
+                                  >
+                                    {totalProductPages}
+                                  </button>
+                                </li>
+                              );
+                            }
+
+                            return pages;
+                          })()}
+
+                          {/* Next Button */}
+                          <li className={`page-item ${currentProductPage === totalProductPages ? 'disabled' : ''}`}>
+                            <button
+                              className="page-link border-0"
+                              onClick={() => handleProductPageChange(currentProductPage + 1)}
+                              disabled={currentProductPage === totalProductPages}
+                              style={{
+                                backgroundColor: currentProductPage === totalProductPages ? '#f8f9fa' : 'white',
+                                color: currentProductPage === totalProductPages ? '#6c757d' : '#212529',
+                                fontWeight: '500',
+                                padding: '8px 12px',
+                                transition: 'all 0.3s ease',
+                                border: 'none'
+                              }}
+                              onMouseEnter={(e) => {
+                                if (currentProductPage !== totalProductPages) {
+                                  e.target.style.backgroundColor = '#212529';
+                                  e.target.style.color = 'white';
+                                  e.target.style.transform = 'translateY(-1px)';
+                                }
+                              }}
+                              onMouseLeave={(e) => {
+                                if (currentProductPage !== totalProductPages) {
+                                  e.target.style.backgroundColor = 'white';
+                                  e.target.style.color = '#212529';
+                                  e.target.style.transform = 'translateY(0)';
+                                }
+                              }}
+                            >
+                              Sau
+                              <i className="fas fa-chevron-right ms-1"></i>
+                            </button>
+                          </li>
+                        </ul>
+                      </nav>
                     </div>
-                    );
-                  })}
-                </div>
+                  )}
+
+                  {/* Product count info */}
+                  <div className="text-center mt-4">
+                    <div className="d-inline-flex align-items-center bg-light rounded-pill px-4 py-2" style={{
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                      border: '1px solid #e9ecef'
+                    }}>
+                      <i className="fas fa-info-circle text-dark me-2"></i>
+                      <span className="text-dark fw-medium">
+                        Hiển thị <span className="text-dark fw-bold">{((currentProductPage - 1) * productsPerPage) + 1}</span> - <span className="text-dark fw-bold">{Math.min(currentProductPage * productsPerPage, filteredProducts.length)}</span>
+                        trong tổng số <span className="text-dark fw-bold">{filteredProducts.length}</span> sản phẩm
+                      </span>
+                    </div>
+                  </div>
+                </>
               ) : (
                 <div className="text-center py-5">
                   <FontAwesomeIcon icon={faSearch} size="3x" className="text-muted mb-3" />

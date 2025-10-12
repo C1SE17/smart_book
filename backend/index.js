@@ -39,10 +39,11 @@ console.log('📝 [Server] Đã cấu hình JSON parser');
 app.use((req, res, next) => {
     console.log(`📨 [Request] ${req.method} ${req.path}`);
     console.log('📋 [Request] Headers:', req.headers);
-    if (req.method === 'POST' && req.headers['content-type'] !== 'application/json') {
-        console.log('❌ [Request] Invalid Content-Type');
-        return res.status(400).json({ error: 'Yêu cầu phải có Content-Type: application/json' });
-    }
+    // Tạm thời comment middleware kiểm tra Content-Type
+    // if (req.method === 'POST' && req.headers['content-type'] && !req.headers['content-type'].includes('application/json')) {
+    //     console.log('❌ [Request] Invalid Content-Type');
+    //     return res.status(400).json({ error: 'Yêu cầu phải có Content-Type: application/json' });
+    // }
     console.log('📦 [Request] Body:', req.body);
     next();
 });
@@ -54,8 +55,8 @@ app.get('/', (req, res) => {
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-    res.json({ 
-        status: 'ok', 
+    res.json({
+        status: 'ok',
         message: 'Backend is running',
         timestamp: new Date().toISOString(),
         version: '1.0.0'

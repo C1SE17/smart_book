@@ -3,9 +3,9 @@ const Author = require('../models/Author');
 exports.getAllAuthors = async (req, res) => { // Lấy danh sách tác giả
     try {
         const authors = await Author.getAll();
-        res.json(authors);
+        res.json({ success: true, data: authors });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ success: false, error: err.message });
     }
 };
 

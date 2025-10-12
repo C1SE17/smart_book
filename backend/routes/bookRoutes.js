@@ -6,6 +6,9 @@ const { auth, adminOnly } = require('../middleware/auth');
 // Lấy danh sách sản phẩm (công khai, hỗ trợ filter và search)
 router.get('/', BookController.getAllBooks);
 
+// Tìm kiếm sách
+router.get('/search', BookController.searchBooks);
+
 // Lấy chi tiết sản phẩm (công khai)
 router.get('/:id', BookController.getBook);
 

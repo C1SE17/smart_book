@@ -8,6 +8,7 @@ const CategoryManagement = () => {
     const [showModal, setShowModal] = useState(false);
     const [editingCategory, setEditingCategory] = useState(null);
     const [formErrors, setFormErrors] = useState({});
+    const [searchTerm, setSearchTerm] = useState('');
     const [formData, setFormData] = useState({
         name: '',
         description: '',
@@ -39,6 +40,17 @@ const CategoryManagement = () => {
     useEffect(() => {
         fetchCategories();
     }, [fetchCategories]);
+
+    // Filter categories based on search term (client-side filtering like UserManagement)
+    const filteredCategories = categories.filter(category => {
+        const name = category.name || '';
+        const description = category.description || '';
+
+        const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            description.toLowerCase().includes(searchTerm.toLowerCase());
+
+        return matchesSearch;
+    });
 
     // Validation function
     const validateForm = (data) => {
@@ -117,7 +129,7 @@ const CategoryManagement = () => {
                 const response = await apiService.createCategory(formData);
                 if (response.success) {
                     const newCategory = {
-                        category_id: response.data.category_id || Math.max(...categories.map(c => c.category_id)) + 1,
+                        category_id: response.data.id || response.data.category_id || Math.max(...categories.map(c => c.category_id)) + 1,
                         ...formData,
                         slug: formData.name.toLowerCase().replace(/\s+/g, '-'),
                         created_at: new Date().toISOString().split('T')[0],
@@ -188,6 +200,26 @@ const CategoryManagement = () => {
                 </button>
             </div>
 
+            {/* Search Bar */}
+            <div className="card border-0 shadow-sm mb-4">
+                <div className="card-body">
+                    <div className="d-flex gap-2">
+                        <input
+                            type="text"
+                            className="form-control"
+                            placeholder="Tìm kiếm danh mục theo tên, mô tả..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                        {searchTerm && (
+                            <button type="button" className="btn btn-outline-secondary" onClick={() => setSearchTerm('')}>
+                                <i className="fas fa-times"></i>
+                            </button>
+                        )}
+                    </div>
+                </div>
+            </div>
+
             {/* Categories Table */}
             <div className="card border-0 shadow-sm">
                 <div className="card-body">
@@ -204,7 +236,7 @@ const CategoryManagement = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {categories.map((category) => (
+                                {filteredCategories.map((category) => (
                                     <tr key={category.category_id}>
                                         <td>
                                             <div className={`fw-medium ${getIndentLevel(category)}`}>

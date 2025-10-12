@@ -12,7 +12,17 @@ class Book {
     const offset = (page - 1) * limit; // Tính offset cho phân trang
     let query = `
             SELECT 
-                b.*,
+                b.book_id,
+                b.title,
+                b.description,
+                b.price,
+                b.stock,
+                b.category_id,
+                b.author_id,
+                b.publisher_id,
+                b.published_date,
+                b.cover_image,
+                b.slug,
                 a.name as author_name,
                 p.name as publisher_name,
                 c.name as category_name
@@ -49,7 +59,7 @@ class Book {
       query += " WHERE " + conditions.join(" AND ");
     }
 
-    query += " LIMIT ? OFFSET ?"; // Thêm phân trang
+    query += " ORDER BY b.book_id ASC LIMIT ? OFFSET ?"; // Thêm phân trang và sắp xếp
     params.push(limit, offset);
 
     const [rows] = await db.promise().query(query, params);
@@ -59,7 +69,7 @@ class Book {
   static async getById(id) {
     // Lấy chi tiết sản phẩm
     const [rows] = await db.promise().query(
-        `SELECT 
+      `SELECT 
             b.book_id,
             b.title,
             b.description,

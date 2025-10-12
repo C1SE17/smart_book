@@ -9,9 +9,9 @@ class BookApiService extends BaseApiService {
   async getBooks(params = {}) {
     try {
       console.log(`📚 [BookAPI] Đang lấy danh sách sách với tham số:`, params);
-      
+
       const queryParams = new URLSearchParams();
-      
+
       if (params.page) queryParams.append('page', params.page);
       if (params.limit) queryParams.append('limit', params.limit);
       if (params.category_id) queryParams.append('category_id', params.category_id);
@@ -25,7 +25,7 @@ class BookApiService extends BaseApiService {
 
       const queryString = queryParams.toString();
       const endpoint = `/books${queryString ? `?${queryString}` : ''}`;
-      
+
       console.log(`📚 [BookAPI] Endpoint cuối cùng: ${endpoint}`);
       const result = await this.apiCall(endpoint);
       console.log(`📚 [BookAPI] Kết quả lấy danh sách sách:`, result);
@@ -95,16 +95,22 @@ class BookApiService extends BaseApiService {
   async searchBooks(query, params = {}) {
     try {
       console.log(`📚 [BookAPI] Đang tìm kiếm sách với từ khóa: "${query}" và tham số:`, params);
-      
-      const searchParams = new URLSearchParams({ q: query });
-      
+
+      const searchParams = new URLSearchParams();
+
+      // Thêm query parameter
+      if (query) {
+        searchParams.append('q', query);
+      }
+
+      // Thêm các tham số khác
       Object.keys(params).forEach(key => {
         if (params[key]) searchParams.append(key, params[key]);
       });
 
       const endpoint = `/books/search?${searchParams.toString()}`;
       console.log(`📚 [BookAPI] Endpoint tìm kiếm: ${endpoint}`);
-      
+
       const result = await this.apiCall(endpoint);
       console.log(`📚 [BookAPI] Kết quả tìm kiếm sách:`, result);
       return result;

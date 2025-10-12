@@ -141,6 +141,7 @@ export const useBookManagement = () => {
             setLoading(true);
             setError(null);
 
+            // Sử dụng API searchBooks với tham số q
             const response = await apiService.searchBooks(query);
 
             if (response.success) {
@@ -148,7 +149,9 @@ export const useBookManagement = () => {
                 setBooks(response.data);
                 return { success: true, data: response.data, message: response.message };
             } else {
-                throw new Error(response.message);
+                console.error('❌ Search failed:', response.message);
+                setError(response.message);
+                return { success: false, data: null, message: response.message };
             }
         } catch (err) {
             console.error('❌ Error searching books:', err);
@@ -178,7 +181,7 @@ export const useBookManagement = () => {
         publishers,
         loading,
         error,
-        
+
         // Actions
         createBook,
         updateBook,

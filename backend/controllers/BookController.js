@@ -17,6 +17,23 @@ exports.getAllBooks = async (req, res) => { // Lấy danh sách sản phẩm
     }
 };
 
+exports.searchBooks = async (req, res) => { // Tìm kiếm sách
+    try {
+        const { q, page, limit, category_id, author_id, publisher_id } = req.query;
+        const books = await Book.getAll({
+            page: page ? parseInt(page) : 1,
+            limit: limit ? parseInt(limit) : 100,
+            category_id,
+            author_id,
+            publisher_id,
+            search: q
+        });
+        res.json({ success: true, data: books, message: `Tìm thấy ${books.length} kết quả` });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+};
+
 exports.getBook = async (req, res) => { // Lấy chi tiết sản phẩm
     try {
         const book = await Book.getById(req.params.id);
@@ -30,26 +47,49 @@ exports.getBook = async (req, res) => { // Lấy chi tiết sản phẩm
 exports.createBook = async (req, res) => { // Tạo sản phẩm mới
     try {
         const book = await Book.create(req.body);
-        res.status(201).json(book);
+        res.status(201).json({
+            success: true,
+            data: book,
+            message: 'Sách đã được tạo thành công'
+        });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({
+            success: false,
+            error: err.message,
+            message: 'Có lỗi xảy ra khi tạo sách'
+        });
     }
 };
 
 exports.updateBook = async (req, res) => { // Cập nhật sản phẩm
     try {
         const book = await Book.update(req.params.id, req.body);
-        res.json(book);
+        res.json({
+            success: true,
+            data: book,
+            message: 'Sách đã được cập nhật thành công'
+        });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({
+            success: false,
+            error: err.message,
+            message: 'Có lỗi xảy ra khi cập nhật sách'
+        });
     }
 };
 
 exports.deleteBook = async (req, res) => { // Xóa sản phẩm
     try {
         await Book.delete(req.params.id);
-        res.json({ message: 'Sách đã được xóa' });
+        res.json({
+            success: true,
+            message: 'Sách đã được xóa thành công'
+        });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({
+            success: false,
+            error: err.message,
+            message: 'Có lỗi xảy ra khi xóa sách'
+        });
     }
 };

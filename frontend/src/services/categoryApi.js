@@ -73,6 +73,27 @@ class CategoryApiService extends BaseApiService {
       throw error;
     }
   }
+
+  async searchCategories(query) {
+    try {
+      console.log(`📂 [CategoryAPI] Đang tìm kiếm danh mục với từ khóa: "${query}"`);
+
+      const searchParams = new URLSearchParams();
+      if (query) {
+        searchParams.append('q', query);
+      }
+
+      const endpoint = `/categories/search?${searchParams.toString()}`;
+      console.log(`📂 [CategoryAPI] Endpoint tìm kiếm: ${endpoint}`);
+
+      const result = await this.apiCall(endpoint);
+      console.log(`📂 [CategoryAPI] Kết quả tìm kiếm danh mục:`, result);
+      return result;
+    } catch (error) {
+      console.error(`💥 [CategoryAPI] Lỗi khi tìm kiếm danh mục:`, error);
+      throw error;
+    }
+  }
 }
 
 export default new CategoryApiService();

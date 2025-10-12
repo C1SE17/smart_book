@@ -265,28 +265,33 @@ const Slide = ({ onNavigateTo }) => {
         onClick={prevSlide}
         style={{
           left: '20px',
-          backgroundColor: 'rgba(0,0,0,0.6)',
-          border: 'none',
-          borderRadius: '50%',
-          width: '50px',
-          height: '50px',
-          color: 'white',
-          fontSize: '18px',
+          backgroundColor: 'rgba(255,255,255,0.1)',
+          border: '1px solid rgba(255,255,255,0.2)',
+          borderRadius: '12px',
+          width: '48px',
+          height: '48px',
+          color: '#333',
+          fontSize: '16px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           transition: 'all 0.3s ease',
           zIndex: 10,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-          cursor: 'pointer'
+          boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+          cursor: 'pointer',
+          backdropFilter: 'blur(20px)'
         }}
         onMouseEnter={(e) => {
-          e.target.style.backgroundColor = 'rgba(0,0,0,0.8)';
-          e.target.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)';
+          e.target.style.backgroundColor = 'rgba(255,255,255,0.25)';
+          e.target.style.border = '1px solid rgba(255,255,255,0.4)';
+          e.target.style.transform = 'scale(1.05)';
+          e.target.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
         }}
         onMouseLeave={(e) => {
-          e.target.style.backgroundColor = 'rgba(0,0,0,0.6)';
-          e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
+          e.target.style.backgroundColor = 'rgba(255,255,255,0.1)';
+          e.target.style.border = '1px solid rgba(255,255,255,0.2)';
+          e.target.style.transform = 'scale(1)';
+          e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)';
         }}
       >
         <i className="fas fa-chevron-left"></i>
@@ -297,28 +302,33 @@ const Slide = ({ onNavigateTo }) => {
         onClick={nextSlide}
         style={{
           right: '20px',
-          backgroundColor: 'rgba(0,0,0,0.6)',
-          border: 'none',
-          borderRadius: '50%',
-          width: '50px',
-          height: '50px',
-          color: 'white',
-          fontSize: '18px',
+          backgroundColor: 'rgba(255,255,255,0.1)',
+          border: '1px solid rgba(255,255,255,0.2)',
+          borderRadius: '12px',
+          width: '48px',
+          height: '48px',
+          color: '#333',
+          fontSize: '16px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           transition: 'all 0.3s ease',
           zIndex: 10,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-          cursor: 'pointer'
+          boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+          cursor: 'pointer',
+          backdropFilter: 'blur(20px)'
         }}
         onMouseEnter={(e) => {
-          e.target.style.backgroundColor = 'rgba(0,0,0,0.8)';
-          e.target.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)';
+          e.target.style.backgroundColor = 'rgba(255,255,255,0.25)';
+          e.target.style.border = '1px solid rgba(255,255,255,0.4)';
+          e.target.style.transform = 'scale(1.05)';
+          e.target.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
         }}
         onMouseLeave={(e) => {
-          e.target.style.backgroundColor = 'rgba(0,0,0,0.6)';
-          e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
+          e.target.style.backgroundColor = 'rgba(255,255,255,0.1)';
+          e.target.style.border = '1px solid rgba(255,255,255,0.2)';
+          e.target.style.transform = 'scale(1)';
+          e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)';
         }}
       >
         <i className="fas fa-chevron-right"></i>

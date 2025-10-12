@@ -6,7 +6,7 @@ console.log('🗄️ [Database] Đang khởi tạo kết nối MySQL...');
 const dbConfig = {
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASS || 'trung123',
+    password: process.env.DB_PASS || '',
     database: process.env.DB_NAME || 'smart_book',
     port: process.env.DB_PORT || 3300
 };
@@ -45,7 +45,7 @@ db.on('error', (err) => {
         errno: err.errno,
         sqlState: err.sqlState
     });
-    
+
     if (err.code === 'PROTOCOL_CONNECTION_LOST') {
         console.log('🔄 [Database] Database connection lost, attempting to reconnect...');
         db.connect();

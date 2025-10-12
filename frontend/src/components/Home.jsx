@@ -12,7 +12,7 @@ const Home = ({ onNavigateTo }) => {
   // State cho danh mục
   const [categories, setCategories] = useState([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
-  
+
   // State cho user role
   const [userRole, setUserRole] = useState(null);
 
@@ -441,19 +441,33 @@ const Home = ({ onNavigateTo }) => {
                     {/* Heart Icon - góc trên trái */}
                     <div className="position-absolute top-0 start-0 m-2">
                       <button
-                        className="btn btn-sm btn-light rounded-circle"
+                        className="btn btn-sm"
                         style={{
                           width: '35px',
                           height: '35px',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          backgroundColor: 'rgba(255,255,255,0.9)',
-                          border: 'none'
+                          backgroundColor: 'rgba(255,255,255,0.95)',
+                          border: '1px solid rgba(0,0,0,0.1)',
+                          borderRadius: '8px',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                          transition: 'all 0.3s ease',
+                          backdropFilter: 'blur(10px)'
                         }}
                         onClick={(e) => {
                           e.stopPropagation();
                           // TODO: Add to wishlist functionality
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.backgroundColor = 'rgba(255,255,255,1)';
+                          e.target.style.transform = 'scale(1.05)';
+                          e.target.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.backgroundColor = 'rgba(255,255,255,0.95)';
+                          e.target.style.transform = 'scale(1)';
+                          e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
                         }}
                       >
                         <i className="bi bi-heart text-dark" style={{ fontSize: '14px' }}></i>
@@ -464,17 +478,31 @@ const Home = ({ onNavigateTo }) => {
                     {book.stock > 0 && userRole !== 'admin' && (
                       <div className="position-absolute top-0 end-0 m-2">
                         <button
-                          className="btn btn-sm rounded-circle"
+                          className="btn btn-sm"
                           style={{
                             width: '35px',
                             height: '35px',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            backgroundColor: '#007bff',
-                            border: 'none'
+                            backgroundColor: 'rgba(0,123,255,0.95)',
+                            border: '1px solid rgba(0,123,255,0.3)',
+                            borderRadius: '8px',
+                            boxShadow: '0 2px 8px rgba(0,123,255,0.2)',
+                            transition: 'all 0.3s ease',
+                            backdropFilter: 'blur(10px)'
                           }}
                           onClick={(e) => handleAddToCart(book, e)}
+                          onMouseEnter={(e) => {
+                            e.target.style.backgroundColor = 'rgba(0,123,255,1)';
+                            e.target.style.transform = 'scale(1.05)';
+                            e.target.style.boxShadow = '0 4px 12px rgba(0,123,255,0.3)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.backgroundColor = 'rgba(0,123,255,0.95)';
+                            e.target.style.transform = 'scale(1)';
+                            e.target.style.boxShadow = '0 2px 8px rgba(0,123,255,0.2)';
+                          }}
                         >
                           <i className="bi bi-cart-plus text-white" style={{ fontSize: '14px' }}></i>
                         </button>
@@ -628,19 +656,33 @@ const Home = ({ onNavigateTo }) => {
                     {/* Heart Icon - góc trên trái */}
                     <div className="position-absolute top-0 start-0 m-2">
                       <button
-                        className="btn btn-sm btn-light rounded-circle"
+                        className="btn btn-sm"
                         style={{
                           width: '35px',
                           height: '35px',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          backgroundColor: 'rgba(255,255,255,0.9)',
-                          border: 'none'
+                          backgroundColor: 'rgba(255,255,255,0.95)',
+                          border: '1px solid rgba(0,0,0,0.1)',
+                          borderRadius: '8px',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                          transition: 'all 0.3s ease',
+                          backdropFilter: 'blur(10px)'
                         }}
                         onClick={(e) => {
                           e.stopPropagation();
                           // TODO: Add to wishlist functionality
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.backgroundColor = 'rgba(255,255,255,1)';
+                          e.target.style.transform = 'scale(1.05)';
+                          e.target.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.backgroundColor = 'rgba(255,255,255,0.95)';
+                          e.target.style.transform = 'scale(1)';
+                          e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
                         }}
                       >
                         <i className="bi bi-heart text-dark" style={{ fontSize: '14px' }}></i>
@@ -651,17 +693,31 @@ const Home = ({ onNavigateTo }) => {
                     {book.stock > 0 && userRole !== 'admin' && (
                       <div className="position-absolute top-0 end-0 m-2">
                         <button
-                          className="btn btn-sm rounded-circle"
+                          className="btn btn-sm"
                           style={{
                             width: '35px',
                             height: '35px',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            backgroundColor: '#007bff',
-                            border: 'none'
+                            backgroundColor: 'rgba(0,123,255,0.95)',
+                            border: '1px solid rgba(0,123,255,0.3)',
+                            borderRadius: '8px',
+                            boxShadow: '0 2px 8px rgba(0,123,255,0.2)',
+                            transition: 'all 0.3s ease',
+                            backdropFilter: 'blur(10px)'
                           }}
                           onClick={(e) => handleAddToCart(book, e)}
+                          onMouseEnter={(e) => {
+                            e.target.style.backgroundColor = 'rgba(0,123,255,1)';
+                            e.target.style.transform = 'scale(1.05)';
+                            e.target.style.boxShadow = '0 4px 12px rgba(0,123,255,0.3)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.backgroundColor = 'rgba(0,123,255,0.95)';
+                            e.target.style.transform = 'scale(1)';
+                            e.target.style.boxShadow = '0 2px 8px rgba(0,123,255,0.2)';
+                          }}
                         >
                           <i className="bi bi-cart-plus text-white" style={{ fontSize: '14px' }}></i>
                         </button>
@@ -815,19 +871,33 @@ const Home = ({ onNavigateTo }) => {
                     {/* Heart Icon - góc trên trái */}
                     <div className="position-absolute top-0 start-0 m-2">
                       <button
-                        className="btn btn-sm btn-light rounded-circle"
+                        className="btn btn-sm"
                         style={{
                           width: '35px',
                           height: '35px',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          backgroundColor: 'rgba(255,255,255,0.9)',
-                          border: 'none'
+                          backgroundColor: 'rgba(255,255,255,0.95)',
+                          border: '1px solid rgba(0,0,0,0.1)',
+                          borderRadius: '8px',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                          transition: 'all 0.3s ease',
+                          backdropFilter: 'blur(10px)'
                         }}
                         onClick={(e) => {
                           e.stopPropagation();
                           // TODO: Add to wishlist functionality
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.backgroundColor = 'rgba(255,255,255,1)';
+                          e.target.style.transform = 'scale(1.05)';
+                          e.target.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.backgroundColor = 'rgba(255,255,255,0.95)';
+                          e.target.style.transform = 'scale(1)';
+                          e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
                         }}
                       >
                         <i className="bi bi-heart text-dark" style={{ fontSize: '14px' }}></i>
@@ -838,17 +908,31 @@ const Home = ({ onNavigateTo }) => {
                     {book.stock > 0 && userRole !== 'admin' && (
                       <div className="position-absolute top-0 end-0 m-2">
                         <button
-                          className="btn btn-sm rounded-circle"
+                          className="btn btn-sm"
                           style={{
                             width: '35px',
                             height: '35px',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            backgroundColor: '#007bff',
-                            border: 'none'
+                            backgroundColor: 'rgba(0,123,255,0.95)',
+                            border: '1px solid rgba(0,123,255,0.3)',
+                            borderRadius: '8px',
+                            boxShadow: '0 2px 8px rgba(0,123,255,0.2)',
+                            transition: 'all 0.3s ease',
+                            backdropFilter: 'blur(10px)'
                           }}
                           onClick={(e) => handleAddToCart(book, e)}
+                          onMouseEnter={(e) => {
+                            e.target.style.backgroundColor = 'rgba(0,123,255,1)';
+                            e.target.style.transform = 'scale(1.05)';
+                            e.target.style.boxShadow = '0 4px 12px rgba(0,123,255,0.3)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.backgroundColor = 'rgba(0,123,255,0.95)';
+                            e.target.style.transform = 'scale(1)';
+                            e.target.style.boxShadow = '0 2px 8px rgba(0,123,255,0.2)';
+                          }}
                         >
                           <i className="bi bi-cart-plus text-white" style={{ fontSize: '14px' }}></i>
                         </button>

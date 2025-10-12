@@ -2,7 +2,7 @@ const db = require('../config/db');
 
 class Publisher {
     static async getAll() { // Lấy tất cả nhà xuất bản
-        const [rows] = await db.promise().query('SELECT * FROM publishers');
+        const [rows] = await db.promise().query('SELECT * FROM publishers ORDER BY publisher_id ASC');
         return rows;
     }
 

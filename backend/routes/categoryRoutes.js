@@ -6,6 +6,9 @@ const { auth, adminOnly } = require('../middleware/auth');
 // Lấy danh sách danh mục (công khai cho frontend)
 router.get('/', CategoryController.getAllCategories);
 
+// Tìm kiếm danh mục
+router.get('/search', CategoryController.searchCategories);
+
 // Lấy chi tiết danh mục (chỉ admin)
 router.get('/:id', auth, adminOnly, CategoryController.getCategory);
 

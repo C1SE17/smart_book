@@ -2,7 +2,19 @@ const db = require('../config/db');
 
 class Category {
     static async getAll() { // Lấy tất cả danh mục
-        const [rows] = await db.promise().query('SELECT * FROM categories');
+        const [rows] = await db.promise().query('SELECT * FROM categories ORDER BY category_id ASC');
+        return rows;
+    }
+
+    static async search(query) { // Tìm kiếm danh mục
+        if (!query || query.trim() === '') {
+            return await this.getAll();
+        }
+
+        const [rows] = await db.promise().query(
+            'SELECT * FROM categories WHERE name LIKE ? OR description LIKE ? ORDER BY category_id ASC',
+            [`%${query}%`, `%${query}%`]
+        );
         return rows;
     }
 
@@ -12,12 +24,16 @@ class Category {
     }
 
     static async create(categoryData) { // Tạo danh mục mới
-        const { name, description, parent_category_id, slug } = categoryData;
+        const { name, description, parent_category_id } = categoryData;
+
+        // Tạo slug từ name
+        const slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') + '-' + Date.now();
+
         const [result] = await db.promise().query(
             'INSERT INTO categories (name, description, parent_category_id, slug) VALUES (?, ?, ?, ?)',
             [name, description, parent_category_id, slug]
         );
-        return { id: result.insertId, ...categoryData };
+        return { id: result.insertId, category_id: result.insertId, ...categoryData, slug };
     }
 
     static async update(id, categoryData) { // Cập nhật danh mục

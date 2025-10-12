@@ -2,7 +2,7 @@ const db = require('../config/db');
 
 class Author {
     static async getAll() { // Lấy tất cả tác giả
-        const [rows] = await db.promise().query('SELECT * FROM authors');
+        const [rows] = await db.promise().query('SELECT * FROM authors ORDER BY author_id ASC');
         return rows;
     }
 

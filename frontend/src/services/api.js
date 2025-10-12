@@ -23,7 +23,7 @@ const baseApi = new BaseApiService();
 const apiService = {
   // Base API methods
   healthCheck: baseApi.healthCheck.bind(baseApi),
-  
+
   // Book APIs
   books: bookApi,
   // Tương thích ngược - expose trực tiếp các method của bookApi
@@ -33,7 +33,7 @@ const apiService = {
   updateBook: bookApi.updateBook.bind(bookApi),
   deleteBook: bookApi.deleteBook.bind(bookApi),
   searchBooks: bookApi.searchBooks.bind(bookApi),
-  
+
   // Category APIs
   categories: categoryApi,
   getCategories: categoryApi.getCategories.bind(categoryApi),
@@ -41,7 +41,8 @@ const apiService = {
   createCategory: categoryApi.createCategory.bind(categoryApi),
   updateCategory: categoryApi.updateCategory.bind(categoryApi),
   deleteCategory: categoryApi.deleteCategory.bind(categoryApi),
-  
+  searchCategories: categoryApi.searchCategories.bind(categoryApi),
+
   // Author APIs
   authors: authorApi,
   getAuthors: authorApi.getAuthors.bind(authorApi),
@@ -49,7 +50,7 @@ const apiService = {
   createAuthor: authorApi.createAuthor.bind(authorApi),
   updateAuthor: authorApi.updateAuthor.bind(authorApi),
   deleteAuthor: authorApi.deleteAuthor.bind(authorApi),
-  
+
   // Publisher APIs
   publishers: publisherApi,
   getPublishers: publisherApi.getPublishers.bind(publisherApi),
@@ -57,7 +58,7 @@ const apiService = {
   createPublisher: publisherApi.createPublisher.bind(publisherApi),
   updatePublisher: publisherApi.updatePublisher.bind(publisherApi),
   deletePublisher: publisherApi.deletePublisher.bind(publisherApi),
-  
+
   // User APIs
   users: userApi,
   getUsers: userApi.getUsers.bind(userApi),
@@ -67,14 +68,14 @@ const apiService = {
   updateUser: userApi.updateUser.bind(userApi),
   deleteUser: userApi.deleteUser.bind(userApi),
   getTotalUsersCount: userApi.getTotalUsersCount.bind(userApi),
-  
+
   // Auth APIs
   auth: authApi,
   login: authApi.login.bind(authApi),
   register: authApi.register.bind(authApi),
   logout: authApi.logout.bind(authApi),
   refreshToken: authApi.refreshToken.bind(authApi),
-  
+
   // Review APIs
   reviews: reviewApi,
   getReviews: reviewApi.getReviews.bind(reviewApi),
@@ -84,7 +85,7 @@ const apiService = {
   deleteReview: reviewApi.deleteReview.bind(reviewApi),
   getAverageRating: reviewApi.getAverageRating.bind(reviewApi),
   getAllReviews: reviewApi.getAllReviews.bind(reviewApi),
-  
+
   // Order APIs
   orders: orderApi,
   getOrders: orderApi.getOrders.bind(orderApi),
@@ -104,7 +105,7 @@ const apiService = {
   getOrderConfirmation: orderApi.getOrderConfirmation.bind(orderApi),
   getAdminOrderDetails: orderApi.getAdminOrderDetails.bind(orderApi),
   confirmOrder: orderApi.confirmOrder.bind(orderApi),
-  
+
   // Cart APIs
   cart: cartApi,
   getCart: cartApi.getCart.bind(cartApi),
@@ -112,7 +113,7 @@ const apiService = {
   updateCartItem: cartApi.updateCartItem.bind(cartApi),
   removeFromCart: cartApi.removeFromCart.bind(cartApi),
   clearCart: cartApi.clearCart.bind(cartApi),
-  
+
   // Warehouse APIs
   warehouse: warehouseApi,
   getWarehouseItems: warehouseApi.getWarehouseItems.bind(warehouseApi),

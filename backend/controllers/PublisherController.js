@@ -3,9 +3,9 @@ const Publisher = require('../models/Publisher');
 exports.getAllPublishers = async (req, res) => { // Lấy danh sách nhà xuất bản
     try {
         const publishers = await Publisher.getAll();
-        res.json(publishers);
+        res.json({ success: true, data: publishers });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ success: false, error: err.message });
     }
 };
 
