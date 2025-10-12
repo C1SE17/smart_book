@@ -4,13 +4,13 @@ const AdminLayout = ({ children, onNavigateTo, onLogout, onBackToHome, currentPa
     const [sidebarOpen, setSidebarOpen] = useState(true);
 
     const menuItems = [
-        { id: 'dashboard', name: 'Dashboard', icon: 'fas fa-chart-pie', path: 'admin-dashboard' },
-        { id: 'books', name: 'Quản lý sách', icon: 'fas fa-book', path: 'admin-books' },
-        { id: 'categories', name: 'Quản lý danh mục', icon: 'fas fa-tags', path: 'admin-categories' },
-        { id: 'warehouse', name: 'Quản lý kho', icon: 'fas fa-warehouse', path: 'admin-warehouse' },
-        { id: 'orders', name: 'Quản lý đơn hàng', icon: 'fas fa-shopping-cart', path: 'admin-orders' },
-        { id: 'users', name: 'Quản lý người dùng', icon: 'fas fa-users', path: 'admin-users' },
-        { id: 'reviews', name: 'Quản lý đánh giá', icon: 'fas fa-star', path: 'admin-reviews' },
+        { id: 'dashboard', name: 'Tổng Quan', icon: 'fas fa-chart-pie', path: 'admin-dashboard' },
+        { id: 'books', name: 'Quản Lý Sách', icon: 'fas fa-book', path: 'admin-books' },
+        { id: 'categories', name: 'Quản Lý Danh Mục', icon: 'fas fa-tags', path: 'admin-categories' },
+        { id: 'warehouse', name: 'Quản Lý Kho', icon: 'fas fa-warehouse', path: 'admin-warehouse' },
+        { id: 'orders', name: 'Quản Lý Đơn Hàng', icon: 'fas fa-shopping-cart', path: 'admin-orders' },
+        { id: 'users', name: 'Quản Lý Người Dùng', icon: 'fas fa-users', path: 'admin-users' },
+        { id: 'reviews', name: 'Quản Lý Đánh Giá', icon: 'fas fa-star', path: 'admin-reviews' },
         { id: 'reports', name: 'Báo cáo', icon: 'fas fa-chart-bar', path: 'admin-reports' }
     ];
 

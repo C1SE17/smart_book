@@ -23,107 +23,108 @@ const OrderManagement = () => {
     const [selectedOrders, setSelectedOrders] = useState(new Set());
     const [selectAll, setSelectAll] = useState(false);
 
-        const fetchOrders = async () => {
-            setLoading(true);
+    const fetchOrders = async () => {
+        setLoading(true);
         setError(null);
         
-            try {
-                // Check if user is admin before calling admin API
-                const user = JSON.parse(localStorage.getItem('user') || 'null');
-                if (!user) {
-                    setError('Bạn chưa đăng nhập. Vui lòng đăng nhập để truy cập trang quản lý đơn hàng.');
-                    setLoading(false);
-                    return;
-                }
+        try {
+            // Check if user is admin before calling admin API
+            const user = JSON.parse(localStorage.getItem('user') || 'null');
+            if (!user) {
+                setError('Bạn chưa đăng nhập. Vui lòng đăng nhập để truy cập trang quản lý đơn hàng.');
+                setLoading(false);
+                return;
+            }
+            
+            if (user.role !== 'admin') {
+                setError('Bạn không có quyền truy cập trang quản lý đơn hàng. Chỉ admin mới có thể truy cập. Vui lòng đăng nhập bằng tài khoản admin.');
+                setLoading(false);
+                return;
+            }
+            
+            // Fetch all orders (not just pending)
+            const allOrdersResponse = await apiService.getAllOrders({ suppressWarning: true }); // Admin context - suppress warning
+            
+            if (allOrdersResponse.success) {
+                const allOrders = allOrdersResponse.data || [];
                 
-                if (user.role !== 'admin') {
-                    setError('Bạn không có quyền truy cập trang quản lý đơn hàng. Chỉ admin mới có thể truy cập. Vui lòng đăng nhập bằng tài khoản admin.');
-                    setLoading(false);
-                    return;
-                }
-                
-                // Fetch all orders (not just pending)
-                const allOrdersResponse = await apiService.getAllOrders();
-                
-                if (allOrdersResponse.success) {
-                    const allOrders = allOrdersResponse.data || [];
-                    
-                    // Use data directly from getAllOrders (now includes user info)
-                    console.log('Processing orders with user data from backend:', allOrders);
-                    const ordersWithUserDetails = allOrders.map((order) => {
-                        console.log(`Processing order ${order.order_id}:`, order);
-                        console.log(`Order ${order.order_id} money fields:`, {
-                            total_price: order.total_price,
-                            total_amount: order.total_amount,
-                            total: order.total,
-                            amount: order.amount
-                        });
-                        
-                        // Use user data from backend query
-                        const customer_name = order.user_name || `User ${order.user_id}`;
-                        const customer_phone = order.user_phone || 'N/A';
-                        const customer_email = order.user_email || 'N/A';
-                        
-                        console.log(`✅ Using customer name: ${customer_name} for user_id: ${order.user_id}`);
-                        
-                        const finalOrder = {
-                            ...order,
-                            customer_name,
-                            customer_phone,
-                            customer_email,
-                            created_at: order.created_at || new Date().toISOString(),
-                            updated_at: order.updated_at || new Date().toISOString()
-                        };
-                        
-                        console.log(`Final order data for ${order.order_id}:`, finalOrder);
-                        return finalOrder;
+                // Use data directly from getAllOrders (now includes user info)
+                console.log('Processing orders with user data from backend:', allOrders);
+                const ordersWithUserDetails = allOrders.map((order) => {
+                    console.log(`Processing order ${order.order_id}:`, order);
+                    console.log(`Order ${order.order_id} money fields:`, {
+                        total_price: order.total_price,
+                        total_amount: order.total_amount,
+                        total: order.total,
+                        amount: order.amount
                     });
                     
-                    // Sort by order_id from low to high (ascending)
-                    ordersWithUserDetails.sort((a, b) => a.order_id - b.order_id);
-                    console.log('Orders sorted by order_id (low to high):', ordersWithUserDetails.map(o => o.order_id));
+                    // Use user data from backend query
+                    const customer_name = order.user_name || `User ${order.user_id}`;
+                    const customer_phone = order.user_phone || 'N/A';
+                    const customer_email = order.user_email || 'N/A';
                     
-                    // Set orders for display
-                    setOrders(ordersWithUserDetails);
+                    console.log(`✅ Using customer name: ${customer_name} for user_id: ${order.user_id}`);
                     
-                    // Calculate statistics from pending orders
-                    console.log('Calculating statistics from orders:', ordersWithUserDetails);
-                    
-                    const totalRevenue = ordersWithUserDetails.reduce((sum, order) => {
-                        const orderTotal = parseFloat(order.total_price) || 0;
-                        console.log(`Order ${order.order_id}: total_price = ${order.total_price}, parsed = ${orderTotal}`);
-                        return sum + orderTotal;
-                    }, 0);
-                    
-                    console.log(`Total revenue calculated: ${totalRevenue}`);
-                    
-                    const totalOrders = ordersWithUserDetails.length;
-                    const pendingOrdersCount = ordersWithUserDetails.filter(o => o.status === 'pending').length;
-                    const paidOrdersCount = ordersWithUserDetails.filter(o => o.status === 'paid').length;
-                    const shippedOrdersCount = ordersWithUserDetails.filter(o => o.status === 'shipped').length;
-                    const completedOrdersCount = ordersWithUserDetails.filter(o => o.status === 'completed').length;
-                    const cancelledOrdersCount = ordersWithUserDetails.filter(o => o.status === 'cancelled').length;
-                    
-                    const statsData = {
-                        totalRevenue,
-                        totalOrders,
-                        pendingOrders: pendingOrdersCount,
-                        paidOrders: paidOrdersCount,
-                        shippedOrders: shippedOrdersCount,
-                        completedOrders: completedOrdersCount,
-                        cancelledOrders: cancelledOrdersCount
+                    const finalOrder = {
+                        ...order,
+                        customer_name,
+                        customer_phone,
+                        customer_email,
+                        created_at: order.created_at || new Date().toISOString(),
+                        updated_at: order.updated_at || new Date().toISOString()
                     };
                     
-                    console.log('Final stats data:', statsData);
-                    setStats(statsData);
+                    console.log(`Final order data for ${order.order_id}:`, finalOrder);
+                    return finalOrder;
+                });
+                
+                // Sort by order_id from low to high (ascending)
+                ordersWithUserDetails.sort((a, b) => a.order_id - b.order_id);
+                console.log('Orders sorted by order_id (low to high):', ordersWithUserDetails.map(o => o.order_id));
+                
+                // Set orders for display
+                setOrders(ordersWithUserDetails);
+                
+                // Calculate statistics from all orders
+                console.log('Calculating statistics from orders:', ordersWithUserDetails);
+                
+                const totalRevenue = ordersWithUserDetails.reduce((sum, order) => {
+                    // Try multiple possible fields for total price
+                    const orderTotal = parseFloat(order.total_price || order.total_amount || order.total || order.amount || 0);
+                    console.log(`Order ${order.order_id}: total_price = ${order.total_price}, total_amount = ${order.total_amount}, total = ${order.total}, amount = ${order.amount}, parsed = ${orderTotal}`);
+                    return sum + orderTotal;
+                }, 0);
+                
+                console.log(`Total revenue calculated from ${ordersWithUserDetails.length} orders: ${totalRevenue}`);
+                
+                const totalOrders = ordersWithUserDetails.length;
+                const pendingOrdersCount = ordersWithUserDetails.filter(o => o.status === 'pending').length;
+                const paidOrdersCount = ordersWithUserDetails.filter(o => o.status === 'paid').length;
+                const shippedOrdersCount = ordersWithUserDetails.filter(o => o.status === 'shipped').length;
+                const completedOrdersCount = ordersWithUserDetails.filter(o => o.status === 'completed').length;
+                const cancelledOrdersCount = ordersWithUserDetails.filter(o => o.status === 'cancelled').length;
+                
+                const statsData = {
+                    totalRevenue,
+                    totalOrders,
+                    pendingOrders: pendingOrdersCount,
+                    paidOrders: paidOrdersCount,
+                    shippedOrders: shippedOrdersCount,
+                    completedOrders: completedOrdersCount,
+                    cancelledOrders: cancelledOrdersCount
+                };
+                
+                console.log('Final stats data:', statsData);
+                setStats(statsData);
+            } else {
+                // Handle specific error cases
+                if (allOrdersResponse.message && allOrdersResponse.message.includes('403')) {
+                    setError('Bạn không có quyền truy cập. Vui lòng đăng nhập bằng tài khoản admin.');
                 } else {
-                    // Handle specific error cases
-                    if (allOrdersResponse.message && allOrdersResponse.message.includes('403')) {
-                        setError('Bạn không có quyền truy cập. Vui lòng đăng nhập bằng tài khoản admin.');
-                    } else {
-                        setError(allOrdersResponse.message || 'Không thể tải danh sách đơn hàng');
-                    }
+                    setError(allOrdersResponse.message || 'Không thể tải danh sách đơn hàng');
                 }
+            }
         } catch (err) {
             console.error('Error fetching orders:', err);
             // Handle 403 Forbidden error specifically
@@ -133,9 +134,9 @@ const OrderManagement = () => {
                 setError('Có lỗi xảy ra khi tải dữ liệu đơn hàng. Vui lòng kiểm tra kết nối mạng và thử lại.');
             }
         } finally {
-                setLoading(false);
+            setLoading(false);
         }
-        };
+    };
 
     // Fetch revenue statistics
     const fetchRevenueStats = async () => {
@@ -211,13 +212,13 @@ const OrderManagement = () => {
             if (response.success) {
                 // Update local state with current timestamp
                 const currentTime = new Date().toISOString();
-            setOrders(prevOrders => 
-                prevOrders.map(order =>
-                order.order_id === orderId
-                        ? { ...order, status: newStatus, updated_at: currentTime }
-                    : order
-                )
-            );
+                setOrders(prevOrders => 
+                    prevOrders.map(order =>
+                        order.order_id === orderId
+                            ? { ...order, status: newStatus, updated_at: currentTime }
+                            : order
+                    )
+                );
 
                 // Dispatch event to notify user orders page about status update
                 window.dispatchEvent(new CustomEvent('orderStatusUpdated', {
@@ -453,16 +454,16 @@ const OrderManagement = () => {
     const getStatusBadge = (status) => {
         const statusMap = {
             'pending': { class: 'bg-warning', text: 'Chờ xử lý' },
-            'paid': { class: 'bg-info', text: 'Đã thanh toán' },
+            'paid': { class: 'bg-primary', text: 'Đã thanh toán' },
             'completed': { class: 'bg-success', text: 'Hoàn thành' },
-            'shipped': { class: 'bg-primary', text: 'Đã giao' },
+            'shipped': { class: 'bg-info', text: 'Đã giao' },
             'cancelled': { class: 'bg-danger', text: 'Đã hủy' }
         };
 
         const statusInfo = statusMap[status] || { class: 'bg-secondary', text: status };
 
         return (
-            <span className={`badge ${statusInfo.class}`}>
+            <span className={`badge ${statusInfo.class} px-2 py-1`}>
                 {statusInfo.text}
             </span>
         );
@@ -490,45 +491,46 @@ const OrderManagement = () => {
     if (loading) {
         return (
             <div className="d-flex justify-content-center align-items-center" style={{ height: '400px' }}>
-                <div className="spinner-border text-primary" role="status">
-                    <span className="visually-hidden">Loading...</span>
+                <div className="text-center">
+                    <div className="spinner-border text-primary mb-3" role="status" style={{ width: '3rem', height: '3rem' }}>
+                        <span className="visually-hidden">Loading...</span>
+                    </div>
+                    <p className="text-muted">Đang tải dữ liệu...</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div>
-            {/* Header */}
+        <div className="container-fluid px-3">
+            {/* Header Section */}
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <div>
-                <h2 className="fw-bold text-dark">Quản lý đơn hàng</h2>
+                    <h1 className="fw-bold text-dark mb-1">Quản lý đơn hàng</h1>
                     <p className="text-muted mb-0">Hiển thị đơn hàng chờ xử lý - Nhấn "Làm mới" để cập nhật đơn hàng mới</p>
                 </div>
                 <div className="d-flex align-items-center gap-3">
                     <button 
-                        className="btn btn-outline-primary btn-sm"
+                        className="btn btn-primary"
                         onClick={() => {
                             fetchOrders();
                             fetchRevenueStats();
                         }}
                         disabled={loading}
                     >
-                        <i className={`fas fa-sync-alt ${loading ? 'fa-spin' : ''} me-1`}></i>
+                        <i className={`fas fa-sync-alt ${loading ? 'fa-spin' : ''} me-2`}></i>
                         Làm mới
                     </button>
                     <button 
-                        className="btn btn-outline-danger btn-sm"
+                        className="btn btn-outline-danger"
                         onClick={handleDeleteMultiple}
                         disabled={loading || selectedOrders.size === 0}
                         title={selectedOrders.size === 0 ? "Chọn đơn hàng để xóa" : `Xóa ${selectedOrders.size} đơn hàng đã chọn`}
                     >
-                        <i className="fas fa-trash me-1"></i>
+                        <i className="fas fa-trash me-2"></i>
                         Xóa nhiều ({selectedOrders.size})
                     </button>
-                <div className="text-muted">
-                        Tổng cộng: {stats.totalOrders} đơn hàng
-                    </div>
+                    
                 </div>
             </div>
 
@@ -591,66 +593,131 @@ const OrderManagement = () => {
 
             {/* Info Message - Only show if user is admin */}
             {!error && (
-            <div className="alert alert-info alert-dismissible fade show" role="alert">
-                <i className="fas fa-info-circle me-2"></i>
-                <strong>Lưu ý:</strong> Khi khách hàng đặt hàng thành công từ trang chủ, đơn hàng sẽ xuất hiện trong danh sách này với trạng thái "Chờ xử lý". Nhấn nút "Làm mới" để cập nhật danh sách đơn hàng mới nhất.
-                <button 
-                    type="button" 
-                    className="btn-close" 
-                    data-bs-dismiss="alert"
-                ></button>
-            </div>
+                <div className="alert alert-info alert-dismissible fade show mb-4" role="alert">
+                    <div className="d-flex align-items-start">
+                        <i className="fas fa-info-circle me-3 mt-1"></i>
+                        <div className="flex-grow-1">
+                            <strong>Lưu ý:</strong> Khi khách hàng đặt hàng thành công từ trang chủ, đơn hàng sẽ xuất hiện trong danh sách này với trạng thái "Chờ xử lý". Nhấn nút "Làm mới" để cập nhật danh sách đơn hàng mới nhất.
+                        </div>
+                        <button 
+                            type="button" 
+                            className="btn-close" 
+                            data-bs-dismiss="alert"
+                        ></button>
+                    </div>
+                </div>
             )}
 
-            {/* Stats Cards */}
+            {/* Order Status Cards - Compact Design */}
             <div className="row mb-4">
-                <div className="col-md-2 mb-3">
-                    <div className="card border-0 shadow-sm text-center">
-                        <div className="card-body">
-                            <h4 className="fw-bold text-warning">{stats.pendingOrders}</h4>
+                <div className="col-xl-2 col-md-4 col-sm-6 mb-3">
+                    <div className="card border-0 shadow-sm h-100">
+                        <div className="card-body text-center py-3 d-flex flex-column justify-content-center" style={{ minHeight: '120px' }}>
+                            <div className="text-warning mb-2">
+                                <i className="fas fa-clock fs-3"></i>
+                            </div>
+                            <h4 className="fw-bold text-warning mb-1">{stats.pendingOrders}</h4>
                             <p className="text-muted mb-0 small">Chờ xử lý</p>
                         </div>
                     </div>
                 </div>
-                <div className="col-md-2 mb-3">
-                    <div className="card border-0 shadow-sm text-center">
-                        <div className="card-body">
-                            <h4 className="fw-bold text-info">{stats.paidOrders}</h4>
+
+                <div className="col-xl-2 col-md-4 col-sm-6 mb-3">
+                    <div className="card border-0 shadow-sm h-100">
+                        <div className="card-body text-center py-3 d-flex flex-column justify-content-center" style={{ minHeight: '120px' }}>
+                            <div className="text-primary mb-2">
+                                <i className="fas fa-credit-card fs-3"></i>
+                            </div>
+                            <h4 className="fw-bold text-primary mb-1">{stats.paidOrders}</h4>
                             <p className="text-muted mb-0 small">Đã thanh toán</p>
                         </div>
                     </div>
                 </div>
-                <div className="col-md-2 mb-3">
-                    <div className="card border-0 shadow-sm text-center">
-                        <div className="card-body">
-                            <h4 className="fw-bold text-primary">{stats.shippedOrders}</h4>
+
+                <div className="col-xl-2 col-md-4 col-sm-6 mb-3">
+                    <div className="card border-0 shadow-sm h-100">
+                        <div className="card-body text-center py-3 d-flex flex-column justify-content-center" style={{ minHeight: '120px' }}>
+                            <div className="text-info mb-2">
+                                <i className="fas fa-truck fs-3"></i>
+                            </div>
+                            <h4 className="fw-bold text-info mb-1">{stats.shippedOrders}</h4>
                             <p className="text-muted mb-0 small">Đã giao</p>
                         </div>
                     </div>
                 </div>
-                <div className="col-md-2 mb-3">
-                    <div className="card border-0 shadow-sm text-center">
-                        <div className="card-body">
-                            <h4 className="fw-bold text-success">{stats.completedOrders}</h4>
+
+                <div className="col-xl-2 col-md-4 col-sm-6 mb-3">
+                    <div className="card border-0 shadow-sm h-100">
+                        <div className="card-body text-center py-3 d-flex flex-column justify-content-center" style={{ minHeight: '120px' }}>
+                            <div className="text-success mb-2">
+                                <i className="fas fa-check-circle fs-3"></i>
+                            </div>
+                            <h4 className="fw-bold text-success mb-1">{stats.completedOrders}</h4>
                             <p className="text-muted mb-0 small">Hoàn thành</p>
                         </div>
                     </div>
                 </div>
-                <div className="col-md-2 mb-3">
-                    <div className="card border-0 shadow-sm text-center">
-                        <div className="card-body">
-                            <h4 className="fw-bold text-danger">{stats.cancelledOrders}</h4>
+
+                <div className="col-xl-2 col-md-4 col-sm-6 mb-3">
+                    <div className="card border-0 shadow-sm h-100">
+                        <div className="card-body text-center py-3 d-flex flex-column justify-content-center" style={{ minHeight: '120px' }}>
+                            <div className="text-danger mb-2">
+                                <i className="fas fa-times-circle fs-3"></i>
+                            </div>
+                            <h4 className="fw-bold text-danger mb-1">{stats.cancelledOrders}</h4>
                             <p className="text-muted mb-0 small">Đã hủy</p>
                         </div>
                     </div>
                 </div>
-                <div className="col-md-2 mb-3">
-                    <div className="card border-0 shadow-sm text-center">
+
+                <div className="col-xl-2 col-md-4 col-sm-6 mb-3">
+                    <div className="card border-0 shadow-sm h-100">
+                        <div className="card-body text-center py-3 d-flex flex-column justify-content-center" style={{ minHeight: '120px' }}>
+                            <div className="text-secondary mb-2">
+                                <i className="fas fa-list fs-3"></i>
+                            </div>
+                            <h4 className="fw-bold text-secondary mb-1">{stats.totalOrders}</h4>
+                            <p className="text-muted mb-0 small">Tổng cộng</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Revenue Overview Section */}
+            <div className="row mb-4">
+                <div className="col-12">
+                    <div className="card border-0 shadow-sm">
+                        <div className="card-header bg-white border-0">
+                            <h5 className="fw-bold text-dark mb-0">
+                                <i className="fas fa-chart-bar me-2 text-primary"></i>
+                                Tổng quan doanh thu
+                            </h5>
+                        </div>
                         <div className="card-body">
-                            <h4 className="fw-bold text-dark">
-                                {formatCurrency(stats.totalRevenue)}
-                            </h4>
-                            <p className="text-muted mb-0 small">Tổng doanh thu</p>
+                            <div className="row">
+                                <div className="col-md-6 mb-3">
+                                    <div className="card border-0 bg-light">
+                                        <div className="card-body text-center py-3">
+                                            <div className="text-primary mb-2">
+                                                <i className="fas fa-dollar-sign fs-2"></i>
+                                            </div>
+                                            <h4 className="fw-bold text-primary mb-1">{formatCurrency(stats.totalRevenue)}</h4>
+                                            <p className="text-muted mb-0 small">Tổng doanh thu</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="col-md-6 mb-3">
+                                    <div className="card border-0 bg-light">
+                                        <div className="card-body text-center py-3">
+                                            <div className="text-success mb-2">
+                                                <i className="fas fa-shopping-cart fs-2"></i>
+                                            </div>
+                                            <h4 className="fw-bold text-success mb-1">{stats.totalOrders}</h4>
+                                            <p className="text-muted mb-0 small">Tổng đơn hàng</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -658,12 +725,18 @@ const OrderManagement = () => {
 
             {/* Orders Table */}
             <div className="card border-0 shadow-sm">
-                <div className="card-body">
+                <div className="card-header bg-white border-0">
+                    <h5 className="fw-bold text-dark mb-0">
+                        <i className="fas fa-list me-2 text-secondary"></i>
+                        Danh sách đơn hàng
+                    </h5>
+                </div>
+                <div className="card-body p-0">
                     <div className="table-responsive">
-                        <table className="table table-hover">
-                            <thead>
+                        <table className="table table-hover mb-0">
+                            <thead className="table-light">
                                 <tr>
-                                    <th>
+                                    <th className="border-0 py-3">
                                         <input 
                                             type="checkbox" 
                                             className="form-check-input"
@@ -671,20 +744,20 @@ const OrderManagement = () => {
                                             onChange={handleSelectAll}
                                         />
                                     </th>
-                                    <th>Mã đơn</th>
-                                    <th>Khách hàng</th>
-                                    <th>Liên hệ</th>
-                                    <th>Loại đơn hàng</th>
-                                    <th className="text-end">Tổng tiền</th>
-                                    <th>Trạng thái</th>
-                                    <th>Ngày tạo</th>
-                                    <th className="text-center">Thao tác</th>
+                                    <th className="border-0 py-3">Mã đơn</th>
+                                    <th className="border-0 py-3">Khách hàng</th>
+                                    <th className="border-0 py-3">Liên hệ</th>
+                                    <th className="border-0 py-3">Loại đơn hàng</th>
+                                    <th className="border-0 py-3 text-end">Tổng tiền</th>
+                                    <th className="border-0 py-3">Trạng thái</th>
+                                    <th className="border-0 py-3">Ngày tạo</th>
+                                    <th className="border-0 py-3 text-center">Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {orders && orders.length > 0 ? orders.map((order, index) => (
-                                    <tr key={`order-${order.order_id}-${index}`}>
-                                        <td>
+                                    <tr key={`order-${order.order_id}-${index}`} className="border-0">
+                                        <td className="py-3">
                                             <input 
                                                 type="checkbox" 
                                                 className="form-check-input"
@@ -692,32 +765,32 @@ const OrderManagement = () => {
                                                 onChange={() => handleOrderSelect(order.order_id)}
                                             />
                                         </td>
-                                        <td>
+                                        <td className="py-3">
                                             <span className="fw-bold">#{order.order_id}</span>
                                         </td>
-                                        <td>
+                                        <td className="py-3">
                                             <div className="fw-medium text-dark">{order.customer_name || `User ${order.user_id}`}</div>
                                             <div className="text-muted small">{order.shipping_address || 'Chưa có địa chỉ'}</div>
                                         </td>
-                                        <td>
+                                        <td className="py-3">
                                             <div className="small">
                                                 <div>{order.user_email || 'N/A'}</div>
                                                 <div className="text-muted">{order.customer_phone || 'N/A'}</div>
                                             </div>
                                         </td>
-                                        <td>
+                                        <td className="py-3">
                                             <span className={`badge ${order.order_type === 'cart' ? 'bg-info' : 'bg-secondary'}`}>
                                                 {order.order_type === 'cart' ? 'Từ giỏ hàng' : 'Mua ngay'}
                                             </span>
                                         </td>
-                                        <td className="text-end fw-bold">
+                                        <td className="text-end fw-bold py-3">
                                             {(() => {
                                                 const amount = order.total_price || order.total_amount || order.total || 0;
                                                 console.log(`Order ${order.order_id} amount:`, amount, 'type:', typeof amount);
                                                 return formatCurrency(amount);
                                             })()}
                                         </td>
-                                        <td>
+                                        <td className="py-3">
                                             <div className="d-flex align-items-center">
                                                 {getStatusBadge(order.status)}
                                                 <select
@@ -737,7 +810,7 @@ const OrderManagement = () => {
                                                 )}
                                             </div>
                                         </td>
-                                        <td className="text-muted small">
+                                        <td className="text-muted small py-3">
                                             {order.created_at ? new Date(order.created_at).toLocaleString('vi-VN', {
                                                 year: 'numeric',
                                                 month: '2-digit',
@@ -747,15 +820,15 @@ const OrderManagement = () => {
                                                 second: '2-digit'
                                             }) : 'N/A'}
                                         </td>
-                                        <td className="text-center">
+                                        <td className="text-center py-3">
                                             <div className="d-flex gap-2 justify-content-center">
-                                            <button
-                                                className="btn btn-outline-primary btn-sm"
-                                                onClick={() => handleViewDetails(order)}
-                                            >
-                                                <i className="fas fa-eye me-1"></i>
-                                                Chi tiết
-                                            </button>
+                                                <button
+                                                    className="btn btn-outline-primary btn-sm"
+                                                    onClick={() => handleViewDetails(order)}
+                                                >
+                                                    <i className="fas fa-eye me-1"></i>
+                                                    Chi tiết
+                                                </button>
                                                 <button
                                                     className="btn btn-outline-danger btn-sm"
                                                     onClick={() => handleDeleteOrder(order.order_id)}
@@ -768,8 +841,8 @@ const OrderManagement = () => {
                                         </td>
                                     </tr>
                                 )) : (
-                                    <tr>
-                                        <td colSpan="7" className="text-center text-muted py-4">
+                                    <tr className="border-0">
+                                        <td colSpan="9" className="text-center text-muted py-4">
                                             <i className="fas fa-inbox fa-2x mb-2"></i>
                                             <div>Không có đơn hàng nào</div>
                                         </td>

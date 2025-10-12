@@ -31,11 +31,16 @@ const Dashboard = () => {
                 }
 
                 // Fetch all data in parallel
-                const [ordersResponse, booksResponse, usersResponse] = await Promise.all([
-                    apiService.getAllOrders(),
+                console.log('🔄 [Dashboard] Fetching dashboard data...');
+                const [ordersResponse, booksResponse, usersCountResponse] = await Promise.all([
+                    apiService.getAllOrders({ suppressWarning: true }), // Admin context - suppress warning
                     apiService.getBooks({ limit: 1000 }), // Get all books for count
-                    apiService.getAllUsers({ limit: 1000 }) // Get all users for count
+                    apiService.getTotalUsersCount() // Get total users count
                 ]);
+                
+                console.log('📊 [Dashboard] Orders response:', ordersResponse);
+                console.log('📚 [Dashboard] Books response:', booksResponse);
+                console.log('👥 [Dashboard] Users count response:', usersCountResponse);
 
                 if (ordersResponse.success) {
                     const orders = ordersResponse.data || [];
@@ -91,7 +96,7 @@ const Dashboard = () => {
                         totalRevenue,
                         totalOrders: orders.length,
                         totalBooks: booksResponse.success ? (booksResponse.data?.length || 0) : 0,
-                        totalUsers: usersResponse.success ? (usersResponse.data?.length || 0) : 0,
+                        totalUsers: usersCountResponse.success ? (usersCountResponse.data || 0) : 0,
                         monthlyRevenue,
                         topSellingBooks,
                         recentOrders

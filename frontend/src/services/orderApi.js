@@ -441,7 +441,9 @@ class OrderApiService extends BaseApiService {
   async getAllOrders(params = {}) {
     // This method is for admin use only
     // Regular users should not call this method
-    console.warn('getAllOrders() is admin-only. Use getMyOrders() for user orders.');
+    if (!params.suppressWarning) {
+      console.warn('getAllOrders() is admin-only. Use getMyOrders() for user orders.');
+    }
     return await this.apiCall('/order/all');
   }
 

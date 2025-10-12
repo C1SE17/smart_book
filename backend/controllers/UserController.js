@@ -215,11 +215,29 @@ class UserController {
         return res.status(500).json({ error: "Lỗi truy vấn cơ sở dữ liệu" });
       }
       res.json({
-        users: result.users,
-        total: result.total,
-        page,
-        limit,
-        totalPages: Math.ceil(result.total / limit),
+        success: true,
+        data: {
+          users: result.users,
+          total: result.total,
+          page,
+          limit,
+          totalPages: Math.ceil(result.total / limit),
+        }
+      });
+    });
+  }
+
+  // Lấy tổng số người dùng cho dashboard (chỉ admin)
+  static getTotalUsersCount(req, res) {
+    const query = 'SELECT COUNT(*) AS total FROM users';
+    db.query(query, (err, results) => {
+      if (err) {
+        console.error('💥 [UserController] Lỗi đếm tổng số người dùng:', err);
+        return res.status(500).json({ error: "Lỗi truy vấn cơ sở dữ liệu" });
+      }
+      res.json({
+        success: true,
+        data: results[0].total
       });
     });
   }

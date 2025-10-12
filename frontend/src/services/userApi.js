@@ -113,6 +113,18 @@ class UserApiService extends BaseApiService {
       throw error;
     }
   }
+
+  async getTotalUsersCount() {
+    try {
+      console.log(`👥 [UserAPI] Đang lấy tổng số người dùng`);
+      const result = await this.apiCall('/users/count');
+      console.log(`👥 [UserAPI] Kết quả lấy tổng số người dùng:`, result);
+      return result;
+    } catch (error) {
+      console.error(`💥 [UserAPI] Lỗi khi lấy tổng số người dùng:`, error);
+      throw error;
+    }
+  }
 }
 
 export default new UserApiService();

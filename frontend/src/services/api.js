@@ -66,6 +66,7 @@ const apiService = {
   createUser: userApi.createUser.bind(userApi),
   updateUser: userApi.updateUser.bind(userApi),
   deleteUser: userApi.deleteUser.bind(userApi),
+  getTotalUsersCount: userApi.getTotalUsersCount.bind(userApi),
   
   // Auth APIs
   auth: authApi,

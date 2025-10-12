@@ -84,6 +84,20 @@ class OrderModel {
           availableStock - quantity
         }`
       );
+
+      // Cập nhật total_price cho đơn mua ngay
+      await db.promise().query(
+        `UPDATE orders 
+         SET total_price = (
+           SELECT COALESCE(SUM(oi.quantity * oi.price_at_order), 0)
+           FROM order_items oi
+           WHERE oi.order_id = ?
+         )
+         WHERE order_id = ?`,
+        [orderId, orderId]
+      );
+      console.log(`🧾 Đã cập nhật total_price cho đơn mua ngay #${orderId}`);
+
       console.log("Tạo đơn tạm thành công, orderId:", orderId);
       return { order_id: orderId, total_amount: totalAmount };
     } catch (err) {
@@ -365,9 +379,22 @@ class OrderModel {
           .promise()
           .query("DELETE FROM carts WHERE cart_id = ?", [cartId]);
       }
+      // Cập nhật total_price cho đơn hàng
+      await db.promise().query(
+        `UPDATE orders 
+         SET total_price = (
+           SELECT COALESCE(SUM(oi.quantity * oi.price_at_order), 0)
+           FROM order_items oi
+           WHERE oi.order_id = ?
+         )
+         WHERE order_id = ?`,
+        [orderId, orderId]
+      );
+      console.log(`🧾 Đã cập nhật total_price cho order #${orderId}`);
 
       console.log("Tạo đơn từ giỏ hàng thành công, orderId:", orderId);
       return { order_id: orderId, total_amount: totalAmount };
+
     } catch (err) {
       console.error("Lỗi tạo đơn từ giỏ hàng:", err.message);
       throw err;
@@ -583,100 +610,72 @@ class OrderModel {
 
   // Lấy đơn hàng của user
   static async getUserOrders(userId) {
-    try {
-      console.log("📋 [OrderModel] getUserOrders - userId:", userId);
+  try {
+    console.log("📋 [OrderModel] getUserOrders - userId:", userId);
 
-      // Kiểm tra userId hợp lệ
-      if (!userId || isNaN(userId)) {
-        console.log(
-          "❌ [OrderModel] getUserOrders - User ID không hợp lệ:",
-          userId
-        );
-        throw new Error("User ID không hợp lệ");
-      }
-
-      console.log("📞 [OrderModel] getUserOrders - Thực hiện SQL query");
-      const [rows] = await db.promise().query(
-        `SELECT 
-            o.order_id, 
-            o.user_id, 
-            o.shipping_address, 
-            COALESCE(SUM(oi.quantity * oi.price_at_order), 0) AS total_price,
-            o.status, 
-            o.created_at, 
-            o.updated_at,
-            oi.book_id, 
-            oi.quantity, 
-            oi.price_at_order,
-            b.title AS book_title, 
-            a.name AS book_author, 
-            b.cover_image AS book_image,
-            u.name AS user_name, 
-            u.email AS user_email, 
-            u.phone AS user_phone
-         FROM smart_book.orders o
-         LEFT JOIN smart_book.order_items oi ON o.order_id = oi.order_id
-         LEFT JOIN smart_book.books b ON oi.book_id = b.book_id
-         LEFT JOIN smart_book.authors a ON b.author_id = a.author_id
-         LEFT JOIN smart_book.users u ON o.user_id = u.user_id
-         WHERE o.user_id = ?
-         GROUP BY o.order_id, o.user_id, o.shipping_address, o.status, o.created_at, o.updated_at, oi.book_id, oi.quantity, oi.price_at_order, b.title, a.name, b.cover_image, u.name, u.email, u.phone
-         ORDER BY o.created_at DESC`,
-        [userId]
-      );
-
-      console.log(
-        "📊 [OrderModel] getUserOrders - Raw rows từ database:",
-        rows.length
-      );
-
-      // Group order items by order_id
-      const ordersMap = new Map();
-      rows.forEach((row) => {
-        if (!ordersMap.has(row.order_id)) {
-          ordersMap.set(row.order_id, {
-            order_id: row.order_id,
-            user_id: row.user_id,
-            shipping_address: row.shipping_address,
-            total_price: row.total_price,
-            status: row.status,
-            created_at: row.created_at,
-            updated_at: row.updated_at,
-            items: [],
-          });
-        }
-
-        if (row.book_id) {
-          ordersMap.get(row.order_id).items.push({
-            book_id: row.book_id,
-            quantity: row.quantity,
-            price_at_order: row.price_at_order,
-            book_title: row.book_title,
-            book_author: row.book_author,
-            book_image: row.book_image,
-          });
-        }
-      });
-
-      const orders = Array.from(ordersMap.values());
-      console.log(
-        "✅ [OrderModel] getUserOrders - Processed orders:",
-        orders.length
-      );
-      console.log("📋 [OrderModel] getUserOrders - Orders data:", orders);
-      return orders;
-    } catch (err) {
-      console.error("💥 [OrderModel] getUserOrders - Lỗi chi tiết:", {
-        message: err.message,
-        code: err.code,
-        errno: err.errno,
-        sqlState: err.sqlState,
-        sqlMessage: err.sqlMessage,
-        userId: userId,
-      });
-      throw err;
+    if (!userId || isNaN(userId)) {
+      throw new Error("User ID không hợp lệ");
     }
+
+    // ✅ Lấy danh sách đơn hàng + tổng tiền chính xác
+    const [orders] = await db.promise().query(
+      `
+      SELECT 
+          o.order_id,
+          o.user_id,
+          o.shipping_address,
+          COALESCE(SUM(oi.quantity * oi.price_at_order), 0) AS total_price,
+          o.status,
+          o.created_at,
+          o.updated_at,
+          u.name AS user_name,
+          u.email AS user_email,
+          u.phone AS user_phone
+      FROM orders o
+      LEFT JOIN order_items oi ON o.order_id = oi.order_id
+      JOIN users u ON o.user_id = u.user_id
+      WHERE o.user_id = ?
+      GROUP BY o.order_id
+      ORDER BY o.created_at DESC
+      `,
+      [userId]
+    );
+
+    // ✅ Lấy chi tiết từng sản phẩm theo order_id
+    const [items] = await db.promise().query(
+      `
+      SELECT 
+          oi.order_id,
+          oi.book_id,
+          oi.quantity,
+          oi.price_at_order,
+          b.title AS book_title,
+          a.name AS book_author,
+          b.cover_image AS book_image
+      FROM order_items oi
+      JOIN books b ON oi.book_id = b.book_id
+      LEFT JOIN authors a ON b.author_id = a.author_id
+      WHERE oi.order_id IN (
+        SELECT order_id FROM orders WHERE user_id = ?
+      )
+      `,
+      [userId]
+    );
+
+    // ✅ Gộp items vào từng đơn
+    const result = orders.map(order => ({
+      ...order,
+      items: items.filter(i => i.order_id === order.order_id),
+    }));
+
+    console.log("✅ [OrderModel] getUserOrders - Kết quả cuối:", result.length);
+    return result;
+  } catch (err) {
+    console.error("💥 [OrderModel] getUserOrders - Lỗi:", err.message);
+    throw err;
   }
+}
+
 
   // Tổng tiền thu được theo ngày/tháng
   static async getRevenue({ type = "day", date }) {

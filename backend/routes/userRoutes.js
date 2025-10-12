@@ -13,10 +13,12 @@ router.post('/register', UserController.register);
 router.post('/login', UserController.login);
 // Tuyến cập nhật thông tin người dùng
 router.put('/update', auth, UserController.updateUser); // Chỉ sửa bản thân
-// Tuyến lấy thông tin người dùng
-router.get('/:user_id', auth, UserController.getUser); // User lấy bản thân, admin lấy bất kỳ
 // Tuyến lấy toàn bộ người dùng (chỉ admin)
 router.get('/', auth, adminOnly, UserController.getAllUsers); // Chỉ admin
+// Tuyến lấy tổng số người dùng cho dashboard (chỉ admin) - PHẢI ĐẶT TRƯỚC /:user_id
+router.get('/count', auth, adminOnly, UserController.getTotalUsersCount); // Chỉ admin
+// Tuyến lấy thông tin người dùng
+router.get('/:user_id', auth, UserController.getUser); // User lấy bản thân, admin lấy bất kỳ
 // Tuyến xóa người dùng
 router.delete('/:user_id', auth, adminOnly, UserController.deleteUser); // Chỉ admin
 // Tuyến đăng xuất
