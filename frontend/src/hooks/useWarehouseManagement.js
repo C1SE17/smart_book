@@ -2,14 +2,12 @@ import { useState, useEffect, useCallback } from 'react';
 import apiService from '../services';
 
 /**
- * Custom hook cho quản lý sách với Real API
- * Sử dụng backend API thật thay vì mock API
+ * Custom hook cho quản lý kho với Real API
+ * Sử dụng backend API thật với phân trang
  */
-export const useBookManagement = () => {
+export const useWarehouseManagement = () => {
+    const [warehouseItems, setWarehouseItems] = useState([]);
     const [books, setBooks] = useState([]);
-    const [categories, setCategories] = useState([]);
-    const [authors, setAuthors] = useState([]);
-    const [publishers, setPublishers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [pagination, setPagination] = useState({
@@ -21,73 +19,61 @@ export const useBookManagement = () => {
         hasPrevPage: false
     });
 
-    // Load dữ liệu ban đầu (bao gồm cả categories, authors, publishers)
+    // Load dữ liệu ban đầu (bao gồm cả books)
     const loadInitialData = useCallback(async (page = 1, limit = 10, search = '') => {
         try {
             setLoading(true);
             setError(null);
 
-            const [booksRes, categoriesRes, authorsRes, publishersRes] = await Promise.all([
-                apiService.getBooks({ page, limit, search }), // Sử dụng phân trang
-                apiService.getCategories(),
-                apiService.getAuthors(),
-                apiService.getPublishers()
+            const [warehouseRes, booksRes] = await Promise.all([
+                apiService.getWarehouseItems({ page, limit, search }),
+                apiService.getBooks({ limit: 1000 }) // Load tất cả books cho dropdown
             ]);
+
+            if (warehouseRes.success) {
+                setWarehouseItems(warehouseRes.data);
+                if (warehouseRes.pagination) {
+                    setPagination(warehouseRes.pagination);
+                }
+            } else {
+                throw new Error(warehouseRes.message);
+            }
 
             if (booksRes.success) {
                 setBooks(booksRes.data);
-                if (booksRes.pagination) {
-                    setPagination(booksRes.pagination);
-                }
-            } else {
-                throw new Error(booksRes.message);
+                console.log('✅ Books loaded for warehouse:', booksRes.data.length);
             }
 
-            if (categoriesRes.success) {
-                setCategories(categoriesRes.data);
-                console.log('✅ Categories loaded:', categoriesRes.data);
-            }
-
-            if (authorsRes.success) {
-                setAuthors(authorsRes.data);
-                console.log('✅ Authors loaded:', authorsRes.data);
-            }
-
-            if (publishersRes.success) {
-                setPublishers(publishersRes.data);
-                console.log('✅ Publishers loaded:', publishersRes.data);
-            }
-
-            console.log('🎉 All data loaded successfully from real API!');
+            console.log('🎉 Warehouse data loaded successfully from real API!');
         } catch (err) {
-            console.error('❌ Error loading data from real API:', err);
+            console.error('❌ Error loading warehouse data from real API:', err);
             setError(err.message);
         } finally {
             setLoading(false);
         }
     }, []);
 
-    // Load chỉ dữ liệu sách (cho phân trang, không reload categories/authors/publishers)
-    const loadBooksOnly = useCallback(async (page = 1, limit = 10, search = '', showLoading = true) => {
+    // Load chỉ dữ liệu warehouse (cho phân trang, không reload books)
+    const loadWarehouseOnly = useCallback(async (page = 1, limit = 10, search = '', showLoading = true) => {
         try {
             if (showLoading) {
                 setLoading(true);
             }
             setError(null);
 
-            const booksRes = await apiService.getBooks({ page, limit, search });
+            const warehouseRes = await apiService.getWarehouseItems({ page, limit, search });
 
-            if (booksRes.success) {
-                setBooks(booksRes.data);
-                if (booksRes.pagination) {
-                    setPagination(booksRes.pagination);
+            if (warehouseRes.success) {
+                setWarehouseItems(warehouseRes.data);
+                if (warehouseRes.pagination) {
+                    setPagination(warehouseRes.pagination);
                 }
-                console.log('✅ Books loaded for pagination:', booksRes.data.length);
+                console.log('✅ Warehouse items loaded for pagination:', warehouseRes.data.length);
             } else {
-                throw new Error(booksRes.message);
+                throw new Error(warehouseRes.message);
             }
         } catch (err) {
-            console.error('❌ Error loading books for pagination:', err);
+            console.error('❌ Error loading warehouse items for pagination:', err);
             setError(err.message);
         } finally {
             if (showLoading) {
@@ -96,17 +82,17 @@ export const useBookManagement = () => {
         }
     }, []);
 
-    // Tạo sách mới
-    const createBook = useCallback(async (bookData) => {
+    // Tạo warehouse item mới
+    const createWarehouseItem = useCallback(async (warehouseData) => {
         try {
-            console.log('📝 Creating book:', bookData);
+            console.log('📝 Creating warehouse item:', warehouseData);
             setLoading(true);
             setError(null);
 
-            const response = await apiService.createBook(bookData);
+            const response = await apiService.createWarehouseItem(warehouseData);
 
             if (response.success) {
-                console.log('✅ Book created successfully:', response.data);
+                console.log('✅ Warehouse item created successfully:', response.data);
                 // Reload data to get updated list
                 await loadInitialData(1, 10, ''); // Reset to first page after creating
                 return { success: true, data: response.data, message: response.message };
@@ -114,7 +100,7 @@ export const useBookManagement = () => {
                 throw new Error(response.message);
             }
         } catch (err) {
-            console.error('❌ Error creating book:', err);
+            console.error('❌ Error creating warehouse item:', err);
             setError(err.message);
             return { success: false, data: null, message: err.message };
         } finally {
@@ -122,17 +108,17 @@ export const useBookManagement = () => {
         }
     }, [loadInitialData]);
 
-    // Cập nhật sách
-    const updateBook = useCallback(async (id, bookData) => {
+    // Cập nhật warehouse item
+    const updateWarehouseItem = useCallback(async (bookId, warehouseData) => {
         try {
-            console.log('✏️ Updating book:', id, bookData);
+            console.log('✏️ Updating warehouse item:', bookId, warehouseData);
             setLoading(true);
             setError(null);
 
-            const response = await apiService.updateBook(id, bookData);
+            const response = await apiService.updateWarehouseItem(bookId, warehouseData);
 
             if (response.success) {
-                console.log('✅ Book updated successfully:', response.data);
+                console.log('✅ Warehouse item updated successfully:', response.data);
                 // Reload data to get updated list
                 await loadInitialData(1, 10, ''); // Reset to first page after updating
                 return { success: true, data: response.data, message: response.message };
@@ -140,7 +126,7 @@ export const useBookManagement = () => {
                 throw new Error(response.message);
             }
         } catch (err) {
-            console.error('❌ Error updating book:', err);
+            console.error('❌ Error updating warehouse item:', err);
             setError(err.message);
             return { success: false, data: null, message: err.message };
         } finally {
@@ -148,17 +134,17 @@ export const useBookManagement = () => {
         }
     }, [loadInitialData]);
 
-    // Xóa sách
-    const deleteBook = useCallback(async (id) => {
+    // Xóa warehouse item
+    const deleteWarehouseItem = useCallback(async (bookId) => {
         try {
-            console.log('🗑️ Deleting book:', id);
+            console.log('🗑️ Deleting warehouse item:', bookId);
             setLoading(true);
             setError(null);
 
-            const response = await apiService.deleteBook(id);
+            const response = await apiService.deleteWarehouseItem(bookId);
 
             if (response.success) {
-                console.log('✅ Book deleted successfully');
+                console.log('✅ Warehouse item deleted successfully');
                 // Reload data to get updated list
                 await loadInitialData(1, 10, ''); // Reset to first page after deleting
                 return { success: true, data: response.data, message: response.message };
@@ -166,7 +152,7 @@ export const useBookManagement = () => {
                 throw new Error(response.message);
             }
         } catch (err) {
-            console.error('❌ Error deleting book:', err);
+            console.error('❌ Error deleting warehouse item:', err);
             setError(err.message);
             return { success: false, data: null, message: err.message };
         } finally {
@@ -174,19 +160,18 @@ export const useBookManagement = () => {
         }
     }, [loadInitialData]);
 
-    // Tìm kiếm sách
-    const searchBooks = useCallback(async (query, page = 1, limit = 10) => {
+    // Tìm kiếm warehouse items
+    const searchWarehouseItems = useCallback(async (query, page = 1, limit = 10) => {
         try {
-            console.log('🔍 Searching books:', query);
+            console.log('🔍 Searching warehouse items:', query);
             setLoading(true);
             setError(null);
 
-            // Sử dụng API searchBooks với tham số q
-            const response = await apiService.searchBooks(query, page, limit);
+            const response = await apiService.getWarehouseItems({ page, limit, search: query });
 
             if (response.success) {
                 console.log('✅ Search completed:', response.data);
-                setBooks(response.data);
+                setWarehouseItems(response.data);
                 if (response.pagination) {
                     setPagination(response.pagination);
                 }
@@ -197,7 +182,7 @@ export const useBookManagement = () => {
                 return { success: false, data: null, message: response.message };
             }
         } catch (err) {
-            console.error('❌ Error searching books:', err);
+            console.error('❌ Error searching warehouse items:', err);
             setError(err.message);
             return { success: false, data: null, message: err.message };
         } finally {
@@ -205,11 +190,11 @@ export const useBookManagement = () => {
         }
     }, []);
 
-    // Refresh dữ liệu (chỉ sách, không reload categories/authors/publishers)
+    // Refresh dữ liệu (chỉ warehouse, không reload books)
     const refreshData = useCallback(async (page = 1, limit = 10, search = '') => {
-        console.log('🔄 Refreshing books data...');
-        await loadBooksOnly(page, limit, search);
-    }, [loadBooksOnly]);
+        console.log('🔄 Refreshing warehouse data...');
+        await loadWarehouseOnly(page, limit, search);
+    }, [loadWarehouseOnly]);
 
     // Load dữ liệu khi component mount
     useEffect(() => {
@@ -218,21 +203,19 @@ export const useBookManagement = () => {
 
     return {
         // State
+        warehouseItems,
         books,
-        categories,
-        authors,
-        publishers,
         loading,
         error,
         pagination,
 
         // Actions
-        createBook,
-        updateBook,
-        deleteBook,
-        searchBooks,
+        createWarehouseItem,
+        updateWarehouseItem,
+        deleteWarehouseItem,
+        searchWarehouseItems,
         refreshData,
         loadInitialData,
-        loadBooksOnly
+        loadWarehouseOnly
     };
 };

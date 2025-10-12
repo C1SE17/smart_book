@@ -3,7 +3,7 @@ const Book = require('../models/Book');
 exports.getAllBooks = async (req, res) => { // Lấy danh sách sản phẩm
     try {
         const { page, limit, category_id, author_id, publisher_id, search } = req.query;
-        const books = await Book.getAll({
+        const result = await Book.getAll({
             page: page ? parseInt(page) : 1,
             limit: limit ? parseInt(limit) : 10,
             category_id,
@@ -11,7 +11,11 @@ exports.getAllBooks = async (req, res) => { // Lấy danh sách sản phẩm
             publisher_id,
             search
         });
-        res.json({ success: true, data: books });
+        res.json({ 
+            success: true, 
+            data: result.books,
+            pagination: result.pagination
+        });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
     }
@@ -20,7 +24,7 @@ exports.getAllBooks = async (req, res) => { // Lấy danh sách sản phẩm
 exports.searchBooks = async (req, res) => { // Tìm kiếm sách
     try {
         const { q, page, limit, category_id, author_id, publisher_id } = req.query;
-        const books = await Book.getAll({
+        const result = await Book.getAll({
             page: page ? parseInt(page) : 1,
             limit: limit ? parseInt(limit) : 100,
             category_id,
@@ -28,7 +32,12 @@ exports.searchBooks = async (req, res) => { // Tìm kiếm sách
             publisher_id,
             search: q
         });
-        res.json({ success: true, data: books, message: `Tìm thấy ${books.length} kết quả` });
+        res.json({ 
+            success: true, 
+            data: result.books, 
+            pagination: result.pagination,
+            message: `Tìm thấy ${result.pagination.totalItems} kết quả` 
+        });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
     }

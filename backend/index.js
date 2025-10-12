@@ -11,6 +11,7 @@ const cartRoutes = require('./routes/cartRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const warehouseRoutes = require('./routes/warehouseRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
+const searchRoutes = require('./routes/searchRoutes');
 
 // Tải biến môi trường
 dotenv.config();
@@ -83,6 +84,8 @@ app.use('/api/warehouse', warehouseRoutes);
 console.log('✅ [Server] Warehouse routes loaded');
 app.use('/api/reviews', reviewRoutes);
 console.log('✅ [Server] Reviews routes loaded');
+app.use('/api/search', searchRoutes);
+console.log('✅ [Server] Search routes loaded');
 
 // Error handling middleware
 app.use((err, req, res, next) => {

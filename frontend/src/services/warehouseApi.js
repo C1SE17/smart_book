@@ -6,10 +6,20 @@ import BaseApiService from './baseApi.js';
 
 class WarehouseApiService extends BaseApiService {
   // ==================== WAREHOUSE ====================
-  async getWarehouseItems() {
+  async getWarehouseItems(params = {}) {
     try {
-      console.log(`📦 [WarehouseAPI] Đang lấy danh sách sản phẩm trong kho`);
-      const result = await this.apiCall('/warehouse');
+      console.log(`📦 [WarehouseAPI] Đang lấy danh sách sản phẩm trong kho với tham số:`, params);
+
+      const queryParams = new URLSearchParams();
+      if (params.page) queryParams.append('page', params.page);
+      if (params.limit) queryParams.append('limit', params.limit);
+      if (params.search) queryParams.append('search', params.search);
+
+      const queryString = queryParams.toString();
+      const endpoint = `/warehouse${queryString ? `?${queryString}` : ''}`;
+
+      console.log(`📦 [WarehouseAPI] Endpoint cuối cùng: ${endpoint}`);
+      const result = await this.apiCall(endpoint);
       console.log(`📦 [WarehouseAPI] Kết quả lấy danh sách kho:`, result);
       return result;
     } catch (error) {

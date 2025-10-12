@@ -16,7 +16,6 @@ const ReviewManagement = () => {
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(20); // Tăng default để hiển thị nhiều hơn
-    const [isPageChanging, setIsPageChanging] = useState(false);
 
     // Fetch reviews from Backend API
     useEffect(() => {
@@ -130,14 +129,8 @@ const ReviewManagement = () => {
     // Pagination handlers
     const handlePageChange = (page) => {
         if (page === currentPage) return;
-
-        setIsPageChanging(true);
-
-        // Smooth transition with slight delay
-        setTimeout(() => {
-            setCurrentPage(page);
-            setIsPageChanging(false);
-        }, 150);
+        
+        setCurrentPage(page);
     };
 
     const handleItemsPerPageChange = (e) => {
@@ -265,6 +258,84 @@ const ReviewManagement = () => {
 
     return (
         <div className="container-fluid">
+            {/* CSS để fix cột không bị lệch và smooth transitions */}
+            <style jsx>{`
+                .table-responsive {
+                    scrollbar-width: thin;
+                    scrollbar-color: #dee2e6 #f8f9fa;
+                }
+                .table-responsive::-webkit-scrollbar {
+                    height: 8px;
+                }
+                .table-responsive::-webkit-scrollbar-track {
+                    background: #f8f9fa;
+                }
+                .table-responsive::-webkit-scrollbar-thumb {
+                    background: #dee2e6;
+                    border-radius: 4px;
+                }
+                .table-responsive::-webkit-scrollbar-thumb:hover {
+                    background: #adb5bd;
+                }
+                .table-fixed {
+                    table-layout: fixed !important;
+                    width: 100% !important;
+                }
+                .table-fixed th,
+                .table-fixed td {
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+                .table-fixed th:first-child,
+                .table-fixed td:first-child {
+                    white-space: normal;
+                    word-wrap: break-word;
+                }
+                
+                /* Smooth transitions for table rows */
+                .table tbody tr {
+                    transition: all 0.3s ease-in-out;
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+                
+                .table tbody tr.fade-out {
+                    opacity: 0;
+                    transform: translateY(-10px);
+                }
+                
+                .table tbody tr.fade-in {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+                
+                
+                /* Smooth button transitions */
+                .page-link {
+                    transition: all 0.2s ease-in-out !important;
+                }
+                
+                .page-link:hover {
+                    transform: translateY(-1px);
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                }
+                
+                .page-item.active .page-link {
+                    transform: scale(1.05);
+                }
+                
+                /* Loading spinner animation */
+                .pagination-spinner {
+                    animation: spin 1s linear infinite;
+                }
+                
+                @keyframes spin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+            `}</style>
+            
             {/* Header */}
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <div>
@@ -350,13 +421,11 @@ const ReviewManagement = () => {
                         </div>
                     )}
 
-                    <div className="table-responsive" style={{ minHeight: '400px' }}>
+                    <div className="table-responsive position-relative" style={{ minHeight: '400px' }}>
+                        
                         <table
-                            className="table table-hover"
-                            style={{
-                                transition: 'opacity 0.2s ease-in-out',
-                                opacity: isPageChanging ? 0.7 : 1
-                            }}
+                            className="table table-hover table-fixed"
+                            style={{ tableLayout: 'fixed', width: '100%' }}
                         >
                             <thead className="table-light">
                                 <tr>
@@ -473,7 +542,7 @@ const ReviewManagement = () => {
                                             <button
                                                 className="page-link"
                                                 onClick={() => handlePageChange(currentPage - 1)}
-                                                disabled={currentPage === 1 || isPageChanging}
+                                                disabled={currentPage === 1 || false}
                                                 style={{ transition: 'all 0.2s ease' }}
                                             >
                                                 Trước
@@ -488,7 +557,7 @@ const ReviewManagement = () => {
                                                     <button
                                                         className="page-link"
                                                         onClick={() => handlePageChange(page)}
-                                                        disabled={isPageChanging}
+                                                        disabled={false}
                                                         style={{ transition: 'all 0.2s ease' }}
                                                     >
                                                         {page}
@@ -501,7 +570,7 @@ const ReviewManagement = () => {
                                             <button
                                                 className="page-link"
                                                 onClick={() => handlePageChange(currentPage + 1)}
-                                                disabled={currentPage === totalPages || isPageChanging}
+                                                disabled={currentPage === totalPages || false}
                                                 style={{ transition: 'all 0.2s ease' }}
                                             >
                                                 Sau

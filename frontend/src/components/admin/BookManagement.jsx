@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useBookManagement } from '../../hooks/useBookManagement';
 
 const BookManagement = () => {
@@ -9,17 +9,22 @@ const BookManagement = () => {
         publishers,
         loading,
         error,
+        pagination,
         createBook,
         updateBook,
         deleteBook,
         searchBooks,
-        refreshData
+        refreshData,
+        loadBooksOnly
     } = useBookManagement();
 
     const [showModal, setShowModal] = useState(false);
     const [editingBook, setEditingBook] = useState(null);
     const [formErrors, setFormErrors] = useState({});
     const [searchTerm, setSearchTerm] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+    const searchTimeoutRef = useRef(null);
     const [formData, setFormData] = useState({
         title: '',
         description: '',
@@ -40,25 +45,49 @@ const BookManagement = () => {
         authors: authors,
         publishers: publishers,
         loading,
-        error
+        error,
+        pagination
     });
 
-    // Filter books based on search term (client-side filtering like UserManagement)
-    const filteredBooks = books.filter(book => {
-        const title = book.title || '';
-        const description = book.description || '';
-        const authorName = book.author_name || '';
-        const categoryName = book.category_name || '';
-        const publisherName = book.publisher_name || '';
+    // Handle search with debounce để tránh gọi API quá nhiều
+    const handleSearch = useCallback(async (searchValue) => {
+        setSearchTerm(searchValue);
+        setCurrentPage(1); // Reset to first page when searching
+        
+        // Clear previous timeout
+        if (searchTimeoutRef.current) {
+            clearTimeout(searchTimeoutRef.current);
+        }
+        
+        // Set new timeout để debounce search
+        searchTimeoutRef.current = setTimeout(async () => {
+            await loadBooksOnly(1, itemsPerPage, searchValue);
+        }, 300); // 300ms delay
+    }, [itemsPerPage, loadBooksOnly]);
 
-        const matchesSearch = title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            authorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            categoryName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            publisherName.toLowerCase().includes(searchTerm.toLowerCase());
+    // Cleanup timeout khi component unmount
+    useEffect(() => {
+        return () => {
+            if (searchTimeoutRef.current) {
+                clearTimeout(searchTimeoutRef.current);
+            }
+        };
+    }, []);
 
-        return matchesSearch;
-    });
+    // Handle page change - chỉ load sách, không reload toàn bộ và không hiển thị loading
+    const handlePageChange = async (page) => {
+        if (page === currentPage) return;
+        
+        setCurrentPage(page);
+        await loadBooksOnly(page, itemsPerPage, searchTerm, false); // false = không hiển thị loading
+    };
+
+    // Handle items per page change
+    const handleItemsPerPageChange = async (newItemsPerPage) => {
+        setItemsPerPage(newItemsPerPage);
+        setCurrentPage(1); // Reset to first page
+        await loadBooksOnly(1, newItemsPerPage, searchTerm);
+    };
 
     // Validation function
     const validateForm = (data) => {
@@ -149,6 +178,8 @@ const BookManagement = () => {
             try {
                 const result = await deleteBook(bookId);
                 if (result.success) {
+                    // Refresh data with current pagination
+                    await loadBooksOnly(currentPage, itemsPerPage, searchTerm);
                     alert(result.message);
                 } else {
                     alert(result.message);
@@ -205,6 +236,8 @@ const BookManagement = () => {
                     cover_image: '',
                     slug: ''
                 });
+                // Refresh data with current pagination
+                await loadBooksOnly(currentPage, itemsPerPage, searchTerm);
                 alert(result.message);
             } else {
                 alert(result.message);
@@ -224,6 +257,84 @@ const BookManagement = () => {
 
     return (
         <div className="card border-0 shadow-sm rounded-3">
+            {/* CSS để fix cột không bị lệch và smooth transitions */}
+            <style jsx>{`
+                .table-responsive {
+                    scrollbar-width: thin;
+                    scrollbar-color: #dee2e6 #f8f9fa;
+                }
+                .table-responsive::-webkit-scrollbar {
+                    height: 8px;
+                }
+                .table-responsive::-webkit-scrollbar-track {
+                    background: #f8f9fa;
+                }
+                .table-responsive::-webkit-scrollbar-thumb {
+                    background: #dee2e6;
+                    border-radius: 4px;
+                }
+                .table-responsive::-webkit-scrollbar-thumb:hover {
+                    background: #adb5bd;
+                }
+                .table-fixed {
+                    table-layout: fixed !important;
+                    width: 100% !important;
+                }
+                .table-fixed th,
+                .table-fixed td {
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+                .table-fixed th:first-child,
+                .table-fixed td:first-child {
+                    white-space: normal;
+                    word-wrap: break-word;
+                }
+                
+                /* Smooth transitions for table rows */
+                .table tbody tr {
+                    transition: all 0.3s ease-in-out;
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+                
+                .table tbody tr.fade-out {
+                    opacity: 0;
+                    transform: translateY(-10px);
+                }
+                
+                .table tbody tr.fade-in {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+                
+                
+                /* Smooth button transitions */
+                .page-link {
+                    transition: all 0.2s ease-in-out !important;
+                }
+                
+                .page-link:hover {
+                    transform: translateY(-1px);
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                }
+                
+                .page-item.active .page-link {
+                    transform: scale(1.05);
+                }
+                
+                /* Loading spinner animation */
+                .pagination-spinner {
+                    animation: spin 1s linear infinite;
+                }
+                
+                @keyframes spin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+            `}</style>
+            
             <div className="card-header bg-white border-0 d-flex align-items-center justify-content-between">
                 <h5 className="fw-bold text-dark mb-0">
                     <i className="fas fa-book-open text-primary me-2"></i>
@@ -235,28 +346,52 @@ const BookManagement = () => {
             </div>
 
             <div className="card-body p-0">
-                {/* Search Bar */}
+                {/* Search Bar and Total Count */}
                 <div className="p-3 border-bottom">
+                    <div className="d-flex justify-content-between align-items-center mb-3">
+                        <div className="d-flex align-items-center gap-3">
+                            <span className="text-muted">
+                                <i className="fas fa-book me-1"></i>
+                                Tổng số sách: <strong className="text-primary">{pagination.totalItems || 0}</strong>
+                            </span>
+                            <span className="text-muted">
+                                Trang {pagination.currentPage || 1} / {pagination.totalPages || 1}
+                            </span>
+                        </div>
+                        <div className="d-flex align-items-center gap-2">
+                            <label className="text-muted small">Hiển thị:</label>
+                            <select 
+                                className="form-select form-select-sm" 
+                                style={{width: 'auto'}}
+                                value={itemsPerPage}
+                                onChange={(e) => handleItemsPerPageChange(parseInt(e.target.value))}
+                            >
+                                <option value={5}>5</option>
+                                <option value={10}>10</option>
+                                <option value={20}>20</option>
+                                <option value={50}>50</option>
+                            </select>
+                        </div>
+                    </div>
                     <div className="d-flex gap-2">
                         <input
                             type="text"
                             className="form-control"
                             placeholder="Tìm kiếm sách theo tên, tác giả, danh mục..."
                             value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
+                            onChange={(e) => handleSearch(e.target.value)}
                         />
                         {searchTerm && (
-                            <button type="button" className="btn btn-outline-secondary" onClick={() => setSearchTerm('')}>
+                            <button type="button" className="btn btn-outline-secondary" onClick={() => handleSearch('')}>
                                 <i className="fas fa-times"></i>
                             </button>
                         )}
                     </div>
                 </div>
 
-                <div className="table-responsive">
+                    <div className="table-responsive position-relative">
                     <table
-                        className="table table-hover mb-0 align-middle text-center"
-                        style={{ tableLayout: "fixed", width: "100%" }}
+                        className="table table-hover mb-0 align-middle text-center table-fixed"
                     >
                         <thead className="bg-light">
                             <tr>
@@ -287,8 +422,8 @@ const BookManagement = () => {
                                         {error}
                                     </td>
                                 </tr>
-                            ) : filteredBooks.length > 0 ? (
-                                filteredBooks.map((book) => (
+                            ) : books.length > 0 ? (
+                                books.map((book) => (
                                     <tr key={book.book_id} className="border-bottom">
                                         <td className="fw-semibold text-dark">{book.book_id}</td>
                                         <td className="text-start ps-3">
@@ -343,6 +478,87 @@ const BookManagement = () => {
                         </tbody>
                     </table>
                 </div>
+
+                {/* Pagination */}
+                {pagination.totalPages > 1 && (
+                    <div className="d-flex justify-content-between align-items-center p-3 border-top">
+                        <div className="text-muted small">
+                            Hiển thị {((pagination.currentPage - 1) * pagination.itemsPerPage) + 1} - {Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)} 
+                            trong tổng số {pagination.totalItems} sách
+                        </div>
+                        <nav>
+                            <ul className="pagination pagination-sm mb-0">
+                                <li className={`page-item ${!pagination.hasPrevPage || false ? 'disabled' : ''}`}>
+                                    <button 
+                                        className="page-link" 
+                                        onClick={() => handlePageChange(1)}
+                                        disabled={!pagination.hasPrevPage || false}
+                                        title="Trang đầu"
+                                    >
+                                        <i className="fas fa-angle-double-left"></i>
+                                    </button>
+                                </li>
+                                <li className={`page-item ${!pagination.hasPrevPage || false ? 'disabled' : ''}`}>
+                                    <button 
+                                        className="page-link" 
+                                        onClick={() => handlePageChange(pagination.currentPage - 1)}
+                                        disabled={!pagination.hasPrevPage || false}
+                                        title="Trang trước"
+                                    >
+                                        <i className="fas fa-chevron-left"></i>
+                                    </button>
+                                </li>
+                                
+                                {/* Show page numbers */}
+                                {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                                    let pageNum;
+                                    if (pagination.totalPages <= 5) {
+                                        pageNum = i + 1;
+                                    } else if (pagination.currentPage <= 3) {
+                                        pageNum = i + 1;
+                                    } else if (pagination.currentPage >= pagination.totalPages - 2) {
+                                        pageNum = pagination.totalPages - 4 + i;
+                                    } else {
+                                        pageNum = pagination.currentPage - 2 + i;
+                                    }
+                                    
+                                    return (
+                                        <li key={pageNum} className={`page-item ${pagination.currentPage === pageNum ? 'active' : ''} ${false ? 'disabled' : ''}`}>
+                                            <button 
+                                                className="page-link" 
+                                                onClick={() => handlePageChange(pageNum)}
+                                                disabled={false}
+                                            >
+                                                {pageNum}
+                                            </button>
+                                        </li>
+                                    );
+                                })}
+                                
+                                <li className={`page-item ${!pagination.hasNextPage || false ? 'disabled' : ''}`}>
+                                    <button 
+                                        className="page-link" 
+                                        onClick={() => handlePageChange(pagination.currentPage + 1)}
+                                        disabled={!pagination.hasNextPage || false}
+                                        title="Trang sau"
+                                    >
+                                        <i className="fas fa-chevron-right"></i>
+                                    </button>
+                                </li>
+                                <li className={`page-item ${!pagination.hasNextPage || false ? 'disabled' : ''}`}>
+                                    <button 
+                                        className="page-link" 
+                                        onClick={() => handlePageChange(pagination.totalPages)}
+                                        disabled={!pagination.hasNextPage || false}
+                                        title="Trang cuối"
+                                    >
+                                        <i className="fas fa-angle-double-right"></i>
+                                    </button>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                )}
             </div>
 
             {/* Modal thêm/sửa sách */}

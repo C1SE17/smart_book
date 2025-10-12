@@ -26,6 +26,9 @@ class UserApiService extends BaseApiService {
       
       if (params.page) queryParams.append('page', params.page);
       if (params.limit) queryParams.append('limit', params.limit);
+      if (params.search) queryParams.append('search', params.search);
+      if (params.sortBy) queryParams.append('sortBy', params.sortBy);
+      if (params.sortOrder) queryParams.append('sortOrder', params.sortOrder);
 
       const queryString = queryParams.toString();
       // Sử dụng endpoint chính thức với auth
@@ -34,16 +37,13 @@ class UserApiService extends BaseApiService {
       console.log(`👥 [UserAPI] Endpoint cuối cùng: ${endpoint}`);
       const response = await this.apiCall(endpoint);
       
-      // Backend trả về format {users: [...], total: ..., page: ..., limit: ..., totalPages: ...}
-      // Cần convert thành format {success: true, data: [...]}
+      // Backend trả về format mới với pagination object
       if (response.success && response.data) {
         const result = {
           success: true,
-          data: response.data.users || response.data,
-          total: response.data.total,
-          page: response.data.page,
-          limit: response.data.limit,
-          totalPages: response.data.totalPages,
+          data: response.data,
+          pagination: response.pagination,
+          total: response.total,
           message: 'Success'
         };
         console.log(`👥 [UserAPI] Kết quả lấy danh sách người dùng với phân trang:`, result);

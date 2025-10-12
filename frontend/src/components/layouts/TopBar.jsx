@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { NotificationDropdown } from '../common';
 
-const TopBar = ({ onViewAllNotifications }) => {
+const TopBar = ({ onViewAllNotifications, user }) => {
   const [cartItemCount, setCartItemCount] = useState(0);
 
   // Cập nhật số lượng mục trong giỏ hàng

@@ -1,12 +1,23 @@
 const WarehouseModel = require('../models/WarehouseModel');
 
 class WarehouseController {
-    // Lấy danh sách kho
-    static getAll(req, res) {
-        WarehouseModel.getAll((err, rows) => {
-            if (err) return res.status(500).json({ error: err.message });
-            res.json(rows);
-        });
+    // Lấy danh sách kho với phân trang
+    static async getAll(req, res) {
+        try {
+            const { page, limit, search } = req.query;
+            const result = await WarehouseModel.getAll({
+                page: page ? parseInt(page) : 1,
+                limit: limit ? parseInt(limit) : 10,
+                search
+            });
+            res.json({ 
+                success: true, 
+                data: result.warehouseItems,
+                pagination: result.pagination
+            });
+        } catch (err) {
+            res.status(500).json({ success: false, error: err.message });
+        }
     }
 
     // Lấy số lượng kho theo book_id

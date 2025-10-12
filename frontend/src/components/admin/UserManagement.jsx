@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faTrash, faSearch, faEdit, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
-import apiService from '../../services';
+import { faUser, faTrash, faSearch, faEdit, faEye, faEyeSlash, faSort, faSortUp, faSortDown } from '@fortawesome/free-solid-svg-icons';
+import { useUserManagement } from '../../hooks/useUserManagement';
 
 const UserManagement = () => {
-    const [users, setUsers] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const { users, loading, error, pagination, deleteUser, refreshData, loadUsersOnly } = useUserManagement();
+    
     const [searchTerm, setSearchTerm] = useState('');
     const [filterRole, setFilterRole] = useState('all');
     const [showModal, setShowModal] = useState(false);
@@ -20,114 +20,64 @@ const UserManagement = () => {
     });
     const [formErrors, setFormErrors] = useState({});
     
-    // Pagination state
+    // Pagination and sort state
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(50);
-    const [isPageChanging, setIsPageChanging] = useState(false);
-    const [totalUsers, setTotalUsers] = useState(0);
-    const [totalPages, setTotalPages] = useState(0);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+    const [sortBy, setSortBy] = useState('created_at');
+    const [sortOrder, setSortOrder] = useState('DESC');
+    const searchTimeoutRef = useRef(null);
 
-    // Fetch users from Backend API with pagination
-    const fetchUsers = async (page = currentPage, limit = itemsPerPage) => {
-        setLoading(true);
-        try {
-            console.log(`🔄 Fetching users from backend API - Page: ${page}, Limit: ${limit}...`);
-            console.log('🔧 API Service:', apiService);
-            console.log('🔧 API Service methods:', Object.keys(apiService));
-            
-            // Check token
-            const token = localStorage.getItem('token');
-            console.log('🔑 Token:', token ? token.substring(0, 20) + '...' : 'No token');
-            
-            // Sử dụng apiService để lấy danh sách users với phân trang
-            const response = await apiService.getAllUsers({ page, limit });
-            console.log('📡 Fetched users data from backend:', response);
-            
-            // Check if response is successful
-            if (!response.success) {
-                throw new Error(response.message || 'API call failed');
-            }
-            
-            // Extract users array from response object
-            const usersData = response.data || response.users || response;
-            console.log('Users array:', usersData);
-            
-            // Check if usersData is an array
-            if (!Array.isArray(usersData)) {
-                throw new Error('Invalid response format: expected array');
-            }
-            
-            // Add default values for missing fields (hiển thị tất cả users bao gồm admin)
-            const processedUsers = usersData.map(user => ({
-                ...user,
-                last_login: user.updated_at || user.created_at
-            }));
-
-            console.log('Processed users:', processedUsers);
-            setUsers(processedUsers);
-            
-            // Update pagination info from backend response
-            if (response.total !== undefined) {
-                setTotalUsers(response.total);
-                setTotalPages(response.totalPages || Math.ceil(response.total / limit));
-            }
-        } catch (error) {
-            console.error('Error fetching users:', error);
-            
-            // Hiển thị thông báo lỗi chi tiết
-            let errorMessage = 'Không thể tải danh sách người dùng';
-            if (error.message.includes('fetch')) {
-                errorMessage = 'Không thể kết nối đến server. Vui lòng kiểm tra backend có đang chạy không.';
-            } else if (error.message.includes('401')) {
-                errorMessage = 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.';
-            } else if (error.message.includes('403')) {
-                errorMessage = 'Bạn không có quyền truy cập trang này.';
-            } else if (error.message.includes('404')) {
-                errorMessage = 'API endpoint không tồn tại.';
-            } else if (error.message.includes('500')) {
-                errorMessage = 'Lỗi server. Vui lòng thử lại sau.';
-            }
-            
-            // Hiển thị thông báo lỗi
-            if (window.showToast) {
-                window.showToast(errorMessage, 'error');
-            } else {
-                alert(errorMessage);
-            }
-            
-            // Fallback to empty array on error
-            setUsers([]);
-        } finally {
-            setLoading(false);
+    // Debounced search
+    const handleSearch = useCallback(async (searchValue) => {
+        setSearchTerm(searchValue);
+        setCurrentPage(1);
+        
+        // Clear existing timeout
+        if (searchTimeoutRef.current) {
+            clearTimeout(searchTimeoutRef.current);
         }
-    };
+        
+        // Set new timeout for debounced search
+        searchTimeoutRef.current = setTimeout(async () => {
+            try {
+                await loadUsersOnly(1, itemsPerPage, searchValue, sortBy, sortOrder, false);
+            } catch (error) {
+                console.error('Error in debounced search:', error);
+            }
+        }, 300);
+    }, [itemsPerPage, sortBy, sortOrder, loadUsersOnly]);
 
-    // Initial fetch
+    // Cleanup debounce timeout
     useEffect(() => {
-        fetchUsers();
+        return () => {
+            if (searchTimeoutRef.current) {
+                clearTimeout(searchTimeoutRef.current);
+            }
+        };
     }, []);
 
-    // Filter users based on search term, role, and status
-    const filteredUsers = users.filter(user => {
-        const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            user.phone?.toLowerCase().includes(searchTerm.toLowerCase());
+    // Handle sort
+    const handleSort = useCallback(async (field) => {
+        let newSortOrder = 'ASC';
+        if (sortBy === field && sortOrder === 'ASC') {
+            newSortOrder = 'DESC';
+        }
         
-        const matchesRole = filterRole === 'all' || user.role === filterRole;
-        
-        return matchesSearch && matchesRole;
-    });
-
-    const currentUsers = filteredUsers;
-
-    // Reset to first page when filters change
-    useEffect(() => {
+        setSortBy(field);
+        setSortOrder(newSortOrder);
         setCurrentPage(1);
-    }, [searchTerm, filterRole, itemsPerPage]);
+        
+        try {
+            await loadUsersOnly(1, itemsPerPage, searchTerm, field, newSortOrder, false);
+        } catch (error) {
+            console.error('Error in sort:', error);
+        }
+    }, [sortBy, sortOrder, itemsPerPage, searchTerm, loadUsersOnly]);
 
-    // Handle search
-    const handleSearch = (e) => {
-        setSearchTerm(e.target.value);
+    // Get sort icon
+    const getSortIcon = (field) => {
+        if (sortBy !== field) return faSort;
+        return sortOrder === 'ASC' ? faSortUp : faSortDown;
     };
 
     // Handle filter changes
@@ -137,62 +87,26 @@ const UserManagement = () => {
         }
     };
 
-    // Pagination handlers
-    const handlePageChange = (page) => {
+    // Handle page change
+    const handlePageChange = async (page) => {
         if (page === currentPage) return;
         
-        setIsPageChanging(true);
         setCurrentPage(page);
-        
-        // Fetch new page data
-        fetchUsers(page, itemsPerPage).finally(() => {
-            setIsPageChanging(false);
-        });
+        await loadUsersOnly(page, itemsPerPage, searchTerm, sortBy, sortOrder, false);
     };
 
-    const handleItemsPerPageChange = (e) => {
-        const newItemsPerPage = parseInt(e.target.value);
+    // Handle items per page change
+    const handleItemsPerPageChange = async (newItemsPerPage) => {
         setItemsPerPage(newItemsPerPage);
-        setCurrentPage(1); // Reset to first page
+        setCurrentPage(1);
         
-        // Fetch data with new items per page
-        fetchUsers(1, newItemsPerPage);
+        try {
+            await loadUsersOnly(1, newItemsPerPage, searchTerm, sortBy, sortOrder);
+        } catch (error) {
+            console.error('Error changing items per page:', error);
+        }
     };
 
-    // Generate page numbers for pagination
-    const getPageNumbers = () => {
-        const pages = [];
-        const maxVisiblePages = 5;
-        
-        if (totalPages <= maxVisiblePages) {
-            for (let i = 1; i <= totalPages; i++) {
-                pages.push(i);
-            }
-        } else {
-            const startPage = Math.max(1, currentPage - 2);
-            const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-            
-            if (startPage > 1) {
-                pages.push(1);
-                if (startPage > 2) {
-                    pages.push('...');
-                }
-            }
-            
-            for (let i = startPage; i <= endPage; i++) {
-                pages.push(i);
-            }
-            
-            if (endPage < totalPages) {
-                if (endPage < totalPages - 1) {
-                    pages.push('...');
-                }
-                pages.push(totalPages);
-            }
-        }
-        
-        return pages;
-    };
 
     // Handle modal actions
     const handleModalAction = (user, action) => {
@@ -217,11 +131,10 @@ const UserManagement = () => {
                 try {
                     console.log('Deleting user:', selectedUser.user_id);
                     
-                    // Sử dụng apiService để xóa user
-                    await apiService.deleteUser(selectedUser.user_id);
+                    await deleteUser(selectedUser.user_id);
 
                     // Refresh the current page to get updated data
-                    fetchUsers(currentPage, itemsPerPage);
+                    await loadUsersOnly(currentPage, itemsPerPage, searchTerm, sortBy, sortOrder);
                     setShowModal(false);
                     
                     if (window.showToast) {
@@ -286,6 +199,93 @@ const UserManagement = () => {
 
     return (
         <div className="container-fluid">
+            {/* CSS để fix cột không bị lệch và smooth transitions */}
+            <style jsx>{`
+                .table-responsive {
+                    scrollbar-width: thin;
+                    scrollbar-color: #dee2e6 #f8f9fa;
+                }
+                .table-responsive::-webkit-scrollbar {
+                    height: 8px;
+                }
+                .table-responsive::-webkit-scrollbar-track {
+                    background: #f8f9fa;
+                }
+                .table-responsive::-webkit-scrollbar-thumb {
+                    background: #dee2e6;
+                    border-radius: 4px;
+                }
+                .table-responsive::-webkit-scrollbar-thumb:hover {
+                    background: #adb5bd;
+                }
+                .table-fixed {
+                    table-layout: fixed !important;
+                    width: 100% !important;
+                }
+                .table-fixed th,
+                .table-fixed td {
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+                .table-fixed th:first-child,
+                .table-fixed td:first-child {
+                    white-space: normal;
+                    word-wrap: break-word;
+                }
+                
+                /* Smooth transitions for table rows */
+                .table tbody tr {
+                    transition: all 0.3s ease-in-out;
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+                
+                .table tbody tr.fade-out {
+                    opacity: 0;
+                    transform: translateY(-10px);
+                }
+                
+                .table tbody tr.fade-in {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+                
+                
+                /* Smooth button transitions */
+                .page-link {
+                    transition: all 0.2s ease-in-out !important;
+                }
+                
+                .page-link:hover {
+                    transform: translateY(-1px);
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                }
+                
+                .page-item.active .page-link {
+                    transform: scale(1.05);
+                }
+                
+                /* Loading spinner animation */
+                .pagination-spinner {
+                    animation: spin 1s linear infinite;
+                }
+                
+                @keyframes spin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+                
+                /* Table content fade animation */
+                .table-content {
+                    transition: opacity 0.3s ease-in-out;
+                }
+                
+                .table-content.loading {
+                    opacity: 0.6;
+                }
+            `}</style>
+            
             {/* Header */}
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <div>
@@ -297,12 +297,12 @@ const UserManagement = () => {
                 </div>
                 <div className="d-flex align-items-center">
                     <span className="badge bg-primary">
-                        Tổng: {totalUsers} người dùng
+                        Tổng: {pagination.totalItems || 0} người dùng
                     </span>
                 </div>
             </div>
 
-            {/* Filters */}
+            {/* Search and Sort Controls */}
             <div className="card mb-4">
                 <div className="card-body">
                     <div className="row g-3">
@@ -317,19 +317,57 @@ const UserManagement = () => {
                                     className="form-control"
                                     placeholder="Tìm theo tên, email, số điện thoại..."
                                     value={searchTerm}
-                                    onChange={handleSearch}
+                                    onChange={(e) => handleSearch(e.target.value)}
                                 />
+                                {searchTerm && (
+                                    <button 
+                                        type="button" 
+                                        className="btn btn-outline-secondary" 
+                                        onClick={() => handleSearch('')}
+                                    >
+                                        <FontAwesomeIcon icon={faTrash} />
+                                    </button>
+                                )}
                             </div>
                         </div>
                         <div className="col-md-2">
-                            <label className="form-label">Vai trò</label>
+                            <label className="form-label">Sắp xếp theo</label>
                             <select
                                 className="form-select"
-                                value={filterRole}
-                                onChange={(e) => handleFilterChange('role', e.target.value)}
+                                value={sortBy}
+                                onChange={(e) => handleSort(e.target.value)}
                             >
-                                <option value="all">Tất cả vai trò</option>
-                                <option value="customer">Khách hàng</option>
+                                <option value="created_at">Ngày tạo</option>
+                                <option value="name">Tên</option>
+                                <option value="email">Email</option>
+                                <option value="user_id">ID</option>
+                            </select>
+                        </div>
+                        <div className="col-md-2">
+                            <label className="form-label">Thứ tự</label>
+                            <select
+                                className="form-select"
+                                value={sortOrder}
+                                onChange={(e) => {
+                                    setSortOrder(e.target.value);
+                                    handleSort(sortBy);
+                                }}
+                            >
+                                <option value="DESC">Mới nhất</option>
+                                <option value="ASC">Cũ nhất</option>
+                            </select>
+                        </div>
+                        <div className="col-md-2">
+                            <label className="form-label">Hiển thị</label>
+                            <select
+                                className="form-select"
+                                value={itemsPerPage}
+                                onChange={(e) => handleItemsPerPageChange(parseInt(e.target.value))}
+                            >
+                                <option value={5}>5</option>
+                                <option value={10}>10</option>
+                                <option value={20}>20</option>
+                                <option value={50}>50</option>
                             </select>
                         </div>
                         <div className="col-md-2">
@@ -340,6 +378,9 @@ const UserManagement = () => {
                                     onClick={() => {
                                         setSearchTerm('');
                                         setFilterRole('all');
+                                        setSortBy('created_at');
+                                        setSortOrder('DESC');
+                                        handleSearch('');
                                     }}
                                 >
                                     Xóa bộ lọc
@@ -353,38 +394,41 @@ const UserManagement = () => {
             {/* Users Table */}
             <div className="card">
                 <div className="card-body position-relative">
-                    {/* Loading overlay for page changes */}
-                    {isPageChanging && (
-                        <div className="position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center" 
-                             style={{ 
-                                 backgroundColor: 'rgba(255, 255, 255, 0.8)', 
-                                 zIndex: 10,
-                                 borderRadius: '0.375rem'
-                             }}>
-                            <div className="spinner-border text-primary" role="status">
-                                <span className="visually-hidden">Đang chuyển trang...</span>
-                            </div>
-                        </div>
-                    )}
                     
                     <div className="table-responsive" style={{ minHeight: '400px' }}>
                         <table 
-                            className="table table-hover" 
+                            className="table table-hover table-fixed" 
                             style={{ 
-                                transition: 'opacity 0.2s ease-in-out',
-                                opacity: isPageChanging ? 0.7 : 1
+                                tableLayout: "fixed",
+                                width: "100%"
                             }}
                         >
                             <thead className="table-light">
                                 <tr>
-                                    <th>Thông tin</th>
-                                    <th>Liên hệ</th>
-                                    <th>Thao tác</th>
+                                    <th style={{ width: "40%" }} className="py-3 fw-semibold text-secondary">
+                                        <button 
+                                            className="btn btn-link p-0 text-decoration-none text-secondary fw-semibold"
+                                            onClick={() => handleSort('name')}
+                                        >
+                                            Thông tin
+                                            <FontAwesomeIcon icon={getSortIcon('name')} className="ms-1" />
+                                        </button>
+                                    </th>
+                                    <th style={{ width: "40%" }} className="py-3 fw-semibold text-secondary">
+                                        <button 
+                                            className="btn btn-link p-0 text-decoration-none text-secondary fw-semibold"
+                                            onClick={() => handleSort('email')}
+                                        >
+                                            Liên hệ
+                                            <FontAwesomeIcon icon={getSortIcon('email')} className="ms-1" />
+                                        </button>
+                                    </th>
+                                    <th style={{ width: "20%" }} className="py-3 fw-semibold text-secondary text-center">Thao tác</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                {currentUsers.map((user) => (
-                                    <tr key={user.user_id}>
+                            <tbody className="table-content">
+                                {users.map((user, index) => (
+                                    <tr key={user.user_id} className="fade-in" style={{ animationDelay: `${index * 50}ms` }}>
                                         <td>
                                             <div>
                                                 <div className="fw-bold">
@@ -426,7 +470,7 @@ const UserManagement = () => {
                         </table>
                     </div>
 
-                    {currentUsers.length === 0 && (
+                    {users.length === 0 && !loading && (
                         <div className="text-center py-4">
                             <FontAwesomeIcon icon={faUser} size="3x" className="text-muted mb-3" />
                             <p className="text-muted">Không tìm thấy người dùng nào</p>
@@ -434,72 +478,88 @@ const UserManagement = () => {
                     )}
 
                     {/* Pagination Controls */}
-                    {currentUsers.length > 0 && (
+                    {pagination.totalPages > 1 && (
                         <div className="d-flex justify-content-between align-items-center mt-4">
                             <div className="d-flex align-items-center">
                                 <span className="text-muted me-3">
-                                    Hiển thị {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, totalUsers)} trong {totalUsers} kết quả
+                                    Hiển thị {((pagination.currentPage - 1) * pagination.itemsPerPage) + 1} - {Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)} trong {pagination.totalItems} kết quả
                                 </span>
-                                <div className="d-flex align-items-center">
-                                    <label className="form-label me-2 mb-0">Hiển thị:</label>
-                                    <select 
-                                        className="form-select form-select-sm" 
-                                        style={{width: 'auto'}}
-                                        value={itemsPerPage} 
-                                        onChange={handleItemsPerPageChange}
-                                    >
-                                        <option value={5}>5</option>
-                                        <option value={10}>10</option>
-                                        <option value={20}>20</option>
-                                        <option value={50}>50</option>
-                                    </select>
-                                </div>
                             </div>
                             
-                            {totalPages > 1 && (
-                                <nav>
-                                    <ul className="pagination pagination-sm mb-0">
-                                        <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                                            <button 
-                                                className="page-link" 
-                                                onClick={() => handlePageChange(currentPage - 1)}
-                                                disabled={currentPage === 1 || isPageChanging}
-                                                style={{ transition: 'all 0.2s ease' }}
-                                            >
-                                                Trước
-                                            </button>
-                                        </li>
+                            <nav>
+                                <ul className="pagination pagination-sm mb-0">
+                                    <li className={`page-item ${!pagination.hasPrevPage || false ? 'disabled' : ''}`}>
+                                        <button 
+                                            className="page-link" 
+                                            onClick={() => handlePageChange(1)}
+                                            disabled={!pagination.hasPrevPage || false}
+                                            title="Trang đầu"
+                                            style={{ transition: 'all 0.2s ease' }}
+                                        >
+                                            <i className="fas fa-angle-double-left"></i>
+                                        </button>
+                                    </li>
+                                    <li className={`page-item ${!pagination.hasPrevPage || false ? 'disabled' : ''}`}>
+                                        <button 
+                                            className="page-link" 
+                                            onClick={() => handlePageChange(pagination.currentPage - 1)}
+                                            disabled={!pagination.hasPrevPage || false}
+                                            title="Trang trước"
+                                            style={{ transition: 'all 0.2s ease' }}
+                                        >
+                                            <i className="fas fa-chevron-left"></i>
+                                        </button>
+                                    </li>
+                                    
+                                    {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                                        let pageNum;
+                                        if (pagination.totalPages <= 5) {
+                                            pageNum = i + 1;
+                                        } else {
+                                            const startPage = Math.max(1, pagination.currentPage - 2);
+                                            const endPage = Math.min(pagination.totalPages, startPage + 4);
+                                            pageNum = startPage + i;
+                                            if (pageNum > endPage) return null;
+                                        }
                                         
-                                        {getPageNumbers().map((page, index) => (
-                                            <li key={index} className={`page-item ${page === currentPage ? 'active' : ''} ${page === '...' ? 'disabled' : ''}`}>
-                                                {page === '...' ? (
-                                                    <span className="page-link">...</span>
-                                                ) : (
-                                                    <button 
-                                                        className="page-link" 
-                                                        onClick={() => handlePageChange(page)}
-                                                        disabled={isPageChanging}
-                                                        style={{ transition: 'all 0.2s ease' }}
-                                                    >
-                                                        {page}
-                                                    </button>
-                                                )}
+                                        return (
+                                            <li key={pageNum} className={`page-item ${pagination.currentPage === pageNum ? 'active' : ''} ${false ? 'disabled' : ''}`}>
+                                                <button 
+                                                    className="page-link" 
+                                                    onClick={() => handlePageChange(pageNum)}
+                                                    disabled={false}
+                                                    style={{ transition: 'all 0.2s ease' }}
+                                                >
+                                                    {pageNum}
+                                                </button>
                                             </li>
-                                        ))}
-                                        
-                                        <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                                            <button 
-                                                className="page-link" 
-                                                onClick={() => handlePageChange(currentPage + 1)}
-                                                disabled={currentPage === totalPages || isPageChanging}
-                                                style={{ transition: 'all 0.2s ease' }}
-                                            >
-                                                Sau
-                                            </button>
-                                        </li>
-                                    </ul>
-                                </nav>
-                            )}
+                                        );
+                                    })}
+                                    
+                                    <li className={`page-item ${!pagination.hasNextPage || false ? 'disabled' : ''}`}>
+                                        <button 
+                                            className="page-link" 
+                                            onClick={() => handlePageChange(pagination.currentPage + 1)}
+                                            disabled={!pagination.hasNextPage || false}
+                                            title="Trang sau"
+                                            style={{ transition: 'all 0.2s ease' }}
+                                        >
+                                            <i className="fas fa-chevron-right"></i>
+                                        </button>
+                                    </li>
+                                    <li className={`page-item ${!pagination.hasNextPage || false ? 'disabled' : ''}`}>
+                                        <button 
+                                            className="page-link" 
+                                            onClick={() => handlePageChange(pagination.totalPages)}
+                                            disabled={!pagination.hasNextPage || false}
+                                            title="Trang cuối"
+                                            style={{ transition: 'all 0.2s ease' }}
+                                        >
+                                            <i className="fas fa-angle-double-right"></i>
+                                        </button>
+                                    </li>
+                                </ul>
+                            </nav>
                         </div>
                     )}
                 </div>

@@ -23,18 +23,29 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch 
     setHasSearched(true);
 
     try {
-      // Import mock API
-      // TODO: Implement real search API
-      // const { bookApi } = await import('../../../services/bookApi');
-      // const response = await bookApi.getBooks({ 
-      //   search: query.trim(),
-      //   limit: 20 
-      // });
+      // Import real search API
+      const bookApi = (await import('../../../services/bookApi')).default;
+      const response = await bookApi.getBooks({ 
+        search: query.trim(),
+        limit: 20 
+      });
 
-      // Mock data for now
-      const response = { success: true, data: [] };
+      console.log('🔍 Search results:', response);
 
-      setSearchResults(response.data);
+      if (response.success && response.data) {
+        // Lọc kết quả để chỉ hiển thị sách có chứa từ khóa tìm kiếm
+        const filteredResults = response.data.filter(book => {
+          const searchTerm = query.trim().toLowerCase();
+          const titleMatch = book.title.toLowerCase().includes(searchTerm);
+          const authorMatch = book.author_name && book.author_name.toLowerCase().includes(searchTerm);
+          return titleMatch || authorMatch;
+        });
+        
+        console.log(`🔍 Filtered ${filteredResults.length} results from ${response.data.length} total`);
+        setSearchResults(filteredResults);
+      } else {
+        setSearchResults([]);
+      }
     } catch (error) {
       console.error('Error searching books:', error);
       setSearchResults([]);
@@ -52,12 +63,16 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch 
     }
 
     try {
-      // TODO: Implement real search suggestions API
-      // const { searchApi } = await import('../../../services/searchApi');
-      // const suggestions = await searchApi.getSearchSuggestions(query);
-      const suggestions = [];
-      setSuggestions(suggestions);
-      setShowSuggestions(true);
+      // Import real search suggestions API
+      const { searchApi } = await import('../../../services/searchApi');
+      const response = await searchApi.getSearchSuggestions(query);
+      
+      if (response.success && response.data) {
+        setSuggestions(response.data);
+        setShowSuggestions(true);
+      } else {
+        setSuggestions([]);
+      }
     } catch (error) {
       console.error('Error getting suggestions:', error);
       setSuggestions([]);
@@ -181,13 +196,20 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch 
   useEffect(() => {
     const loadPopularKeywords = async () => {
       try {
-        // TODO: Implement real popular keywords API
-        // const { searchApi } = await import('../../../services/searchApi');
-        // const keywords = await searchApi.getPopularKeywords();
-        const keywords = [];
-        setPopularKeywords(keywords);
+        // Import real popular keywords API
+        const { searchApi } = await import('../../../services/searchApi');
+        const response = await searchApi.getPopularKeywords();
+        
+        if (response.success && response.data) {
+          setPopularKeywords(response.data);
+        } else {
+          // Fallback to some default keywords if API fails
+          setPopularKeywords(['tiểu thuyết', 'khoa học', 'lịch sử', 'văn học', 'kinh tế']);
+        }
       } catch (error) {
         console.error('Error loading popular keywords:', error);
+        // Fallback to some default keywords if API fails
+        setPopularKeywords(['tiểu thuyết', 'khoa học', 'lịch sử', 'văn học', 'kinh tế']);
       }
     };
 
@@ -222,13 +244,7 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch 
         <div className="col-12">
           {/* Search Header */}
           <div className="d-flex align-items-center mb-4">
-            <button
-              className="btn btn-outline-secondary me-3"
-              onClick={onBackToHome}
-            >
-              <FontAwesomeIcon icon={faTimes} className="me-2" />
-              Quay lại
-            </button>
+            
             <h2 className="mb-0">Tìm kiếm sách</h2>
           </div>
 

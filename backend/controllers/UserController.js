@@ -210,19 +210,25 @@ class UserController {
   static getAllUsers(req, res) {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    User.getAllPaged(page, limit, (err, result) => {
+    const search = req.query.search || '';
+    const sortBy = req.query.sortBy || 'created_at';
+    const sortOrder = req.query.sortOrder || 'DESC';
+    
+    console.log(`👥 [UserController] getAllUsers - Page: ${page}, Limit: ${limit}, Search: "${search}", Sort: ${sortBy} ${sortOrder}`);
+    
+    User.getAllPaged(page, limit, search, sortBy, sortOrder, (err, result) => {
       if (err) {
+        console.error('💥 [UserController] Lỗi getAllPaged:', err);
         return res.status(500).json({ error: "Lỗi truy vấn cơ sở dữ liệu" });
       }
+      
+      console.log(`👥 [UserController] getAllUsers - Found ${result.users.length} users, Total: ${result.total}`);
+      
       res.json({
         success: true,
-        data: {
-          users: result.users,
-          total: result.total,
-          page,
-          limit,
-          totalPages: Math.ceil(result.total / limit),
-        }
+        data: result.users,
+        pagination: result.pagination,
+        total: result.total
       });
     });
   }

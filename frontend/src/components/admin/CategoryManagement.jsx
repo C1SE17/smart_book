@@ -14,6 +14,11 @@ const CategoryManagement = () => {
         description: '',
         parent_category_id: null
     });
+    
+    // Pagination states
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+    const [paginationLoading, setPaginationLoading] = useState(false);
 
     // Fetch categories from real API
     const fetchCategories = useCallback(async () => {

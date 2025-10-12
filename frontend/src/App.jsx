@@ -229,6 +229,11 @@ function App() {
       setProductId(params.productId);
       navigateTo(path, { id: params.productId });
     }
+    // Handle search page with searchQuery
+    else if (page === 'search' && params.searchQuery) {
+      setSearchQuery(params.searchQuery);
+      navigateTo(path, { searchQuery: params.searchQuery });
+    }
     // Handle author detail page with authorId
     else if (page === 'author-detail' && params.id) {
       setAuthorId(params.id);

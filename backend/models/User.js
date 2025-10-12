@@ -91,15 +91,71 @@ class User {
             callback(err, results);
         });
     }
-    static getAllPaged(page = 1, limit = 10, callback) {
-    const offset = (page - 1) * limit;
-    const query = 'SELECT * FROM users LIMIT ? OFFSET ?';
-    db.query(query, [limit, offset], (err, results) => {
-        if (err) return callback(err);
-        // Đếm tổng số user để trả về cho client
-        db.query('SELECT COUNT(*) AS total FROM users', (countErr, countRes) => {
-            if (countErr) return callback(countErr);
-            callback(null, { users: results, total: countRes[0].total });
+    static getAllPaged(page = 1, limit = 10, search = '', sortBy = 'created_at', sortOrder = 'DESC', callback) {
+        const offset = (page - 1) * limit;
+        
+        // Build search conditions
+        let searchConditions = [];
+        let searchParams = [];
+        
+        if (search) {
+            searchConditions.push(`(
+                name LIKE ? OR 
+                email LIKE ? OR 
+                phone LIKE ? OR 
+                address LIKE ?
+            )`);
+            const searchPattern = `%${search}%`;
+            searchParams.push(searchPattern, searchPattern, searchPattern, searchPattern);
+        }
+        
+        const whereClause = searchConditions.length > 0 ? `WHERE ${searchConditions.join(' AND ')}` : '';
+        
+        // Build sort clause
+        const allowedSortFields = ['user_id', 'name', 'email', 'created_at', 'updated_at'];
+        const allowedSortOrders = ['ASC', 'DESC'];
+        
+        const validSortBy = allowedSortFields.includes(sortBy) ? sortBy : 'created_at';
+        const validSortOrder = allowedSortOrders.includes(sortOrder.toUpperCase()) ? sortOrder.toUpperCase() : 'DESC';
+        
+        const orderClause = `ORDER BY ${validSortBy} ${validSortOrder}`;
+        
+        // Query for data
+        const dataQuery = `
+            SELECT user_id, name, email, phone, address, role, created_at, updated_at 
+            FROM users 
+            ${whereClause} 
+            ${orderClause} 
+            LIMIT ? OFFSET ?
+        `;
+        const dataParams = [...searchParams, limit, offset];
+        
+        // Query for count
+        const countQuery = `SELECT COUNT(*) AS total FROM users ${whereClause}`;
+        const countParams = searchParams;
+        
+        // Execute both queries
+        db.query(dataQuery, dataParams, (err, results) => {
+            if (err) return callback(err);
+            
+            db.query(countQuery, countParams, (countErr, countRes) => {
+                if (countErr) return callback(countErr);
+                
+                const total = countRes[0].total;
+                const totalPages = Math.ceil(total / limit);
+                
+                callback(null, { 
+                    users: results, 
+                    total: total,
+                    pagination: {
+                        currentPage: page,
+                        totalPages: totalPages,
+                        totalItems: total,
+                        itemsPerPage: limit,
+                        hasNextPage: page < totalPages,
+                        hasPrevPage: page > 1
+                    }
+                });
             });
         });
     }
