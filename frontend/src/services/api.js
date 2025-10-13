@@ -45,11 +45,8 @@ const apiService = {
 
   // Author APIs
   authors: authorApi,
-  getAuthors: authorApi.getAuthors.bind(authorApi),
+  getAllAuthors: authorApi.getAllAuthors.bind(authorApi),
   getAuthorById: authorApi.getAuthorById.bind(authorApi),
-  createAuthor: authorApi.createAuthor.bind(authorApi),
-  updateAuthor: authorApi.updateAuthor.bind(authorApi),
-  deleteAuthor: authorApi.deleteAuthor.bind(authorApi),
 
   // Publisher APIs
   publishers: publisherApi,
@@ -109,6 +106,7 @@ const apiService = {
   // Cart APIs
   cart: cartApi,
   getCart: cartApi.getCart.bind(cartApi),
+  getCartDetails: cartApi.getCartDetails.bind(cartApi),
   addToCart: cartApi.addToCart.bind(cartApi),
   updateCartItem: cartApi.updateCartItem.bind(cartApi),
   removeFromCart: cartApi.removeFromCart.bind(cartApi),

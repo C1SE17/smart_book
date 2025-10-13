@@ -109,6 +109,7 @@ class Book {
             b.description,
             b.price,
             b.stock,
+            b.cover_image,
             c.name AS category_name,
             a.name AS author_name,
             p.name AS publisher_name

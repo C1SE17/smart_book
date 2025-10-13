@@ -19,6 +19,8 @@ const Dashboard = () => {
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [dateFilter, setDateFilter] = useState('month'); // 'day', 'month', 'year'
+    const [selectedDate, setSelectedDate] = useState(new Date().toISOString().substring(0, 7) + '-01'); // YYYY-MM-01 format (first day of current month)
 
     // Fetch real data from API
     useEffect(() => {
@@ -69,34 +71,102 @@ const Dashboard = () => {
                             date: order.created_at
                         }));
 
-                    // Calculate monthly revenue and orders (last 6 months)
-                    const monthlyRevenue = [];
-                    const monthlyOrders = []; // Thêm dòng này
-                    const currentDate = new Date();
+                    // Calculate revenue and orders based on date filter
+                    let chartData = [];
+                    let chartOrders = [];
                     
-                    for (let i = 5; i >= 0; i--) {
-                        const monthDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
-                        const monthName = monthDate.toLocaleDateString('vi-VN', { month: 'short' });
+                    if (dateFilter === 'day') {
+                        // Daily data for selected month - only up to today
+                        const selectedMonth = new Date(selectedDate);
+                        const year = selectedMonth.getFullYear();
+                        const month = selectedMonth.getMonth();
+                        const today = new Date();
                         
-                        const monthOrders = orders.filter(order => {
-                            const orderDate = new Date(order.created_at);
-                            return orderDate.getMonth() === monthDate.getMonth() && 
-                                   orderDate.getFullYear() === monthDate.getFullYear();
-                        });
+                        // If selected month is current month, only show up to today
+                        // If selected month is in the past, show all days in that month
+                        let maxDay;
+                        if (year === today.getFullYear() && month === today.getMonth()) {
+                            maxDay = today.getDate(); // Only up to today
+                        } else {
+                            maxDay = new Date(year, month + 1, 0).getDate(); // All days in month
+                        }
                         
-                        const monthRevenue = monthOrders.reduce((sum, order) => {
-                            return sum + (parseFloat(order.total_price) || 0);
-                        }, 0);
+                        for (let day = 1; day <= maxDay; day++) {
+                            const dayDate = new Date(year, month, day);
+                            const dayOrders = orders.filter(order => {
+                                const orderDate = new Date(order.created_at);
+                                return orderDate.getDate() === day && 
+                                       orderDate.getMonth() === month && 
+                                       orderDate.getFullYear() === year;
+                            });
+                            
+                            const dayRevenue = dayOrders.reduce((sum, order) => {
+                                return sum + (parseFloat(order.total_price) || 0);
+                            }, 0);
+                            
+                            chartData.push({
+                                month: `${day}/${month + 1}`,
+                                revenue: dayRevenue
+                            });
+                            
+                            chartOrders.push({
+                                month: `${day}/${month + 1}`,
+                                orders: dayOrders.length
+                            });
+                        }
+                    } else if (dateFilter === 'month') {
+                        // Monthly data (last 6 months)
+                        const currentDate = new Date();
                         
-                        monthlyRevenue.push({
-                            month: monthName,
-                            revenue: monthRevenue
-                        });
+                        for (let i = 5; i >= 0; i--) {
+                            const monthDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
+                            const monthName = monthDate.toLocaleDateString('vi-VN', { month: 'short' });
+                            
+                            const monthOrders = orders.filter(order => {
+                                const orderDate = new Date(order.created_at);
+                                return orderDate.getMonth() === monthDate.getMonth() && 
+                                       orderDate.getFullYear() === monthDate.getFullYear();
+                            });
+                            
+                            const monthRevenue = monthOrders.reduce((sum, order) => {
+                                return sum + (parseFloat(order.total_price) || 0);
+                            }, 0);
+                            
+                            chartData.push({
+                                month: monthName,
+                                revenue: monthRevenue
+                            });
+                            
+                            chartOrders.push({
+                                month: monthName,
+                                orders: monthOrders.length
+                            });
+                        }
+                    } else if (dateFilter === 'year') {
+                        // Yearly data (last 5 years)
+                        const currentDate = new Date();
                         
-                        monthlyOrders.push({ // Sử dụng monthlyOrders đã khai báo
-                            month: monthName,
-                            orders: monthOrders.length
-                        });
+                        for (let i = 4; i >= 0; i--) {
+                            const year = currentDate.getFullYear() - i;
+                            const yearOrders = orders.filter(order => {
+                                const orderDate = new Date(order.created_at);
+                                return orderDate.getFullYear() === year;
+                            });
+                            
+                            const yearRevenue = yearOrders.reduce((sum, order) => {
+                                return sum + (parseFloat(order.total_price) || 0);
+                            }, 0);
+                            
+                            chartData.push({
+                                month: year.toString(),
+                                revenue: yearRevenue
+                            });
+                            
+                            chartOrders.push({
+                                month: year.toString(),
+                                orders: yearOrders.length
+                            });
+                        }
                     }
 
                     // Calculate top selling books from orders
@@ -183,8 +253,8 @@ const Dashboard = () => {
                         totalOrders: orders.length,
                         totalBooks: booksResponse.success ? (booksResponse.data?.length || 0) : 0,
                         totalUsers: usersCountResponse.success ? (usersCountResponse.data || 0) : 0,
-                        monthlyRevenue: monthlyRevenue || [], // Đảm bảo không undefined
-                        monthlyOrders: monthlyOrders || [],   // Đảm bảo không undefined
+                        monthlyRevenue: chartData || [], // Sử dụng chartData dựa trên filter
+                        monthlyOrders: chartOrders || [],   // Sử dụng chartOrders dựa trên filter
                         topSellingBooks,
                         topRatedBooks, // Thêm mới
                         recentOrders
@@ -212,7 +282,7 @@ const Dashboard = () => {
         return () => {
             window.removeEventListener('newOrderPlaced', handleNewOrder);
         };
-    }, []);
+    }, [dateFilter, selectedDate]); // Refetch khi date filter hoặc selected date thay đổi
 
     const formatCurrency = (amount) => {
         return new Intl.NumberFormat('vi-VN', {
@@ -376,10 +446,34 @@ const Dashboard = () => {
                 <div className="col-xl-8 mb-4">
                     <div className="card border-0 shadow-sm h-100">
                         <div className="card-header bg-white border-0">
-                            <h5 className="fw-bold text-dark mb-0">
-                                <i className="fas fa-chart-line me-2 text-primary"></i>
-                                Doanh thu theo tháng
-                            </h5>
+                            <div className="d-flex justify-content-between align-items-center">
+                                <h5 className="fw-bold text-dark mb-0">
+                                    <i className="fas fa-chart-line me-2 text-primary"></i>
+                                    Doanh thu theo {dateFilter === 'day' ? 'ngày' : dateFilter === 'month' ? 'tháng' : 'năm'}
+                                </h5>
+                                <div className="d-flex gap-2">
+                                    <select 
+                                        className="form-select form-select-sm" 
+                                        style={{ width: 'auto' }}
+                                        value={dateFilter}
+                                        onChange={(e) => setDateFilter(e.target.value)}
+                                    >
+                                        <option value="day">Theo ngày</option>
+                                        <option value="month">Theo tháng</option>
+                                        <option value="year">Theo năm</option>
+                                    </select>
+                                    {dateFilter === 'day' && (
+                                        <input 
+                                            type="month" 
+                                            className="form-control form-control-sm" 
+                                            style={{ width: 'auto' }}
+                                            value={selectedDate.substring(0, 7)}
+                                            onChange={(e) => setSelectedDate(e.target.value + '-01')}
+                                            max={new Date().toISOString().substring(0, 7)} // Không cho chọn tháng tương lai
+                                        />
+                                    )}
+                                </div>
+                            </div>
                         </div>
                         <div className="card-body">
                             <RevenueChart data={stats.monthlyRevenue || []} height={300} />
@@ -393,7 +487,7 @@ const Dashboard = () => {
                         <div className="card-header bg-white border-0">
                             <h5 className="fw-bold text-dark mb-0">
                                 <i className="fas fa-chart-bar me-2 text-success"></i>
-                                Số đơn hàng theo tháng
+                                Số đơn hàng theo {dateFilter === 'day' ? 'ngày' : dateFilter === 'month' ? 'tháng' : 'năm'}
                             </h5>
                         </div>
                         <div className="card-body">

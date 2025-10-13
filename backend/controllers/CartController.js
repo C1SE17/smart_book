@@ -3,14 +3,22 @@ const CartModel = require('../models/CartModel'); // Nhập model giỏ hàng
 class CartController {
     // Hàm xử lý thêm sản phẩm vào giỏ hàng
     static addToCart(req, res) {
+        console.log('🛒 [CartController] ===========================================');
+        console.log('🛒 [CartController] Bắt đầu thêm sản phẩm vào giỏ hàng...');
+        console.log('🛒 [CartController] Request body:', req.body);
+        console.log('🛒 [CartController] User from token:', req.user);
+
         const { book_id, quantity } = req.body; // Lấy book_id và quantity từ body request
         const userId = req.user.userId; // Lấy userId từ token đã giải mã
 
+        console.log('🛒 [CartController] Parsed data:', { userId, book_id, quantity });
+
         CartModel.addToCart(userId, book_id, quantity, (err, result) => { // Gọi hàm model với callback
             if (err) { // Xử lý lỗi nếu có
-                console.log(err); // In lỗi ra console để debug
+                console.error('💥 [CartController] Lỗi từ CartModel:', err); // In lỗi ra console để debug
                 return res.status(500).json({ error: 'Lỗi khi thêm sản phẩm vào giỏ hàng' });
             }
+            console.log('✅ [CartController] Thêm vào giỏ hàng thành công:', result);
             res.status(200).json({ message: 'Sản phẩm đã được thêm vào giỏ hàng' }); // Trả về thành công
         });
     }
@@ -36,13 +44,20 @@ class CartController {
 
     // Hàm xử lý xem chi tiết giỏ hàng
     static getCartDetails(req, res) {
+        console.log('🛒 [CartController] ===========================================');
+        console.log('🛒 [CartController] Bắt đầu lấy chi tiết giỏ hàng...');
+        console.log('🛒 [CartController] User from token:', req.user);
+
         const userId = req.user.userId; // Lấy userId từ token
+
+        console.log('🛒 [CartController] User ID:', userId);
 
         CartModel.getCartDetails(userId, (err, cartDetails) => { // Gọi model với callback
             if (err) { // Xử lý lỗi
-                console.log('Lỗi lấy chi tiết giỏ hàng:', err.message); // Log lỗi chi tiết
+                console.error('💥 [CartController] Lỗi lấy chi tiết giỏ hàng:', err.message); // Log lỗi chi tiết
                 return res.status(500).json({ error: 'Lỗi khi lấy chi tiết giỏ hàng: ' + err.message });
             }
+            console.log('✅ [CartController] Lấy chi tiết giỏ hàng thành công:', cartDetails);
             res.status(200).json(cartDetails); // Trả về chi tiết giỏ hàng
         });
     }

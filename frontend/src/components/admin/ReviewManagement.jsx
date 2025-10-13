@@ -406,22 +406,8 @@ const ReviewManagement = () => {
 
             {/* Reviews Table */}
             <div className="card">
-                <div className="card-body position-relative">
-                    {/* Loading overlay for page changes */}
-                    {isPageChanging && (
-                        <div className="position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
-                            style={{
-                                backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                                zIndex: 10,
-                                borderRadius: '0.375rem'
-                            }}>
-                            <div className="spinner-border text-primary" role="status">
-                                <span className="visually-hidden">Đang chuyển trang...</span>
-                            </div>
-                        </div>
-                    )}
-
-                    <div className="table-responsive position-relative" style={{ minHeight: '400px' }}>
+                <div className="card-body">
+                    <div className="table-responsive" style={{ minHeight: '400px' }}>
                         
                         <table
                             className="table table-hover table-fixed"

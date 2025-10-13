@@ -38,12 +38,23 @@ class BookApiService extends BaseApiService {
 
   async getBookById(id) {
     try {
+      console.log(`📚 [BookAPI] ===========================================`);
       console.log(`📚 [BookAPI] Đang lấy thông tin sách theo ID: ${id}`);
+      console.log(`📚 [BookAPI] Base URL: ${this.baseURL}`);
+      console.log(`📚 [BookAPI] Endpoint: /books/${id}`);
+      
       const result = await this.apiCall(`/books/${id}`);
+      
       console.log(`📚 [BookAPI] Kết quả lấy thông tin sách:`, result);
+      console.log(`📚 [BookAPI] ===========================================`);
       return result;
     } catch (error) {
       console.error(`💥 [BookAPI] Lỗi khi lấy thông tin sách ID ${id}:`, error);
+      console.error(`💥 [BookAPI] Error details:`, {
+        message: error.message,
+        stack: error.stack,
+        bookId: id
+      });
       throw error;
     }
   }

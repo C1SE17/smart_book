@@ -15,7 +15,7 @@ import BlogPage from './components/client/blog/BlogPage'
 import BlogDetail from './components/client/blog/BlogDetail'
 import Contact from './components/client/contact/Contact'
 import AboutUs from './components/client/about/AboutUs'
-import { AuthorPage, AuthorDetail } from './components/client/author'
+import { Authors, AuthorDetail } from './components/client/author'
 import AdminLayout from './components/admin/AdminLayout'
 import Layout from './components/layouts/Layout'
 import Dashboard from './components/admin/Dashboard'
@@ -38,7 +38,7 @@ function App() {
   const [searchQuery, setSearchQuery] = useState(''); // State tìm kiếm toàn cục
   const [productId, setProductId] = useState(null); // ID sản phẩm cho trang chi tiết
   const [blogId, setBlogId] = useState(null);
-  const [authorId, setAuthorId] = useState(null); // ID blog cho trang chi tiết blog
+  const [authorId, setAuthorId] = useState(null);
   const [user, setUser] = useState(null); // State xác thực người dùng
   const [profileTab, setProfileTab] = useState('profile'); // State tab profile
   const [adminWantsHome, setAdminWantsHome] = useState(false); // State để theo dõi admin có muốn ở trang chủ
@@ -201,12 +201,12 @@ function App() {
       'notification': '/notification',
       'blog': '/blog',
       'blog-detail': '/blog-detail',
+      'author': '/author',
+      'author-detail': '/author-detail',
       'checkout': '/checkout',
       'orders': '/orders',
       'contact': '/contact',
       'about': '/about',
-      'author': '/author',
-      'author-detail': '/author-detail',
       'admin-dashboard': '/admin/dashboard',
       'admin-books': '/admin/books',
       'admin-categories': '/admin/categories',
@@ -225,9 +225,11 @@ function App() {
     }
 
     // Handle product page with productId
-    if (page === 'product' && params.productId) {
-      setProductId(params.productId);
-      navigateTo(path, { id: params.productId });
+    if (page === 'product' && (params.productId || params.id)) {
+      const id = params.productId || params.id;
+      console.log('🔄 [App] Setting productId:', id, 'from params:', params);
+      setProductId(id);
+      navigateTo(path, { id });
     }
     // Handle search page with searchQuery
     else if (page === 'search' && params.searchQuery) {
@@ -454,6 +456,7 @@ function App() {
           </ErrorBoundary>
         </Layout>
       )}
+
       {currentPage === 'author' && (
         <Layout 
           onViewAllNotifications={handleViewAllNotifications}
@@ -463,10 +466,11 @@ function App() {
           onLogout={handleLogout}
         >
           <ErrorBoundary>
-            <AuthorPage onNavigateTo={handleNavigateTo} onNavigateToAuthorDetail={handleNavigateToAuthorDetail} />
+            <Authors onNavigateTo={handleNavigateTo} onNavigateToAuthorDetail={handleNavigateToAuthorDetail} />
           </ErrorBoundary>
         </Layout>
       )}
+
       {currentPage === 'author-detail' && (
         <Layout 
           onViewAllNotifications={handleViewAllNotifications}

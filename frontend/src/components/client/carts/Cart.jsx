@@ -19,44 +19,34 @@ const Cart = ({ onBackToHome, onNavigateTo }) => {
         return;
       }
 
-      // Use mock API to get cart items
-      // TODO: Implement real cart API
-      // const { cartApi } = await import('../../../services/cartApi');
-      // const cartData = await cartApi.getCartByUserId(user.user_id);
+      // Use real cart API
+      console.log('🛒 [Cart] Fetching cart items for user:', user.user_id);
+      const cartApiModule = await import('../../../services/cartApi');
+      const cartApi = cartApiModule.default;
+      const cartData = await cartApi.getCartDetails();
 
-      // For now, get cart items from localStorage
-      const cartKey = `cart_${user.user_id}`;
-      const cartItemsFromStorage = JSON.parse(localStorage.getItem(cartKey) || '[]');
-      const cartData = { success: true, items: cartItemsFromStorage };
+      console.log('🛒 [Cart] Cart API response:', cartData);
+
+      if (!cartData || !cartData.cart || !Array.isArray(cartData.cart)) {
+        console.log('🛒 [Cart] No cart items found or invalid format:', cartData);
+        setCartItems([]);
+        setLoading(false);
+        return;
+      }
+
+      console.log('🛒 [Cart] Found', cartData.cart.length, 'items in cart');
 
       // Get book details for each cart item
-      const itemsWithDetails = await Promise.all(
-        cartData.items.map(async (item) => {
-          try {
-            // TODO: Use real API
-            // const book = await bookApi.getBookById(item.book_id);
-            // For now, use the data already stored in localStorage
-            return {
-              ...item,
-              book_title: item.title || `Book ${item.book_id}`,
-              author: item.author_name || item.author || 'Unknown Author',
-              price: item.price || 0,
-              total_price: (item.price || 0) * item.quantity,
-              image_url: item.cover_image || '/images/book1.jpg'
-            };
-          } catch (error) {
-            console.error('Error fetching book details:', error);
-            return {
-              ...item,
-              book_title: `Book ${item.book_id}`,
-              author: 'Unknown Author',
-              price: 0,
-              total_price: 0,
-              image_url: '/images/book1.jpg'
-            };
-          }
-        })
-      );
+      const itemsWithDetails = cartData.cart.map((item) => {
+        return {
+          ...item,
+          book_title: item.book_title || `Book ${item.book_id}`,
+          author: 'Unknown Author', // Will be filled from book details if needed
+          price: item.price || 0,
+          total_price: item.total_price || 0,
+          image_url: '/images/book1.jpg' // Will be filled from book details if needed
+        };
+      });
 
       setCartItems(itemsWithDetails);
     } catch (error) {

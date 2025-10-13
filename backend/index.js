@@ -5,13 +5,13 @@ const dotenv = require('dotenv');
 const userRoutes = require('./routes/userRoutes');
 const bookRoutes = require('./routes/bookRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
-const authorRoutes = require('./routes/authorRoutes');
 const publisherRoutes = require('./routes/publisherRoutes');
 const cartRoutes = require('./routes/cartRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const warehouseRoutes = require('./routes/warehouseRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 const searchRoutes = require('./routes/searchRoutes');
+const authorRoutes = require('./routes/authorRoutes');
 
 // Tải biến môi trường
 dotenv.config();
@@ -25,12 +25,13 @@ console.log('📡 [Server] Port:', port);
 
 // Cấu hình CORS
 app.use(cors({
-    origin: ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:5173'],
+    origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000', 'http://127.0.0.1:5173', 'http://127.0.0.1:5174'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 console.log('🌐 [Server] Đã cấu hình CORS');
+console.log('🌐 [Server] CORS origins:', ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000', 'http://127.0.0.1:5173', 'http://127.0.0.1:5174']);
 
 // Phân tích JSON từ body
 app.use(express.json());
@@ -39,7 +40,8 @@ console.log('📝 [Server] Đã cấu hình JSON parser');
 // Middleware kiểm tra header
 app.use((req, res, next) => {
     console.log(`📨 [Request] ${req.method} ${req.path}`);
-    console.log('📋 [Request] Headers:', req.headers);
+    console.log('📋 [Request] Origin:', req.headers.origin);
+    console.log('📋 [Request] User-Agent:', req.headers['user-agent']);
     // Tạm thời comment middleware kiểm tra Content-Type
     // if (req.method === 'POST' && req.headers['content-type'] && !req.headers['content-type'].includes('application/json')) {
     //     console.log('❌ [Request] Invalid Content-Type');
@@ -72,8 +74,6 @@ app.use('/api/books', bookRoutes);
 console.log('✅ [Server] Books routes loaded');
 app.use('/api/categories', categoryRoutes);
 console.log('✅ [Server] Categories routes loaded');
-app.use('/api/authors', authorRoutes);
-console.log('✅ [Server] Authors routes loaded');
 app.use('/api/publishers', publisherRoutes);
 console.log('✅ [Server] Publishers routes loaded');
 app.use('/api/cart', cartRoutes);
@@ -86,6 +86,11 @@ app.use('/api/reviews', reviewRoutes);
 console.log('✅ [Server] Reviews routes loaded');
 app.use('/api/search', searchRoutes);
 console.log('✅ [Server] Search routes loaded');
+app.use('/api/authors', authorRoutes);
+console.log('✅ [Server] Authors routes loaded');
+console.log('📋 [Server] Author endpoints available:');
+console.log('   - GET /api/authors - Lấy danh sách tất cả tác giả');
+console.log('   - GET /api/authors/:id - Lấy thông tin chi tiết tác giả');
 
 // Error handling middleware
 app.use((err, req, res, next) => {

@@ -6,6 +6,8 @@ import ProductRating from './ProductRating';
 import ErrorBoundary from '../../common/ErrorBoundary/ErrorBoundary';
 
 const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = null }) => {
+  console.log('🔄 [ProductDetail] Component rendered with productId:', productId, 'type:', typeof productId);
+  
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
@@ -27,23 +29,40 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
   // Fetch product data
   useEffect(() => {
     const fetchProduct = async () => {
-      if (!productId) return;
+      if (!productId) {
+        console.log('❌ [ProductDetail] No productId provided');
+        setLoading(false);
+        return;
+      }
 
+      console.log('🔄 [ProductDetail] Fetching product with ID:', productId);
       setLoading(true);
       try {
-        const apiService = await import('../../../services');
-        const response = await apiService.default.getBookById(productId);
+        const bookApi = await import('../../../services/bookApi.js');
+        // Ensure productId is a number
+        const numericId = parseInt(productId);
+        console.log('🔄 [ProductDetail] Converted ID to number:', numericId);
+        const response = await bookApi.default.getBookById(numericId);
 
-        console.log('Product API response:', response);
+        console.log('📊 [ProductDetail] Product API response:', response);
 
         if (response && response.success && response.data) {
           setProduct(response.data);
+          console.log('✅ [ProductDetail] Product loaded successfully:', response.data.title);
+          console.log('📊 [ProductDetail] Product data:', {
+            book_id: response.data.book_id,
+            title: response.data.title,
+            cover_image: response.data.cover_image,
+            price: response.data.price,
+            author_name: response.data.author_name,
+            category_name: response.data.category_name
+          });
         } else {
-          console.error('Error fetching product:', response);
+          console.error('❌ [ProductDetail] Error fetching product:', response);
           setProduct(null);
         }
       } catch (error) {
-        console.error('Error fetching product:', error);
+        console.error('💥 [ProductDetail] Error fetching product:', error);
         setProduct(null);
       } finally {
         setLoading(false);
@@ -58,8 +77,8 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
     const fetchRecommendations = async () => {
       setRecommendationsLoading(true);
       try {
-        const apiService = await import('../../../services');
-        const response = await apiService.default.getBooks({ limit: 4 });
+        const bookApi = await import('../../../services/bookApi.js');
+        const response = await bookApi.default.getBooks({ limit: 4 });
 
         console.log('Recommendations API response:', response);
 
@@ -86,8 +105,8 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
 
     setReviewsLoading(true);
     try {
-      const apiService = await import('../../../services');
-      const reviewsData = await apiService.default.getReviews({ book_id: productId });
+      const reviewApi = await import('../../../services/reviewApi.js');
+      const reviewsData = await reviewApi.default.getReviews({ book_id: productId });
 
       console.log('Reviews API response:', reviewsData);
 
@@ -297,6 +316,9 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
             <span className="visually-hidden">Đang tải...</span>
           </div>
           <p className="mt-3">Đang tải thông tin sản phẩm...</p>
+          {productId && (
+            <small className="text-muted">Product ID: {productId}</small>
+          )}
         </div>
       </div>
     );
@@ -352,15 +374,34 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
         {/* Product Image */}
         <div className="col-lg-6">
           <div className="product-image-container">
-            <img
-              src={product.cover_image}
-              className="img-fluid rounded shadow"
-              alt={product.title}
-              style={{ width: '100%', maxHeight: '500px', objectFit: 'contain' }}
-              onError={(e) => {
-                e.target.src = '/images/book1.jpg';
-              }}
-            />
+            {product.cover_image && product.cover_image.trim() !== '' ? (
+              <img
+                src={product.cover_image}
+                className="img-fluid rounded shadow"
+                alt={product.title}
+                style={{ width: '100%', maxHeight: '500px', objectFit: 'contain' }}
+                onError={(e) => {
+                  console.log('❌ [ProductDetail] Image failed to load:', product.cover_image);
+                }}
+                onLoad={() => {
+                  console.log('✅ [ProductDetail] Image loaded successfully:', product.cover_image);
+                }}
+              />
+            ) : (
+              <div 
+                className="d-flex align-items-center justify-content-center bg-light rounded shadow"
+                style={{ 
+                  width: '100%', 
+                  height: '500px'
+                }}
+              >
+                <div className="text-center">
+                  <i className="fas fa-book fa-5x text-muted mb-3"></i>
+                  <h5 className="text-muted">{product.title}</h5>
+                  <p className="text-muted small">Không có hình ảnh</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
