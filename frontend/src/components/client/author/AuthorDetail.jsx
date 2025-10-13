@@ -54,14 +54,14 @@ const AuthorDetail = ({ onNavigateTo, authorId }) => {
     // Function to add book to cart
     const handleAddToCart = async (book, e) => {
         e.stopPropagation(); // Prevent card click
-        
+
         try {
             console.log('🛒 [AuthorDetail] Adding book to cart:', book.title);
-            
+
             // Check if user is logged in
             const user = JSON.parse(localStorage.getItem('user'));
             const token = localStorage.getItem('token');
-            
+
             if (!user || !token) {
                 window.showToast('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng!', 'error');
                 onNavigateTo('auth');
@@ -74,7 +74,7 @@ const AuthorDetail = ({ onNavigateTo, authorId }) => {
             };
 
             const response = await cartApi.addToCart(cartData);
-            
+
             // Backend trả về { message: 'Sản phẩm đã được thêm vào giỏ hàng' }
             if (response && (response.message || response.success)) {
                 window.showToast(`Đã thêm "${book.title}" vào giỏ hàng!`, 'success');
@@ -92,10 +92,10 @@ const AuthorDetail = ({ onNavigateTo, authorId }) => {
     // Function to add book to wishlist
     const handleAddToWishlist = async (book, e) => {
         e.stopPropagation(); // Prevent card click
-        
+
         try {
             console.log('❤️ [AuthorDetail] Adding book to wishlist:', book.title);
-            
+
             // Check if user is logged in
             const user = JSON.parse(localStorage.getItem('user'));
             if (!user) {
@@ -116,37 +116,117 @@ const AuthorDetail = ({ onNavigateTo, authorId }) => {
     if (loading) {
         return (
             <div className="container mt-4">
+                {/* Back Button */}
+                <div className="row mb-3">
+                    <div className="col-12">
+                        <button
+                            className="btn btn-link text-dark p-0 no-hover"
+                            onClick={() => onNavigateTo('author')}
+                            style={{
+                                border: 'none',
+                                background: 'none',
+                                fontSize: '16px',
+                                textDecoration: 'none',
+                                boxShadow: 'none',
+                                fontWeight: '500'
+                            }}
+                        >
+                            <i className="fas fa-arrow-left me-2"></i>Tác giả
+                        </button>
+                    </div>
+                </div>
+                
                 <div className="d-flex justify-content-center">
                     <div className="spinner-border" role="status">
                         <span className="visually-hidden">Đang tải...</span>
                     </div>
                 </div>
-                  </div>
+            </div>
         );
     }
 
     if (error) {
         return (
             <div className="container mt-4">
+                {/* Back Button */}
+                <div className="row mb-3">
+                    <div className="col-12">
+                        <button
+                            className="btn btn-link text-dark p-0 no-hover"
+                            onClick={() => onNavigateTo('author')}
+                            style={{
+                                border: 'none',
+                                background: 'none',
+                                fontSize: '16px',
+                                textDecoration: 'none',
+                                boxShadow: 'none',
+                                fontWeight: '500'
+                            }}
+                        >
+                            <i className="fas fa-arrow-left me-2"></i>Tác giả
+                        </button>
+                    </div>
+                </div>
+                
                 <div className="alert alert-danger" role="alert">
                     {error}
                 </div>
-                  </div>
+            </div>
         );
     }
 
     if (!author) {
         return (
             <div className="container mt-4">
+                {/* Back Button */}
+                <div className="row mb-3">
+                    <div className="col-12">
+                        <button
+                            className="btn btn-link text-dark p-0 no-hover"
+                            onClick={() => onNavigateTo('author')}
+                            style={{
+                                border: 'none',
+                                background: 'none',
+                                fontSize: '16px',
+                                textDecoration: 'none',
+                                boxShadow: 'none',
+                                fontWeight: '500'
+                            }}
+                        >
+                            <i className="fas fa-arrow-left me-2"></i>Tác giả
+                        </button>
+                    </div>
+                </div>
+
                 <div className="alert alert-warning" role="alert">
                     Không tìm thấy thông tin tác giả
                 </div>
-              </div>
+            </div>
         );
     }
 
     return (
         <div className="container mt-4">
+            {/* Back Button */}
+            <div className="row mb-3">
+                <div className="col-12">
+                    <button
+                        className="btn btn-link text-dark p-0 no-hover"
+                        onClick={() => onNavigateTo('author')}
+                        style={{
+                            border: 'none',
+                            background: 'none',
+                            fontSize: '16px',
+                            textDecoration: 'none',
+                            boxShadow: 'none',
+                            fontWeight: '500'
+                        }}
+                    >
+                        <i className="fas fa-arrow-left me-2"></i>Tác giả
+                    </button>
+                </div>
+            </div>
+
             {/* Author Header */}
             <div className="row mb-5">
                 <div className="col-12">
@@ -172,14 +252,14 @@ const AuthorDetail = ({ onNavigateTo, authorId }) => {
                                                 <i className="fas fa-book me-1"></i>
                                                 {author.books.length} cuốn sách
                                             </span>
-                </div>
+                                        </div>
                                     )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                </div>
-              </div>
             </div>
-          </div>
-        </div>
 
             {/* Author's Books */}
             {author.books && author.books.length > 0 ? (
@@ -188,7 +268,7 @@ const AuthorDetail = ({ onNavigateTo, authorId }) => {
                         <h3 className="mb-4">
                             Tác phẩm của {author.name}
                         </h3>
-                  <div className="row">
+                        <div className="row">
                             {author.books.map((book) => {
                                 console.log('📚 [AuthorDetail] Rendering book:', {
                                     book_id: book.book_id,
@@ -198,8 +278,8 @@ const AuthorDetail = ({ onNavigateTo, authorId }) => {
                                 });
                                 return (
                                     <div key={book.book_id} className="col-lg-3 col-md-6 mb-4">
-                      <div
-                        className="card h-100 border-0 shadow-sm"
+                                        <div
+                                            className="card h-100 border-0 shadow-sm"
                                             style={{
                                                 transition: 'all 0.3s ease',
                                                 cursor: 'pointer',
@@ -210,21 +290,21 @@ const AuthorDetail = ({ onNavigateTo, authorId }) => {
                                             }}
                                             onClick={() => handleBookClick(book.book_id)}
                                             title="Click để xem chi tiết sách"
-                        onMouseEnter={(e) => {
+                                            onMouseEnter={(e) => {
                                                 e.currentTarget.style.transform = 'translateY(-8px)';
                                                 e.currentTarget.style.boxShadow = '0 15px 35px rgba(0,0,0,0.15)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.transform = 'translateY(0)';
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.transform = 'translateY(0)';
                                                 e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-                        }}
-                      >
+                                            }}
+                                        >
                                             <div className="position-relative">
                                                 {book.cover_image && book.cover_image.trim() !== '' ? (
-                        <img
+                                                    <img
                                                         src={book.cover_image}
-                          className="card-img-top"
-                          alt={book.title}
+                                                        className="card-img-top"
+                                                        alt={book.title}
                                                         style={{
                                                             height: '280px',
                                                             objectFit: 'contain',
@@ -250,73 +330,73 @@ const AuthorDetail = ({ onNavigateTo, authorId }) => {
                                                     </div>
                                                 )}
 
-                                                 {/* Heart Icon - góc trên trái */}
-                                                 <div className="position-absolute top-0 start-0 m-2">
-                                                     <button
-                                                         className="btn btn-sm"
-                                                         style={{
-                                                             width: '35px',
-                                                             height: '35px',
-                                                             display: 'flex',
-                                                             alignItems: 'center',
-                                                             justifyContent: 'center',
-                                                             backgroundColor: 'rgba(255,255,255,0.95)',
-                                                             border: '1px solid rgba(0,0,0,0.1)',
-                                                             borderRadius: '8px',
-                                                             boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                                                             transition: 'all 0.3s ease',
-                                                             backdropFilter: 'blur(10px)'
-                                                         }}
-                                                         onClick={(e) => handleAddToWishlist(book, e)}
-                                                         onMouseEnter={(e) => {
-                                                             e.target.style.backgroundColor = 'rgba(255,255,255,1)';
-                                                             e.target.style.transform = 'scale(1.05)';
-                                                             e.target.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-                                                         }}
-                                                         onMouseLeave={(e) => {
-                                                             e.target.style.backgroundColor = 'rgba(255,255,255,0.95)';
-                                                             e.target.style.transform = 'scale(1)';
-                                                             e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
-                                                         }}
-                                                         title="Thêm vào yêu thích"
-                                                     >
-                                                         <i className="bi bi-heart text-dark" style={{ fontSize: '14px' }}></i>
-                                                     </button>
-                                                 </div>
+                                                {/* Heart Icon - góc trên trái */}
+                                                <div className="position-absolute top-0 start-0 m-2">
+                                                    <button
+                                                        className="btn btn-sm"
+                                                        style={{
+                                                            width: '35px',
+                                                            height: '35px',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            backgroundColor: 'rgba(255,255,255,0.95)',
+                                                            border: '1px solid rgba(0,0,0,0.1)',
+                                                            borderRadius: '8px',
+                                                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                                                            transition: 'all 0.3s ease',
+                                                            backdropFilter: 'blur(10px)'
+                                                        }}
+                                                        onClick={(e) => handleAddToWishlist(book, e)}
+                                                        onMouseEnter={(e) => {
+                                                            e.target.style.backgroundColor = 'rgba(255,255,255,1)';
+                                                            e.target.style.transform = 'scale(1.05)';
+                                                            e.target.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+                                                        }}
+                                                        onMouseLeave={(e) => {
+                                                            e.target.style.backgroundColor = 'rgba(255,255,255,0.95)';
+                                                            e.target.style.transform = 'scale(1)';
+                                                            e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+                                                        }}
+                                                        title="Thêm vào yêu thích"
+                                                    >
+                                                        <i className="bi bi-heart text-dark" style={{ fontSize: '14px' }}></i>
+                                                    </button>
+                                                </div>
 
-                                                 {/* Shopping Cart Icon - góc trên phải */}
-                                                 <div className="position-absolute top-0 end-0 m-2">
-                                                     <button
-                                                         className="btn btn-sm"
-                                                         style={{
-                                                             width: '35px',
-                                                             height: '35px',
-                                                             display: 'flex',
-                                                             alignItems: 'center',
-                                                             justifyContent: 'center',
-                                                             backgroundColor: 'rgba(0,123,255,0.95)',
-                                                             border: '1px solid rgba(0,123,255,0.3)',
-                                                             borderRadius: '8px',
-                                                             boxShadow: '0 2px 8px rgba(0,123,255,0.2)',
-                                                             transition: 'all 0.3s ease',
-                                                             backdropFilter: 'blur(10px)'
-                                                         }}
-                                                         onClick={(e) => handleAddToCart(book, e)}
-                                                         onMouseEnter={(e) => {
-                                                             e.target.style.backgroundColor = 'rgba(0,123,255,1)';
-                                                             e.target.style.transform = 'scale(1.05)';
-                                                             e.target.style.boxShadow = '0 4px 12px rgba(0,123,255,0.3)';
-                                                         }}
-                                                         onMouseLeave={(e) => {
-                                                             e.target.style.backgroundColor = 'rgba(0,123,255,0.95)';
-                                                             e.target.style.transform = 'scale(1)';
-                                                             e.target.style.boxShadow = '0 2px 8px rgba(0,123,255,0.2)';
-                                                         }}
-                                                         title="Thêm vào giỏ hàng"
-                                                     >
-                                                         <i className="bi bi-cart-plus text-white" style={{ fontSize: '14px' }}></i>
-                                                     </button>
-                                                 </div>
+                                                {/* Shopping Cart Icon - góc trên phải */}
+                                                <div className="position-absolute top-0 end-0 m-2">
+                                                    <button
+                                                        className="btn btn-sm"
+                                                        style={{
+                                                            width: '35px',
+                                                            height: '35px',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            backgroundColor: 'rgba(0,123,255,0.95)',
+                                                            border: '1px solid rgba(0,123,255,0.3)',
+                                                            borderRadius: '8px',
+                                                            boxShadow: '0 2px 8px rgba(0,123,255,0.2)',
+                                                            transition: 'all 0.3s ease',
+                                                            backdropFilter: 'blur(10px)'
+                                                        }}
+                                                        onClick={(e) => handleAddToCart(book, e)}
+                                                        onMouseEnter={(e) => {
+                                                            e.target.style.backgroundColor = 'rgba(0,123,255,1)';
+                                                            e.target.style.transform = 'scale(1.05)';
+                                                            e.target.style.boxShadow = '0 4px 12px rgba(0,123,255,0.3)';
+                                                        }}
+                                                        onMouseLeave={(e) => {
+                                                            e.target.style.backgroundColor = 'rgba(0,123,255,0.95)';
+                                                            e.target.style.transform = 'scale(1)';
+                                                            e.target.style.boxShadow = '0 2px 8px rgba(0,123,255,0.2)';
+                                                        }}
+                                                        title="Thêm vào giỏ hàng"
+                                                    >
+                                                        <i className="bi bi-cart-plus text-white" style={{ fontSize: '14px' }}></i>
+                                                    </button>
+                                                </div>
                                             </div>
 
                                             <div className="card-body d-flex flex-column p-3">
@@ -330,8 +410,8 @@ const AuthorDetail = ({ onNavigateTo, authorId }) => {
                                                     WebkitLineClamp: 2,
                                                     WebkitBoxOrient: 'vertical'
                                                 }}>
-                            {book.title}
-                          </h6>
+                                                    {book.title}
+                                                </h6>
 
                                                 <p className="text-muted small mb-2" style={{
                                                     fontSize: '12px',
@@ -368,7 +448,7 @@ const AuthorDetail = ({ onNavigateTo, authorId }) => {
                                                             <i className="bi bi-check-circle me-1"></i>
                                                             Còn hàng
                                                         </small>
-                            </div>
+                                                    </div>
 
                                                     <button
                                                         className="btn btn-outline-primary w-100"
@@ -396,15 +476,15 @@ const AuthorDetail = ({ onNavigateTo, authorId }) => {
                                                     >
                                                         Xem chi tiết
                                                     </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 );
                             })}
+                        </div>
+                    </div>
                 </div>
-              </div>
-            </div>
             ) : (
                 <div className="row">
                     <div className="col-12">
@@ -412,9 +492,9 @@ const AuthorDetail = ({ onNavigateTo, authorId }) => {
                             <i className="fas fa-book-open fa-3x text-muted mb-3"></i>
                             <h4 className="text-muted">Chưa có tác phẩm nào</h4>
                             <p className="text-muted">Tác giả này chưa có sách nào trong hệ thống</p>
-          </div>
-        </div>
-      </div>
+                        </div>
+                    </div>
+                </div>
             )}
 
             <style jsx>{`
@@ -445,8 +525,8 @@ const AuthorDetail = ({ onNavigateTo, authorId }) => {
                 }
                 
             `}</style>
-    </div>
-  );
+        </div>
+    );
 };
 
 export default AuthorDetail;

@@ -30,7 +30,7 @@ export const useBookManagement = () => {
             const [booksRes, categoriesRes, authorsRes, publishersRes] = await Promise.all([
                 apiService.getBooks({ page, limit, search }), // Sử dụng phân trang
                 apiService.getCategories(),
-                apiService.getAuthors(),
+                apiService.getAllAuthors(),
                 apiService.getPublishers()
             ]);
 

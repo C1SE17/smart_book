@@ -38,7 +38,7 @@ const CategoriesPage = ({ onNavigateTo }) => {
         const [categoriesResponse, booksResponse, authorsResponse] = await Promise.all([
           apiService.getCategories(),
           apiService.getBooks({ limit: 1000 }), // Lấy tối đa 1000 sách
-          apiService.getAuthors()
+          apiService.getAllAuthors()
         ]);
 
         console.log('📊 API Responses:', {
@@ -46,6 +46,23 @@ const CategoriesPage = ({ onNavigateTo }) => {
           books: booksResponse,
           authors: authorsResponse
         });
+
+        // Debug: Log sample data
+        if (booksResponse.success && booksResponse.data) {
+          console.log('📚 Sample books data:', booksResponse.data.slice(0, 3).map(book => ({
+            id: book.book_id,
+            title: book.title,
+            category_id: book.category_id,
+            author_id: book.author_id
+          })));
+        }
+
+        if (categoriesResponse.success && categoriesResponse.data) {
+          console.log('📂 Categories data:', categoriesResponse.data.map(cat => ({
+            id: cat.category_id,
+            name: cat.name
+          })));
+        }
 
         // Set data from API responses
         if (categoriesResponse.success) {
@@ -114,16 +131,49 @@ const CategoriesPage = ({ onNavigateTo }) => {
     // Filter by category
     if (selectedCategory && categories && Array.isArray(categories)) {
       const category = categories.find(c => c && c.name === selectedCategory);
+      console.log('🔍 [CategoriesPage] Filtering by category:', {
+        selectedCategory,
+        category,
+        totalProducts: products.length,
+        productsWithCategoryId: products.filter(p => p && p.category_id).length
+      });
+      
       if (category) {
+        const beforeFilter = filtered.length;
         filtered = filtered.filter(product => product && product.category_id === category.category_id);
+        console.log('📊 [CategoriesPage] Category filter result:', {
+          categoryName: category.name,
+          categoryId: category.category_id,
+          beforeFilter,
+          afterFilter: filtered.length,
+          matchingProducts: filtered.map(p => ({ id: p.book_id, title: p.title, category_id: p.category_id }))
+        });
+      } else {
+        console.log('❌ [CategoriesPage] Category not found:', selectedCategory);
       }
     }
 
     // Filter by author
     if (selectedAuthor && authors && Array.isArray(authors)) {
       const author = authors.find(a => a && a.name === selectedAuthor);
+      console.log('🔍 [CategoriesPage] Filtering by author:', {
+        selectedAuthor,
+        author,
+        beforeFilter: filtered.length
+      });
+      
       if (author) {
+        const beforeFilter = filtered.length;
         filtered = filtered.filter(product => product && product.author_id === author.author_id);
+        console.log('📊 [CategoriesPage] Author filter result:', {
+          authorName: author.name,
+          authorId: author.author_id,
+          beforeFilter,
+          afterFilter: filtered.length,
+          matchingProducts: filtered.map(p => ({ id: p.book_id, title: p.title, author_id: p.author_id }))
+        });
+      } else {
+        console.log('❌ [CategoriesPage] Author not found:', selectedAuthor);
       }
     }
 
@@ -185,6 +235,20 @@ const CategoriesPage = ({ onNavigateTo }) => {
       }
     });
 
+    // Log final result
+    console.log('🎯 [CategoriesPage] Final filter result:', {
+      totalProducts: products.length,
+      finalFilteredCount: filtered.length,
+      activeFilters: {
+        category: selectedCategory || 'none',
+        author: selectedAuthor || 'none',
+        search: searchQuery || 'none',
+        priceRange: `${priceRange.min} - ${priceRange.max}`
+      },
+      sortBy,
+      sortOrder
+    });
+
     return filtered;
   }, [products, selectedCategory, selectedAuthor, searchQuery, priceRange, sortBy, sortOrder, categories, authors]);
 
@@ -204,14 +268,24 @@ const CategoriesPage = ({ onNavigateTo }) => {
 
   // Handle category selection
   const handleCategorySelect = (categoryName) => {
-    setSelectedCategory(categoryName);
+    // Toggle category selection - nếu đã chọn thì bỏ chọn, nếu chưa chọn thì chọn
+    if (selectedCategory === categoryName) {
+      setSelectedCategory(''); // Bỏ chọn nếu đã chọn
+    } else {
+      setSelectedCategory(categoryName); // Chọn category mới
+    }
     setShowCategoryCards(false);
     setCurrentProductPage(1); // Reset to first page
   };
 
   // Handle author selection
   const handleAuthorSelect = (authorName) => {
-    setSelectedAuthor(authorName);
+    // Toggle author selection - nếu đã chọn thì bỏ chọn, nếu chưa chọn thì chọn
+    if (selectedAuthor === authorName) {
+      setSelectedAuthor(''); // Bỏ chọn nếu đã chọn
+    } else {
+      setSelectedAuthor(authorName); // Chọn author mới
+    }
     setShowCategoryCards(false);
     setCurrentProductPage(1); // Reset to first page
   };
@@ -336,7 +410,7 @@ const CategoriesPage = ({ onNavigateTo }) => {
       const [categoriesResponse, booksResponse, authorsResponse] = await Promise.all([
         apiService.getCategories(),
         apiService.getBooks({ limit: 1000 }),
-        apiService.getAuthors()
+        apiService.getAllAuthors()
       ]);
 
       if (categoriesResponse.success) {
@@ -598,6 +672,54 @@ const CategoriesPage = ({ onNavigateTo }) => {
                   </span>
                 )}
               </h6>
+              
+              {/* Active Filters Display */}
+              {(selectedCategory || selectedAuthor || searchQuery) && (
+                <div className="mt-2">
+                  <small className="text-muted me-2">Bộ lọc đang áp dụng:</small>
+                  {selectedCategory && (
+                    <span className="badge bg-primary me-1">
+                      📂 {selectedCategory}
+                      <button 
+                        className="btn-close btn-close-white ms-1" 
+                        style={{ fontSize: '0.6rem' }}
+                        onClick={() => setSelectedCategory('')}
+                        title="Bỏ chọn danh mục"
+                      ></button>
+                    </span>
+                  )}
+                  {selectedAuthor && (
+                    <span className="badge bg-success me-1">
+                      ✍️ {selectedAuthor}
+                      <button 
+                        className="btn-close btn-close-white ms-1" 
+                        style={{ fontSize: '0.6rem' }}
+                        onClick={() => setSelectedAuthor('')}
+                        title="Bỏ chọn tác giả"
+                      ></button>
+                    </span>
+                  )}
+                  {searchQuery && (
+                    <span className="badge bg-warning text-dark me-1">
+                      🔍 "{searchQuery}"
+                      <button 
+                        className="btn-close ms-1" 
+                        style={{ fontSize: '0.6rem' }}
+                        onClick={() => setSearchQuery('')}
+                        title="Xóa tìm kiếm"
+                      ></button>
+                    </span>
+                  )}
+                  <button 
+                    className="btn btn-sm btn-outline-secondary ms-2"
+                    onClick={handleResetFilters}
+                    title="Xóa tất cả bộ lọc"
+                  >
+                    <FontAwesomeIcon icon={faTimes} className="me-1" />
+                    Xóa tất cả
+                  </button>
+                </div>
+              )}
             </div>
             <div className="d-flex align-items-center">
               <label className="form-label me-2 mb-0">Sắp xếp theo:</label>

@@ -14,37 +14,41 @@ const Cart = ({ onBackToHome, onNavigateTo }) => {
       // Get user from localStorage
       const user = JSON.parse(localStorage.getItem('user') || 'null');
       if (!user) {
+        console.log('🛒 [Cart] No user found, cart is empty');
         setCartItems([]);
         setLoading(false);
         return;
       }
 
-      // Use real cart API
-      console.log('🛒 [Cart] Fetching cart items for user:', user.user_id);
-      const cartApiModule = await import('../../../services/cartApi');
-      const cartApi = cartApiModule.default;
-      const cartData = await cartApi.getCartDetails();
+      // Get cart data from localStorage (consistent with other components)
+      const cartKey = `cart_${user.user_id}`;
+      const cartData = JSON.parse(localStorage.getItem(cartKey) || '[]');
 
-      console.log('🛒 [Cart] Cart API response:', cartData);
+      console.log('🛒 [Cart] Fetching cart items from localStorage for user:', user.user_id);
+      console.log('🛒 [Cart] Cart data from localStorage:', cartData);
 
-      if (!cartData || !cartData.cart || !Array.isArray(cartData.cart)) {
-        console.log('🛒 [Cart] No cart items found or invalid format:', cartData);
+      if (!Array.isArray(cartData) || cartData.length === 0) {
+        console.log('🛒 [Cart] No cart items found in localStorage');
         setCartItems([]);
         setLoading(false);
         return;
       }
 
-      console.log('🛒 [Cart] Found', cartData.cart.length, 'items in cart');
+      console.log('🛒 [Cart] Found', cartData.length, 'items in localStorage cart');
 
-      // Get book details for each cart item
-      const itemsWithDetails = cartData.cart.map((item) => {
+      // Transform localStorage data to match expected format
+      const itemsWithDetails = cartData.map((item) => {
         return {
-          ...item,
-          book_title: item.book_title || `Book ${item.book_id}`,
-          author: 'Unknown Author', // Will be filled from book details if needed
+          cart_item_id: item.book_id, // Use book_id as cart_item_id for now
+          book_id: item.book_id,
+          book_title: item.title || `Book ${item.book_id}`,
+          author: item.author_name || 'Unknown Author',
           price: item.price || 0,
-          total_price: item.total_price || 0,
-          image_url: '/images/book1.jpg' // Will be filled from book details if needed
+          quantity: item.quantity || 1,
+          total_price: (item.price || 0) * (item.quantity || 1),
+          image_url: item.cover_image || '/images/book1.jpg',
+          category_name: item.category_name || 'Unknown Category',
+          publisher_name: item.publisher_name || 'Unknown Publisher'
         };
       });
 
