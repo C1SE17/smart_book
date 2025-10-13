@@ -104,8 +104,23 @@ const Login = ({ onToggleMode, onLoginSuccess, onForgotPassword }) => {
       
     } catch (error) {
       console.error('Lỗi đăng nhập:', error);
-      // Hiển thị thông báo lỗi cụ thể từ error message
-      setErrors({ general: error.message || 'Đăng nhập thất bại. Vui lòng thử lại.' });
+      
+      // Xử lý thông báo lỗi cụ thể
+      let errorMessage = 'Đăng nhập thất bại. Vui lòng thử lại.';
+      
+      if (error.message) {
+        if (error.message.includes('Email không tồn tại')) {
+          errorMessage = 'Tài khoản của bạn không tồn tại. Nếu bạn chưa có tài khoản, vui lòng đăng ký.';
+        } else if (error.message.includes('Mật khẩu không đúng')) {
+          errorMessage = 'Mật khẩu không đúng. Vui lòng kiểm tra lại.';
+        } else if (error.message.includes('Thiếu email hoặc mật khẩu')) {
+          errorMessage = 'Vui lòng nhập đầy đủ email và mật khẩu.';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      setErrors({ general: errorMessage });
     } finally {
       setLoading(false);
     }

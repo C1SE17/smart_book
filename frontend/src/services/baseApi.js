@@ -37,22 +37,31 @@ class BaseApiService {
       console.log(`🌐 [BaseAPI] Response ok:`, response.ok);
 
       if (!response.ok) {
+        // Try to get error message from response body
+        let errorMessage = '';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorData.message || '';
+        } catch (e) {
+          console.log('Không thể parse error response body');
+        }
+
         // Handle specific HTTP status codes
         if (response.status === 403) {
           console.error(`🚫 [BaseAPI] Lỗi 403 - Không có quyền truy cập endpoint: ${endpoint}`);
-          throw new Error(`HTTP error! status: ${response.status} - Forbidden: Bạn không có quyền truy cập`);
+          throw new Error(errorMessage || `HTTP error! status: ${response.status} - Forbidden: Bạn không có quyền truy cập`);
         } else if (response.status === 401) {
           console.error(`🔐 [BaseAPI] Lỗi 401 - Chưa đăng nhập hoặc token hết hạn cho endpoint: ${endpoint}`);
-          throw new Error(`HTTP error! status: ${response.status} - Unauthorized: Vui lòng đăng nhập lại`);
+          throw new Error(errorMessage || `HTTP error! status: ${response.status} - Unauthorized: Vui lòng đăng nhập lại`);
         } else if (response.status === 404) {
           console.error(`❌ [BaseAPI] Lỗi 404 - Không tìm thấy endpoint: ${endpoint}`);
-          throw new Error(`HTTP error! status: ${response.status} - Not Found: Endpoint không tồn tại`);
+          throw new Error(errorMessage || `HTTP error! status: ${response.status} - Not Found: Endpoint không tồn tại`);
         } else if (response.status === 500) {
           console.error(`💥 [BaseAPI] Lỗi 500 - Lỗi server cho endpoint: ${endpoint}`);
-          throw new Error(`HTTP error! status: ${response.status} - Server Error: Lỗi máy chủ`);
+          throw new Error(errorMessage || `HTTP error! status: ${response.status} - Server Error: Lỗi máy chủ`);
         } else {
           console.error(`⚠️ [BaseAPI] Lỗi HTTP ${response.status} cho endpoint: ${endpoint}`);
-          throw new Error(`HTTP error! status: ${response.status}`);
+          throw new Error(errorMessage || `HTTP error! status: ${response.status}`);
         }
       }
 
