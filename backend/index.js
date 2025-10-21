@@ -12,6 +12,8 @@ const warehouseRoutes = require('./routes/warehouseRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 const searchRoutes = require('./routes/searchRoutes');
 const authorRoutes = require('./routes/authorRoutes');
+const trackingRoutes = require('./routes/trackingRoutes');
+const connectDB = require('./config/mongodb');
 
 // Tải biến môi trường
 dotenv.config();
@@ -22,6 +24,7 @@ const app = express(); // Đảm bảo app được khai báo trước khi sử 
 const port = process.env.PORT || 3306;
 console.log('🚀 [Server] Khởi tạo Express app');
 console.log('📡 [Server] Port:', port);
+
 
 // Cấu hình CORS
 app.use(cors({
@@ -91,6 +94,8 @@ console.log('✅ [Server] Authors routes loaded');
 console.log('📋 [Server] Author endpoints available:');
 console.log('   - GET /api/authors - Lấy danh sách tất cả tác giả');
 console.log('   - GET /api/authors/:id - Lấy thông tin chi tiết tác giả');
+app.use('/api/tracking', trackingRoutes);
+console.log('✅ [Server] Tracking routes loaded');
 
 // Error handling middleware
 app.use((err, req, res, next) => {
