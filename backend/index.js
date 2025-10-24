@@ -12,8 +12,8 @@ const warehouseRoutes = require('./routes/warehouseRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 const searchRoutes = require('./routes/searchRoutes');
 const authorRoutes = require('./routes/authorRoutes');
-const trackingRoutes = require('./routes/trackingRoutes');
-const connectDB = require('./config/mongodb');
+// const trackingRoutes = require('./routes/trackingRoutes');
+// const connectDB = require('./config/mongodb');
 
 // Tải biến môi trường
 dotenv.config();
@@ -94,8 +94,8 @@ console.log('✅ [Server] Authors routes loaded');
 console.log('📋 [Server] Author endpoints available:');
 console.log('   - GET /api/authors - Lấy danh sách tất cả tác giả');
 console.log('   - GET /api/authors/:id - Lấy thông tin chi tiết tác giả');
-app.use('/api/tracking', trackingRoutes);
-console.log('✅ [Server] Tracking routes loaded');
+// app.use('/api/tracking', trackingRoutes);
+// console.log('✅ [Server] Tracking routes loaded');
 
 // Error handling middleware
 app.use((err, req, res, next) => {
