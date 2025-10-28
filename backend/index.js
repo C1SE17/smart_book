@@ -12,8 +12,9 @@ const warehouseRoutes = require('./routes/warehouseRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 const searchRoutes = require('./routes/searchRoutes');
 const authorRoutes = require('./routes/authorRoutes');
-// const trackingRoutes = require('./routes/trackingRoutes');
-// const connectDB = require('./config/mongodb');
+ const trackingRoutes = require('./routes/trackingRoutes');
+ const recommendationRoutes = require('./routes/recommendationRoutes');
+ const connectDB = require('./config/mongodb');
 
 // Tải biến môi trường
 dotenv.config();
@@ -46,10 +47,10 @@ app.use((req, res, next) => {
     console.log('📋 [Request] Origin:', req.headers.origin);
     console.log('📋 [Request] User-Agent:', req.headers['user-agent']);
     // Tạm thời comment middleware kiểm tra Content-Type
-    // if (req.method === 'POST' && req.headers['content-type'] && !req.headers['content-type'].includes('application/json')) {
-    //     console.log('❌ [Request] Invalid Content-Type');
-    //     return res.status(400).json({ error: 'Yêu cầu phải có Content-Type: application/json' });
-    // }
+    if (req.method === 'POST' && req.headers['content-type'] && !req.headers['content-type'].includes('application/json')) {
+        console.log('❌ [Request] Invalid Content-Type');
+        return res.status(400).json({ error: 'Yêu cầu phải có Content-Type: application/json' });
+    }
     console.log('📦 [Request] Body:', req.body);
     next();
 });
@@ -94,8 +95,10 @@ console.log('✅ [Server] Authors routes loaded');
 console.log('📋 [Server] Author endpoints available:');
 console.log('   - GET /api/authors - Lấy danh sách tất cả tác giả');
 console.log('   - GET /api/authors/:id - Lấy thông tin chi tiết tác giả');
-// app.use('/api/tracking', trackingRoutes);
-// console.log('✅ [Server] Tracking routes loaded');
+app.use('/api/tracking', trackingRoutes);
+console.log('✅ [Server] Tracking routes loaded');
+app.use('/api/recommendations', recommendationRoutes);
+console.log('✅ [Server] Recommendations routes loaded');
 
 // Error handling middleware
 app.use((err, req, res, next) => {

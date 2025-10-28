@@ -18,4 +18,7 @@ router.put('/:book_id', auth, adminOnly, WarehouseController.update);
 // Xóa kho của sách
 router.delete('/:book_id', auth, adminOnly, WarehouseController.delete);
 
+// PUBLIC endpoint: số lượng hiển thị an toàn cho danh sách book_ids (comma-separated)
+router.get('/public/display-quantities', WarehouseController.getPublicDisplayQuantities);
+
 module.exports = router;

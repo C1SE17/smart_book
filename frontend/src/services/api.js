@@ -14,6 +14,7 @@ import reviewApi from './reviewApi.js';
 import orderApi from './orderApi.js';
 import cartApi from './cartApi.js';
 import warehouseApi from './warehouseApi.js';
+import trackingApi from './trackingApi.js';
 import BaseApiService from './baseApi.js';
 
 // Tạo một instance của BaseApiService để có các method chung
@@ -119,6 +120,12 @@ const apiService = {
   createWarehouseItem: warehouseApi.createWarehouseItem.bind(warehouseApi),
   updateWarehouseItem: warehouseApi.updateWarehouseItem.bind(warehouseApi),
   deleteWarehouseItem: warehouseApi.deleteWarehouseItem.bind(warehouseApi),
+
+  // Tracking APIs
+  tracking: trackingApi,
+  trackSearch: trackingApi.trackSearch.bind(trackingApi),
+  trackProductView: trackingApi.trackProductView.bind(trackingApi),
+  trackCartAction: trackingApi.trackCartAction.bind(trackingApi),
 };
 
 // Export default để tương thích với code cũ
@@ -136,5 +143,6 @@ export {
   orderApi,
   cartApi,
   warehouseApi,
+  trackingApi,
   baseApi
 };

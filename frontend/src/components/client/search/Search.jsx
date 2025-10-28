@@ -23,6 +23,14 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch 
     setHasSearched(true);
 
     try {
+      // Gửi tracking tìm kiếm lên BE
+      try {
+        const api = (await import('../../../services/api')).default;
+        await api.trackSearch(query.trim());
+      } catch (e) {
+        console.warn('Tracking search failed:', e?.message || e);
+      }
+
       // Import real search API
       const bookApi = (await import('../../../services/bookApi')).default;
       const response = await bookApi.getBooks({ 
@@ -117,7 +125,19 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch 
   };
 
   // Handle book click
-  const handleBookClick = (bookId) => {
+  const handleBookClick = async (bookId) => {
+    try {
+      const api = (await import('../../../services/api')).default;
+      const book = searchResults.find(b => b && b.book_id === bookId);
+      await api.trackProductView({
+        productId: bookId,
+        productName: book?.title || 'Unknown',
+        viewDuration: 0
+      });
+    } catch (e) {
+      console.warn('Tracking product click (search) failed:', e?.message || e);
+    }
+
     if (onNavigateTo) {
       onNavigateTo('product', { productId: bookId });
     }
@@ -141,6 +161,19 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch 
 
       // Dispatch cart updated event
       window.dispatchEvent(new CustomEvent('cartUpdated'));
+
+      // Tracking hành động thêm giỏ hàng
+      try {
+        const api = (await import('../../../services/api')).default;
+        await api.trackCartAction({
+          productId: book.book_id,
+          productName: book.title,
+          action: 'add',
+          quantity: 1
+        });
+      } catch (e) {
+        console.warn('Tracking cart add failed:', e?.message || e);
+      }
 
       alert('Đã thêm sản phẩm vào giỏ hàng!');
     } catch (error) {

@@ -125,6 +125,38 @@ class Book {
     return rows[0];
   }
 
+  static async getByIds(ids = []) {
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return [];
+    }
+    const placeholders = ids.map(() => '?').join(',');
+    const [rows] = await db.promise().query(
+      `SELECT 
+          b.book_id,
+          b.title,
+          b.description,
+          b.price,
+          b.stock,
+          b.category_id,
+          b.author_id,
+          b.publisher_id,
+          b.published_date,
+          b.cover_image,
+          a.name as author_name,
+          p.name as publisher_name,
+          c.name as category_name
+        FROM books b
+        LEFT JOIN authors a ON b.author_id = a.author_id
+        LEFT JOIN publishers p ON b.publisher_id = p.publisher_id
+        LEFT JOIN categories c ON b.category_id = c.category_id
+        WHERE b.book_id IN (${placeholders})
+        ORDER BY FIELD(b.book_id, ${placeholders})
+      `,
+      [...ids, ...ids]
+    );
+    return rows;
+  }
+
   static async create(bookData) {
     // Tạo sản phẩm mới
     const {

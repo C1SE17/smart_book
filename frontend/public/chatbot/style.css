@@ -1,0 +1,125 @@
+.chatwindow{
+    position: fixed;
+    bottom: 50px;
+    right: 50px;
+    border: 1px solid #ccc;
+    border-radius: 25px;
+    display: flex;
+    flex-direction: column;
+    width: 250px;
+    height: 400px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 9999;
+}
+.chatwindow.hidden{
+    display: none;
+}
+.chatwindow .header{
+    background-color: #000;
+    color: #fff;
+    padding: 10px;
+    text-align: center;
+    border-radius: 25px 25px 0 0;
+    position: relative;
+}
+.chatwindow .close{
+    color: #fff;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 16px;
+}
+.chatwindow .chat{
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px 0 0 0;
+}
+.chatwindow .chat .model p {
+    background: #d3d3d3;
+    width: 80%;
+    margin: 5px 0;
+}
+.chatwindow .chat p {
+    border-radius: 25px;
+    padding: 10px;
+    margin: 0;
+    color: #000;
+}
+.chatwindow .chat .user {
+    display: flex;
+    justify-content: flex-end;
+}
+.chatwindow .chat .user p {
+    background: #2c18a9;
+    width: 80%;
+    color: #fff;
+    margin: 5px 0;
+}
+.input-area{
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    gap: 6px;
+    background: #fff;
+    border-top: 1px solid #eee;
+    border-radius: 0 0 25px 25px;
+}
+.input-area input{
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background: #fff;
+    padding: 8px;
+    height: 36px;
+    font-size: 16px;
+    flex: 1;
+    box-sizing: border-box;
+    outline: none;
+}
+.input-area input:focus{
+    border-color: #2c18a9;
+}
+.input-area button{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 36px;
+    width: 36px;
+    padding: 0;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background: #f0f0f0;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: background-color 0.2s;
+}
+.input-area button:hover{
+    background: #e0e0e0;
+}
+.input-area button img{
+    width: 18px;
+}
+
+/* Toggle button */
+.chat-toggle{
+    position: fixed;
+    bottom: 50px;
+    right: 50px;
+    height: 48px;
+    width: 48px;
+    border-radius: 50%;
+    border: 1px solid #ccc;
+    background: #2c18a9;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    cursor: pointer;
+    z-index: 10000;
+}
+.chat-toggle:hover{
+    filter: brightness(1.05);
+}
+
+

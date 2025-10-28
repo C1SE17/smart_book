@@ -72,6 +72,29 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
     fetchProduct();
   }, [productId]);
 
+  // Tracking thời gian xem sản phẩm
+  useEffect(() => {
+    let startTs = Date.now();
+    return () => { 
+      if (!product) return;
+      const durationSec = Math.max(0, Math.floor((Date.now() - startTs) / 1000));
+      if (durationSec >= 10) {
+        (async () => {
+          try {
+            const api = (await import('../../../services/api')).default;
+            await api.trackProductView({
+              productId: product.book_id,
+              productName: product.title,
+              viewDuration: durationSec
+            });
+          } catch (e) {
+            console.warn('Tracking product view failed:', e?.message || e);
+          }
+        })();
+      }
+    };
+  }, [product]);
+
   // Fetch recommendations
   useEffect(() => {
     const fetchRecommendations = async () => {
@@ -139,8 +162,11 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
     }
   };
 
-  // Handle add to cart
-  const handleAddToCart = async () => {
+  // Handle add to cart (supports optional event and specific item when called from recommendations)
+  const handleAddToCart = async (e, specificItem) => {
+    if (e && typeof e.stopPropagation === 'function') {
+      e.stopPropagation();
+    }
     console.log('Current user state:', user);
     console.log('User from localStorage:', localStorage.getItem('user'));
 
@@ -150,48 +176,63 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
       onNavigateTo('auth');
       return;
     }
-    if (!product) {
+    const item = specificItem || product;
+    if (!item) {
       console.log('No product available');
       return;
     }
 
     try {
-      console.log('Adding to cart:', { userId: user.user_id, bookId: product.book_id, quantity });
+      const qty = specificItem ? 1 : quantity;
+      console.log('Adding to cart:', { userId: user.user_id, bookId: item.book_id, quantity: qty });
       
       // Add to cart using localStorage
       const cartKey = `cart_${user.user_id}`;
       const existingCart = JSON.parse(localStorage.getItem(cartKey) || '[]');
-      const existingItem = existingCart.find(item => item.book_id === product.book_id);
+      const existingItem = existingCart.find(ci => ci.book_id === item.book_id);
 
       if (existingItem) {
         // Update existing item quantity
-        existingItem.quantity += quantity;
+        existingItem.quantity += qty;
         const updatedCart = existingCart.map(item =>
-          item.book_id === product.book_id ? existingItem : item
+          item.book_id === existingItem.book_id ? existingItem : item
         );
         localStorage.setItem(cartKey, JSON.stringify(updatedCart));
       } else {
         // Add new item to cart
         const newItem = {
-          book_id: product.book_id,
-          title: product.title,
-          price: product.price,
-          quantity: quantity,
-          cover_image: product.cover_image,
-          author_name: product.author_name,
-          author: product.author,
-          category_name: product.category_name,
-          publisher_name: product.publisher_name
+          book_id: item.book_id,
+          title: item.title,
+          price: item.price,
+          quantity: qty,
+          cover_image: item.cover_image,
+          author_name: item.author_name,
+          author: item.author,
+          category_name: item.category_name,
+          publisher_name: item.publisher_name
         };
         const updatedCart = [...existingCart, newItem];
         localStorage.setItem(cartKey, JSON.stringify(updatedCart));
       }
 
       console.log('Successfully added to cart');
-      showToast(`${quantity} x "${product.title}" đã được thêm vào giỏ hàng!`, 'success');
+      showToast(`${specificItem ? 1 : qty} x "${item.title}" đã được thêm vào giỏ hàng!`, 'success');
 
       // Dispatch event to update cart count in menu
       window.dispatchEvent(new CustomEvent('cartUpdated'));
+
+      // Tracking thêm giỏ hàng
+      try {
+        const api = (await import('../../../services/api')).default;
+        await api.trackCartAction({
+          productId: item.book_id,
+          productName: item.title,
+          action: 'add',
+          quantity: specificItem ? 1 : qty
+        });
+      } catch (e) {
+        console.warn('Tracking cart add failed:', e?.message || e);
+      }
     } catch (error) {
       console.error('Error adding to cart:', error);
       showToast('Không thể thêm sản phẩm vào giỏ hàng.', 'error');
@@ -248,11 +289,22 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
   };
 
   // Handle book click in recommendations
-  const handleBookClick = (bookId) => {
+  const handleBookClick = async (bookId) => {
+    try {
+      const api = (await import('../../../services/api')).default;
+      const rec = recommendations.find(r => r && r.book_id === bookId);
+      await api.trackProductView({
+        productId: bookId,
+        productName: rec?.title || 'Unknown',
+        viewDuration: 0
+      });
+    } catch (e) {
+      console.warn('Tracking product click (recommendations) failed:', e?.message || e);
+    }
+
     if (onNavigateToProduct) {
       onNavigateToProduct(bookId);
     } else {
-      // Fallback: navigate to product page
       window.location.href = `/product?id=${bookId}`;
     }
   };
@@ -721,7 +773,7 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
                               alignItems: 'center',
                               justifyContent: 'center'
                             }}
-                            onClick={(e) => handleAddToCart(book, e)}
+                            onClick={(e) => handleAddToCart(e, book)}
                           >
                             <FontAwesomeIcon icon={faShoppingCart} />
                           </button>

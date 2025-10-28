@@ -13,5 +13,31 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <!-- Chatbot assets -->
+    <link rel="stylesheet" href="/chatbot/style.css" />
+    <button class="chat-toggle" aria-label="Mở chat">💬</button>
+    <div class="chatwindow hidden">
+      <div class="header"><span class="close">X</span></div>
+      <div class="chat">
+        <div class="model"><p>"Xin chào bạn, bạn cần hỗ trợ gì?" </p></div>
+      </div>
+      <div class="input-area">
+        <input type="text"/>
+        <button><img src="/chatbot/send.png" alt=""></button>
+      </div>
+    </div>
+    <script src="/chatbot/chatbotai.js"></script>
+    <script>
+      // Toggle show/hide chat window
+      (function(){
+        const toggle = document.querySelector('.chat-toggle');
+        const win = document.querySelector('.chatwindow');
+        const closeBtn = document.querySelector('.chatwindow .close');
+        function open(){ win.classList.remove('hidden'); toggle.style.display='none'; }
+        function close(){ win.classList.add('hidden'); toggle.style.display='inline-block'; }
+        if (toggle && win){ toggle.addEventListener('click', open); }
+        if (closeBtn){ closeBtn.addEventListener('click', close); }
+      })();
+    </script>
   </body>
 </html>

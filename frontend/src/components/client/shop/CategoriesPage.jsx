@@ -332,7 +332,21 @@ const CategoriesPage = ({ onNavigateTo }) => {
   };
 
   // Handle product click
-  const handleProductClick = (bookId) => {
+  const handleProductClick = async (bookId) => {
+    try {
+      const api = (await import('../../../services/api')).default;
+      const product = filteredProducts.find(p => p && p.book_id === bookId);
+      if (product) {
+        await api.trackProductView({
+          productId: product.book_id,
+          productName: product.title,
+          viewDuration: 0
+        });
+      }
+    } catch (e) {
+      console.warn('Tracking product click failed:', e?.message || e);
+    }
+
     onNavigateTo('product', { productId: bookId });
   };
 
@@ -386,6 +400,19 @@ const CategoriesPage = ({ onNavigateTo }) => {
 
       // Dispatch cart updated event
       window.dispatchEvent(new CustomEvent('cartUpdated'));
+
+      // Tracking thêm vào giỏ từ listing
+      try {
+        const api = (await import('../../../services/api')).default;
+        await api.trackCartAction({
+          productId: product.book_id,
+          productName: product.title,
+          action: 'add',
+          quantity: 1
+        });
+      } catch (e) {
+        console.warn('Tracking cart add (listing) failed:', e?.message || e);
+      }
 
       alert('Đã thêm sản phẩm vào giỏ hàng!');
     } catch (error) {
