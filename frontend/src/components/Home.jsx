@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, useState, useEffect } from 'react';
+import React, { useMemo, useCallback, useState, useEffect, useRef } from 'react';
 import apiService from '../services';
 
 const Home = ({ onNavigateTo }) => {
@@ -6,6 +6,8 @@ const Home = ({ onNavigateTo }) => {
   const [books, setBooks] = useState([]);
   const [newBooks, setNewBooks] = useState([]);
   const [popularBooks, setPopularBooks] = useState([]);
+  const [recommended, setRecommended] = useState([]);
+  const [recoLoading, setRecoLoading] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -15,6 +17,20 @@ const Home = ({ onNavigateTo }) => {
 
   // State cho user role
   const [userRole, setUserRole] = useState(null);
+
+  // IntersectionObserver để track impression của đề xuất
+  const recoObserverRef = useRef(null);
+  const recoObservedIdsRef = useRef(new Set());
+  const recoScrollRef = useRef(null);
+
+  const scrollReco = useCallback((direction) => {
+    const el = recoScrollRef.current;
+    if (!el) return;
+    const firstCard = el.querySelector('.reco-card');
+    const cardWidth = firstCard ? firstCard.clientWidth : Math.min(el.clientWidth / 4, 280);
+    const gap = 16;
+    el.scrollBy({ left: direction * (cardWidth + gap) * 2, behavior: 'smooth' });
+  }, []);
 
   // Ghi nhớ dữ liệu để tránh tạo lại mỗi lần render
   const blogPosts = useMemo(() => [
@@ -74,6 +90,81 @@ const Home = ({ onNavigateTo }) => {
 
     fetchBooks();
   }, []);
+
+  // Lấy sản phẩm đề xuất và subscribe cập nhật realtime
+  useEffect(() => {
+    let unsubscribe = null;
+    let mounted = true;
+    const loadRecommendations = async () => {
+      setRecoLoading(true);
+      const res = await apiService.getRecommendedProducts({ limit: 8 });
+      if (!mounted) return;
+      const items = res?.data?.products || [];
+      setRecommended(items);
+      setRecoLoading(false);
+
+      // Subscribe realtime updates
+      try {
+        unsubscribe = apiService.subscribeRecommendationUpdates({
+          onMessage: (evt) => {
+            try {
+              const doc = evt?.data || evt; // depending on emitter
+              const rec = doc?.data || doc;
+              const ids = rec?.recommendations?.product_ids || [];
+              if (ids.length > 0) {
+                // Khi chỉ có ids, không có product objects: fallback gọi API lấy products theo ids trong BE đã hỗ trợ
+                // Đơn giản: reload danh sách đề xuất qua API để lấy chi tiết
+                apiService.getRecommendedProducts({ limit: 8 }).then(r => {
+                  const next = r?.data?.products || [];
+                  setRecommended(next);
+                });
+              }
+            } catch (_) {}
+          },
+          onError: () => {}
+        });
+      } catch (_) {}
+    };
+    loadRecommendations();
+    return () => {
+      mounted = false;
+      if (unsubscribe) unsubscribe();
+    };
+  }, []);
+
+  // Khởi tạo IntersectionObserver để track impression
+  useEffect(() => {
+    // Clean old observer
+    if (recoObserverRef.current) {
+      try { recoObserverRef.current.disconnect(); } catch (_) {}
+      recoObserverRef.current = null;
+    }
+    if (!('IntersectionObserver' in window)) return;
+    const seen = recoObservedIdsRef.current;
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const { productId, title } = entry.target.dataset;
+          if (productId && !seen.has(productId)) {
+            seen.add(productId);
+            apiService.trackProductView({
+              productId,
+              productName: title,
+              viewDuration: 0
+            });
+          }
+        }
+      });
+    }, { threshold: 0.25 });
+    recoObserverRef.current = observer;
+    // Attach to current recommended items
+    setTimeout(() => {
+      document.querySelectorAll('[data-reco-item="1"]').forEach((el) => observer.observe(el));
+    }, 0);
+    return () => {
+      try { observer.disconnect(); } catch (_) {}
+    };
+  }, [recommended]);
 
   // Lấy danh mục từ API và đếm số sách cho mỗi danh mục
   useEffect(() => {
@@ -371,6 +462,222 @@ const Home = ({ onNavigateTo }) => {
               </div>
             )}
           </div>
+        </div>
+      </section>
+
+      {/* Đề xuất cho bạn */}
+      <section className="py-5 bg-light">
+        <div className="container">
+          <div className="d-flex align-items-center justify-content-between mb-3">
+            <h2 className="fw-bold mb-0">Đề xuất cho bạn</h2>
+            <div className="d-flex align-items-center gap-2">
+              <button className="btn btn-outline-secondary btn-sm" onClick={() => scrollReco(-1)}>
+                <i className="bi bi-chevron-left"></i>
+              </button>
+              <button className="btn btn-outline-secondary btn-sm" onClick={() => scrollReco(1)}>
+                <i className="bi bi-chevron-right"></i>
+              </button>
+            </div>
+          </div>
+
+          {recoLoading ? (
+            <div className="text-center py-5">
+              <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+              <p className="mt-2">Đang lấy đề xuất cá nhân hóa...</p>
+            </div>
+          ) : (
+            <div
+              ref={recoScrollRef}
+              className="reco-slider d-flex flex-nowrap gap-4"
+              style={{ overflowX: 'auto', scrollBehavior: 'smooth', paddingBottom: '6px' }}
+            >
+              {recommended.length === 0 ? (
+                <div className="w-100">
+                  <div className="alert alert-info mb-0">Hiện chưa có đề xuất. Hãy xem vài sản phẩm để chúng tôi gợi ý tốt hơn!</div>
+                </div>
+              ) : recommended.map((book, idx) => (
+                <div
+                  key={`reco-${book.book_id || idx}`}
+                  className="reco-card card h-100 border-0 shadow-sm"
+                  style={{
+                    transition: 'all 0.3s ease',
+                    cursor: 'pointer',
+                    borderRadius: '8px',
+                    overflow: 'hidden',
+                    height: '450px',
+                    backgroundColor: 'white',
+                    width: '300px',
+                    minWidth: '300px'
+                  }}
+                  onClick={() => handleBookClick(book.book_id)}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-8px)';
+                    e.currentTarget.style.boxShadow = '0 15px 35px rgba(0,0,0,0.15)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                  }}
+                  data-reco-item="1"
+                  data-product-id={String(book.book_id)}
+                  data-title={book.title}
+                >
+                  <div className="position-relative">
+                    <img
+                      src={book.cover_image || '/images/book1.jpg'}
+                      className="card-img-top"
+                      alt={book.title}
+                      style={{
+                        height: '280px',
+                        objectFit: 'contain',
+                        width: '100%',
+                        backgroundColor: '#f8f9fa'
+                      }}
+                    />
+                    <div className="position-absolute top-0 start-0 m-2">
+                      <button
+                        className="btn btn-sm"
+                        style={{
+                          width: '35px',
+                          height: '35px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          backgroundColor: 'rgba(255,255,255,0.95)',
+                          border: '1px solid rgba(0,0,0,0.1)',
+                          borderRadius: '8px',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                          transition: 'all 0.3s ease',
+                          backdropFilter: 'blur(10px)'
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.backgroundColor = 'rgba(255,255,255,1)';
+                          e.target.style.transform = 'scale(1.05)';
+                          e.target.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.backgroundColor = 'rgba(255,255,255,0.95)';
+                          e.target.style.transform = 'scale(1)';
+                          e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+                        }}
+                      >
+                        <i className="bi bi-heart text-dark" style={{ fontSize: '14px' }}></i>
+                      </button>
+                    </div>
+
+                    {book.stock > 0 && userRole !== 'admin' && (
+                      <div className="position-absolute top-0 end-0 m-2">
+                        <button
+                          className="btn btn-sm"
+                          style={{
+                            width: '35px',
+                            height: '35px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backgroundColor: 'rgba(0,123,255,0.95)',
+                            border: '1px solid rgba(0,123,255,0.3)',
+                            borderRadius: '8px',
+                            boxShadow: '0 2px 8px rgba(0,123,255,0.2)',
+                            transition: 'all 0.3s ease',
+                            backdropFilter: 'blur(10px)'
+                          }}
+                          onClick={(e) => handleAddToCart(book, e)}
+                          onMouseEnter={(e) => {
+                            e.target.style.backgroundColor = 'rgba(0,123,255,1)';
+                            e.target.style.transform = 'scale(1.05)';
+                            e.target.style.boxShadow = '0 4px 12px rgba(0,123,255,0.3)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.backgroundColor = 'rgba(0,123,255,0.95)';
+                            e.target.style.transform = 'scale(1)';
+                            e.target.style.boxShadow = '0 2px 8px rgba(0,123,255,0.2)';
+                          }}
+                        >
+                          <i className="bi bi-cart-plus text-white" style={{ fontSize: '14px' }}></i>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="card-body p-3 d-flex flex-column">
+                    <h6 className="card-title fw-bold mb-2" style={{
+                      fontSize: '1rem',
+                      lineHeight: '1.3',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                      minHeight: '2.6rem'
+                    }}>
+                      {book.title}
+                    </h6>
+                    <p className="card-text text-muted small mb-2" style={{ fontSize: '0.85rem' }}>
+                      {book.author_name || 'Tác giả chưa xác định'}
+                    </p>
+
+                    <div className="mb-2">
+                      <div className="d-flex align-items-center">
+                        {[...Array(5)].map((_, i) => (
+                          <i
+                            key={i}
+                            className={`bi bi-star${i < Math.floor(book.rating || 0) ? '-fill' : ''} text-warning`}
+                            style={{ fontSize: '12px' }}
+                          ></i>
+                        ))}
+                        <span className="text-muted small ms-1" style={{ fontSize: '11px' }}>
+                          ({book.reviewCount || 1})
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="mt-auto">
+                      <div className="d-flex justify-content-between align-items-center mb-3">
+                        <span className="fw-bold text-dark h5 mb-0">
+                          {book.price ? new Intl.NumberFormat('vi-VN', {
+                            style: 'currency',
+                            currency: 'VND'
+                          }).format(book.price) : 'Liên hệ'}
+                        </span>
+                        {book.stock > 0 ? (
+                          <small className="text-success">
+                            <i className="bi bi-check-circle me-1"></i>
+                            Còn hàng
+                          </small>
+                        ) : (
+                          <small className="text-danger">
+                            <i className="bi bi-x-circle me-1"></i>
+                            Hết hàng
+                          </small>
+                        )}
+                      </div>
+                      <button
+                        className="btn btn-outline-primary w-100"
+                        style={{
+                          fontSize: '14px',
+                          padding: '8px 16px',
+                          border: '1px solid #007bff',
+                          backgroundColor: 'white',
+                          color: '#007bff'
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleBookClick(book.book_id);
+                        }}
+                      >
+                        Xem chi tiết
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

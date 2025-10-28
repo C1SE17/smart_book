@@ -204,6 +204,15 @@ body {
   animation: fadeInUp 0.3s ease-out;
 }
 
+/* Hide scrollbar for recommendation slider */
+.reco-slider {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+.reco-slider::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
+
 /* Slide Animations */
 @keyframes slideInLeft {
   from {

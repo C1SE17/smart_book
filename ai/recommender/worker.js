@@ -1,13 +1,24 @@
 /*
   Recommender Worker
-  - Watches MongoDB Change Streams on searchtracks/producttracks/carttracks
-  - Maintains per-session/user profile scores
-  - Writes recommendations collection with { key, recommendations: { product_ids, category_ids }, createdAt }
+  --------------------------------------------
+  Mục tiêu chỉnh sửa theo yêu cầu:
+  1) Tài khoản mới (vừa đăng ký) hoặc người dùng chưa có dữ liệu hành vi
+     => KHÔNG ghi đề xuất (recommendations) cho tới khi có dữ liệu.
+  2) Chỉnh phần ghi nhận hành vi: click/xem sản phẩm (producttracks) và thao tác giỏ hàng (carttracks).
+     Nếu có thêm sự kiện đặt hàng (ordertracks) trong tương lai, sẽ cộng điểm mạnh hơn.
+
+  Luồng hoạt động:
+  - Lắng nghe Change Streams của MongoDB ở các collection: searchtracks/producttracks/carttracks
+    (và ordertracks nếu có).
+  - Duy trì điểm số hồ sơ hành vi (profiles) theo từng khoá key (sessionId hoặc user:USER_ID).
+  - Chỉ ghi bản ghi đề xuất (recommendations) khi đã có điểm số thực sự (scores tồn tại và > 0).
+  - Ghi chú: Worker chỉ chỉnh trong thư mục ai/recommender, không thay đổi backend.
 */
 console.log('[reco-cfg]', require('./config'));
 const { MongoClient } = require('mongodb');
 const cfg = require('./config');
 
+// Tính điểm cho từng sự kiện để phục vụ xếp hạng đề xuất
 function computeIncrement(e) {
   const doc = e.fullDocument || {};
   if (e.ns && e.ns.coll === 'producttracks') {
@@ -20,7 +31,35 @@ function computeIncrement(e) {
     if (action === 'update') return cfg.UPDATE_WEIGHT;
     if (action === 'remove') return cfg.REMOVE_WEIGHT;
   }
+  // Nếu sau này có collection ordertracks (ghi nhận đặt hàng): cộng trọng số mạnh hơn
+  if (e.ns && e.ns.coll === 'ordertracks') {
+    // Ví dụ: mỗi đơn hàng cho productId tương ứng sẽ cộng điểm ORDER_WEIGHT
+    return cfg.ORDER_WEIGHT || 0;
+  }
   return 0;
+}
+
+// Ghi nhận bộ đếm hành vi (checking lượt click/tìm kiếm/giỏ hàng/đặt hàng)
+function computeMetricIncrements(e) {
+  const inc = {};
+  if (e.ns && e.ns.coll === 'producttracks') {
+    // Mỗi lần xem sản phẩm coi như 1 click
+    inc['metrics.clicks'] = 1;
+  }
+  if (e.ns && e.ns.coll === 'searchtracks') {
+    inc['metrics.searches'] = 1;
+  }
+  if (e.ns && e.ns.coll === 'carttracks') {
+    const action = (e.fullDocument && e.fullDocument.action) || '';
+    if (action === 'add') inc['metrics.cartAdds'] = 1;
+    else if (action === 'update') inc['metrics.cartUpdates'] = 1;
+    else if (action === 'remove') inc['metrics.cartRemoves'] = 1;
+  }
+  if (e.ns && e.ns.coll === 'ordertracks') {
+    // Mỗi bản ghi order được tính là 1 đơn hàng
+    inc['metrics.orders'] = 1;
+  }
+  return inc;
 }
 
 async function run() {
@@ -34,8 +73,11 @@ async function run() {
   const profiles = db.collection('profiles');
   const recos = db.collection('recommendations');
 
+  // Chỉ lắng nghe các sự kiện insert mới vào các collection tracking
   const pipeline = [{ $match: { operationType: 'insert' } }];
   const collections = ['searchtracks', 'producttracks', 'carttracks'];
+  // Nếu có collection ordertracks trong MongoDB, có thể thêm vào danh sách bên dưới
+  // collections.push('ordertracks');
 
   // Debounce timers per key
   const timers = new Map();
@@ -51,30 +93,42 @@ async function run() {
       const key = doc.sessionId || (doc.userId ? `user:${doc.userId}` : 'guest');
       const productId = doc.productId ? String(doc.productId) : null;
       const inc = computeIncrement(e);
+      const metricIncs = computeMetricIncrements(e);
 
-      // Update profile scores
+      // Cập nhật điểm số hồ sơ hành vi (profile scores) và bộ đếm (metrics)
+      // - Nếu có productId và inc != 0: tăng/giảm điểm cho sản phẩm đó
+      // - Nếu không có productId hoặc inc == 0: chỉ cập nhật thời điểm updatedAt để đánh dấu có hoạt động
       if (productId && inc !== 0) {
         await profiles.updateOne(
           { key },
           {
             $setOnInsert: { key, createdAt: new Date() },
             $set: { updatedAt: new Date() },
-            $inc: { [`scores.${productId}`]: inc }
+            $inc: { [`scores.${productId}`]: inc, ...metricIncs }
           },
           { upsert: true }
         );
       } else {
         await profiles.updateOne(
           { key },
-          { $setOnInsert: { key, createdAt: new Date() }, $set: { updatedAt: new Date() } },
+          { $setOnInsert: { key, createdAt: new Date() }, $set: { updatedAt: new Date() }, $inc: { ...metricIncs } },
           { upsert: true }
         );
       }
 
-      // Debounced recompute recommendations
+      // Tính toán đề xuất theo kiểu debounce để gom nhiều sự kiện liên tiếp
       schedule(key, async () => {
         const p = await profiles.findOne({ key });
-        const entries = Object.entries((p && p.scores) || {});
+        // 1) Không có profile or chưa có dữ liệu điểm số: KHÔNG ghi đề xuất
+        if (!p || !p.scores || Object.keys(p.scores).length === 0) {
+          // Xoá đề xuất cũ (nếu có) để đảm bảo người dùng mới không nhận đề xuất trống
+          await recos.deleteOne({ key });
+          console.log(`[reco] skip for ${key} (no scores yet)`);
+          return;
+        }
+
+        // 2) Có điểm số: sắp xếp và chọn top-N
+        const entries = Object.entries(p.scores || {});
         entries.sort((a, b) => b[1] - a[1]);
         const product_ids = entries.slice(0, cfg.MAX_CANDIDATES).map(([id]) => parseInt(id, 10)).slice(0, cfg.TOP_N);
         const category_ids = []; // TODO: map product->category when MySQL access is available

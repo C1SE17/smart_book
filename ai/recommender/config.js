@@ -6,6 +6,8 @@ module.exports = {
   ADD_TO_CART_WEIGHT: 3,
   UPDATE_WEIGHT: 0.5,
   REMOVE_WEIGHT: -1,
+  // Trọng số khi có đơn hàng (nếu backend có ghi log sang MongoDB "ordertracks")
+  ORDER_WEIGHT: 10,
   // debounce ms to aggregate bursts
   DEBOUNCE_MS: 1200,
   // how many products to keep as candidates
