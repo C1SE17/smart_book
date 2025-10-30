@@ -154,6 +154,16 @@ const MenuClient = ({ onNavigateTo, onBackToHome, user, onLogout, onViewAllNotif
                 Liên Hệ
               </a>
             </li>
+            <li className="nav-item">
+              <a
+                className="nav-link text-white fw-normal"
+                href="#"
+                onClick={(e) => { e.preventDefault(); onNavigateTo('ai-ask'); }}
+                style={{ fontSize: '1rem', fontFamily: 'sans-serif' }}
+              >
+                AI Ask
+              </a>
+            </li>
           </ul>
 
           {/* Right Side Icons */}

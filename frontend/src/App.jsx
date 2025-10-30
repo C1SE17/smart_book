@@ -16,6 +16,7 @@ import BlogDetail from './components/client/blog/BlogDetail'
 import Contact from './components/client/contact/Contact'
 import AboutUs from './components/client/about/AboutUs'
 import { Authors, AuthorDetail } from './components/client/author'
+import AIAsk from './components/client/ai/AIAsk.jsx'
 import AdminLayout from './components/admin/AdminLayout'
 import Layout from './components/layouts/Layout'
 import Dashboard from './components/admin/Dashboard'
@@ -207,6 +208,7 @@ function App() {
       'orders': '/orders',
       'contact': '/contact',
       'about': '/about',
+      'ai-ask': '/ai-ask',
       'admin-dashboard': '/admin/dashboard',
       'admin-books': '/admin/books',
       'admin-categories': '/admin/categories',
@@ -232,9 +234,15 @@ function App() {
       navigateTo(path, { id });
     }
     // Handle search page with searchQuery
-    else if (page === 'search' && params.searchQuery) {
-      setSearchQuery(params.searchQuery);
-      navigateTo(path, { searchQuery: params.searchQuery });
+    else if (page === 'search') {
+      const query = params?.searchQuery || params?.q || '';
+      if (query) {
+        setSearchQuery(query);
+        navigateTo(path, { q: query });
+      } else {
+        setSearchQuery('');
+        navigateTo(path);
+      }
     }
     // Handle author detail page with authorId
     else if (page === 'author-detail' && params.id) {
@@ -443,6 +451,19 @@ function App() {
           </ErrorBoundary>
         </Layout>
       )}
+    {currentPage === 'ai-ask' && (
+      <Layout 
+        onViewAllNotifications={handleViewAllNotifications}
+        onNavigateTo={handleNavigateTo}
+        onBackToHome={handleBackToHome}
+        user={user}
+        onLogout={handleLogout}
+      >
+        <ErrorBoundary>
+          <AIAsk onNavigateTo={handleNavigateTo} onSearch={handleSearch} />
+        </ErrorBoundary>
+      </Layout>
+    )}
       {currentPage === 'about' && (
         <Layout 
           onViewAllNotifications={handleViewAllNotifications}

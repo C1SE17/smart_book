@@ -1,0 +1,516 @@
+/* 📐 Bố cục tổng thể của trang AI Ask */
+.aiask-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 40px 16px 80px;
+  background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+}
+
+/* 📦 Thẻ nội dung chính */
+.aiask-card {
+  width: min(1100px, 100%);
+  background: #fff;
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: 0 24px 60px -28px rgba(79, 70, 229, 0.45);
+  border: 1px solid rgba(99, 102, 241, 0.12);
+}
+
+.aiask-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #1e1b4b;
+}
+
+.aiask-subtitle {
+  margin: 0;
+  color: #475569;
+  font-size: 1rem;
+}
+
+/* 🔍 Khu vực input tìm kiếm chính */
+.aiask-search {
+  margin-top: 24px;
+  position: relative;
+}
+
+.aiask-label {
+  display: block;
+  font-weight: 600;
+  color: #312e81;
+  margin-bottom: 8px;
+}
+
+.aiask-search-wrapper {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  background: #f8fafc;
+  border: 1px solid transparent;
+  border-radius: 16px;
+  padding: 10px 14px;
+  transition: all 0.2s ease;
+}
+
+.aiask-search-wrapper.active,
+.aiask-search-wrapper:focus-within {
+  border-color: #6366f1;
+  background: #fff;
+  box-shadow: 0 10px 36px -18px rgba(79, 70, 229, 0.55);
+}
+
+.aiask-search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 1rem;
+  outline: none;
+}
+
+.aiask-search-button {
+  min-width: 72px;
+  border: none;
+  background: #6366f1;
+  color: #fff;
+  font-weight: 600;
+  padding: 10px 18px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.aiask-search-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px -14px rgba(79, 70, 229, 0.55);
+}
+
+/* 💡 Panel gợi ý tức thời (queries, books, authors) */
+.aiask-suggestion-panel {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  padding: 20px;
+  background: #0f172a;
+  color: #e0e7ff;
+  border-radius: 20px;
+  box-shadow: 0 28px 60px -32px rgba(15, 23, 42, 0.65);
+  position: absolute;
+  width: 100%;
+  z-index: 20;
+}
+
+.aiask-suggestion-column {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.aiask-column-title {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  font-size: 0.82rem;
+  opacity: 0.75;
+}
+
+.aiask-suggestion-item {
+  text-align: left;
+  border: none;
+  background: rgba(255, 255, 255, 0.06);
+  color: inherit;
+  border-radius: 12px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: background 0.18s ease, transform 0.18s ease;
+}
+
+.aiask-suggestion-item:hover {
+  background: rgba(255, 255, 255, 0.14);
+  transform: translateX(2px);
+}
+
+.aiask-suggestion-main {
+  font-weight: 600;
+}
+
+.aiask-suggestion-sub {
+  display: block;
+  font-size: 0.82rem;
+  color: rgba(226, 232, 240, 0.75);
+  margin-top: 2px;
+}
+
+.aiask-suggestion-empty {
+  font-size: 0.88rem;
+  opacity: 0.7;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* 🎛️ Khối bộ lọc nhanh */
+.aiask-filters {
+  margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.aiask-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.aiask-filter-control {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.aiask-filter-control > button {
+  border: 1px solid rgba(79, 70, 229, 0.3);
+  background: rgba(99, 102, 241, 0.12);
+  color: #312e81;
+  padding: 10px 18px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 600;
+  min-width: 160px;
+  transition: all 0.2s ease;
+}
+
+.aiask-filter-control > button:hover {
+  background: rgba(79, 70, 229, 0.18);
+  border-color: rgba(79, 70, 229, 0.5);
+}
+
+.aiask-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: max-content;
+  min-width: 220px;
+  max-height: 280px;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 20px 50px -24px rgba(15, 23, 42, 0.55);
+  padding: 14px;
+  z-index: 25;
+  border: 1px solid rgba(99, 102, 241, 0.18);
+}
+
+.aiask-dropdown-menu.single {
+  max-height: none;
+}
+
+.aiask-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 4px;
+  font-size: 0.94rem;
+  color: #1e1b4b;
+}
+
+.aiask-option input {
+  accent-color: #6366f1;
+}
+
+.aiask-synonym {
+  font-size: 0.78rem;
+  color: #6366f1;
+}
+
+.aiask-range {
+  padding: 12px 18px;
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px dashed rgba(79, 70, 229, 0.35);
+  border-radius: 18px;
+  min-width: 240px;
+}
+
+.aiask-range-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.aiask-range-values {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: #475569;
+}
+
+.aiask-double-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.aiask-double-input input {
+  width: 90px;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  padding: 6px 10px;
+}
+
+.aiask-range-sep {
+  color: #6366f1;
+  font-weight: 600;
+}
+
+.aiask-rating {
+  background: rgba(20, 184, 166, 0.1);
+  border: 1px dashed rgba(20, 184, 166, 0.35);
+  border-radius: 18px;
+  padding: 12px 18px;
+  min-width: 220px;
+}
+
+.aiask-rating-input {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.aiask-rating-input input[type="range"] {
+  flex: 1;
+}
+
+.aiask-rating-value {
+  font-weight: 600;
+  color: #0f766e;
+}
+
+.aiask-active-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.aiask-chip {
+  background: #eef2ff;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  color: #3730a3;
+  font-weight: 600;
+}
+
+/* 🚀 Nhóm nút hành động AI */
+.aiask-actions {
+  margin-top: 28px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.aiask-action {
+  border: none;
+  border-radius: 14px;
+  padding: 12px 20px;
+  font-weight: 600;
+  background: #4f46e5;
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.aiask-action:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 36px -20px rgba(79, 70, 229, 0.7);
+}
+
+.aiask-action:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.aiask-secondary {
+  background: #64748b;
+}
+
+/* 🧠 Khung hiển thị thông điệp và insight từ AI */
+.aiask-message {
+  margin-top: 20px;
+  padding: 16px 18px;
+  background: rgba(15, 118, 110, 0.08);
+  border-left: 4px solid #0f766e;
+  border-radius: 14px;
+  color: #0f172a;
+}
+
+.aiask-insights {
+  margin: 12px 0 0;
+  padding-left: 20px;
+  color: #0f172a;
+}
+
+.aiask-insights li {
+  font-size: 0.92rem;
+  line-height: 1.5;
+  margin-bottom: 4px;
+}
+
+/* 📊 Lưới kết quả gợi ý */
+.aiask-recommendations {
+  margin-top: 28px;
+}
+
+.aiask-loader,
+.aiask-placeholder {
+  padding: 40px 24px;
+  text-align: center;
+  color: #475569;
+  background: rgba(148, 163, 184, 0.12);
+  border-radius: 18px;
+}
+
+/* 🧱 Lưới hiển thị card sách */
+.aiask-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 18px;
+}
+
+/* 📘 Card một cuốn sách gợi ý */
+.aiask-book-card {
+  background: #fff;
+  border: 1px solid rgba(99, 102, 241, 0.12);
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: 0 16px 40px -26px rgba(79, 70, 229, 0.55);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.aiask-book-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 24px 50px -28px rgba(79, 70, 229, 0.62);
+}
+
+.aiask-book-card.is-selected {
+  border-color: rgba(79, 70, 229, 0.55);
+  box-shadow: 0 28px 60px -30px rgba(15, 23, 42, 0.6);
+}
+
+.aiask-book-card.is-selected .aiask-book-cover {
+  box-shadow: inset 0 0 0 2px rgba(79, 70, 229, 0.45);
+}
+
+.aiask-book-cover {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #eef2ff;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.aiask-book-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.aiask-placeholder-cover {
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.aiask-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(236, 72, 153, 0.9);
+  color: #fff;
+  font-size: 0.72rem;
+  padding: 4px 10px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.aiask-book-info h3 {
+  font-size: 1rem;
+  margin: 0;
+  color: #1e1b4b;
+}
+
+.aiask-book-author {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #475569;
+}
+
+.aiask-book-price {
+  margin: 4px 0 0;
+  font-weight: 700;
+  color: #dc2626;
+}
+
+.aiask-book-meta {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 0.78rem;
+  color: #475569;
+}
+
+.aiask-view-button {
+  margin-top: auto;
+  border: none;
+  background: #6366f1;
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.aiask-view-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 38px -20px rgba(79, 70, 229, 0.7);
+}
+
+/* 📱 Tối ưu hiển thị trên màn hình nhỏ */
+@media (max-width: 768px) {
+  .aiask-card {
+    padding: 24px 18px;
+  }
+
+  .aiask-suggestion-panel {
+    grid-template-columns: 1fr;
+    position: static;
+  }
+
+  .aiask-filter-control > button {
+    min-width: auto;
+  }
+
+  .aiask-range,
+  .aiask-rating {
+    min-width: auto;
+    width: 100%;
+  }
+
+  .aiask-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+}
+
