@@ -1,0 +1,2030 @@
+{
+  "nav": {
+    "home": "Trang Chủ",
+    "shop": "Shop",
+    "blog": "Blog",
+    "author": "Tác Giả",
+    "about": "Về Chúng Tôi",
+    "contact": "Liên Hệ",
+    "translation": "Dịch Nội Dung",
+    "aiAsk": "AI Ask",
+    "login": "Đăng nhập",
+    "register": "Đăng ký",
+    "logout": "Đăng xuất",
+    "profile": "Hồ sơ",
+    "orders": "Đơn Hàng",
+    "adminDashboard": "Bảng điều khiển"
+  },
+  "languageToggle": {
+    "tooltip": "Chuyển ngôn ngữ",
+    "vi": "VI",
+    "en": "EN"
+  },
+  "slides": [
+    {
+      "title": "Top 10 cuốn sách yêu thích",
+      "description": "Khám phá những cuốn sách hay nhất mọi thời đại được các chuyên gia của chúng tôi tuyển chọn kỹ lưỡng.",
+      "buttonText": "Xem thêm"
+    },
+    {
+      "title": "Sách mới",
+      "description": "Hãy xem bộ sưu tập sách mới nhất của chúng tôi từ khắp nơi trên thế giới.",
+      "buttonText": "Mua ngay"
+    },
+    {
+      "title": "Bán chạy nhất",
+      "description": "Những cuốn sách phổ biến nhất mà mọi người đang bàn tán.",
+      "buttonText": "Xem tất cả"
+    }
+  ],
+  "translationPage": {
+    "title": "Dịch Nội Dung Sách",
+    "subtitle": "Sử dụng mô hình đa ngữ kết hợp glossary để dịch chính xác mô tả sản phẩm, chương truyện, đánh giá và nội dung marketing.",
+    "directionLabel": "Chọn hướng dịch",
+    "directions": {
+      "auto": "Tự phát hiện",
+      "en_vi": "Tiếng Anh → Tiếng Việt",
+      "vi_en": "Tiếng Việt → Tiếng Anh"
+    },
+    "sourceLabel": "Nội dung nguồn",
+    "placeholder": "Nhập mô tả sản phẩm, tiêu đề sách, chương truyện hoặc nội dung marketing bạn muốn dịch...",
+    "example": "Ví dụ: “Một tiểu thuyết kỳ ảo về hành trình trưởng thành của cô bé mồ côi tại hiệu sách cổ.”",
+    "swap": "Đảo chiều",
+    "action": "Dịch nội dung",
+    "translating": "Đang dịch...",
+    "resultTitle": "Kết quả",
+    "glossaryTitle": "Thuật ngữ ưu tiên",
+    "exampleTitle": "Ví dụ tham chiếu",
+    "exampleSource": "Nguồn",
+    "exampleTarget": "Bản dịch",
+    "errors": {
+      "empty": "Vui lòng nhập nội dung cần dịch.",
+      "generic": "Đã xảy ra lỗi khi dịch nội dung."
+    }
+  },
+  "aiAsk": {
+    "header": {
+      "title": "AI Gợi ý Sách thông minh",
+      "subtitle": "Nhập từ khóa, chọn bộ lọc và để AI đề xuất những cuốn sách hợp với bạn nhất."
+    },
+    "search": {
+      "label": "Bạn muốn tìm sách gì?",
+      "placeholder": "Tìm theo tên sách, tác giả, chủ đề...",
+      "button": "Tìm",
+      "suggestionColumns": {
+        "queries": "Từ khóa",
+        "books": "Sách",
+        "others": "Tác giả / Thể loại"
+      },
+      "suggestions": {
+        "loading": "Đang tải...",
+        "emptyQueries": "Không có gợi ý",
+        "emptyBooks": "Chưa có sách trùng khớp",
+        "emptyOthers": "Chưa có gợi ý thêm"
+      }
+    },
+    "languageOptions": [
+      { "value": "vi", "label": "Tiếng Việt" },
+      { "value": "en", "label": "Tiếng Anh" },
+      { "value": "jp", "label": "Tiếng Nhật" },
+      { "value": "cn", "label": "Tiếng Trung" },
+      { "value": "kr", "label": "Tiếng Hàn" },
+      { "value": "fr", "label": "Tiếng Pháp" }
+    ],
+    "statusOptions": [
+      { "value": "in_stock", "label": "Còn hàng" },
+      { "value": "preorder", "label": "Đặt trước" },
+      { "value": "out_of_stock", "label": "Hết hàng" }
+    ],
+    "tagLibrary": [
+      { "value": "mới phát hành", "label": "Mới phát hành" },
+      { "value": "bán chạy", "label": "Bán chạy" },
+      { "value": "giải thưởng", "label": "Giải thưởng" },
+      { "value": "thiếu nhi", "label": "Thiếu nhi" },
+      { "value": "chuyển thể phim", "label": "Chuyển thể phim" },
+      { "value": "self-help", "label": "Self-help" },
+      { "value": "light novel", "label": "Light novel" },
+      { "value": "classic", "label": "Classic" }
+    ],
+    "filters": {
+      "categories": "Thể loại",
+      "authors": "Tác giả",
+      "publishers": "NXB / Nhà phát hành",
+      "price": "Khoảng giá",
+      "years": "Năm xuất bản",
+      "languages": "Ngôn ngữ",
+      "status": "Tình trạng",
+      "minRating": "Đánh giá tối thiểu",
+      "tags": "Tags/Keywords",
+      "ratingValue": "≥ {{value}}"
+    },
+    "labels": {
+      "synonym": "(aka {{terms}})"
+    },
+    "dataTypes": {
+      "categories": "danh mục",
+      "authors": "tác giả",
+      "publishers": "nhà phát hành"
+    },
+    "actions": {
+      "quick": "Gợi ý nhanh",
+      "similar": "Sách tương tự",
+      "reset": "Làm mới"
+    },
+    "messages": {
+      "initial": "Hãy nhập từ khóa hoặc chọn bộ lọc để AI gợi ý sách phù hợp.",
+      "metaLoadPartial": "Không tải được dữ liệu {{dataTypes}}. Một số bộ lọc có thể thiếu thông tin.",
+      "metaLoadError": "Không thể tải dữ liệu bộ lọc. Vui lòng thử lại sau ít phút.",
+      "autocompleteError": "Không thể tải gợi ý tức thời, hãy nhập lại từ khóa khác.",
+      "emptyQuery": "Bạn hãy nhập từ khóa để tìm kiếm hoặc thử Gợi ý nhanh nhé!",
+      "searchOpening": "Đang mở trang tìm kiếm cho “{{query}}”...",
+      "quickAnalyzing": "AI đang phân tích dữ liệu của bạn...",
+      "fewResults": "AI chỉ tìm được một vài tựa sách phù hợp. Bạn có thể nới lỏng bộ lọc để có thêm lựa chọn.",
+      "currentPreferences": "sở thích hiện tại",
+      "quickSummary": "AI đã tổng hợp {{count}} gợi ý dựa trên {{source}}, tập trung vào {{summary}}.",
+      "quickError": "Có lỗi khi gợi ý nhanh. Bạn vui lòng thử lại hoặc làm mới trang.",
+      "selectBookForSimilar": "Hãy chọn một cuốn sách từ danh sách gợi ý trước khi xem sách tương tự.",
+      "similarAnalyzing": "AI đang phân tích “{{title}}” để tìm sách tương tự...",
+      "similarSummary": "AI tìm thấy {{count}} tựa sách có chủ đề gần với “{{title}}”.",
+      "similarFew": "Chỉ tìm được {{count}} sách tương tự cho “{{title}}”. Bạn hãy mở rộng bộ lọc nhé!",
+      "similarNone": "Chưa có sách tương tự, bạn hãy thử đổi từ khóa hoặc chọn bộ lọc khác nhé!",
+      "similarError": "Có lỗi khi lấy sách tương tự. Bạn hãy thử lại sau!",
+      "similarSummaryContext": "chủ đề tương đồng với “{{title}}”",
+      "similarSource": "phân tích metadata & hành vi đọc tương tự",
+      "reset": "Bộ lọc đã được làm mới. Hãy nhập từ khóa mới để AI gợi ý.",
+      "bookSelected": "Đã chọn sách “{{title}}”. Bấm “Sách tương tự” để xem thêm gợi ý liên quan.",
+      "bookSelectedNoDetail": "Không lấy được chi tiết sách, nhưng bạn vẫn có thể bấm “Sách tương tự”.",
+      "authorAdded": "Đã thêm tác giả {{name}} vào bộ lọc.",
+      "categoryAdded": "Đã thêm thể loại {{name}} vào bộ lọc. Nhấn “Gợi ý nhanh” để cập nhật danh sách.",
+      "keywordSelected": "Đã chọn từ khóa “{{keyword}}”. Bạn có thể bấm nút Tìm hoặc Gợi ý nhanh.",
+      "suggestionError": "Không xử lý được lựa chọn này, hãy thử nhấp lại hoặc chọn mục khác."
+    },
+    "filterSummary": {
+      "categories": "thể loại {{names}}",
+      "authors": "tác giả {{names}}",
+      "publishers": "NXB {{names}}",
+      "price": "khoảng giá {{min}} - {{max}}",
+      "years": "năm xuất bản {{min}} - {{max}}",
+      "languages": "ngôn ngữ {{names}}",
+      "tags": "tags {{tags}}",
+      "minRating": "điểm đánh giá tối thiểu {{value}}"
+    },
+    "insights": {
+      "priorityFilters": "Bộ lọc ưu tiên: {{summary}}.",
+      "dataSource": "Nguồn dữ liệu: {{source}}.",
+      "dataSourceFallback": "Nguồn dữ liệu: {{source}} (sử dụng fallback xu hướng).",
+      "averageRating": "Điểm đánh giá trung bình của nhóm đề xuất ≈ {{value}}/5.",
+      "priceRange": "Khoảng giá gợi ý ~ {{min}} - {{max}}.",
+      "topCategory": "Danh mục nổi bật nhất: {{category}}."
+    },
+    "reasons": {
+      "systemTrend": "Xu hướng toàn hệ thống",
+      "personalProfile": "Hồ sơ đọc cá nhân",
+      "category": "Thể loại {{name}}",
+      "author": "Tác giả {{name}}",
+      "combinedFilters": "Bộ lọc tổng hợp",
+      "default": "Hệ thống đề xuất"
+    },
+    "recommendations": {
+      "loading": "Đang phân tích dữ liệu...",
+      "empty": "Chưa có dữ liệu hiển thị. Hãy thử “Gợi ý nhanh” để AI bắt đầu nhé!",
+      "noImage": "Không có ảnh",
+      "badgeNew": "Mới",
+      "badgeSuggested": "Đề xuất",
+      "authorPlaceholder": "Đang cập nhật",
+      "priceContact": "Liên hệ",
+      "viewDetails": "Xem chi tiết"
+    }
+  },
+  "bookManagement": {
+    "title": "Quản lý sách",
+    "addButton": "Thêm sách mới",
+    "searchPlaceholder": "Tìm kiếm sách theo tên, tác giả, danh mục...",
+    "buttons": {
+      "clearSearch": "Xóa tìm kiếm"
+    },
+    "stats": {
+      "totalLabel": "Tổng số sách:",
+      "pageLabel": "Trang {{current}} / {{total}}"
+    },
+    "itemsPerPage": "Hiển thị:",
+    "table": {
+      "headers": {
+        "id": "ID",
+        "title": "Tên sách",
+        "price": "Giá",
+        "stock": "Tồn kho",
+        "category": "Danh mục",
+        "author": "Tác giả",
+        "publisher": "NXB",
+        "actions": "Thao tác"
+      },
+      "loading": "Đang tải...",
+      "error": "Không thể tải dữ liệu sách.",
+      "empty": "Không có dữ liệu sách"
+    },
+    "actions": {
+      "edit": "Chỉnh sửa",
+      "delete": "Xóa"
+    },
+    "pagination": {
+      "summary": "Hiển thị {{start}} - {{end}} trong tổng số {{total}} sách",
+      "first": "Trang đầu",
+      "previous": "Trang trước",
+      "next": "Trang sau",
+      "last": "Trang cuối"
+    },
+    "confirm": {
+      "delete": "Bạn có chắc chắn muốn xóa sách này?"
+    },
+    "messages": {
+      "deleteSuccess": "Đã xóa sách thành công.",
+      "deleteError": "Có lỗi xảy ra khi xóa sách. Vui lòng thử lại.",
+      "saveError": "Có lỗi xảy ra khi lưu sách. Vui lòng thử lại.",
+      "createSuccess": "Thêm sách mới thành công!",
+      "updateSuccess": "Cập nhật sách thành công!"
+    },
+    "form": {
+      "titleAdd": "Thêm sách mới",
+      "titleEdit": "Chỉnh sửa sách",
+      "labels": {
+        "title": "Tên sách *",
+        "slug": "Slug *",
+        "price": "Giá *",
+        "stock": "Số lượng tồn kho *",
+        "category": "Danh mục *",
+        "author": "Tác giả *",
+        "publisher": "Nhà xuất bản *",
+        "description": "Mô tả",
+        "publishedDate": "Ngày xuất bản",
+        "coverImage": "Hình ảnh bìa"
+      },
+      "select": {
+        "category": "Chọn danh mục",
+        "author": "Chọn tác giả",
+        "publisher": "Chọn nhà xuất bản",
+        "loadingCategories": "Đang tải danh mục...",
+        "loadingAuthors": "Đang tải tác giả...",
+        "loadingPublishers": "Đang tải nhà xuất bản..."
+      },
+      "placeholders": {
+        "slug": "Tự động tạo từ tên sách",
+        "coverImage": "URL hình ảnh"
+      },
+      "hints": {
+        "slug": "Định danh thân thiện với URL (tự động tạo từ tên sách)"
+      },
+      "buttons": {
+        "cancel": "Hủy",
+        "create": "Thêm mới",
+        "update": "Cập nhật"
+      },
+      "errors": {
+        "title": "Tên sách phải có ít nhất 2 ký tự",
+        "slug": "Slug là bắt buộc",
+        "price": "Giá sách phải lớn hơn 0",
+        "stock": "Số lượng tồn kho không được âm",
+        "category": "Vui lòng chọn danh mục",
+        "author": "Vui lòng chọn tác giả",
+        "publisher": "Vui lòng chọn nhà xuất bản"
+      }
+    },
+    "fallback": {
+      "category": "Danh mục {{id}}",
+      "author": "Tác giả {{id}}",
+      "publisher": "Nhà xuất bản {{id}}"
+    }
+  },
+  "categoryManagement": {
+    "title": "Quản lý danh mục",
+    "addButton": "Thêm danh mục",
+    "searchPlaceholder": "Tìm kiếm danh mục theo tên, mô tả...",
+    "buttons": {
+      "clearSearch": "Xóa tìm kiếm",
+      "retry": "Thử lại"
+    },
+    "actions": {
+      "edit": "Chỉnh sửa",
+      "delete": "Xóa"
+    },
+    "table": {
+      "headers": {
+        "name": "Tên danh mục",
+        "description": "Mô tả",
+        "parent": "Danh mục cha",
+        "bookCount": "Số sách",
+        "createdAt": "Ngày tạo",
+        "actions": "Thao tác"
+      },
+      "empty": "Chưa có danh mục nào",
+      "error": "Không thể tải dữ liệu danh mục.",
+      "loading": "Đang tải..."
+    },
+    "messages": {
+      "fetchError": "Không thể tải danh sách danh mục. {{message}}",
+      "backendHint": "Vui lòng đảm bảo backend đang chạy và kết nối cơ sở dữ liệu.",
+      "deleteSuccess": "Xóa danh mục thành công!",
+      "deleteError": "Không thể xóa danh mục.",
+      "updateSuccess": "Cập nhật danh mục thành công!",
+      "updateError": "Không thể cập nhật danh mục.",
+      "createSuccess": "Thêm danh mục thành công!",
+      "createError": "Không thể thêm danh mục mới.",
+      "saveError": "Không thể lưu danh mục. {{message}}"
+    },
+    "confirm": {
+      "delete": "Bạn có chắc chắn muốn xóa danh mục này?"
+    },
+    "parent": {
+      "root": "Danh mục gốc",
+      "unknown": "Không xác định"
+    },
+    "badges": {
+      "bookCount": "{{count}} sách"
+    },
+    "form": {
+      "titleAdd": "Thêm danh mục mới",
+      "titleEdit": "Chỉnh sửa danh mục",
+      "labels": {
+        "name": "Tên danh mục *",
+        "parent": "Danh mục cha",
+        "description": "Mô tả"
+      },
+      "buttons": {
+        "cancel": "Hủy",
+        "create": "Thêm mới",
+        "update": "Cập nhật"
+      },
+      "errors": {
+        "nameRequired": "Tên danh mục là bắt buộc",
+        "nameMin": "Tên danh mục phải có ít nhất 2 ký tự"
+      }
+    }
+  },
+  "warehouseManagement": {
+    "title": "Quản lý kho",
+    "importButton": "Nhập hàng",
+    "exportButton": "Xuất hàng",
+    "searchPlaceholder": "Tìm kiếm sản phẩm theo tên, tác giả, danh mục...",
+    "itemsPerPage": "Hiển thị:",
+    "stats": {
+      "totalQuantity": "Sản phẩm trong kho",
+      "lowStock": "Sắp hết hàng",
+      "outOfStock": "Hết hàng",
+      "totalProducts": "Tổng sản phẩm (SKU)"
+    },
+    "table": {
+      "title": "Danh sách sản phẩm trong kho",
+      "headers": {
+        "book": "Tên sách",
+        "quantity": "Số lượng hiện tại",
+        "status": "Trạng thái",
+        "updatedAt": "Cập nhật lần cuối",
+        "actions": "Thao tác"
+      },
+      "loading": "Đang tải...",
+      "error": "Không thể tải dữ liệu kho.",
+      "empty": "Không có dữ liệu sản phẩm trong kho"
+    },
+    "statuses": {
+      "out": "Hết hàng",
+      "low": "Sắp hết",
+      "medium": "Trung bình",
+      "good": "Đủ hàng"
+    },
+    "pagination": {
+      "summary": "Hiển thị {{start}} - {{end}} trong tổng số {{total}} sản phẩm",
+      "first": "Trang đầu",
+      "previous": "Trang trước",
+      "next": "Trang sau",
+      "last": "Trang cuối"
+    },
+    "actions": {
+      "export": "Xuất"
+    },
+    "messages": {
+      "importSuccess": "Nhập hàng thành công!",
+      "exportSuccess": "Xuất hàng thành công!",
+      "importError": "Có lỗi xảy ra khi nhập hàng. Vui lòng thử lại.",
+      "exportError": "Có lỗi xảy ra khi xuất hàng. Vui lòng thử lại.",
+      "notFound": "Không tìm thấy sản phẩm trong kho!",
+      "insufficient": "Không đủ hàng trong kho! Hiện có: {{stock}}"
+    },
+    "labels": {
+      "author": "Tác giả",
+      "category": "Danh mục"
+    },
+    "forms": {
+      "import": {
+        "title": "Nhập hàng vào kho",
+        "bookLabel": "Chọn sách *",
+        "quantityLabel": "Số lượng nhập *",
+        "reasonLabel": "Lý do nhập",
+        "submit": "Nhập hàng",
+        "defaultReason": "Nhập hàng mới"
+      },
+      "export": {
+        "title": "Xuất hàng khỏi kho",
+        "bookLabel": "Chọn sách *",
+        "quantityLabel": "Số lượng xuất *",
+        "reasonLabel": "Lý do xuất",
+        "submit": "Xuất hàng",
+        "defaultReason": "Xuất bán"
+      },
+      "placeholders": {
+        "bookOption": "{{title}} Hiện có: {{stock}}",
+        "selectBook": "Chọn sách"
+      },
+      "errors": {
+        "bookRequired": "Vui lòng chọn sách",
+        "quantityPositive": "Số lượng phải lớn hơn 0",
+        "reasonRequired": "Lý do là bắt buộc",
+        "quantityExceed": "Số lượng xuất không được vượt quá tồn kho hiện tại ({{stock}})"
+      },
+      "buttons": {
+        "cancel": "Hủy"
+      }
+    }
+  },
+  "orderManagement": {
+    "title": "Quản lý đơn hàng",
+    "subtitle": "Hiển thị đơn hàng chờ xử lý - nhấn \"Làm mới\" để cập nhật dữ liệu mới.",
+    "buttons": {
+      "refresh": "Làm mới",
+      "deleteSelected": "Xóa nhiều ({{count}})",
+      "deleteSelectedTooltipEmpty": "Chọn đơn hàng để xóa",
+      "deleteSelectedTooltip": "Xóa {{count}} đơn hàng đã chọn",
+      "exportCsv": "Xuất CSV",
+      "exportTooltip": "Xuất danh sách đơn hàng đã lọc ra CSV"
+    },
+    "filters": {
+      "year": "Năm",
+      "month": "Tháng",
+      "itemsPerPage": "Hiển thị:",
+      "range": {
+        "label": "Chọn phạm vi"
+      },
+      "months": {
+        "all": "Tất cả",
+        "1": "Tháng 1",
+        "2": "Tháng 2",
+        "3": "Tháng 3",
+        "4": "Tháng 4",
+        "5": "Tháng 5",
+        "6": "Tháng 6",
+        "7": "Tháng 7",
+        "8": "Tháng 8",
+        "9": "Tháng 9",
+        "10": "Tháng 10",
+        "11": "Tháng 11",
+        "12": "Tháng 12"
+      },
+      "years": {
+        "all": "Tất cả",
+        "year": "Năm {{year}}"
+      }
+    },
+    "info": {
+      "title": "Lưu ý:",
+      "message": "Các đơn hàng tạo từ trang bán hàng sẽ xuất hiện tại đây với trạng thái \"{{status}}\". Nhấn \"{{button}}\" để cập nhật dữ liệu mới nhất."
+    },
+    "statuses": {
+      "pending": "Chờ xử lý",
+      "paid": "Đã thanh toán",
+      "shipped": "Đã giao",
+      "completed": "Hoàn thành",
+      "cancelled": "Đã hủy",
+      "unknown": "Không xác định"
+    },
+    "orderTypes": {
+      "cart": "Từ giỏ hàng",
+      "instant": "Mua ngay"
+    },
+    "loading": {
+      "aria": "Đang tải...",
+      "message": "Đang tải dữ liệu đơn hàng..."
+    },
+    "table": {
+      "title": "Danh sách đơn hàng",
+      "headers": {
+        "orderId": "Mã đơn",
+        "customer": "Khách hàng",
+        "contact": "Liên hệ",
+        "orderType": "Loại đơn hàng",
+        "total": "Tổng tiền",
+        "status": "Trạng thái",
+        "createdAt": "Ngày tạo",
+        "actions": "Thao tác"
+      },
+      "noAddress": "Chưa có địa chỉ",
+      "notAvailable": "Chưa cập nhật",
+      "actions": {
+        "view": "Chi tiết",
+        "delete": "Xóa",
+        "viewTooltip": "Xem chi tiết",
+        "deleteTooltip": "Xóa đơn hàng"
+      },
+      "empty": "Không có đơn hàng nào"
+    },
+    "pagination": {
+      "summary": "Hiển thị {{start}} - {{end}} trong tổng số {{total}} đơn hàng",
+      "first": "Trang đầu",
+      "previous": "Trang trước",
+      "next": "Trang sau",
+      "last": "Trang cuối"
+    },
+    "messages": {
+      "updateSuccess": "Cập nhật trạng thái đơn hàng thành công!",
+      "partialOrderLoaded": "Đã tải thông tin cơ bản (một số dữ liệu có thể thiếu).",
+      "deleteSuccess": "Xóa đơn hàng thành công!",
+      "deleteMultipleSuccess": "Đã xóa {{success}}/{{total}} đơn hàng!",
+      "exportNoData": "Không có dữ liệu để xuất."
+    },
+    "errors": {
+      "notLoggedIn": "Bạn chưa đăng nhập. Vui lòng đăng nhập để truy cập trang quản lý đơn hàng.",
+      "notAdmin": "Bạn không có quyền truy cập trang quản lý đơn hàng. Vui lòng đăng nhập bằng tài khoản admin.",
+      "notAdminGeneric": "Truy cập bị từ chối. Vui lòng đăng nhập bằng tài khoản admin.",
+      "fetchFailed": "Không thể tải danh sách đơn hàng.",
+      "network": "Có lỗi xảy ra khi tải dữ liệu đơn hàng. Vui lòng kiểm tra kết nối và thử lại.",
+      "updateNotAllowed": "Bạn không được phép cập nhật trạng thái đơn hàng. Chỉ admin mới có thể thực hiện.",
+      "updateFailed": "Không thể cập nhật trạng thái đơn hàng. Vui lòng thử lại.",
+      "viewNotAllowed": "Bạn không được phép xem chi tiết đơn hàng này.",
+      "detailsGeneric": "Có lỗi xảy ra khi tải chi tiết đơn hàng.",
+      "detailsNotFound": "Không tìm thấy đơn hàng.",
+      "server": "Lỗi máy chủ. Vui lòng thử lại sau.",
+      "detailsWithMessage": "Lỗi: {{message}}",
+      "deleteFailed": "Không thể xóa đơn hàng.",
+      "deleteNone": "Không xóa được đơn hàng nào."
+    },
+    "validation": {
+      "statusRequired": "Vui lòng chọn trạng thái."
+    },
+    "confirm": {
+      "deleteSingle": "Bạn có chắc chắn muốn xóa đơn hàng này? Hành động không thể hoàn tác.",
+      "selectAtLeastOne": "Vui lòng chọn ít nhất một đơn hàng để xóa.",
+      "deleteMultiple": "Xóa {{count}} đơn hàng đã chọn? Hành động không thể hoàn tác."
+    },
+    "fallback": {
+      "user": "Người dùng {{id}}"
+    },
+    "export": {
+      "headers": {
+        "orderId": "Mã đơn",
+        "customer": "Khách hàng",
+        "email": "Email",
+        "phone": "Số điện thoại",
+        "orderType": "Loại đơn hàng",
+        "total": "Tổng tiền (VND)",
+        "status": "Trạng thái",
+        "createdAt": "Ngày tạo"
+      }
+    },
+    "cards": {
+      "total": "Tổng cộng"
+    },
+    "revenue": {
+      "title": "Tổng quan doanh thu",
+      "cards": {
+        "totalRevenue": "Tổng doanh thu",
+        "totalOrders": "Tổng đơn hàng"
+      }
+    },
+    "modal": {
+      "title": "Chi tiết đơn hàng #{{order}}",
+      "customer": {
+        "heading": "Thông tin khách hàng",
+        "name": "Tên:",
+        "email": "Email:",
+        "phone": "Số điện thoại:",
+        "address": "Địa chỉ giao hàng:"
+      },
+      "order": {
+        "heading": "Thông tin đơn hàng",
+        "status": "Trạng thái:",
+        "createdAt": "Ngày tạo:",
+        "updatedAt": "Cập nhật cuối:",
+        "total": "Tổng tiền:"
+      },
+      "items": {
+        "heading": "Sản phẩm trong đơn hàng",
+        "columns": {
+          "title": "Tên sách",
+          "quantity": "Số lượng",
+          "price": "Đơn giá",
+          "subtotal": "Thành tiền"
+        },
+        "empty": "Không có sản phẩm nào",
+        "total": "Tổng cộng",
+        "fallbackTitle": "Sách ID: {{id}}"
+      },
+      "buttons": {
+        "close": "Đóng"
+      }
+    }
+  },
+  "userManagement": {
+    "title": "Quản lý người dùng",
+    "subtitle": "Quản lý tài khoản khách hàng",
+    "badge": {
+      "total": "Tổng: {{count}} người dùng"
+    },
+    "filters": {
+      "search": {
+        "label": "Tìm kiếm",
+        "placeholder": "Tìm theo tên, email, số điện thoại..."
+      },
+      "sortBy": {
+        "label": "Sắp xếp theo",
+        "options": {
+          "createdAt": "Ngày tạo",
+          "name": "Tên",
+          "email": "Email",
+          "userId": "ID"
+        }
+      },
+      "sortOrder": {
+        "label": "Thứ tự",
+        "options": {
+          "desc": "Mới nhất",
+          "asc": "Cũ nhất"
+        }
+      },
+      "itemsPerPage": {
+        "label": "Hiển thị"
+      },
+      "reset": "Xóa bộ lọc"
+    },
+    "loading": {
+      "aria": "Đang tải..."
+    },
+    "table": {
+      "headers": {
+        "info": "Thông tin",
+        "contact": "Liên hệ",
+        "actions": "Thao tác"
+      },
+      "notProvided": "Chưa cập nhật",
+      "notAvailable": "Chưa cập nhật",
+      "actions": {
+        "viewTooltip": "Xem chi tiết",
+        "deleteTooltip": "Xóa tài khoản"
+      },
+      "empty": "Không tìm thấy người dùng nào"
+    },
+    "pagination": {
+      "summary": "Hiển thị {{start}} - {{end}} trong {{total}} kết quả",
+      "first": "Trang đầu",
+      "previous": "Trang trước",
+      "next": "Trang sau",
+      "last": "Trang cuối"
+    },
+    "confirm": {
+      "delete": "Bạn có chắc chắn muốn xóa tài khoản {{name}}?"
+    },
+    "messages": {
+      "deleteSuccess": "Xóa tài khoản thành công!",
+      "deleteError": "Không thể xóa tài khoản."
+    },
+    "roles": {
+      "admin": "Admin",
+      "customer": "Khách hàng"
+    },
+    "modal": {
+      "title": {
+        "view": "Chi tiết người dùng",
+        "edit": "Chỉnh sửa người dùng",
+        "delete": "Xóa tài khoản"
+      },
+      "sections": {
+        "personal": "Thông tin cá nhân",
+        "account": "Thông tin tài khoản"
+      },
+      "labels": {
+        "name": "Tên:",
+        "email": "Email:",
+        "phone": "Số điện thoại:",
+        "address": "Địa chỉ:",
+        "role": "Vai trò:",
+        "createdAt": "Ngày tạo:",
+        "updatedAt": "Cập nhật cuối:"
+      },
+      "deleteWarning": {
+        "title": "Cảnh báo:",
+        "description": "Bạn sắp xóa vĩnh viễn tài khoản này. Hành động không thể hoàn tác!"
+      },
+      "confirmation": {
+        "label": "Xác nhận xóa tài khoản:",
+        "placeholder": "Nhập \"{{name}}\" để xác nhận"
+      },
+      "buttons": {
+        "cancel": "Hủy",
+        "delete": "Xóa tài khoản"
+      }
+    }
+  },
+  "reviewManagement": {
+    "title": "Quản lý đánh giá",
+    "subtitle": "Quản lý đánh giá sản phẩm từ khách hàng",
+    "badge": {
+      "total": "Tổng: {{count}} đánh giá"
+    },
+    "filters": {
+      "search": {
+        "label": "Tìm kiếm",
+        "placeholder": "Tìm theo tên, email, sách, tác giả..."
+      },
+      "rating": {
+        "label": "Đánh giá",
+        "options": {
+          "all": "Tất cả đánh giá",
+          "fiveStars": "5 sao",
+          "fourStars": "4 sao",
+          "threeStars": "3 sao",
+          "twoStars": "2 sao",
+          "oneStar": "1 sao"
+        }
+      },
+      "reset": "Xóa bộ lọc"
+    },
+    "loading": {
+      "aria": "Đang tải...",
+      "message": "Đang tải danh sách đánh giá từ cơ sở dữ liệu...",
+      "hint": "Có thể mất vài giây để tải dữ liệu lớn."
+    },
+    "errors": {
+      "fetchGeneric": "Không thể tải danh sách đánh giá.",
+      "network": "Không thể kết nối tới máy chủ. Vui lòng kiểm tra backend.",
+      "unauthorized": "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
+      "forbidden": "Bạn không có quyền truy cập trang này.",
+      "notFound": "Không tìm thấy API endpoint.",
+      "server": "Lỗi máy chủ. Vui lòng thử lại sau.",
+      "adminRequired": "Bạn cần đăng nhập bằng tài khoản admin để xem đầy đủ đánh giá. Hiện đang hiển thị dữ liệu mẫu."
+    },
+    "confirm": {
+      "delete": "Bạn có chắc chắn muốn xóa đánh giá này?"
+    },
+    "messages": {
+      "deleteSuccess": "Xóa đánh giá thành công!",
+      "deleteError": "Không thể xóa đánh giá."
+    },
+    "table": {
+      "headers": {
+        "user": "Người dùng",
+        "product": "Sản phẩm",
+        "rating": "Đánh giá",
+        "content": "Nội dung",
+        "createdAt": "Ngày tạo",
+        "actions": "Thao tác"
+      },
+      "notAvailable": "Chưa cập nhật",
+      "author": "Tác giả: {{author}}",
+      "noContent": "Không có nội dung đánh giá",
+      "actions": {
+        "viewTooltip": "Xem chi tiết",
+        "deleteTooltip": "Xóa đánh giá"
+      },
+      "empty": "Không tìm thấy đánh giá nào"
+    },
+    "pagination": {
+      "summary": "Hiển thị {{start}} - {{end}} trong {{total}} kết quả",
+      "itemsPerPage": "Hiển thị:",
+      "previous": "Trước",
+      "next": "Sau"
+    },
+    "modal": {
+      "title": {
+        "view": "Chi tiết đánh giá",
+        "delete": "Xóa đánh giá"
+      },
+      "sections": {
+        "user": "Thông tin người dùng",
+        "product": "Thông tin sản phẩm",
+        "review": "Đánh giá"
+      },
+      "labels": {
+        "userName": "Tên:",
+        "userEmail": "Email:",
+        "userId": "ID người dùng:",
+        "bookTitle": "Tên sách:",
+        "bookAuthor": "Tác giả:",
+        "bookId": "ID sách:",
+        "content": "Nội dung:",
+        "createdAt": "Ngày tạo:"
+      },
+      "ratingBadge": "{{rating}}/5 sao",
+      "noContent": "Không có nội dung đánh giá",
+      "deleteWarning": {
+        "title": "Cảnh báo:",
+        "description": "Bạn sắp xóa vĩnh viễn đánh giá này. Hành động không thể hoàn tác!"
+      },
+      "deleteSummary": {
+        "heading": "Thông tin đánh giá sẽ bị xóa:",
+        "rating": "Đánh giá:"
+      },
+      "buttons": {
+        "cancel": "Hủy",
+        "delete": "Xóa đánh giá"
+      }
+    }
+  },
+  "reports": {
+    "header": {
+      "title": "Phân tích & Đề xuất thông minh",
+      "lastUpdated": "Cập nhật lần cuối: {{time}}",
+      "loading": "Đang tải..."
+    },
+    "filters": {
+      "range": {
+        "label": "Chọn phạm vi",
+        "month": "Theo tháng",
+        "quarter": "Theo quý",
+        "year": "Theo năm"
+      }
+    },
+    "actions": {
+      "refresh": "Làm mới dữ liệu",
+      "customizeSoon": "Tùy chỉnh phạm vi (sắp ra mắt)"
+    },
+    "errors": {
+      "sessionExpired": "Phiên đăng nhập đã hết hạn hoặc không hợp lệ. Vui lòng đăng nhập lại để xem báo cáo.",
+      "generic": "Không thể tải dữ liệu phân tích."
+    },
+    "cards": {
+      "lowStockItem": "{{title}} – còn {{quantity}}"
+    },
+    "sections": {
+      "sales": {
+        "title": "Doanh thu & xu hướng bán hàng",
+        "subtitle": "Theo dõi doanh thu và số đơn theo thời gian",
+        "empty": "Chưa có dữ liệu doanh thu."
+      },
+      "inventory": {
+        "title": "Phân tích kho & nguồn hàng",
+        "subtitle": "Theo dõi tình trạng tồn kho và cảnh báo",
+        "tooltip": {
+          "unit": "cuốn"
+        },
+        "lowStock": {
+          "title": "Sản phẩm sắp hết",
+          "empty": "Không có sản phẩm nào dưới ngưỡng cảnh báo."
+        },
+        "overstock": {
+          "title": "Sản phẩm tồn kho cao",
+          "empty": "Không có sản phẩm nào tồn kho quá nhiều."
+        },
+        "empty": "Chưa có dữ liệu tồn kho."
+      },
+      "reviews": {
+        "title": "Phân tích đánh giá & phản hồi",
+        "subtitle": "Theo dõi phân bố sao và điểm nóng phản hồi",
+        "distribution": {
+          "title": "Phân bố đánh giá",
+          "tooltip": {
+            "percent": "Tỷ lệ",
+            "count": "Số lượt"
+          }
+        },
+        "highlights": {
+          "title": "Điểm cần xử lý",
+          "countLabel": "đánh giá",
+          "empty": "Không có sản phẩm nào dưới 2.5★ trong kỳ này."
+        },
+        "details": {
+          "insightsTitle": "Nhận định chi tiết",
+          "actionsTitle": "Hướng xử lý đề xuất"
+        },
+        "empty": "Chưa có dữ liệu đánh giá."
+      },
+      "behavior": {
+        "title": "Phân tích hành vi khách hàng",
+        "subtitle": "Nắm bắt kênh truy cập, khung giờ cao điểm và chuyển đổi",
+        "sources": {
+          "title": "Nguồn truy cập"
+        },
+        "heatmap": {
+          "title": "Khung giờ cao điểm",
+          "tooltip": "{{day}} {{hour}}: {{sessions}} phiên"
+        },
+        "conversion": {
+          "title": "Tỷ lệ chuyển đổi",
+          "label": "Tỷ lệ chuyển đổi",
+          "empty": "Chưa có dữ liệu chuyển đổi."
+        },
+        "details": {
+          "title": "Nhận định chi tiết",
+          "topSource": "Nguồn truy cập hiệu quả nhất: {{source}} chiếm {{percent}}% lưu lượng.",
+          "topSourceEmpty": "Chưa có dữ liệu nguồn truy cập nổi bật.",
+          "compareSource": "{{topSource}} hiệu quả gấp {{ratio}} lần so với {{secondSource}}.",
+          "peakSlot": "Khung giờ cao điểm: {{day}} lúc {{hour}} với {{sessions}} phiên.",
+          "peakSlotEmpty": "Chưa xác định được khung giờ cao điểm.",
+          "conversionRate": "Tỷ lệ chuyển đổi hiện tại: {{rate}}."
+        }
+      },
+      "ai": {
+        "title": "Đề xuất thông minh (AI)",
+        "subtitle": "Những hành động đề xuất dựa trên dữ liệu mới nhất",
+        "reasonsTitle": "Lý do chính",
+        "actionsTitle": "Hành động đề xuất"
+      }
+    },
+    "charts": {
+      "sales": {
+        "tooltip": {
+          "revenue": "Doanh thu",
+          "orders": "Đơn hàng"
+        },
+        "series": {
+          "revenue": "Doanh thu",
+          "orders": "Đơn hàng"
+        },
+        "millionSuffix": "tr"
+      }
+    }
+  },
+  "searchPage": {
+    "header": {
+      "title": "Tìm kiếm sách"
+    },
+    "form": {
+      "placeholder": "Nhập tên sách, tác giả, danh mục hoặc từ khóa...",
+      "button": "Tìm kiếm",
+      "popularTitle": "Từ khóa phổ biến:",
+      "popularFallback": ["tiểu thuyết", "khoa học", "lịch sử", "văn học", "kinh tế"]
+    },
+    "states": {
+      "loadingAria": "Đang tìm kiếm...",
+      "loadingTitle": "Đang tìm kiếm sách...",
+      "loadingSubtitle": "Vui lòng đợi trong giây lát",
+      "resultsTitle": "Kết quả tìm kiếm cho “{{query}}” ({{count}} sách)",
+      "noResultsTitle": "Không tìm thấy sách nào",
+      "noResultsDescription": "Không có kết quả cho từ khóa “{{query}}”. Hãy thử từ khóa khác."
+    },
+    "empty": {
+      "title": "Tìm kiếm sách yêu thích",
+      "subtitle": "Nhập tên sách, tác giả, danh mục hoặc từ khóa để bắt đầu tìm kiếm",
+      "hint": "💡 Gợi ý: Gõ tên sách đầy đủ hoặc chọn từ gợi ý để tìm kiếm chính xác"
+    },
+    "bookCard": {
+      "unknownAuthor": "Tác giả chưa xác định",
+      "viewDetails": "Xem chi tiết",
+      "wishlistTooltip": "Thêm vào yêu thích",
+      "addToCartTooltip": "Thêm vào giỏ hàng",
+      "reviewCount": "({{count}})"
+    },
+    "messages": {
+      "loginRequired": "Bạn cần đăng nhập để đặt sản phẩm",
+      "addToCartSuccess": "Đã thêm sản phẩm vào giỏ hàng!",
+      "addToCartError": "Có lỗi xảy ra khi thêm sản phẩm vào giỏ hàng!",
+      "wishlistComingSoon": "Tính năng yêu thích sẽ được bổ sung sớm!"
+    }
+  },
+  "profilePage": {
+    "tabs": {
+      "profile": "Hồ sơ",
+      "orders": "Đơn hàng",
+      "settings": "Cài đặt",
+      "security": "Bảo mật"
+    },
+    "breadcrumb": {
+      "home": "Home",
+      "separator": "/"
+    },
+    "demo": {
+      "title": "Chế độ demo:",
+      "description": "Bạn đang xem dữ liệu mẫu.",
+      "loginCta": "Đăng nhập",
+      "loginSuffix": "để cập nhật thông tin thực."
+    },
+    "profileCard": {
+      "title": "Thông Tin Cá Nhân",
+      "editButton": "Chỉnh Sửa",
+      "fields": {
+        "nameLabel": "Họ và tên",
+        "namePlaceholder": "Nhập họ và tên",
+        "emailLabel": "Email",
+        "emailPlaceholder": "Nhập email",
+        "phoneLabel": "Số điện thoại",
+        "phonePlaceholder": "Nhập số điện thoại",
+        "roleLabel": "Vai trò",
+        "roleOptions": {
+          "customer": "Khách hàng",
+          "admin": "Quản trị viên"
+        },
+        "roleHint": "Chỉ quản trị viên mới có thể thay đổi vai trò",
+        "addressLabel": "Địa chỉ",
+        "addressPlaceholder": "Nhập địa chỉ đầy đủ"
+      },
+      "buttons": {
+        "save": "Lưu thay đổi",
+        "saving": "Đang lưu...",
+        "cancel": "Hủy"
+      },
+      "messages": {
+        "demoMode": "Đây là chế độ demo. Vui lòng đăng nhập để cập nhật thông tin thực.",
+        "updateSuccess": "Cập nhật thông tin thành công!",
+        "updateError": "Cập nhật thông tin thất bại. Vui lòng thử lại."
+      }
+    },
+    "settingsCard": {
+      "title": "Cài Đặt Tài Khoản",
+      "sections": {
+        "notifications": {
+          "title": "Thông Báo"
+        },
+        "privacy": {
+          "title": "Quyền Riêng Tư"
+        },
+        "languageRegion": {
+          "title": "Ngôn Ngữ & Vùng",
+          "languageLabel": "Ngôn ngữ",
+          "timezoneLabel": "Múi giờ"
+        }
+      },
+      "notifications": {
+        "email": "Nhận thông báo qua email",
+        "orders": "Cập nhật đơn hàng",
+        "promotions": "Khuyến mãi và ưu đãi"
+      },
+      "privacy": {
+        "profileVisibility": "Hiển thị hồ sơ công khai",
+        "dataSharing": "Chia sẻ dữ liệu để cải thiện dịch vụ"
+      },
+      "languageOptions": [
+        { "value": "vi", "label": "Tiếng Việt" },
+        { "value": "en", "label": "English" }
+      ],
+      "timezones": [
+        { "value": "Asia/Ho_Chi_Minh", "label": "Asia/Ho_Chi_Minh (GMT+7)" },
+        { "value": "UTC", "label": "UTC (GMT+0)" }
+      ],
+      "saveButton": "Lưu Cài Đặt"
+    },
+    "securityCard": {
+      "title": "Bảo Mật Tài Khoản",
+      "changePasswordTitle": "Đổi Mật Khẩu",
+      "fields": {
+        "currentPasswordLabel": "Mật khẩu hiện tại",
+        "currentPasswordPlaceholder": "Nhập mật khẩu hiện tại",
+        "newPasswordLabel": "Mật khẩu mới",
+        "newPasswordPlaceholder": "Nhập mật khẩu mới",
+        "confirmPasswordLabel": "Xác nhận mật khẩu mới",
+        "confirmPasswordPlaceholder": "Nhập lại mật khẩu mới"
+      },
+      "passwordButton": {
+        "submit": "Đổi Mật Khẩu",
+        "loading": "Đang xử lý..."
+      },
+      "info": {
+        "title": "Thông Tin Bảo Mật",
+        "accountStatusLabel": "Trạng thái tài khoản",
+        "accountStatusValue": "Tài khoản đang hoạt động",
+        "lastLoginLabel": "Lần đăng nhập cuối",
+        "lastLoginValue": "Hôm nay, 14:30"
+      },
+      "dangerZone": {
+        "title": "Vùng Nguy Hiểm",
+        "warningTitle": "Cảnh báo:",
+        "warningDescription": "Các hành động dưới đây có thể ảnh hưởng đến tài khoản của bạn.",
+        "logoutAllButton": "Đăng xuất tất cả thiết bị"
+      },
+      "logout": {
+        "confirm": "Bạn có chắc chắn muốn đăng xuất tất cả thiết bị? Bạn sẽ cần đăng nhập lại.",
+        "success": "Đã đăng xuất tất cả thiết bị! Vui lòng đăng nhập lại.",
+        "error": "Có lỗi xảy ra khi đăng xuất tất cả thiết bị!"
+      },
+      "passwordChange": {
+        "success": "Đổi mật khẩu thành công!",
+        "error": "Có lỗi xảy ra khi đổi mật khẩu. Vui lòng thử lại."
+      }
+    },
+    "validation": {
+      "nameRequired": "Tên là bắt buộc",
+      "nameMin": "Tên phải có ít nhất 2 ký tự",
+      "nameSpecialChars": "Tên không được chứa ký tự đặc biệt hoặc số",
+      "emailRequired": "Email là bắt buộc",
+      "emailInvalid": "Vui lòng nhập email hợp lệ",
+      "phoneInvalid": "Số điện thoại phải có ít nhất 10 chữ số",
+      "phoneNumbersOnly": "Số điện thoại Only numbers can be entered.",
+      "addressMin": "Địa chỉ phải có từ 5 đến 30 ký tự",
+      "addressMax": "Địa chỉ không được vượt quá 30 ký tự",
+      "addressInvalid": "Địa chỉ không hợp lệ"
+    },
+    "passwordValidation": {
+      "currentRequired": "Vui lòng nhập mật khẩu hiện tại",
+      "newRequired": "Vui lòng nhập mật khẩu mới",
+      "newMin": "Mật khẩu mới phải có ít nhất 6 ký tự",
+      "confirmRequired": "Vui lòng xác nhận mật khẩu mới",
+      "confirmMismatch": "Mật khẩu xác nhận không khớp",
+      "newDifferent": "Mật khẩu mới phải khác mật khẩu hiện tại"
+    }
+  },
+  "ordersPage": {
+    "common": {
+      "notAvailable": "Chưa có",
+      "loading": "Đang tải..."
+    },
+    "header": {
+      "title": "Đơn hàng của tôi",
+      "subtitle": "Quản lý và theo dõi đơn hàng của bạn",
+      "refresh": "Làm mới",
+      "testEvent": "Test Event",
+      "total": "Tổng cộng: {{count}} đơn hàng",
+      "page": "(Trang {{current}}/{{total}})",
+      "bulkCancel": "Hủy nhiều ({{count}})"
+    },
+    "filters": {
+      "all": "Tất cả ({{count}})",
+      "pending": "Chờ xử lý ({{count}})",
+      "processing": "Đang xử lý ({{count}})",
+      "completed": "Hoàn thành ({{count}})",
+      "selectAll": "Chọn tất cả",
+      "clearSelection": "Bỏ chọn tất cả"
+    },
+    "statuses": {
+      "pending": "Chờ xử lý",
+      "processing": "Đang xử lý",
+      "paid": "Đã thanh toán",
+      "shipped": "Đã giao",
+      "delivered": "Đã giao",
+      "completed": "Hoàn thành",
+      "cancelled": "Đã hủy",
+      "draft": "Bản nháp"
+    },
+    "orderTypes": {
+      "cart": "Từ giỏ hàng",
+      "buyNow": "Mua ngay"
+    },
+    "messages": {
+      "loginRequired": "Vui lòng đăng nhập để xem đơn hàng",
+      "loadFailed": "Không thể tải danh sách đơn hàng",
+      "loadedFromLocal": "Đã tải đơn hàng từ bộ nhớ cục bộ (backend không khả dụng)",
+      "genericError": "Có lỗi xảy ra khi tải dữ liệu đơn hàng",
+      "cancelConfirm": "Bạn có chắc chắn muốn hủy đơn hàng này?",
+      "cancelSuccess": "Hủy đơn hàng thành công!",
+      "cancelError": "Không thể hủy đơn hàng",
+      "selectAtLeastOne": "Vui lòng chọn ít nhất một đơn hàng để hủy",
+      "multiCancelConfirm": "Bạn có chắc chắn muốn hủy {{count}} đơn hàng đã chọn?",
+      "multiCancelResult": "Đã hủy thành công {{success}}/{{total}} đơn hàng",
+      "multiCancelFailed": "Không thể hủy {{count}} đơn hàng: {{detail}}",
+      "detailError": "Không thể tải chi tiết đơn hàng",
+      "noItems": "Không có sản phẩm nào",
+      "shippingFallback": "Không có thông tin giao hàng"
+    },
+    "notifications": {
+      "browserTitle": "Đơn hàng #{{id}}",
+      "browserBody": "Trạng thái đã được cập nhật thành \"{{status}}\"",
+      "consoleLog": "Đơn hàng #{{id}} đã đổi sang trạng thái \"{{status}}\""
+    },
+    "empty": {
+      "title": "Chưa có đơn hàng nào",
+      "subtitle": "Bạn chưa có đơn hàng nào. Hãy bắt đầu mua sắm!",
+      "cta": "Mua sắm ngay"
+    },
+    "card": {
+      "orderLabel": "Đơn hàng #{{id}}",
+      "productsLabel": "Sản phẩm:",
+      "totalLabel": "Tổng tiền:",
+      "placedLabel": "Ngày đặt:",
+      "typeLabel": "Loại đơn hàng:",
+      "productMore": "{{first}} và {{count}} sản phẩm khác",
+      "productEmpty": "Không có sản phẩm",
+      "viewDetails": "Xem chi tiết",
+      "cancel": "Hủy đơn hàng",
+      "cancelHint": "Chỉ có thể hủy đơn hàng đang chờ xử lý",
+      "orderTypes": {
+        "cart": "Từ giỏ hàng",
+        "buyNow": "Mua ngay"
+      }
+    },
+    "modal": {
+      "title": "Chi tiết đơn hàng #{{id}}",
+      "shippingTitle": "Thông tin giao hàng",
+      "orderInfoTitle": "Thông tin đơn hàng",
+      "statusLabel": "Trạng thái:",
+      "placedLabel": "Ngày đặt:",
+      "totalLabel": "Tổng tiền:",
+      "typeLabel": "Loại đơn hàng:",
+      "itemsTitle": "Sản phẩm trong đơn hàng",
+      "summaryLabel": "Tổng cộng",
+      "closeButton": "Đóng",
+      "shippingFallback": "Không có thông tin giao hàng",
+      "addressFallback": "Chưa có địa chỉ",
+      "labels": {
+        "name": "Tên:",
+        "email": "Email:",
+        "phone": "Số điện thoại:",
+        "address": "Địa chỉ:"
+      },
+      "tableHeaders": {
+        "name": "Tên sách",
+        "quantity": "Số lượng",
+        "price": "Đơn giá",
+        "total": "Thành tiền"
+      }
+    },
+    "pagination": {
+      "prev": "Trước",
+      "next": "Sau",
+      "ariaPrev": "Trang trước",
+      "ariaNext": "Trang tiếp theo"
+    }
+  },
+  "home": {
+    "sections": {
+      "categoriesTitle": "Danh Mục Sản Phẩm",
+      "featuredTitle": "Sách Nổi Bật",
+      "newTitle": "Sách Mới",
+      "popularTitle": "Sách Phổ Biến",
+      "recommendTitle": "Gợi ý dành riêng cho bạn",
+      "recommendSubtitle": "Hoàn thiện thông tin hồ sơ để nhận đề xuất chính xác hơn.",
+      "recommendEmpty": "Chưa có đề xuất phù hợp, hãy khám phá thêm các danh mục khác.",
+      "authorsTitle": "Tác Giả Yêu Thích",
+      "blogTitle": "Bài viết"
+    },
+    "actions": {
+      "viewAll": "Xem Tất Cả",
+      "viewDetails": "Xem chi tiết",
+      "addToCart": "Thêm vào giỏ",
+      "shopNow": "Mua ngay"
+    },
+    "states": {
+      "loading": "Đang tải...",
+      "noCategoriesTitle": "Không có danh mục nào",
+      "noCategoriesSubtitle": "Vui lòng thử lại sau",
+      "noBooksTitle": "Không tìm thấy sách",
+      "noBooksSubtitle": "Vui lòng quay lại sau",
+      "inStock": "Còn hàng",
+      "outOfStock": "Tạm hết",
+      "updating": "Đang cập nhật..."
+    },
+    "badges": {
+      "bookCount": "{{count}} sách",
+      "ratingCount": "({{count}})"
+    },
+    "messages": {
+      "categoryFallback": "Khám phá các sách trong danh mục này",
+      "loginRequired": "Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng!",
+      "outOfStock": "Sản phẩm đã hết hàng!",
+      "stockLimit": "Chỉ còn {{stock}} sản phẩm trong kho!",
+      "quantityIncreased": "Đã tăng số lượng \"{{title}}\" trong giỏ hàng!",
+      "addSuccess": "Thêm thành công! Đã thêm \"{{title}}\" vào giỏ hàng!",
+      "addFailed": "Không thể thêm sản phẩm vào giỏ hàng!",
+      "unknownAuthor": "Tác giả chưa xác định",
+      "contactForPrice": "Liên hệ",
+      "recommendLoading": "Đang lấy đề xuất cá nhân hóa..."
+    }
+  },
+  "shop": {
+    "sidebar": {
+      "filterTitle": "Bộ lọc",
+      "searchLabel": "Tìm kiếm",
+      "searchPlaceholder": "Tìm sách hoặc tác giả...",
+      "categoriesLabel": "Danh mục",
+      "authorsLabel": "Tác giả",
+      "viewAll": "Xem Tất Cả",
+      "priceLabel": "Khoảng giá",
+      "minPlaceholder": "0",
+      "maxPlaceholder": "1.000.000",
+      "reset": "Đặt lại",
+      "refresh": "Làm mới",
+      "refreshLoading": "Đang tải..."
+    },
+    "header": {
+      "results": "Hiển thị {{count}} kết quả",
+      "summary": "(Tổng: {{books}} sách, {{categories}} danh mục)",
+      "activeFilters": "Bộ lọc đang áp dụng:",
+      "clearAll": "Xóa tất cả",
+      "sortLabel": "Sắp xếp theo:",
+      "sortOptions": {
+        "default": "Mặc định",
+        "priceAsc": "Giá: Thấp đến Cao",
+        "priceDesc": "Giá: Cao đến Thấp",
+        "titleAsc": "Tên: A-Z",
+        "titleDesc": "Tên: Z-A",
+        "ratingDesc": "Đánh giá: Cao nhất",
+        "ratingAsc": "Đánh giá: Thấp nhất"
+      }
+    },
+    "filterBadges": {
+      "clearCategory": "Bỏ chọn danh mục",
+      "clearAuthor": "Bỏ chọn tác giả",
+      "clearSearch": "Xóa tìm kiếm",
+      "clearAll": "Xóa tất cả bộ lọc"
+    },
+    "categories": {
+      "title": "Danh mục sách",
+      "authorsTitle": "Danh mục tác giả",
+      "bookCount": "{{count}} sách",
+      "authorCount": "{{count}} tác giả",
+      "pagination": {
+        "prev": "Trước",
+        "next": "Sau",
+        "range": "Hiển thị {{start}}-{{end}} trong tổng số {{total}} tác giả"
+      }
+    },
+    "products": {
+      "saleBadge": "Sale",
+      "addToWishlist": "Thêm vào yêu thích",
+      "addToCart": "Thêm vào giỏ hàng",
+      "viewDetails": "Xem chi tiết",
+      "unknownAuthorById": "Tác giả ID: {{id}}",
+      "paginationRange": "Hiển thị {{start}} - {{end}} trong tổng số {{total}} sản phẩm",
+      "emptyTitle": "Không tìm thấy sách nào",
+      "emptyDescription": "Không có sách nào phù hợp với bộ lọc của bạn.",
+      "notFound": "Không tìm thấy thông tin sản phẩm!",
+      "wishlistPending": "Tính năng yêu thích sẽ được thêm sớm!"
+    },
+    "pagination": {
+      "prev": "Trước",
+      "next": "Sau",
+      "ellipsis": "..."
+    },
+    "states": {
+      "loading": "Đang tải...",
+      "refreshing": "Đang tải...",
+      "errorLoading": "Không thể tải dữ liệu từ server. Vui lòng thử lại sau."
+    },
+    "detail": {
+      "back": "Quay lại cửa hàng",
+      "addToCart": "Thêm vào giỏ hàng",
+      "buyNow": "Mua ngay",
+      "share": "Chia sẻ",
+      "quantity": "Số lượng",
+      "inStock": "Còn hàng",
+      "outOfStock": "Hết hàng",
+      "unknownCategory": "Danh mục chưa xác định",
+      "unknownPublisher": "Nhà xuất bản chưa xác định",
+      "description": "Mô tả",
+      "information": "Thông tin sản phẩm",
+      "author": "Tác giả",
+      "category": "Danh mục",
+      "publisher": "Nhà xuất bản",
+      "publishDate": "Ngày xuất bản",
+      "recommendations": "Có thể bạn cũng thích",
+      "noRecommendations": "Không có sách gợi ý nào.",
+      "loadingRecommendations": "Đang tải gợi ý...",
+      "reviews": "Đánh giá",
+      "loadingReviews": "Đang tải đánh giá...",
+      "noReviews": "Chưa có đánh giá nào.",
+      "addReview": "Thêm đánh giá",
+      "loginToReview": "Vui lòng đăng nhập để đánh giá sản phẩm."
+    },
+    "notifications": {
+      "refreshSuccess": "Dữ liệu đã được cập nhật thành công!",
+      "refreshError": "Không thể cập nhật dữ liệu. Vui lòng thử lại."
+    }
+  },
+  "productDetail": {
+    "states": {
+      "loadingMessage": "Đang tải thông tin sản phẩm...",
+      "loadingId": "ID sản phẩm: {{id}}",
+      "notFoundTitle": "Sản phẩm không tồn tại",
+      "notFoundDescription": "Không tìm thấy sản phẩm với ID này.",
+      "noImage": "Không có hình ảnh",
+      "recommendationsLoading": "Đang tải sách gợi ý...",
+      "noRecommendations": "Không có sách gợi ý nào."
+    },
+    "breadcrumb": {
+      "shop": "Sách"
+    },
+    "actions": {
+      "backHome": "Quay về trang chủ",
+      "checkout": "Thanh toán"
+    },
+    "info": {
+      "notAvailable": "Chưa cập nhật",
+      "noDescription": "Chưa có mô tả",
+      "priceLabel": "Giá:",
+      "statusLabel": "Tình trạng:",
+      "remainingQuantity": "Số lượng còn lại:",
+      "unitBook": "cuốn"
+    },
+    "meta": {
+      "author": "Tác giả:",
+      "publisher": "Nhà xuất bản:",
+      "category": "Danh mục:",
+      "tags": "Tags:"
+    },
+    "sections": {
+      "description": "Mô tả",
+      "detailInfo": "Thông tin chi tiết"
+    },
+    "tabs": {
+      "details": "Mô tả chi tiết"
+    },
+    "messages": {
+      "loginRequiredCheckout": "Vui lòng đăng nhập để thanh toán.",
+      "linkCopied": "Link đã được sao chép!"
+    },
+    "toasts": {
+      "addedToCart": "{{quantity}} x \"{{title}}\" đã được thêm vào giỏ hàng!"
+    },
+    "reviews": {
+      "title": "Đánh giá sản phẩm",
+      "summaryCount": "({{count}} đánh giá)",
+      "filter": {
+        "all": "Tất cả",
+        "star": "{{rating}} sao",
+        "starWithCount": "{{rating}} sao ({{count}})"
+      },
+      "sortLabel": "Sắp xếp:",
+      "sortOptions": {
+        "newest": "Mới nhất",
+        "oldest": "Cũ nhất",
+        "highest": "Cao nhất",
+        "lowest": "Thấp nhất"
+      },
+      "filterSummary": "Hiển thị {{count}} trong {{total}} đánh giá",
+      "empty": {
+        "title": "Chưa có đánh giá nào cho sản phẩm này.",
+        "subtitle": "Hãy là người đầu tiên đánh giá!"
+      },
+      "emptyFiltered": "Không có đánh giá nào phù hợp với bộ lọc đã chọn.",
+      "helpfulQuestion": "Đánh giá này có hữu ích không?",
+      "helpfulCount": "Hữu ích ({{count}})",
+      "anonymousUser": "Người dùng ẩn danh",
+      "alreadyReviewed": "Bạn đã đánh giá sản phẩm này!",
+      "form": {
+        "title": "Viết đánh giá của bạn",
+        "ratingLabel": "Đánh giá của bạn",
+        "qualityLabel": "Chất lượng:",
+        "ratingOptions": {
+          "1": "Rất tệ",
+          "2": "Tệ",
+          "3": "Bình thường",
+          "4": "Tốt",
+          "5": "Rất tốt"
+        },
+        "contentLabel": "Nội dung đánh giá",
+        "contentPlaceholder": "Chia sẻ trải nghiệm của bạn về sản phẩm này...",
+        "submit": "Gửi đánh giá",
+        "submitting": "Đang gửi..."
+      },
+      "adminNotice": {
+        "title": "Bạn đang đăng nhập với tư cách Admin",
+        "description": "Admin không thể viết đánh giá, chỉ có thể trả lời bình luận của người dùng."
+      }
+    },
+    "comments": {
+      "title": "Bình luận ({{count}})",
+      "adminInstructions": {
+        "title": "Hướng dẫn cho Admin:",
+        "reply": "Trả lời bình luận (nút xanh): Trả lời bình luận chưa có phản hồi",
+        "edit": "Sửa phản hồi (nút vàng): Chỉnh sửa phản hồi đã gửi",
+        "delete": "Xóa phản hồi (nút đỏ nhỏ): Xóa phản hồi admin, giữ lại bình luận của khách hàng",
+        "note": "Admin không thể xóa bình luận của khách hàng, chỉ có thể quản lý phản hồi của mình"
+      },
+      "adminOnly": "Chỉ admin mới có thể trả lời bình luận",
+      "reply": {
+        "label": "Phản hồi của Admin",
+        "placeholder": "Viết phản hồi của bạn...",
+        "submit": "Gửi phản hồi",
+        "submitting": "Đang gửi...",
+        "reply": "Trả lời bình luận",
+        "edit": "Sửa phản hồi",
+        "cancel": "Hủy",
+        "delete": "Xóa phản hồi"
+      },
+      "user": {
+        "nameLabel": "Tên của bạn",
+        "namePlaceholder": "Nhập tên của bạn",
+        "nameAutofill": "Tên từ tài khoản của bạn",
+        "nameHint": "Tên được lấy từ tài khoản của bạn"
+      },
+      "form": {
+        "commentLabel": "Bình luận",
+        "commentPlaceholder": "Viết bình luận của bạn...",
+        "submit": "Gửi bình luận"
+      },
+      "messages": {
+        "alreadyCommented": "Bạn đã bình luận sản phẩm này!",
+        "adminCannotComment": "Admin không thể tạo bình luận mới",
+        "adminCannotCommentHint": "Admin chỉ có thể trả lời các bình luận hiện có của người dùng."
+      }
+    },
+    "notifications": {
+      "reviewLoginRequired": "Vui lòng đăng nhập để đánh giá sản phẩm!",
+      "reviewContentRequired": "Vui lòng nhập nội dung đánh giá!",
+      "reviewSubmitSuccess": "Đánh giá đã được gửi thành công!",
+      "reviewSubmitError": "Có lỗi xảy ra khi gửi đánh giá!",
+      "reviewAlreadyExists": "Bạn đã đánh giá sản phẩm này rồi!",
+      "commentSubmitSuccess": "Bình luận đã được gửi thành công!",
+      "commentAlreadyExists": "Bạn đã bình luận sản phẩm này rồi!",
+      "replySubmitSuccess": "Phản hồi đã được gửi thành công!",
+      "replyDeleteConfirm": "Bạn có chắc chắn muốn xóa phản hồi này không?",
+      "replyDeleteSuccess": "Phản hồi đã được xóa thành công!"
+    }
+  },
+  "cart": {
+    "breadcrumb": {
+      "home": "Trang Chủ",
+      "cart": "Giỏ Hàng"
+    },
+    "states": {
+      "loading": "Đang tải giỏ hàng...",
+      "emptyTitle": "Giỏ hàng của bạn trống",
+      "emptySubtitle": "Thêm một số cuốn sách để bắt đầu!"
+    },
+    "sections": {
+      "items": "Các Mục Giỏ Hàng",
+      "summary": "Tóm Tắt Đơn Hàng"
+    },
+    "actions": {
+      "selectAll": "Chọn tất cả",
+      "deselectAll": "Bỏ chọn tất cả",
+      "removeAll": "Xóa tất cả",
+      "removeSelected": "Xóa đã chọn ({{count}})",
+      "remove": "Xóa",
+      "checkout": "Tiến Hành Thanh Toán",
+      "clearSelection": "Bỏ chọn tất cả"
+    },
+    "labels": {
+      "subtotal": "Tạm tính ({{count}} mục):",
+      "total": "Tổng cộng:",
+      "price": "Giá:",
+      "itemTotal": "Tổng:"
+    },
+    "messages": {
+      "selectToRemove": "Vui lòng chọn ít nhất một sản phẩm để xóa!",
+      "cartEmpty": "Giỏ hàng đã trống!",
+      "removeAllConfirm": "Bạn có chắc chắn muốn xóa tất cả {{count}} sản phẩm khỏi giỏ hàng?",
+      "loginRequired": "Vui lòng đăng nhập để thực hiện thao tác này!",
+      "removeAllSuccess": "Đã xóa tất cả {{count}} sản phẩm khỏi giỏ hàng!",
+      "removeAllError": "Có lỗi xảy ra khi xóa giỏ hàng!",
+      "checkoutSelected": "Đang chuyển đến thanh toán với {{count}} sản phẩm!",
+      "checkoutRequired": "Vui lòng chọn ít nhất một sản phẩm để thanh toán!"
+    }
+  },
+  "checkout": {
+    "states": {
+      "emptyTitle": "Giỏ hàng trống",
+      "emptySubtitle": "Bạn chưa có sản phẩm nào để thanh toán"
+    },
+    "actions": {
+      "backHome": "Về trang chủ",
+      "placeOrder": "Đặt hàng ngay",
+      "processing": "Đang xử lý..."
+    },
+    "sections": {
+      "title": "Thanh toán",
+      "shippingInfo": "Thông tin giao hàng",
+      "paymentMethod": "Phương thức thanh toán",
+      "orderNotes": "Ghi chú đơn hàng",
+      "orderSummary": "Đơn hàng của bạn"
+    },
+    "form": {
+      "addressType": "Chọn loại địa chỉ",
+      "useDefaultAddress": "Sử dụng địa chỉ mặc định",
+      "useNewAddress": "Nhập địa chỉ mới",
+      "defaultAddressLabel": "Địa chỉ mặc định",
+      "noDefaultAddress": "Bạn chưa có địa chỉ mặc định. Vui lòng cập nhật địa chỉ trong profile.",
+      "address": "Địa chỉ chi tiết *",
+      "addressPlaceholder": "Nhập địa chỉ chi tiết (số nhà, tên đường, tòa nhà...)",
+      "googlePlacesHint": "Gõ địa chỉ để tự động điền",
+      "googlePlacesHelp": "Nhập địa chỉ và chọn từ gợi ý để tự động điền thông tin",
+      "city": "Tỉnh/Thành phố *",
+      "cityPlaceholder": "Ví dụ: Đà Nẵng",
+      "selectCity": "Chọn tỉnh/thành phố",
+      "selectCityFirst": "Chọn tỉnh/thành phố trước",
+      "district": "Quận/Huyện *",
+      "districtPlaceholder": "Ví dụ: Thanh Khê",
+      "selectDistrict": "Chọn quận/huyện",
+      "selectDistrictFirst": "Chọn quận/huyện trước",
+      "ward": "Phường/Xã *",
+      "wardPlaceholder": "Ví dụ: An Khê",
+      "selectWard": "Chọn phường/xã",
+      "loading": "Đang tải...",
+      "orderNotes": "Ghi chú cho đơn hàng",
+      "orderNotesPlaceholder": "Nhập ghi chú cho đơn hàng (tùy chọn)...",
+      "orderNotesHelp": "Bạn có thể thêm ghi chú về thời gian giao hàng, hướng dẫn địa chỉ, hoặc yêu cầu đặc biệt"
+    },
+    "payment": {
+      "codLabel": "Thanh toán khi nhận hàng (COD)",
+      "codDescription": "Bạn sẽ thanh toán bằng tiền mặt khi nhận được hàng"
+    },
+    "summary": {
+      "quantityLabel": "Số lượng: {{count}}",
+      "total": "Tổng cộng:",
+      "shippingNotice": "Phí vận chuyển sẽ được tính khi xác nhận đơn hàng"
+    },
+    "messages": {
+      "adminRestriction": "Admin không thể đặt hàng. Vui lòng đăng nhập bằng tài khoản user.",
+      "loginRequired": "Vui lòng đăng nhập để đặt hàng!",
+      "sessionExpired": "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!",
+      "cartEmpty": "Giỏ hàng trống!",
+      "successWithCart": "Đặt hàng thành công! {{count}} sản phẩm đã được xóa khỏi giỏ hàng và đang chờ xử lý.",
+      "success": "Đặt hàng thành công! Đơn hàng đang chờ xử lý.",
+      "error": "Có lỗi xảy ra khi đặt hàng!",
+      "noPermission": "Bạn không có quyền đặt hàng. Vui lòng đăng nhập lại.",
+      "adminNoPermission": "Admin không thể đặt hàng. Vui lòng đăng nhập bằng tài khoản user để đặt hàng.",
+      "sessionExpiredShort": "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại."
+    },
+    "validation": {
+      "addressRequired": "Vui lòng nhập địa chỉ chi tiết",
+      "addressMin": "Địa chỉ chi tiết phải có ít nhất 10 ký tự",
+      "addressInvalid": "Địa chỉ không hợp lệ",
+      "noDefaultAddress": "Bạn chưa có địa chỉ mặc định. Vui lòng cập nhật địa chỉ trong profile.",
+      "cityRequired": "Vui lòng nhập tỉnh/thành phố",
+      "cityMin": "Tỉnh/thành phố phải có ít nhất 2 ký tự",
+      "cityInvalid": "Tỉnh/thành phố không được chứa ký tự đặc biệt hoặc số",
+      "districtRequired": "Vui lòng nhập quận/huyện",
+      "districtMin": "Quận/huyện phải có ít nhất 2 ký tự",
+      "districtInvalid": "Quận/huyện không được chứa ký tự đặc biệt hoặc số",
+      "wardRequired": "Vui lòng nhập phường/xã",
+      "wardMin": "Phường/xã phải có ít nhất 2 ký tự",
+      "wardInvalid": "Phường/xã không được chứa ký tự đặc biệt hoặc số"
+    }
+  },
+  "about": {
+    "breadcrumb": {
+      "home": "Trang Chủ",
+      "about": "Giới Thiệu"
+    },
+    "title": "Về Chúng Tôi",
+    "subtitle": "Khám phá thế giới sách và tri thức cùng SmartBook",
+    "sections": {
+      "whoWeAre": {
+        "title": "Chúng Tôi Là Ai",
+        "paragraphs": [
+          "SmartBook là nền tảng mua sách trực tuyến hàng đầu Việt Nam, được thành lập với sứ mệnh lan tỏa tri thức và văn hóa đọc đến mọi người dân. Chúng tôi cam kết mang đến những cuốn sách chất lượng cao với giá cả hợp lý và dịch vụ khách hàng xuất sắc.",
+          "Với hơn 50,000 đầu sách từ các nhà xuất bản uy tín trong và ngoài nước, SmartBook tự hào là điểm đến tin cậy cho những người yêu thích đọc sách và muốn khám phá tri thức mới."
+        ],
+        "founder": "Nguyễn Văn A, Người sáng lập & Giám đốc điều hành.",
+        "imageAlt": "SmartBook - Nền tảng sách trực tuyến"
+      },
+      "mission": {
+        "title": "Sứ Mệnh Của Chúng Tôi",
+        "paragraphs": [
+          "Chúng tôi tin rằng sách là cánh cửa mở ra thế giới tri thức vô tận. Mỗi cuốn sách đều chứa đựng những bài học quý giá, những câu chuyện ý nghĩa và những kiến thức bổ ích có thể thay đổi cuộc đời bạn.",
+          "SmartBook cam kết mang đến trải nghiệm mua sách tuyệt vời nhất với hệ thống tìm kiếm thông minh, giao hàng nhanh chóng và dịch vụ khách hàng chuyên nghiệp. Hãy để chúng tôi đồng hành cùng bạn trên hành trình khám phá tri thức."
+        ],
+        "stats": [
+          { "value": "50K+", "label": "ĐẦU SÁCH" },
+          { "value": "10K+", "label": "KHÁCH HÀNG" },
+          { "value": "5+", "label": "NĂM KINH NGHIỆM" }
+        ]
+      },
+      "testimonial": {
+        "title": "SmartBook Tuyệt Vời",
+        "quote": "\"SmartBook đã thay đổi hoàn toàn cách tôi mua sách. Giao diện thân thiện, tìm kiếm dễ dàng, và giao hàng nhanh chóng. Tôi đã tìm thấy rất nhiều cuốn sách hay mà trước đây khó tìm mua.\"",
+        "author": "Nguyễn Thị B",
+        "role": "Khách hàng thân thiết"
+      },
+      "authors": {
+        "title": "Tác Giả Yêu Thích",
+        "cta": "Xem Tất Cả"
+      }
+    },
+    "fallback": {
+      "title": "SmartBook",
+      "description": "Nền tảng sách trực tuyến"
+    }
+  },
+  "contact": {
+    "breadcrumb": {
+      "home": "Trang Chủ",
+      "contact": "Liên Hệ"
+    },
+    "header": {
+      "title": "Liên Hệ Với Chúng Tôi",
+      "subtitle": "Chúng tôi luôn sẵn sàng lắng nghe và hỗ trợ bạn"
+    },
+    "info": {
+      "title": "Thông Tin Liên Hệ",
+      "items": [
+        {
+          "icon": "fas fa-map-marker-alt",
+          "title": "Địa chỉ",
+          "content": "1000 Nguyễn Văn A, Thanh Khê, Đà Nẵng, Việt Nam",
+          "color": "text-primary"
+        },
+        {
+          "icon": "fas fa-phone",
+          "title": "Điện thoại",
+          "content": "+84 123 456 789",
+          "color": "text-success"
+        },
+        {
+          "icon": "fas fa-envelope",
+          "title": "Email",
+          "content": "smartbook@gmail.com",
+          "color": "text-info"
+        },
+        {
+          "icon": "fas fa-clock",
+          "title": "Giờ làm việc",
+          "content": "Thứ 2 - Thứ 6: 8:00 - 18:00\\nThứ 7 - Chủ nhật: 9:00 - 17:00",
+          "color": "text-warning"
+        }
+      ]
+    },
+    "follow": {
+      "title": "Theo Dõi Chúng Tôi"
+    }
+  },
+  "authors": {
+    "title": "Tác giả",
+    "searchPlaceholder": "Tìm kiếm tác giả...",
+    "messages": {
+      "loading": "Đang tải...",
+      "empty": "Không tìm thấy tác giả nào",
+      "errorTitle": "Lỗi tải dữ liệu",
+      "loadFailed": "Không thể tải danh sách tác giả",
+      "connectionError": "Lỗi kết nối: {{message}}. Vui lòng kiểm tra backend có đang chạy không."
+    },
+    "buttons": {
+      "retry": "Thử lại",
+      "reload": "Tải lại trang",
+      "viewDetail": "Xem chi tiết"
+    }
+  },
+  "authorDetail": {
+    "breadcrumbs": {
+      "back": "Tác giả"
+    },
+    "messages": {
+      "loading": "Đang tải...",
+      "loadFailed": "Không thể tải thông tin tác giả",
+      "connectionError": "Lỗi khi tải thông tin tác giả",
+      "notFound": "Không tìm thấy thông tin tác giả",
+      "noBooksTitle": "Chưa có tác phẩm nào",
+      "noBooksDescription": "Tác giả này chưa có sách nào trong hệ thống",
+      "loginRequired": "Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng!",
+      "wishlistLoginRequired": "Vui lòng đăng nhập để thêm sản phẩm vào yêu thích!",
+      "addToCartSuccess": "Đã thêm \"{{title}}\" vào giỏ hàng!",
+      "addToCartError": "Có lỗi xảy ra khi thêm sản phẩm vào giỏ hàng!",
+      "addToWishlistSuccess": "Đã thêm \"{{title}}\" vào yêu thích!",
+      "addToWishlistError": "Có lỗi xảy ra khi thêm sản phẩm vào yêu thích!"
+    },
+    "labels": {
+      "bio": "Tiểu sử",
+      "bookCount": "{{count}} cuốn sách",
+      "worksByAuthor": "Tác phẩm của {{name}}",
+      "unknownCategory": "Không có danh mục",
+      "inStock": "Còn hàng"
+    },
+    "buttons": {
+      "viewDetail": "Xem chi tiết",
+      "addToWishlist": "Thêm vào yêu thích",
+      "addToCart": "Thêm vào giỏ hàng"
+    },
+    "tooltips": {
+      "addToWishlist": "Thêm vào yêu thích",
+      "addToCart": "Thêm vào giỏ hàng",
+      "viewBook": "Click để xem chi tiết sách"
+    }
+  },
+  "blog": {
+    "breadcrumb": {
+      "home": "Trang Chủ",
+      "blog": "Blog"
+    },
+    "title": "Blog",
+    "subtitle": "Khám phá những bài viết thú vị về thế giới sách và manga",
+    "searchPlaceholder": "Tìm kiếm bài viết, tác giả hoặc thể loại...",
+    "filters": {
+      "categories": {
+        "all": "Tất cả danh mục",
+        "featured": "Nổi bật",
+        "art": "Nghệ thuật",
+        "review": "Đánh giá",
+        "history": "Lịch sử",
+        "culture": "Văn hóa",
+        "technique": "Kỹ thuật"
+      },
+      "authors": {
+        "all": "Tất cả tác giả",
+        "authorA": "Nguyễn Văn A",
+        "authorB": "Trần Thị B",
+        "authorC": "Lê Văn C",
+        "authorD": "Phạm Thị D",
+        "authorE": "Hoàng Văn E",
+        "authorF": "Trần Thị F"
+      },
+      "sort": {
+        "newest": "Mới nhất",
+        "oldest": "Cũ nhất",
+        "popular": "Phổ biến",
+        "mostRead": "Đọc nhiều"
+      }
+    },
+    "sections": {
+      "otherPosts": "Các Bài Viết Khác",
+      "newsletterTitle": "Đăng Ký Nhận Tin Tức",
+      "newsletterSubtitle": "Nhận những bài viết mới nhất về sách và manga"
+    },
+    "messages": {
+      "noPosts": "Chưa có bài viết nào",
+      "noResults": "Không có bài viết nào phù hợp với tiêu chí tìm kiếm."
+    },
+    "newsletter": {
+      "placeholder": "Nhập email của bạn",
+      "submit": "Đăng Ký"
+    },
+    "posts": [
+      {
+        "id": 1,
+        "title": "Fujiko F. Fujio - Người Tạo Ra Doraemon",
+        "excerpt": "Khám phá cuộc đời và sự nghiệp của tác giả manga nổi tiếng Fujiko F. Fujio, người đã tạo ra nhân vật Doraemon được yêu thích trên toàn thế giới.",
+        "content": "Fujiko F. Fujio (1933-1996) là một trong những mangaka vĩ đại nhất của Nhật Bản. Ông nổi tiếng với bộ truyện Doraemon, một tác phẩm đã trở thành biểu tượng văn hóa không chỉ ở Nhật mà còn trên toàn thế giới. Với hơn 100 triệu bản in được bán ra, Doraemon đã chạm đến trái tim của hàng triệu độc giả ở mọi lứa tuổi...",
+        "authorKey": "authorA",
+        "date": "24 Tháng 10, 2023",
+        "readTime": "7 phút đọc",
+        "image": "https://xkld.thanhgiang.com.vn/wp-content/uploads/2020/12/chuyen-doi-it-ai-biet-ve-hoa-si-fujiko-f-fujio-1-1024x538.jpg",
+        "categoryKey": "featured",
+        "tags": ["Doraemon", "Manga", "Fujiko F. Fujio"]
+      },
+      {
+        "id": 2,
+        "title": "Nghệ Thuật Kể Chuyện Manga",
+        "excerpt": "Tìm hiểu về những kỹ thuật kể chuyện độc đáo trong manga và cách các mangaka tạo ra những câu chuyện hấp dẫn.",
+        "content": "Manga không chỉ là những hình ảnh đơn thuần mà là một hình thức nghệ thuật kể chuyện phức tạp. Từ cách sắp xếp khung hình đến việc sử dụng âm thanh và chuyển động, mỗi yếu tố đều góp phần tạo nên trải nghiệm đọc độc đáo...",
+        "authorKey": "authorB",
+        "date": "17 Tháng 10, 2023",
+        "readTime": "5 phút đọc",
+        "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=300&fit=crop",
+        "categoryKey": "art",
+        "tags": ["Manga", "Kể chuyện", "Nghệ thuật"]
+      },
+      {
+        "id": 3,
+        "title": "Top 10 Bộ Manga Phải Đọc",
+        "excerpt": "Danh sách những bộ manga kinh điển và đáng đọc nhất mọi thời đại, từ những tác phẩm cổ điển đến những bộ truyện hiện đại.",
+        "content": "Trong thế giới manga rộng lớn, có những bộ truyện đã vượt qua ranh giới của thời gian và không gian để trở thành những tác phẩm kinh điển. Từ One Piece với cuộc phiêu lưu vĩ đại của Luffy đến Attack on Titan với câu chuyện đầy kịch tính...",
+        "authorKey": "authorC",
+        "date": "07 Tháng 10, 2023",
+        "readTime": "8 phút đọc",
+        "image": "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=600&h=300&fit=crop",
+        "categoryKey": "review",
+        "tags": ["Top 10 Manga", "Đánh giá"]
+      },
+      {
+        "id": 4,
+        "title": "Lịch Sử Phát Triển Của Manga",
+        "excerpt": "Tìm hiểu về quá trình phát triển của manga từ những bản vẽ đầu tiên đến ngành công nghiệp tỷ đô ngày nay.",
+        "content": "Manga có lịch sử phát triển lâu dài và phong phú, bắt đầu từ những bản vẽ đơn giản trong thời kỳ Edo đến ngành công nghiệp manga hiện đại với doanh thu hàng tỷ đô. Quá trình này phản ánh sự thay đổi của xã hội Nhật Bản và sự phát triển của công nghệ...",
+        "authorKey": "authorD",
+        "date": "01 Tháng 10, 2023",
+        "readTime": "6 phút đọc",
+        "image": "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=600&h=300&fit=crop",
+        "categoryKey": "history",
+        "tags": ["Lịch sử Manga", "Manga"]
+      },
+      {
+        "id": 5,
+        "title": "Tác Động Của Manga Đến Văn Hóa Thế Giới",
+        "excerpt": "Khám phá cách manga đã ảnh hưởng đến văn hóa toàn cầu và tạo ra những xu hướng mới trong nghệ thuật và giải trí.",
+        "content": "Manga không chỉ là một hình thức giải trí mà còn là một sức mạnh văn hóa mạnh mẽ. Từ việc lan tỏa văn hóa Nhật Bản ra thế giới đến việc tạo ra những xu hướng mới trong nghệ thuật, thời trang và lối sống...",
+        "authorKey": "authorE",
+        "date": "25 Tháng 9, 2023",
+        "readTime": "7 phút đọc",
+        "image": "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600&h=300&fit=crop",
+        "categoryKey": "culture",
+        "tags": ["Văn hóa", "Manga", "Ảnh hưởng"]
+      },
+      {
+        "id": 6,
+        "title": "Cách Đọc Manga Hiệu Quả",
+        "excerpt": "Hướng dẫn chi tiết về cách đọc manga để có trải nghiệm tốt nhất, từ cách chọn tác phẩm đến kỹ thuật đọc.",
+        "content": "Đọc manga là một nghệ thuật. Không chỉ đơn giản là lật trang và xem hình ảnh, việc đọc manga đúng cách sẽ mang lại trải nghiệm sâu sắc và thú vị hơn nhiều. Từ việc hiểu cách đọc từ phải sang trái đến việc cảm nhận nhịp điệu của câu chuyện...",
+        "authorKey": "authorF",
+        "date": "18 Tháng 9, 2023",
+        "readTime": "4 phút đọc",
+        "image": "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=600&h=300&fit=crop",
+        "categoryKey": "technique",
+        "tags": ["Manga", "Kỹ thuật đọc"]
+      }
+    ],
+    "categoryColors": {
+      "featured": "#dc3545",
+      "art": "#28a745",
+      "review": "#fd7e14",
+      "history": "#6f42c1",
+      "culture": "#20c997",
+      "technique": "#0d6efd",
+      "default": "#6c757d"
+    }
+  },
+  "blogDetail": {
+    "breadcrumb": {
+      "home": "Trang Chủ",
+      "blog": "Blog"
+    },
+    "buttons": {
+      "like": "{{count}} lượt thích",
+      "save": "Lưu",
+      "share": "Chia sẻ",
+      "back": "Quay Lại Blog"
+    },
+    "share": {
+      "menu": {
+        "facebook": "Facebook",
+        "twitter": "Twitter",
+        "linkedin": "LinkedIn",
+        "copy": "Sao chép liên kết"
+      },
+      "copySuccess": "Đã sao chép liên kết!"
+    },
+    "posts": {
+      "1": {
+        "title": "Fujiko F. Fujio - Người Tạo Ra Doraemon",
+        "content": "<p>Fujiko F. Fujio (1933-1996) là một trong những mangaka vĩ đại nhất của Nhật Bản. Ông với bộ truyện Doraemon, một tác phẩm đã trở thành biểu tượng văn hóa không chỉ ở còn trên toàn thế giới.</p><h3>Những Ngày Đầu</h3><p>Fujiko F. Fujio sinh ra tại Takaoka, tỉnh Toyama vào năm 1933. Tên thật của ông là Hiroshi Fujimoto. Từ nhỏ, ông đã có niềm đam mê với manga và anime. Năm 1951, ông gặp Motoo Abiko (sau này là Fujiko A. Fujio) và hai người bắt đầu hợp tác sáng tác manga dưới bút danh chung \"Fujiko Fujio\".</p><h3>Sự Ra Đời Của Doraemon</h3><p>Doraemon được tạo ra vào năm 1969, ban đầu là một nhân vật phụ trong bộ truyện \"Doraemon\" của Fujiko F. Fujio. Tuy nhiên, nhân vật này nhanh chóng trở thành nhân vật chính và được yêu thích trên toàn thế giới.</p><h3>Tác Động Văn Hóa</h3><p>Doraemon không chỉ là một bộ truyện tranh mà còn là một hiện tượng văn hóa. Bộ truyện đã được dịch sang nhiều ngôn ngữ và được chuyển thể thành anime, phim điện ảnh, và các sản phẩm thương mại khác.</p><h3>Di Sản</h3><p>Mặc dù Fujiko F. Fujio đã qua đời vào năm 1996, nhưng di sản của ông vẫn tiếp tục sống mãi thông qua Doraemon. Nhân vật này đã trở thành biểu tượng của tình bạn, sự sáng tạo và ước mơ của trẻ em trên toàn thế giới.</p>",
+        "authorKey": "authorA",
+        "date": "24 Tháng 10, 2019",
+        "readTime": "5 phút đọc",
+        "image": "https://xkld.thanhgiang.com.vn/wp-content/uploads/2020/12/chuyen-doi-it-ai-biet-ve-hoa-si-fujiko-f-fujio-1-1024x538.jpg",
+        "tags": ["Doraemon", "Manga", "Fujiko F. Fujio", "Nhật Bản"]
+      }
+    }
+  },
+  "admin": {
+    "layout": {
+      "backToHome": "Về trang chủ",
+      "logout": "Đăng xuất",
+      "menu": {
+        "dashboard": "Tổng Quan",
+        "books": "Quản Lý Sách",
+        "categories": "Quản Lý Danh Mục",
+        "warehouse": "Quản Lý Kho",
+        "orders": "Quản Lý Đơn Hàng",
+        "users": "Quản Lý Người Dùng",
+        "reviews": "Quản Lý Đánh Giá",
+        "reports": "Báo cáo"
+      }
+    },
+    "dashboard": {
+      "loading": "Đang tải...",
+      "title": "Tổng Quan",
+      "actions": {
+        "refresh": "Làm mới",
+        "retry": "Thử lại"
+      },
+      "alert": {
+        "title": "Lưu ý:",
+        "message": "Khi khách hàng đặt hàng thành công từ trang chủ, đơn hàng sẽ xuất hiện trong dashboard này với trạng thái \"{{status}}\". Dữ liệu sẽ tự động cập nhật khi có đơn hàng mới."
+      },
+      "stats": {
+        "totalRevenue": "Tổng doanh thu",
+        "totalOrders": "Tổng đơn hàng",
+        "totalBooks": "Tổng sách",
+        "totalUsers": "Tổng người dùng"
+      },
+      "charts": {
+        "revenueTitle": "Doanh thu theo {{period}}",
+        "ordersTitle": "Số đơn hàng theo {{period}}",
+        "periods": {
+          "day": "ngày",
+          "month": "tháng",
+          "year": "năm"
+        },
+        "range": {
+          "day": "Theo ngày",
+          "month": "Theo tháng",
+          "year": "Theo năm"
+        },
+        "revenueDataset": "Doanh thu (₫)",
+        "ordersDataset": "Số đơn hàng"
+      },
+      "table": {
+        "title": "Đơn hàng gần đây",
+        "columns": {
+          "orderId": "Mã đơn",
+          "customer": "Khách hàng",
+          "amount": "Giá trị",
+          "status": "Trạng thái",
+          "createdAt": "Ngày tạo"
+        }
+      },
+      "topSelling": {
+        "title": "Sách bán chạy",
+        "empty": "Chưa có dữ liệu sách bán chạy",
+        "salesLine": "{{count}} bản · {{revenue}}",
+        "rank": {
+          "1": "Top 1",
+          "2": "Top 2",
+          "3": "Top 3",
+          "default": "Top {{rank}}"
+        },
+        "placeholder": "Sách {{index}}"
+      },
+      "topRated": {
+        "title": "Top 3 sách đánh giá 5 sao",
+        "empty": "Chưa có dữ liệu đánh giá sách",
+        "placeholder": "Sách {{index}}"
+      },
+      "statuses": {
+        "completed": "Hoàn thành",
+        "pending": "Chờ xử lý",
+        "shipped": "Đã giao",
+        "processing": "Đang xử lý",
+        "cancelled": "Đã hủy"
+      },
+      "errors": {
+        "unauthorized": "Bạn không có quyền truy cập dashboard admin",
+        "apiRequest": "Lỗi gọi API",
+        "fetchFailed": "Không thể tải dữ liệu dashboard",
+        "generic": "Có lỗi xảy ra khi tải dữ liệu dashboard"
+      }
+    }
+  }
+}
+

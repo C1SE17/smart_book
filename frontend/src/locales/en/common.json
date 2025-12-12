@@ -1,0 +1,2119 @@
+{
+  "nav": {
+    "home": "Home",
+    "shop": "Shop",
+    "blog": "Blog",
+    "author": "Authors",
+    "about": "About Us",
+    "contact": "Contact",
+    "translation": "Translate Content",
+    "aiAsk": "AI Ask",
+    "login": "Log in",
+    "register": "Register",
+    "logout": "Log out",
+    "profile": "Profile",
+    "orders": "Orders",
+    "adminDashboard": "Admin Dashboard"
+  },
+  "languageToggle": {
+    "tooltip": "Switch language",
+    "vi": "VI",
+    "en": "EN"
+  },
+  "slides": [
+    {
+      "title": "Top 10 Favorite Books",
+      "description": "Discover timeless, must-read titles handpicked by our expert curators.",
+      "buttonText": "Explore more"
+    },
+    {
+      "title": "Fresh Releases",
+      "description": "See the newest arrivals from publishers around the world.",
+      "buttonText": "Shop now"
+    },
+    {
+      "title": "Best Sellers",
+      "description": "The most talked-about books everyone is reading.",
+      "buttonText": "View all"
+    }
+  ],
+  "translationPage": {
+    "title": "Bookstore Translation",
+    "subtitle": "Harness a multilingual LLM with domain glossary support to translate product copy, chapters, reviews, and marketing content accurately.",
+    "directionLabel": "Select direction",
+    "directions": {
+      "auto": "Auto detect",
+      "en_vi": "English → Vietnamese",
+      "vi_en": "Vietnamese → English"
+    },
+    "sourceLabel": "Source text",
+    "placeholder": "Paste your product blurb, book title, chapter excerpt, or marketing copy here...",
+    "example": "Example: “A heartwarming coming-of-age tale set in a vintage Hanoi bookshop.”",
+    "swap": "Swap direction",
+    "action": "Translate",
+    "translating": "Translating...",
+    "resultTitle": "Result",
+    "glossaryTitle": "Glossary hints",
+    "exampleTitle": "Reference example",
+    "exampleSource": "Source",
+    "exampleTarget": "Target",
+    "errors": {
+      "empty": "Please enter content to translate.",
+      "generic": "An error occurred while translating."
+    }
+  },
+  "aiAsk": {
+    "header": {
+      "title": "Smart AI Book Advisor",
+      "subtitle": "Enter keywords, adjust filters, and let AI surface the best books for you."
+    },
+    "search": {
+      "label": "What kind of books are you looking for?",
+      "placeholder": "Search by title, author, genre...",
+      "button": "Search",
+      "suggestionColumns": {
+        "queries": "Queries",
+        "books": "Books",
+        "others": "Authors / Categories"
+      },
+      "suggestions": {
+        "loading": "Loading...",
+        "emptyQueries": "No suggestions",
+        "emptyBooks": "No matching books",
+        "emptyOthers": "No additional suggestions"
+      }
+    },
+    "languageOptions": [
+      { "value": "vi", "label": "Vietnamese" },
+      { "value": "en", "label": "English" },
+      { "value": "jp", "label": "Japanese" },
+      { "value": "cn", "label": "Chinese" },
+      { "value": "kr", "label": "Korean" },
+      { "value": "fr", "label": "French" }
+    ],
+    "statusOptions": [
+      { "value": "in_stock", "label": "In stock" },
+      { "value": "preorder", "label": "Pre-order" },
+      { "value": "out_of_stock", "label": "Out of stock" }
+    ],
+    "tagLibrary": [
+      { "value": "mới phát hành", "label": "New release" },
+      { "value": "bán chạy", "label": "Best seller" },
+      { "value": "giải thưởng", "label": "Award-winning" },
+      { "value": "thiếu nhi", "label": "Kids" },
+      { "value": "chuyển thể phim", "label": "Movie adaptation" },
+      { "value": "self-help", "label": "Self-help" },
+      { "value": "light novel", "label": "Light novel" },
+      { "value": "classic", "label": "Classic" }
+    ],
+    "filters": {
+      "categories": "Categories",
+      "authors": "Authors",
+      "publishers": "Publishers / Distributors",
+      "price": "Price range",
+      "years": "Publication years",
+      "languages": "Languages",
+      "status": "Status",
+      "minRating": "Minimum rating",
+      "tags": "Tags / Keywords",
+      "ratingValue": "≥ {{value}}"
+    },
+    "labels": {
+      "synonym": "(aka {{terms}})"
+    },
+    "dataTypes": {
+      "categories": "categories",
+      "authors": "authors",
+      "publishers": "publishers"
+    },
+    "actions": {
+      "quick": "Quick recommend",
+      "similar": "Similar books",
+      "reset": "Reset"
+    },
+    "messages": {
+      "initial": "Start by entering a keyword or choose filters so AI can recommend the right books.",
+      "metaLoadPartial": "Unable to load {{dataTypes}} data. Some filters may be missing.",
+      "metaLoadError": "We couldn't load filter data. Please try again in a moment.",
+      "autocompleteError": "Live suggestions are unavailable right now—try typing a different keyword.",
+      "emptyQuery": "Enter a keyword to search or try Quick recommend!",
+      "searchOpening": "Opening search results for “{{query}}”...",
+      "quickAnalyzing": "AI is analyzing your data...",
+      "fewResults": "AI only found a few matching titles. Try broadening your filters.",
+      "currentPreferences": "your current preferences",
+      "quickSummary": "AI collected {{count}} suggestions from {{source}}, focused on {{summary}}.",
+      "quickError": "Something went wrong while generating quick suggestions. Refresh and try again.",
+      "selectBookForSimilar": "Select a recommendation card before asking for similar books.",
+      "similarAnalyzing": "AI is analyzing “{{title}}” to find similar books...",
+      "similarSummary": "AI found {{count}} titles related to “{{title}}”.",
+      "similarFew": "Only {{count}} similar books were found for “{{title}}”. Try expanding your filters.",
+      "similarNone": "No similar books were found. Try another keyword or adjust your filters.",
+      "similarError": "Something went wrong while fetching similar books. Please try again.",
+      "similarSummaryContext": "themes related to “{{title}}”",
+      "similarSource": "metadata & similar behavior analysis",
+      "reset": "Filters have been reset. Enter a new keyword to get recommendations.",
+      "bookSelected": "Selected “{{title}}”. Use “Similar books” to view related titles.",
+      "bookSelectedNoDetail": "Couldn't load the full details, but you can still try “Similar books”.",
+      "authorAdded": "Author {{name}} added to filters.",
+      "categoryAdded": "Category {{name}} added to filters. Use “Quick recommend” to refresh results.",
+      "keywordSelected": "Selected keyword “{{keyword}}”. Use Search or Quick recommend.",
+      "suggestionError": "We couldn't process that option. Please try again."
+    },
+    "filterSummary": {
+      "categories": "categories {{names}}",
+      "authors": "authors {{names}}",
+      "publishers": "publishers {{names}}",
+      "price": "price {{min}} - {{max}}",
+      "years": "years {{min}} - {{max}}",
+      "languages": "languages {{names}}",
+      "tags": "tags {{tags}}",
+      "minRating": "minimum rating {{value}}"
+    },
+    "insights": {
+      "priorityFilters": "Priority filters: {{summary}}.",
+      "dataSource": "Data source: {{source}}.",
+      "dataSourceFallback": "Data source: {{source}} (trend fallback).",
+      "averageRating": "Average rating ≈ {{value}}/5.",
+      "priceRange": "Suggested price range ~ {{min}} - {{max}}.",
+      "topCategory": "Top category: {{category}}."
+    },
+    "reasons": {
+      "systemTrend": "Global trend",
+      "personalProfile": "Personal reading profile",
+      "category": "Category {{name}}",
+      "author": "Author {{name}}",
+      "combinedFilters": "Combined filters",
+      "default": "Recommendation system"
+    },
+    "recommendations": {
+      "loading": "Analyzing data...",
+      "empty": "No data yet. Try “Quick recommend” to let AI begin!",
+      "noImage": "No image",
+      "badgeNew": "New",
+      "badgeSuggested": "Featured",
+      "authorPlaceholder": "Updating",
+      "priceContact": "Contact for price",
+      "viewDetails": "View details"
+    }
+  },
+  "bookManagement": {
+    "title": "Book Management",
+    "addButton": "Add new book",
+    "searchPlaceholder": "Search by title, author, category...",
+    "buttons": {
+      "clearSearch": "Clear search"
+    },
+    "stats": {
+      "totalLabel": "Total books:",
+      "pageLabel": "Page {{current}} / {{total}}"
+    },
+    "itemsPerPage": "Show:",
+    "table": {
+      "headers": {
+        "id": "ID",
+        "title": "Title",
+        "price": "Price",
+        "stock": "Stock",
+        "category": "Category",
+        "author": "Author",
+        "publisher": "Publisher",
+        "actions": "Actions"
+      },
+      "loading": "Loading...",
+      "error": "Unable to load books.",
+      "empty": "No books available"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "pagination": {
+      "summary": "Showing {{start}} - {{end}} of {{total}} books",
+      "first": "First page",
+      "previous": "Previous page",
+      "next": "Next page",
+      "last": "Last page"
+    },
+    "confirm": {
+      "delete": "Are you sure you want to delete this book?"
+    },
+    "messages": {
+      "deleteSuccess": "Book deleted successfully.",
+      "deleteError": "Failed to delete the book. Please try again.",
+      "saveError": "Failed to save the book. Please try again.",
+      "createSuccess": "Book created successfully!",
+      "updateSuccess": "Book updated successfully!"
+    },
+    "form": {
+      "titleAdd": "Add new book",
+      "titleEdit": "Edit book",
+      "labels": {
+        "title": "Title *",
+        "slug": "Slug *",
+        "price": "Price *",
+        "stock": "Stock *",
+        "category": "Category *",
+        "author": "Author *",
+        "publisher": "Publisher *",
+        "description": "Description",
+        "publishedDate": "Published date",
+        "coverImage": "Cover image"
+      },
+      "select": {
+        "category": "Select category",
+        "author": "Select author",
+        "publisher": "Select publisher",
+        "loadingCategories": "Loading categories...",
+        "loadingAuthors": "Loading authors...",
+        "loadingPublishers": "Loading publishers..."
+      },
+      "placeholders": {
+        "slug": "Auto-generated from title",
+        "coverImage": "Image URL"
+      },
+      "hints": {
+        "slug": "URL-friendly identifier (auto-generated from title)"
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "create": "Create",
+        "update": "Update"
+      },
+      "errors": {
+        "title": "Title must be at least 2 characters",
+        "slug": "Slug is required",
+        "price": "Price must be greater than 0",
+        "stock": "Stock cannot be negative",
+        "category": "Please select a category",
+        "author": "Please select an author",
+        "publisher": "Please select a publisher"
+      }
+    },
+    "fallback": {
+      "category": "Category {{id}}",
+      "author": "Author {{id}}",
+      "publisher": "Publisher {{id}}"
+    }
+  },
+  "categoryManagement": {
+    "title": "Category Management",
+    "addButton": "Add category",
+    "searchPlaceholder": "Search categories by name or description...",
+    "buttons": {
+      "clearSearch": "Clear search",
+      "retry": "Retry"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "table": {
+      "headers": {
+        "name": "Category name",
+        "description": "Description",
+        "parent": "Parent category",
+        "bookCount": "Books",
+        "createdAt": "Created at",
+        "actions": "Actions"
+      },
+      "empty": "No categories yet",
+      "error": "Unable to load category data.",
+      "loading": "Loading..."
+    },
+    "messages": {
+      "fetchError": "Unable to load categories. {{message}}",
+      "backendHint": "Please make sure the backend server and database are running.",
+      "deleteSuccess": "Category deleted successfully!",
+      "deleteError": "Unable to delete the category.",
+      "updateSuccess": "Category updated successfully!",
+      "updateError": "Unable to update the category.",
+      "createSuccess": "Category created successfully!",
+      "createError": "Unable to create the category.",
+      "saveError": "Unable to save the category. {{message}}"
+    },
+    "confirm": {
+      "delete": "Are you sure you want to delete this category?"
+    },
+    "parent": {
+      "root": "Root category",
+      "unknown": "Unknown"
+    },
+    "badges": {
+      "bookCount": "{{count}} books"
+    },
+    "form": {
+      "titleAdd": "Add category",
+      "titleEdit": "Edit category",
+      "labels": {
+        "name": "Category name *",
+        "parent": "Parent category",
+        "description": "Description"
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "create": "Create",
+        "update": "Update"
+      },
+      "errors": {
+        "nameRequired": "Category name is required",
+        "nameMin": "Category name must be at least 2 characters"
+      }
+    }
+  },
+  "warehouseManagement": {
+    "title": "Warehouse Management",
+    "importButton": "Add Stock",
+    "exportButton": "Dispatch Stock",
+    "searchPlaceholder": "Search inventory by title, author, category...",
+    "itemsPerPage": "Show:",
+    "stats": {
+      "totalQuantity": "Items in stock",
+      "lowStock": "Low stock",
+      "outOfStock": "Out of stock",
+      "totalProducts": "Total products (SKU)"
+    },
+    "table": {
+      "title": "Inventory items",
+      "headers": {
+        "book": "Book title",
+        "quantity": "Current quantity",
+        "status": "Status",
+        "updatedAt": "Last updated",
+        "actions": "Actions"
+      },
+      "loading": "Loading...",
+      "error": "Unable to load warehouse data.",
+      "empty": "No inventory data available"
+    },
+    "statuses": {
+      "out": "Out of stock",
+      "low": "Low",
+      "medium": "Moderate",
+      "good": "In stock"
+    },
+    "pagination": {
+      "summary": "Showing {{start}} - {{end}} of {{total}} products",
+      "first": "First page",
+      "previous": "Previous page",
+      "next": "Next page",
+      "last": "Last page"
+    },
+    "actions": {
+      "export": "Dispatch"
+    },
+    "messages": {
+      "importSuccess": "Stock received successfully!",
+      "exportSuccess": "Stock dispatched successfully!",
+      "importError": "Something went wrong while receiving stock. Please try again.",
+      "exportError": "Something went wrong while dispatching stock. Please try again.",
+      "notFound": "Inventory item not found!",
+      "insufficient": "Insufficient stock. Current quantity: {{stock}}"
+    },
+    "labels": {
+      "author": "Author",
+      "category": "Category"
+    },
+    "forms": {
+      "import": {
+        "title": "Add Stock",
+        "bookLabel": "Select book *",
+        "quantityLabel": "Quantity to receive *",
+        "reasonLabel": "Reason for receiving",
+        "submit": "Add Stock",
+        "defaultReason": "New shipment"
+      },
+      "export": {
+        "title": "Delete Stock",
+        "bookLabel": "Select book *",
+        "quantityLabel": "Quantity to dispatch *",
+        "reasonLabel": "Reason for dispatch",
+        "submit": "Dispatch Stock",
+        "defaultReason": "Order fulfillment"
+      },
+      "placeholders": {
+        "selectBook": "Select a book"
+      },
+      "errors": {
+        "bookRequired": "Please select a book",
+        "quantityPositive": "Quantity must be greater than 0",
+        "reasonRequired": "Reason is required",
+        "quantityExceed": "Quantity cannot exceed current stock ({{stock}})"
+      },
+      "buttons": {
+        "cancel": "Cancel"
+      }
+    }
+  },
+  "orderManagement": {
+    "title": "Order Management",
+    "subtitle": "Display pending orders—select \"Refresh\" to load the latest records.",
+    "buttons": {
+      "refresh": "Refresh",
+      "deleteSelected": "Delete selected ({{count}})",
+      "deleteSelectedTooltipEmpty": "Select orders to delete",
+      "deleteSelectedTooltip": "Delete {{count}} selected orders",
+      "exportCsv": "Export CSV",
+      "exportTooltip": "Export filtered orders to CSV"
+    },
+    "filters": {
+      "year": "Year",
+      "month": "Month",
+      "itemsPerPage": "Show:",
+      "range": {
+        "label": "Select range"
+      },
+      "months": {
+        "all": "All",
+        "1": "January",
+        "2": "February",
+        "3": "March",
+        "4": "April",
+        "5": "May",
+        "6": "June",
+        "7": "July",
+        "8": "August",
+        "9": "September",
+        "10": "October",
+        "11": "November",
+        "12": "December"
+      },
+      "years": {
+        "all": "All",
+        "year": "Year {{year}}"
+      }
+    },
+    "info": {
+      "title": "Note:",
+      "message": "Orders created from the storefront appear here with the status \"{{status}}\". Use \"{{button}}\" to refresh the latest data."
+    },
+    "statuses": {
+      "pending": "Pending",
+      "paid": "Paid",
+      "shipped": "Shipped",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "unknown": "Unknown"
+    },
+    "orderTypes": {
+      "cart": "From cart",
+      "instant": "Buy now"
+    },
+    "loading": {
+      "aria": "Loading...",
+      "message": "Loading order data..."
+    },
+    "table": {
+      "title": "Order list",
+      "headers": {
+        "orderId": "Order ID",
+        "customer": "Customer",
+        "contact": "Contact",
+        "orderType": "Order type",
+        "total": "Total amount",
+        "status": "Status",
+        "createdAt": "Created at",
+        "actions": "Actions"
+      },
+      "noAddress": "Address unavailable",
+      "notAvailable": "N/A",
+      "actions": {
+        "view": "Details",
+        "delete": "Delete",
+        "viewTooltip": "View details",
+        "deleteTooltip": "Delete order"
+      },
+      "empty": "No orders found"
+    },
+    "pagination": {
+      "summary": "Showing {{start}} - {{end}} of {{total}} orders",
+      "first": "First page",
+      "previous": "Previous page",
+      "next": "Next page",
+      "last": "Last page"
+    },
+    "messages": {
+      "updateSuccess": "Order status updated successfully!",
+      "partialOrderLoaded": "Loaded partial order data (some details may be unavailable).",
+      "deleteSuccess": "Order deleted successfully!",
+      "deleteMultipleSuccess": "Deleted {{success}} of {{total}} orders!",
+      "exportNoData": "No data to export."
+    },
+    "errors": {
+      "notLoggedIn": "You are not signed in. Please log in to access order management.",
+      "notAdmin": "You do not have permission to access order management. Please sign in with an admin account.",
+      "notAdminGeneric": "Access denied. Please sign in with an admin account.",
+      "fetchFailed": "Unable to load orders.",
+      "network": "An error occurred while loading orders. Check your connection and try again.",
+      "updateNotAllowed": "You are not allowed to update order statuses. Only admins can perform this action.",
+      "updateFailed": "Unable to update order status. Please try again.",
+      "viewNotAllowed": "You are not allowed to view order details. Only admins can access this information.",
+      "detailsGeneric": "An error occurred while loading order details.",
+      "detailsNotFound": "Order not found.",
+      "server": "Server error. Please try again later.",
+      "detailsWithMessage": "Error: {{message}}",
+      "deleteFailed": "Unable to delete the order.",
+      "deleteNone": "No orders could be deleted."
+    },
+    "validation": {
+      "statusRequired": "Please select a status."
+    },
+    "confirm": {
+      "deleteSingle": "Are you sure you want to delete this order? This action cannot be undone.",
+      "selectAtLeastOne": "Please select at least one order to delete.",
+      "deleteMultiple": "Delete {{count}} selected orders? This action cannot be undone."
+    },
+    "fallback": {
+      "user": "User {{id}}"
+    },
+    "export": {
+      "headers": {
+        "orderId": "Order ID",
+        "customer": "Customer",
+        "email": "Email",
+        "phone": "Phone",
+        "orderType": "Order type",
+        "total": "Total (VND)",
+        "status": "Status",
+        "createdAt": "Created at"
+      }
+    },
+    "cards": {
+      "total": "Total"
+    },
+    "revenue": {
+      "title": "Revenue overview",
+      "cards": {
+        "totalRevenue": "Total revenue",
+        "totalOrders": "Total orders"
+      }
+    },
+    "modal": {
+      "title": "Order details #{{order}}",
+      "customer": {
+        "heading": "Customer information",
+        "name": "Name:",
+        "email": "Email:",
+        "phone": "Phone:",
+        "address": "Shipping address:"
+      },
+      "order": {
+        "heading": "Order information",
+        "status": "Status:",
+        "createdAt": "Created at:",
+        "updatedAt": "Last updated:",
+        "total": "Total:"
+      },
+      "items": {
+        "heading": "Order items",
+        "columns": {
+          "title": "Book title",
+          "quantity": "Quantity",
+          "price": "Unit price",
+          "subtotal": "Subtotal"
+        },
+        "empty": "No items found",
+        "total": "Grand total",
+        "fallbackTitle": "Book ID: {{id}}"
+      },
+      "buttons": {
+        "close": "Close"
+      }
+    }
+  },
+  "userManagement": {
+    "title": "User Management",
+    "subtitle": "Manage customer accounts",
+    "badge": {
+      "total": "Total: {{count}} users"
+    },
+    "filters": {
+      "search": {
+        "label": "Search",
+        "placeholder": "Search by name, email, or phone..."
+      },
+      "sortBy": {
+        "label": "Sort by",
+        "options": {
+          "createdAt": "Created date",
+          "name": "Name",
+          "email": "Email",
+          "userId": "ID"
+        }
+      },
+      "sortOrder": {
+        "label": "Order",
+        "options": {
+          "desc": "Newest first",
+          "asc": "Oldest first"
+        }
+      },
+      "itemsPerPage": {
+        "label": "Show"
+      },
+      "reset": "Clear filters"
+    },
+    "loading": {
+      "aria": "Loading..."
+    },
+    "table": {
+      "headers": {
+        "info": "Information",
+        "contact": "Contact",
+        "actions": "Actions"
+      },
+      "notProvided": "Not provided",
+      "notAvailable": "N/A",
+      "actions": {
+        "viewTooltip": "View details",
+        "deleteTooltip": "Delete account"
+      },
+      "empty": "No users found"
+    },
+    "pagination": {
+      "summary": "Showing {{start}} - {{end}} of {{total}} results",
+      "first": "First page",
+      "previous": "Previous page",
+      "next": "Next page",
+      "last": "Last page"
+    },
+    "confirm": {
+      "delete": "Are you sure you want to delete the account {{name}}?"
+    },
+    "messages": {
+      "deleteSuccess": "Account deleted successfully!",
+      "deleteError": "Unable to delete the account."
+    },
+    "roles": {
+      "admin": "Admin",
+      "customer": "Customer"
+    },
+    "modal": {
+      "title": {
+        "view": "User details",
+        "edit": "Edit user",
+        "delete": "Delete account"
+      },
+      "sections": {
+        "personal": "Personal information",
+        "account": "Account information"
+      },
+      "labels": {
+        "name": "Name:",
+        "email": "Email:",
+        "phone": "Phone:",
+        "address": "Address:",
+        "role": "Role:",
+        "createdAt": "Created:",
+        "updatedAt": "Updated:"
+      },
+      "deleteWarning": {
+        "title": "Warning:",
+        "description": "You are about to permanently delete this account. This action cannot be undone!"
+      },
+      "confirmation": {
+        "label": "Confirm account deletion:",
+        "placeholder": "Enter \"{{name}}\" to confirm"
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "delete": "Delete account"
+      }
+    }
+  },
+  "reviewManagement": {
+    "title": "Review Management",
+    "subtitle": "Manage customer product reviews",
+    "badge": {
+      "total": "Total: {{count}} reviews"
+    },
+    "filters": {
+      "search": {
+        "label": "Search",
+        "placeholder": "Search by user, email, book, or author..."
+      },
+      "rating": {
+        "label": "Rating",
+        "options": {
+          "all": "All ratings",
+          "fiveStars": "5 stars",
+          "fourStars": "4 stars",
+          "threeStars": "3 stars",
+          "twoStars": "2 stars",
+          "oneStar": "1 star"
+        }
+      },
+      "reset": "Clear filters"
+    },
+    "loading": {
+      "aria": "Loading...",
+      "message": "Loading reviews from the database...",
+      "hint": "This may take a few seconds for large datasets."
+    },
+    "errors": {
+      "fetchGeneric": "Unable to load reviews.",
+      "network": "Cannot connect to the server. Ensure the backend is running.",
+      "unauthorized": "Your session has expired. Please log in again.",
+      "forbidden": "You do not have permission to access this page.",
+      "notFound": "API endpoint not found.",
+      "server": "Server error. Please try again later.",
+      "adminRequired": "Admin access required to view full review data. Showing sample data."
+    },
+    "confirm": {
+      "delete": "Are you sure you want to delete this review?"
+    },
+    "messages": {
+      "deleteSuccess": "Review deleted successfully!",
+      "deleteError": "Unable to delete the review."
+    },
+    "table": {
+      "headers": {
+        "user": "User",
+        "product": "Product",
+        "rating": "Rating",
+        "content": "Content",
+        "createdAt": "Created at",
+        "actions": "Actions"
+      },
+      "notAvailable": "N/A",
+      "author": "Author: {{author}}",
+      "noContent": "No review content",
+      "actions": {
+        "viewTooltip": "View details",
+        "deleteTooltip": "Delete review"
+      },
+      "empty": "No reviews found"
+    },
+    "pagination": {
+      "summary": "Showing {{start}} - {{end}} of {{total}} results",
+      "itemsPerPage": "Show:",
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "modal": {
+      "title": {
+        "view": "Review details",
+        "delete": "Delete review"
+      },
+      "sections": {
+        "user": "User information",
+        "product": "Product information",
+        "review": "Review"
+      },
+      "labels": {
+        "userName": "Name:",
+        "userEmail": "Email:",
+        "userId": "User ID:",
+        "bookTitle": "Book title:",
+        "bookAuthor": "Author:",
+        "bookId": "Book ID:",
+        "content": "Content:",
+        "createdAt": "Created at:"
+      },
+      "ratingBadge": "{{rating}}/5 stars",
+      "noContent": "No review content",
+      "deleteWarning": {
+        "title": "Warning:",
+        "description": "This review will be permanently deleted. This action cannot be undone!"
+      },
+      "deleteSummary": {
+        "heading": "Review details to be deleted:",
+        "rating": "Rating:"
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "delete": "Delete review"
+      }
+    }
+  },
+  "reports": {
+    "header": {
+      "title": "Analytics & AI Recommendations",
+      "lastUpdated": "Last updated: {{time}}",
+      "loading": "Loading..."
+    },
+    "filters": {
+      "range": {
+        "label": "Select range",
+        "month": "Monthly",
+        "quarter": "Quarterly",
+        "year": "Yearly"
+      }
+    },
+    "actions": {
+      "refresh": "Refresh data",
+      "customizeSoon": "Customize scope (coming soon)"
+    },
+    "errors": {
+      "sessionExpired": "Your session has expired or is invalid. Please sign in again to view reports.",
+      "generic": "Unable to load analytics data."
+    },
+    "cards": {
+      "lowStockItem": "{{title}} – remaining {{quantity}}"
+    },
+    "sections": {
+      "sales": {
+        "title": "Sales performance",
+        "subtitle": "Track revenue and order volume over time",
+        "empty": "No sales data available."
+      },
+      "inventory": {
+        "title": "Inventory analysis",
+        "subtitle": "Monitor inventory health and alerts",
+        "tooltip": {
+          "unit": "copies"
+        },
+        "lowStock": {
+          "title": "Low stock items",
+          "empty": "No items are below the alert threshold."
+        },
+        "overstock": {
+          "title": "High inventory items",
+          "empty": "No items are currently overstocked."
+        },
+        "empty": "No inventory data available."
+      },
+      "reviews": {
+        "title": "Customer review insights",
+        "subtitle": "Visualize rating distribution and hotspots",
+        "distribution": {
+          "title": "Rating distribution",
+          "tooltip": {
+            "percent": "Percentage",
+            "count": "Count"
+          }
+        },
+        "highlights": {
+          "title": "Products needing attention",
+          "countLabel": "reviews",
+          "empty": "No products are below 2.5★ during this period."
+        },
+        "details": {
+          "insightsTitle": "Detailed insights",
+          "actionsTitle": "Recommended actions"
+        },
+        "empty": "No review data available."
+      },
+      "behavior": {
+        "title": "Customer behavior analytics",
+        "subtitle": "Understand traffic sources, peak times, and conversions",
+        "sources": {
+          "title": "Traffic sources"
+        },
+        "heatmap": {
+          "title": "Peak hours",
+          "tooltip": "{{day}} {{hour}}: {{sessions}} sessions"
+        },
+        "conversion": {
+          "title": "Conversion rate",
+          "label": "Conversion rate",
+          "empty": "Conversion data unavailable."
+        },
+        "details": {
+          "title": "Detailed insights",
+          "topSource": "Top-performing source: {{source}} accounts for {{percent}}% of traffic.",
+          "topSourceEmpty": "No standout traffic source data yet.",
+          "compareSource": "{{topSource}} performs {{ratio}}× better than {{secondSource}}.",
+          "peakSlot": "Peak traffic: {{day}} at {{hour}} with {{sessions}} sessions.",
+          "peakSlotEmpty": "Peak hours are not yet identified.",
+          "conversionRate": "Current conversion rate: {{rate}}."
+        }
+      },
+      "ai": {
+        "title": "AI decision support",
+        "subtitle": "Recommended actions based on the latest data",
+        "reasonsTitle": "Key reasons",
+        "actionsTitle": "Recommended actions"
+      }
+    },
+    "charts": {
+      "sales": {
+        "tooltip": {
+          "revenue": "Revenue",
+          "orders": "Orders"
+        },
+        "series": {
+          "revenue": "Revenue",
+          "orders": "Orders"
+        },
+        "millionSuffix": "M"
+      }
+    }
+  },
+  "searchPage": {
+    "header": {
+      "title": "Search books"
+    },
+    "form": {
+      "placeholder": "Enter a book title, author, category, or keyword...",
+      "button": "Search",
+      "popularTitle": "Popular keywords:",
+      "popularFallback": ["novel", "science", "history", "literature", "business"]
+    },
+    "states": {
+      "loadingAria": "Searching...",
+      "loadingTitle": "Looking for matching books...",
+      "loadingSubtitle": "Hang tight while we gather results",
+      "resultsTitle": "Search results for “{{query}}” ({{count}} books)",
+      "noResultsTitle": "No books found",
+      "noResultsDescription": "No matches for “{{query}}”. Try another keyword."
+    },
+    "empty": {
+      "title": "Find your next favorite book",
+      "subtitle": "Enter a title, author, category, or keyword to start searching",
+      "hint": "Tip: Type the full book title or pick a suggestion for better accuracy"
+    },
+    "bookCard": {
+      "unknownAuthor": "Unknown author",
+      "viewDetails": "View details",
+      "wishlistTooltip": "Add to wishlist",
+      "addToCartTooltip": "Add to cart",
+      "reviewCount": "({{count}})"
+    },
+    "messages": {
+      "loginRequired": "You need to log in to order products",
+      "addToCartSuccess": "Book added to your cart!",
+      "addToCartError": "Something went wrong while adding to cart.",
+      "wishlistComingSoon": "Wishlist support is coming soon!"
+    }
+  },
+  "profilePage": {
+    "tabs": {
+      "profile": "Profile",
+      "orders": "Orders",
+      "settings": "Settings",
+      "security": "Security"
+    },
+    "breadcrumb": {
+      "home": "Home",
+      "separator": "/"
+    },
+    "demo": {
+      "title": "Demo mode:",
+      "description": "You're viewing sample data.",
+      "loginCta": "Log in",
+      "loginSuffix": "to update your real profile."
+    },
+    "profileCard": {
+      "title": "Personal Information",
+      "editButton": "Edit",
+      "fields": {
+        "nameLabel": "Full name",
+        "namePlaceholder": "Enter your full name",
+        "emailLabel": "Email",
+        "emailPlaceholder": "Enter email address",
+        "phoneLabel": "Phone number",
+        "phonePlaceholder": "Enter phone number",
+        "roleLabel": "Role",
+        "roleOptions": {
+          "customer": "Customer",
+          "admin": "Administrator"
+        },
+        "roleHint": "Only administrators can change roles",
+        "addressLabel": "Address",
+        "addressPlaceholder": "Enter full address"
+      },
+      "buttons": {
+        "save": "Save changes",
+        "saving": "Saving...",
+        "cancel": "Cancel"
+      },
+      "messages": {
+        "demoMode": "Demo mode only. Please log in to update real data.",
+        "updateSuccess": "Profile updated successfully!",
+        "updateError": "Unable to update profile. Please try again."
+      }
+    },
+    "settingsCard": {
+      "title": "Account Settings",
+      "sections": {
+        "notifications": {
+          "title": "Notifications"
+        },
+        "privacy": {
+          "title": "Privacy"
+        },
+        "languageRegion": {
+          "title": "Language & Region",
+          "languageLabel": "Language",
+          "timezoneLabel": "Time zone"
+        }
+      },
+      "notifications": {
+        "email": "Receive email notifications",
+        "orders": "Order updates",
+        "promotions": "Promotions & offers"
+      },
+      "privacy": {
+        "profileVisibility": "Show profile publicly",
+        "dataSharing": "Share data to improve services"
+      },
+      "languageOptions": [
+        { "value": "vi", "label": "Vietnamese" },
+        { "value": "en", "label": "English" }
+      ],
+      "timezones": [
+        { "value": "Asia/Ho_Chi_Minh", "label": "Asia/Ho_Chi_Minh (GMT+7)" },
+        { "value": "UTC", "label": "UTC (GMT+0)" }
+      ],
+      "saveButton": "Save settings"
+    },
+    "securityCard": {
+      "title": "Account Security",
+      "changePasswordTitle": "Change Password",
+      "fields": {
+        "currentPasswordLabel": "Current password",
+        "currentPasswordPlaceholder": "Enter current password",
+        "newPasswordLabel": "New password",
+        "newPasswordPlaceholder": "Enter new password",
+        "confirmPasswordLabel": "Confirm new password",
+        "confirmPasswordPlaceholder": "Re-enter new password"
+      },
+      "passwordButton": {
+        "submit": "Change password",
+        "loading": "Processing..."
+      },
+      "info": {
+        "title": "Security Information",
+        "accountStatusLabel": "Account status",
+        "accountStatusValue": "Account is active",
+        "lastLoginLabel": "Last login",
+        "lastLoginValue": "Today, 14:30"
+      },
+      "dangerZone": {
+        "title": "Danger Zone",
+        "warningTitle": "Warning:",
+        "warningDescription": "Actions below may affect your account.",
+        "logoutAllButton": "Log out of all devices"
+      },
+      "logout": {
+        "confirm": "Log out of all devices? You will need to sign in again.",
+        "success": "All devices have been logged out. Please sign in again.",
+        "error": "Something went wrong while logging out of all devices!"
+      },
+      "passwordChange": {
+        "success": "Password changed successfully!",
+        "error": "We couldn't change the password. Please try again."
+      }
+    },
+    "validation": {
+      "nameRequired": "Name is required.",
+      "nameMin": "Name must be at least 2 characters.",
+      "nameSpecialChars": "Name cannot contain special characters or numbers",
+      "emailRequired": "Email is required.",
+      "emailInvalid": "Please enter a valid email.",
+      "phoneInvalid": "Phone number must have at least 10 digits.",
+      "phoneNumbersOnly": "Phone number can only contain digits",
+      "addressMin": "Address must be at least 5 characters.",
+      "addressMax": "Address must not exceed 30 characters.",
+      "addressInvalid": "Invalid address format"
+    },
+    "passwordValidation": {
+      "currentRequired": "Please enter your current password.",
+      "newRequired": "Please enter a new password.",
+      "newMin": "The new password must be at least 6 characters.",
+      "confirmRequired": "Please confirm the new password.",
+      "confirmMismatch": "Confirmation password does not match.",
+      "newDifferent": "The new password must be different from the current one."
+    }
+  },
+  "ordersPage": {
+    "common": {
+      "notAvailable": "N/A",
+      "loading": "Loading..."
+    },
+    "header": {
+      "title": "My orders",
+      "subtitle": "Track and manage all of your purchases",
+      "refresh": "Refresh",
+      "testEvent": "Test Event",
+      "total": "Total: {{count}} orders",
+      "page": "(Page {{current}}/{{total}})",
+      "bulkCancel": "Cancel selected ({{count}})"
+    },
+    "filters": {
+      "all": "All ({{count}})",
+      "pending": "Pending ({{count}})",
+      "processing": "Processing ({{count}})",
+      "completed": "Completed ({{count}})",
+      "selectAll": "Select all",
+      "clearSelection": "Clear selection"
+    },
+    "statuses": {
+      "pending": "Pending",
+      "processing": "Processing",
+      "paid": "Paid",
+      "shipped": "Shipped",
+      "delivered": "Delivered",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "draft": "Draft"
+    },
+    "orderTypes": {
+      "cart": "From cart",
+      "buyNow": "Buy now"
+    },
+    "messages": {
+      "loginRequired": "Please log in to see your orders.",
+      "loadFailed": "Unable to load orders.",
+      "loadedFromLocal": "Orders were loaded from local storage (backend unavailable).",
+      "genericError": "Something went wrong while loading your orders.",
+      "cancelConfirm": "Are you sure you want to cancel this order?",
+      "cancelSuccess": "Order cancelled successfully!",
+      "cancelError": "Unable to cancel this order.",
+      "selectAtLeastOne": "Please select at least one order to cancel.",
+      "multiCancelConfirm": "Are you sure you want to cancel {{count}} selected orders?",
+      "multiCancelResult": "Cancelled {{success}}/{{total}} orders.",
+      "multiCancelFailed": "Unable to cancel {{count}} orders: {{detail}}",
+      "detailError": "Unable to load order details.",
+      "noItems": "No items found.",
+      "shippingFallback": "Shipping information is unavailable."
+    },
+    "notifications": {
+      "browserTitle": "Order #{{id}}",
+      "browserBody": "Status updated to \"{{status}}\"",
+      "consoleLog": "Order #{{id}} updated to \"{{status}}\""
+    },
+    "empty": {
+      "title": "No orders yet",
+      "subtitle": "You have no orders yet. Start shopping!",
+      "cta": "Shop now"
+    },
+    "card": {
+      "orderLabel": "Order #{{id}}",
+      "productsLabel": "Products:",
+      "totalLabel": "Total amount:",
+      "placedLabel": "Placed:",
+      "typeLabel": "Order type:",
+      "productMore": "{{first}} and {{count}} other item(s)",
+      "productEmpty": "No products",
+      "viewDetails": "View details",
+      "cancel": "Cancel order",
+      "cancelHint": "Only pending orders can be cancelled",
+      "orderTypes": {
+        "cart": "From cart",
+        "buyNow": "Buy now"
+      }
+    },
+    "modal": {
+      "title": "Order details #{{id}}",
+      "shippingTitle": "Shipping information",
+      "orderInfoTitle": "Order information",
+      "statusLabel": "Status:",
+      "placedLabel": "Placed:",
+      "totalLabel": "Total:",
+      "typeLabel": "Order type:",
+      "itemsTitle": "Items in this order",
+      "summaryLabel": "Grand total",
+      "closeButton": "Close",
+      "shippingFallback": "Shipping information unavailable",
+      "addressFallback": "Address unavailable",
+      "labels": {
+        "name": "Name:",
+        "email": "Email:",
+        "phone": "Phone:",
+        "address": "Address:"
+      },
+      "tableHeaders": {
+        "name": "Book title",
+        "quantity": "Qty",
+        "price": "Unit price",
+        "total": "Line total"
+      }
+    },
+    "pagination": {
+      "prev": "Prev",
+      "next": "Next",
+      "ariaPrev": "Previous page",
+      "ariaNext": "Next page"
+    }
+  },
+  "home": {
+    "sections": {
+      "categoriesTitle": "Product Categories",
+      "featuredTitle": "Featured Books",
+      "newTitle": "New Releases",
+      "popularTitle": "Popular Books",
+      "recommendTitle": "Recommendations for You",
+      "recommendSubtitle": "Complete your profile information to receive more accurate suggestions.",
+      "recommendEmpty": "No tailored recommendations yet; explore other categories in the meantime.",
+      "authorsTitle": "Favorite Authors",
+      "blogTitle": "From the Blog"
+    },
+    "actions": {
+      "viewAll": "View All",
+      "viewDetails": "View details",
+      "addToCart": "Add to cart",
+      "shopNow": "Shop now"
+    },
+    "states": {
+      "loading": "Loading...",
+      "noCategoriesTitle": "No categories available",
+      "noCategoriesSubtitle": "Please try again later",
+      "noBooksTitle": "No books found",
+      "noBooksSubtitle": "Please check back soon",
+      "inStock": "In stock",
+      "outOfStock": "Out of stock",
+      "updating": "Updating..."
+    },
+    "badges": {
+      "bookCount": "{{count}} books",
+      "ratingCount": "({{count}})"
+    },
+    "messages": {
+      "categoryFallback": "Discover the books available in this category",
+      "loginRequired": "Please log in to add products to your cart!",
+      "outOfStock": "This product is out of stock!",
+      "stockLimit": "Only {{stock}} item(s) left in stock!",
+      "quantityIncreased": "Increased the quantity of \"{{title}}\" in your cart!",
+      "addSuccess": "Added successfully! \"{{title}}\" is now in your cart!",
+      "addFailed": "Unable to add the product to your cart!",
+      "unknownAuthor": "Author information unavailable",
+      "contactForPrice": "Contact us",
+      "recommendLoading": "Fetching personalized recommendations..."
+    }
+  },
+  "shop": {
+    "sidebar": {
+      "filterTitle": "Filters",
+      "searchLabel": "Search",
+      "searchPlaceholder": "Search for books or authors...",
+      "categoriesLabel": "Categories",
+      "authorsLabel": "Authors",
+      "viewAll": "View All",
+      "priceLabel": "Price Range",
+      "minPlaceholder": "0",
+      "maxPlaceholder": "1,000,000",
+      "reset": "Reset",
+      "refresh": "Refresh",
+      "refreshLoading": "Refreshing..."
+    },
+    "header": {
+      "results": "Showing {{count}} result(s)",
+      "summary": "(Total: {{books}} books, {{categories}} categories)",
+      "activeFilters": "Active filters:",
+      "clearAll": "Clear all",
+      "sortLabel": "Sort by:",
+      "sortOptions": {
+        "default": "Default",
+        "priceAsc": "Price: Low to High",
+        "priceDesc": "Price: High to Low",
+        "titleAsc": "Title: A-Z",
+        "titleDesc": "Title: Z-A",
+        "ratingDesc": "Rating: Highest",
+        "ratingAsc": "Rating: Lowest"
+      }
+    },
+    "filterBadges": {
+      "clearCategory": "Clear category",
+      "clearAuthor": "Clear author",
+      "clearSearch": "Clear search",
+      "clearAll": "Clear all filters"
+    },
+    "categories": {
+      "title": "Book categories",
+      "authorsTitle": "Author directory",
+      "bookCount": "{{count}} books",
+      "authorCount": "{{count}} authors",
+      "pagination": {
+        "prev": "Prev",
+        "next": "Next",
+        "range": "Showing {{start}}-{{end}} of {{total}} authors"
+      }
+    },
+    "products": {
+      "saleBadge": "Sale",
+      "addToWishlist": "Add to wishlist",
+      "addToCart": "Add to cart",
+      "viewDetails": "View details",
+      "unknownAuthorById": "Author ID: {{id}}",
+      "paginationRange": "Showing {{start}} - {{end}} of {{total}} products",
+      "emptyTitle": "No books found",
+      "emptyDescription": "No books match your filters.",
+      "notFound": "Product information not found!",
+      "wishlistPending": "Wishlist feature coming soon!"
+    },
+    "pagination": {
+      "prev": "Prev",
+      "next": "Next",
+      "ellipsis": "..."
+    },
+    "states": {
+      "loading": "Loading...",
+      "refreshing": "Refreshing...",
+      "errorLoading": "Unable to load data from the server. Please try again later."
+    },
+    "detail": {
+      "back": "Back to shop",
+      "addToCart": "Add to cart",
+      "buyNow": "Buy now",
+      "share": "Share",
+      "quantity": "Quantity",
+      "inStock": "In stock",
+      "outOfStock": "Out of stock",
+      "unknownCategory": "Category unavailable",
+      "unknownPublisher": "Publisher unavailable",
+      "description": "Description",
+      "information": "Product information",
+      "author": "Author",
+      "category": "Category",
+      "publisher": "Publisher",
+      "publishDate": "Publication date",
+      "recommendations": "You may also like",
+      "noRecommendations": "No related books available.",
+      "loadingRecommendations": "Loading recommendations...",
+      "reviews": "Reviews",
+      "loadingReviews": "Loading reviews...",
+      "noReviews": "No reviews yet.",
+      "addReview": "Write a review",
+      "loginToReview": "Please log in to review this product."
+    },
+    "notifications": {
+      "refreshSuccess": "Data refreshed successfully!",
+      "refreshError": "Unable to refresh data. Please try again."
+    }
+  },
+  "productDetail": {
+    "states": {
+      "loadingMessage": "Loading product details...",
+      "loadingId": "Product ID: {{id}}",
+      "notFoundTitle": "Product not found",
+      "notFoundDescription": "We couldn't find a product with this ID.",
+      "noImage": "No image available",
+      "recommendationsLoading": "Loading recommendations...",
+      "noRecommendations": "No recommendations available."
+    },
+    "breadcrumb": {
+      "shop": "Books"
+    },
+    "actions": {
+      "backHome": "Back to home",
+      "checkout": "Checkout"
+    },
+    "info": {
+      "notAvailable": "Not available",
+      "noDescription": "No description yet",
+      "priceLabel": "Price:",
+      "statusLabel": "Status:",
+      "remainingQuantity": "Quantity remaining:",
+      "unitBook": "copies"
+    },
+    "meta": {
+      "author": "Author:",
+      "publisher": "Publisher:",
+      "category": "Category:",
+      "tags": "Tags:"
+    },
+    "sections": {
+      "description": "Description",
+      "detailInfo": "Detailed information"
+    },
+    "tabs": {
+      "details": "Detailed description"
+    },
+    "messages": {
+      "loginRequiredCheckout": "Please log in to proceed to checkout.",
+      "linkCopied": "Link copied!"
+    },
+    "toasts": {
+      "addedToCart": "{{quantity}} x \"{{title}}\" has been added to your cart!"
+    },
+    "reviews": {
+      "title": "Product reviews",
+      "summaryCount": "({{count}} reviews)",
+      "filter": {
+        "all": "All",
+        "star": "{{rating}} star(s)",
+        "starWithCount": "{{rating}} star(s) ({{count}})"
+      },
+      "sortLabel": "Sort by:",
+      "sortOptions": {
+        "newest": "Newest",
+        "oldest": "Oldest",
+        "highest": "Highest rating",
+        "lowest": "Lowest rating"
+      },
+      "filterSummary": "Showing {{count}} of {{total}} reviews",
+      "empty": {
+        "title": "This product has no reviews yet.",
+        "subtitle": "Be the first to share your thoughts!"
+      },
+      "emptyFiltered": "No reviews match the selected filters.",
+      "helpfulQuestion": "Was this review helpful?",
+      "helpfulCount": "Helpful ({{count}})",
+      "anonymousUser": "Anonymous user",
+      "alreadyReviewed": "You have already reviewed this product!",
+      "form": {
+        "title": "Write your review",
+        "ratingLabel": "Your rating",
+        "qualityLabel": "Quality:",
+        "ratingOptions": {
+          "1": "Terrible",
+          "2": "Poor",
+          "3": "Average",
+          "4": "Good",
+          "5": "Excellent"
+        },
+        "contentLabel": "Review content",
+        "contentPlaceholder": "Share your experience with this product...",
+        "submit": "Submit review",
+        "submitting": "Submitting..."
+      },
+      "adminNotice": {
+        "title": "You are signed in as an admin",
+        "description": "Admins cannot write reviews; they can only reply to customer comments."
+      }
+    },
+    "comments": {
+      "title": "Comments ({{count}})",
+      "adminInstructions": {
+        "title": "Admin guidelines:",
+        "reply": "Reply to comment (green button): respond to comments without an admin reply yet",
+        "edit": "Edit reply (yellow button): update an admin reply that was already sent",
+        "delete": "Delete reply (small red button): remove the admin reply while keeping the customer comment",
+        "note": "Admins cannot delete customer comments; they can only manage their own replies"
+      },
+      "adminOnly": "Only admins can reply to comments",
+      "reply": {
+        "label": "Admin reply",
+        "placeholder": "Write your reply...",
+        "submit": "Submit reply",
+        "submitting": "Submitting...",
+        "reply": "Reply to comment",
+        "edit": "Edit reply",
+        "cancel": "Cancel",
+        "delete": "Delete reply"
+      },
+      "user": {
+        "nameLabel": "Your name",
+        "namePlaceholder": "Enter your name",
+        "nameAutofill": "Name from your account",
+        "nameHint": "Name is pulled from your account"
+      },
+      "form": {
+        "commentLabel": "Comment",
+        "commentPlaceholder": "Write your comment...",
+        "submit": "Submit comment"
+      },
+      "messages": {
+        "alreadyCommented": "You have already commented on this product!",
+        "adminCannotComment": "Admins cannot create new comments",
+        "adminCannotCommentHint": "Admins can only reply to existing customer comments."
+      }
+    },
+    "notifications": {
+      "reviewLoginRequired": "Please log in to review this product!",
+      "reviewContentRequired": "Please enter your review content!",
+      "reviewSubmitSuccess": "Your review was submitted successfully!",
+      "reviewSubmitError": "Something went wrong while submitting your review!",
+      "reviewAlreadyExists": "You have already reviewed this product!",
+      "commentSubmitSuccess": "Your comment was submitted successfully!",
+      "commentAlreadyExists": "You have already commented on this product!",
+      "replySubmitSuccess": "Your reply was submitted successfully!",
+      "replyDeleteConfirm": "Are you sure you want to delete this reply?",
+      "replyDeleteSuccess": "The reply was deleted successfully!"
+    }
+  },
+  "cart": {
+    "breadcrumb": {
+      "home": "Home",
+      "cart": "Cart"
+    },
+    "states": {
+      "loading": "Loading your cart...",
+      "emptyTitle": "Your cart is empty",
+      "emptySubtitle": "Add a few books to get started!"
+    },
+    "sections": {
+      "items": "Cart Items",
+      "summary": "Order Summary"
+    },
+    "actions": {
+      "selectAll": "Select all",
+      "deselectAll": "Deselect all",
+      "removeAll": "Remove all",
+      "removeSelected": "Remove selected ({{count}})",
+      "remove": "Remove",
+      "checkout": "Proceed to Checkout",
+      "clearSelection": "Clear selection"
+    },
+    "labels": {
+      "subtotal": "Subtotal ({{count}} item(s)):",
+      "total": "Total:",
+      "price": "Price:",
+      "itemTotal": "Total:"
+    },
+    "messages": {
+      "selectToRemove": "Please select at least one item to remove!",
+      "cartEmpty": "Your cart is already empty!",
+      "removeAllConfirm": "Are you sure you want to remove all {{count}} items from your cart?",
+      "loginRequired": "Please log in to continue.",
+      "removeAllSuccess": "Removed all {{count}} items from your cart!",
+      "removeAllError": "Something went wrong while clearing the cart!",
+      "checkoutSelected": "Redirecting to checkout with {{count}} item(s)!",
+      "checkoutRequired": "Please select at least one item to checkout!"
+    }
+  },
+  "checkout": {
+    "states": {
+      "emptyTitle": "Cart is empty",
+      "emptySubtitle": "You don't have any items to checkout yet"
+    },
+    "actions": {
+      "backHome": "Back to home",
+      "placeOrder": "Place order now",
+      "processing": "Processing..."
+    },
+    "sections": {
+      "title": "Checkout",
+      "shippingInfo": "Shipping information",
+      "paymentMethod": "Payment method",
+      "orderNotes": "Order notes",
+      "orderSummary": "Your order"
+    },
+    "form": {
+      "addressType": "Select address type",
+      "useDefaultAddress": "Use default address",
+      "useNewAddress": "Enter new address",
+      "defaultAddressLabel": "Default address",
+      "noDefaultAddress": "You don't have a default address. Please update your address in profile.",
+      "address": "Detailed address *",
+      "addressPlaceholder": "Enter the full address (house number, street name, building...)",
+      "googlePlacesHint": "Type address to auto-fill",
+      "googlePlacesHelp": "Enter address and select from suggestions to auto-fill information",
+      "city": "City/Province *",
+      "cityPlaceholder": "e.g., Da Nang",
+      "selectCity": "Select city/province",
+      "selectCityFirst": "Select city/province first",
+      "district": "District *",
+      "districtPlaceholder": "e.g., Thanh Khe",
+      "selectDistrict": "Select district",
+      "selectDistrictFirst": "Select district first",
+      "ward": "Ward *",
+      "wardPlaceholder": "e.g., An Khe",
+      "selectWard": "Select ward",
+      "loading": "Loading...",
+      "orderNotes": "Order notes",
+      "orderNotesPlaceholder": "Add notes for this order (optional)...",
+      "orderNotesHelp": "You can specify delivery time, directions, or any special instructions."
+    },
+    "payment": {
+      "codLabel": "Cash on delivery (COD)",
+      "codDescription": "Pay with cash when the order arrives."
+    },
+    "summary": {
+      "quantityLabel": "Quantity: {{count}}",
+      "total": "Total:",
+      "shippingNotice": "Shipping fees will be calculated during order confirmation."
+    },
+    "messages": {
+      "adminRestriction": "Admins cannot place orders. Please sign in with a customer account.",
+      "loginRequired": "Please log in to place an order!",
+      "sessionExpired": "Your session has expired. Please sign in again!",
+      "cartEmpty": "Cart is empty!",
+      "successWithCart": "Order placed successfully! {{count}} item(s) were removed from your cart and are now being processed.",
+      "success": "Order placed successfully! Your order is now pending.",
+      "error": "Something went wrong while placing the order!",
+      "noPermission": "You are not allowed to place orders. Please sign in again.",
+      "adminNoPermission": "Admins cannot place orders. Please sign in with a customer account to continue.",
+      "sessionExpiredShort": "Your session has expired. Please sign in again."
+    },
+    "validation": {
+      "addressRequired": "Please enter the detailed address",
+      "addressMin": "Detailed address must be at least 10 characters",
+      "addressInvalid": "Invalid address format",
+      "noDefaultAddress": "You don't have a default address. Please update your address in profile.",
+      "cityRequired": "Please enter the city/province",
+      "cityMin": "City/province must be at least 2 characters",
+      "cityInvalid": "City/province cannot contain special characters or numbers",
+      "districtRequired": "Please enter the district",
+      "districtMin": "District must be at least 2 characters",
+      "districtInvalid": "District cannot contain special characters or numbers",
+      "wardRequired": "Please enter the ward",
+      "wardMin": "Ward must be at least 2 characters",
+      "wardInvalid": "Ward cannot contain special characters or numbers"
+    }
+  },
+  "about": {
+    "breadcrumb": {
+      "home": "Home",
+      "about": "About Us"
+    },
+    "title": "About Us",
+    "subtitle": "Discover the world of books and knowledge with SmartBook",
+    "sections": {
+      "whoWeAre": {
+        "title": "Who We Are",
+        "paragraphs": [
+          "SmartBook is Vietnam's leading online bookstore, founded with the mission of spreading knowledge and a love of reading to everyone. We are committed to delivering high-quality books at fair prices alongside excellent customer service.",
+          "With more than 50,000 titles from trusted domestic and international publishers, SmartBook is proud to be the go-to destination for readers who want to keep exploring new ideas."
+        ],
+        "founder": "Nguyen Van A, Founder & CEO.",
+        "imageAlt": "SmartBook - Online bookstore platform"
+      },
+      "mission": {
+        "title": "Our Mission",
+        "paragraphs": [
+          "We believe books open the door to an endless universe of knowledge. Every title carries valuable lessons, meaningful stories, and practical insights that can change your life.",
+          "SmartBook is dedicated to offering an outstanding shopping experience with intelligent search, fast delivery, and professional customer care. Let us accompany you on your journey to discover knowledge."
+        ],
+        "stats": [
+          { "value": "50K+", "label": "BOOK TITLES" },
+          { "value": "10K+", "label": "CUSTOMERS" },
+          { "value": "5+", "label": "YEARS OF EXPERIENCE" }
+        ]
+      },
+      "testimonial": {
+        "title": "SmartBook is Amazing",
+        "quote": "\"SmartBook completely changed the way I buy books. The interface is friendly, searching is easy, and delivery is quick. I've found so many wonderful titles that used to be hard to get.\"",
+        "author": "Nguyen Thi B",
+        "role": "Loyal customer"
+      },
+      "authors": {
+        "title": "Favorite Authors",
+        "cta": "View All"
+      }
+    },
+    "fallback": {
+      "title": "SmartBook",
+      "description": "Online bookstore platform"
+    }
+  },
+  "contact": {
+    "breadcrumb": {
+      "home": "Home",
+      "contact": "Contact"
+    },
+    "header": {
+      "title": "Contact Us",
+      "subtitle": "We're always ready to listen and support you"
+    },
+    "info": {
+      "title": "Contact Information",
+      "items": [
+        {
+          "icon": "fas fa-map-marker-alt",
+          "title": "Address",
+          "content": "1000 Nguyen Van A, Thanh Khe, Da Nang, Vietnam",
+          "color": "text-primary"
+        },
+        {
+          "icon": "fas fa-phone",
+          "title": "Phone",
+          "content": "+84 123 456 789",
+          "color": "text-success"
+        },
+        {
+          "icon": "fas fa-envelope",
+          "title": "Email",
+          "content": "smartbook@gmail.com",
+          "color": "text-info"
+        },
+        {
+          "icon": "fas fa-clock",
+          "title": "Working hours",
+          "content": "Mon - Fri: 8:00 - 18:00\\nSat - Sun: 9:00 - 17:00",
+          "color": "text-warning"
+        }
+      ]
+    },
+    "follow": {
+      "title": "Follow Us"
+    }
+  },
+  "authors": {
+    "title": "Authors",
+    "searchPlaceholder": "Search authors...",
+    "messages": {
+      "loading": "Loading...",
+      "empty": "No authors found",
+      "errorTitle": "Failed to load data",
+      "loadFailed": "Unable to load the author list",
+      "connectionError": "Connection error: {{message}}. Please verify the backend is running."
+    },
+    "buttons": {
+      "retry": "Retry",
+      "reload": "Reload page",
+      "viewDetail": "View details"
+    }
+  },
+  "authorDetail": {
+    "breadcrumbs": {
+      "back": "Authors"
+    },
+    "messages": {
+      "loading": "Loading...",
+      "loadFailed": "Unable to load author information",
+      "connectionError": "An error occurred while loading author information",
+      "notFound": "Author information not found",
+      "noBooksTitle": "No works yet",
+      "noBooksDescription": "This author currently has no books in the system",
+      "loginRequired": "Please log in to add products to your cart!",
+      "wishlistLoginRequired": "Please log in to add products to your wishlist!",
+      "addToCartSuccess": "\"{{title}}\" has been added to your cart!",
+      "addToCartError": "Something went wrong while adding the product to the cart!",
+      "addToWishlistSuccess": "\"{{title}}\" has been added to your favorites!",
+      "addToWishlistError": "Something went wrong while adding the product to favorites!"
+    },
+    "labels": {
+      "bio": "Biography",
+      "bookCount": "{{count}} book(s)",
+      "worksByAuthor": "Works by {{name}}",
+      "unknownCategory": "No category",
+      "inStock": "In stock"
+    },
+    "buttons": {
+      "viewDetail": "View details",
+      "addToWishlist": "Add to favorites",
+      "addToCart": "Add to cart"
+    },
+    "tooltips": {
+      "addToWishlist": "Add to favorites",
+      "addToCart": "Add to cart",
+      "viewBook": "Click to view book details"
+    }
+  },
+  "blog": {
+    "breadcrumb": {
+      "home": "Home",
+      "blog": "Blog"
+    },
+    "title": "Blog",
+    "subtitle": "Discover engaging stories about the world of books and manga",
+    "searchPlaceholder": "Search posts, authors, or genres...",
+    "filters": {
+      "categories": {
+        "all": "All categories",
+        "featured": "Featured",
+        "art": "Art",
+        "review": "Reviews",
+        "history": "History",
+        "culture": "Culture",
+        "technique": "Techniques"
+      },
+      "authors": {
+        "all": "All authors",
+        "authorA": "Nguyen Van A",
+        "authorB": "Tran Thi B",
+        "authorC": "Le Van C",
+        "authorD": "Pham Thi D",
+        "authorE": "Hoang Van E",
+        "authorF": "Tran Thi F"
+      },
+      "sort": {
+        "newest": "Newest",
+        "oldest": "Oldest",
+        "popular": "Popular",
+        "mostRead": "Most read"
+      }
+    },
+    "sections": {
+      "otherPosts": "Other Posts",
+      "newsletterTitle": "Subscribe for Updates",
+      "newsletterSubtitle": "Get the latest articles about books and manga"
+    },
+    "messages": {
+      "noPosts": "No posts available yet",
+      "noResults": "No posts match your current filters."
+    },
+    "newsletter": {
+      "placeholder": "Enter your email",
+      "submit": "Subscribe"
+    },
+    "posts": [
+      {
+        "id": 1,
+        "title": "Fujiko F. Fujio – Creator of Doraemon",
+        "excerpt": "Explore the life and career of the legendary manga artist Fujiko F. Fujio, the mind behind the beloved character Doraemon.",
+        "content": "Fujiko F. Fujio (1933-1996) is one of Japan's greatest mangaka. He is best known for Doraemon, a series that has become a cultural icon not only in Japan but around the world. With over 100 million copies sold, Doraemon has captured the hearts of readers of all ages...",
+        "authorKey": "authorA",
+        "date": "October 24, 2023",
+        "readTime": "7 min read",
+        "image": "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=600&h=300&fit=crop",
+        "categoryKey": "featured",
+        "tags": ["Doraemon", "Manga", "Fujiko F. Fujio"]
+      },
+      {
+        "id": 2,
+        "title": "The Art of Manga Storytelling",
+        "excerpt": "Discover the unique storytelling techniques in manga and how creators craft captivating narratives.",
+        "content": "Manga is more than simple drawings—it is a complex storytelling medium. From panel layouts to the use of sound effects and motion, every element contributes to a unique reading experience...",
+        "authorKey": "authorB",
+        "date": "October 17, 2023",
+        "readTime": "5 min read",
+        "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=300&fit=crop",
+        "categoryKey": "art",
+        "tags": ["Manga", "Storytelling", "Art"]
+      },
+      {
+        "id": 3,
+        "title": "Top 10 Must-Read Manga Series",
+        "excerpt": "A list of timeless manga series, from classic masterpieces to modern epics.",
+        "content": "Within the vast world of manga, some series transcend time and boundaries to become true classics. From One Piece with Luffy's grand adventure to the intense storytelling of Attack on Titan...",
+        "authorKey": "authorC",
+        "date": "October 07, 2023",
+        "readTime": "8 min read",
+        "image": "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=600&h=300&fit=crop",
+        "categoryKey": "review",
+        "tags": ["Top 10 Manga", "Reviews"]
+      },
+      {
+        "id": 4,
+        "title": "The History of Manga",
+        "excerpt": "Trace the journey of manga from its earliest drawings to today's billion-dollar industry.",
+        "content": "Manga has a long, rich history—from simple sketches during the Edo period to the modern industry that generates billions. This evolution reflects Japan's societal changes and technological innovation...",
+        "authorKey": "authorD",
+        "date": "October 01, 2023",
+        "readTime": "6 min read",
+        "image": "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=600&h=300&fit=crop",
+        "categoryKey": "history",
+        "tags": ["Manga History", "Manga"]
+      },
+      {
+        "id": 5,
+        "title": "How Manga Shapes Global Culture",
+        "excerpt": "See how manga has influenced global culture and sparked new trends in art and entertainment.",
+        "content": "Manga is more than entertainment—it is a cultural powerhouse. From spreading Japanese culture worldwide to inspiring new trends in art, fashion, and lifestyle...",
+        "authorKey": "authorE",
+        "date": "September 25, 2023",
+        "readTime": "7 min read",
+        "image": "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600&h=300&fit=crop",
+        "categoryKey": "culture",
+        "tags": ["Culture", "Manga", "Influence"]
+      },
+      {
+        "id": 6,
+        "title": "How to Read Manga Effectively",
+        "excerpt": "A detailed guide to getting the most out of manga—from choosing series to reading techniques.",
+        "content": "Reading manga is an art. Beyond flipping pages, reading manga the right way can offer a deeper and more enjoyable experience. From understanding right-to-left reading to feeling the story's rhythm...",
+        "authorKey": "authorF",
+        "date": "September 18, 2023",
+        "readTime": "4 min read",
+        "image": "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=600&h=300&fit=crop",
+        "categoryKey": "technique",
+        "tags": ["Manga", "Reading techniques"]
+      }
+    ],
+    "categoryColors": {
+      "featured": "#dc3545",
+      "art": "#28a745",
+      "review": "#fd7e14",
+      "history": "#6f42c1",
+      "culture": "#20c997",
+      "technique": "#0d6efd",
+      "default": "#6c757d"
+    }
+  },
+  "blogDetail": {
+    "breadcrumb": {
+      "home": "Home",
+      "blog": "Blog"
+    },
+    "buttons": {
+      "like": "{{count}} likes",
+      "save": "Save",
+      "share": "Share",
+      "back": "Back to Blog"
+    },
+    "share": {
+      "menu": {
+        "facebook": "Facebook",
+        "twitter": "Twitter",
+        "linkedin": "LinkedIn",
+        "copy": "Copy link"
+      },
+      "copySuccess": "Link copied!"
+    },
+    "posts": {
+      "1": {
+        "title": "Fujiko F. Fujio – Creator of Doraemon",
+        "content": "<p>Fujiko F. Fujio (1933-1996) is one of Japan's greatest mangaka. He and his series Doraemon created a cultural phenomenon that resonates worldwide.</p><h3>Early Days</h3><p>Born in 1933 in Toyama Prefecture, Hiroshi Fujimoto—better known as Fujiko F. Fujio—fell in love with manga early on. In 1951 he met Motoo Abiko (later Fujiko A. Fujio), and the two began working together under the shared pen name \"Fujiko Fujio\".</p><h3>The Birth of Doraemon</h3><p>Doraemon first appeared in 1969 as a secondary character but quickly became the heart of the series, winning fans across the globe.</p><h3>Cultural Impact</h3><p>Doraemon is more than a comic—it is a cultural phenomenon translated into many languages and adapted into anime, films, and countless products.</p><h3>Legacy</h3><p>Though Fujiko F. Fujio passed away in 1996, his legacy lives on through Doraemon—a symbol of friendship, creativity, and childhood dreams.</p>",
+        "authorKey": "authorA",
+        "date": "October 24, 2019",
+        "readTime": "5 min read",
+        "image": "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&h=400&fit=crop",
+        "tags": ["Doraemon", "Manga", "Fujiko F. Fujio", "Japan"]
+      }
+    }
+  },
+  "admin": {
+    "layout": {
+      "backToHome": "Back to homepage",
+      "logout": "Log out",
+      "menu": {
+        "dashboard": "Overview",
+        "books": "Book Management",
+        "categories": "Category Management",
+        "warehouse": "Warehouse Management",
+        "orders": "Order Management",
+        "users": "User Management",
+        "reviews": "Review Management",
+        "reports": "Reports"
+      }
+    },
+    "dashboard": {
+      "loading": "Loading...",
+      "title": "Overview",
+      "actions": {
+        "refresh": "Refresh",
+        "retry": "Retry"
+      },
+      "alert": {
+        "title": "Note:",
+        "message": "When a customer places an order from the storefront, the order will appear here with the status \"{{status}}\". Data refreshes automatically whenever new orders arrive."
+      },
+      "stats": {
+        "totalRevenue": "Total revenue",
+        "totalOrders": "Total orders",
+        "totalBooks": "Total books",
+        "totalUsers": "Total users"
+      },
+      "charts": {
+        "revenueTitle": "Revenue by {{period}}",
+        "ordersTitle": "Orders by {{period}}",
+        "periods": {
+          "day": "day",
+          "month": "month",
+          "year": "year"
+        },
+        "range": {
+          "day": "By day",
+          "month": "By month",
+          "year": "By year"
+        },
+        "revenueDataset": "Revenue (₫)",
+        "ordersDataset": "Orders"
+      },
+      "table": {
+        "title": "Recent orders",
+        "columns": {
+          "orderId": "Order ID",
+          "customer": "Customer",
+          "amount": "Amount",
+          "status": "Status",
+          "createdAt": "Created at"
+        }
+      },
+      "topSelling": {
+        "title": "Best-selling books",
+        "empty": "No best-selling data yet",
+        "salesLine": "{{count}} copies · {{revenue}}",
+        "rank": {
+          "1": "Top 1",
+          "2": "Top 2",
+          "3": "Top 3",
+          "default": "Top {{rank}}"
+        },
+        "placeholder": "Book {{index}}"
+      },
+      "topRated": {
+        "title": "Top 3 five-star books",
+        "empty": "No review data yet",
+        "placeholder": "Book {{index}}"
+      },
+      "statuses": {
+        "completed": "Completed",
+        "pending": "Pending",
+        "shipped": "Shipped",
+        "processing": "Processing",
+        "cancelled": "Cancelled"
+      },
+      "errors": {
+        "unauthorized": "You do not have permission to view the admin dashboard",
+        "apiRequest": "API request failed",
+        "fetchFailed": "Unable to load dashboard data",
+        "generic": "Something went wrong while loading the dashboard"
+      }
+    }
+  },
+  "admin": {
+    "layout": {
+      "backToHome": "Back to homepage",
+      "logout": "Log out",
+      "menu": {
+        "dashboard": "Overview",
+        "books": "Book Management",
+        "categories": "Category Management",
+        "warehouse": "Warehouse Management",
+        "orders": "Order Management",
+        "users": "User Management",
+        "reviews": "Review Management",
+        "reports": "Reports"
+      }
+    },
+    "dashboard": {
+      "loading": "Loading...",
+      "title": "Overview",
+      "actions": {
+        "refresh": "Refresh",
+        "retry": "Retry"
+      },
+      "alert": {
+        "title": "Note:",
+        "message": "When a customer places an order from the storefront, the order will appear here with the status \"{{status}}\". Data refreshes automatically whenever new orders arrive."
+      },
+      "stats": {
+        "totalRevenue": "Total revenue",
+        "totalOrders": "Total orders",
+        "totalBooks": "Total books",
+        "totalUsers": "Total users"
+      },
+      "charts": {
+        "revenueTitle": "Revenue by {{period}}",
+        "ordersTitle": "Orders by {{period}}",
+        "periods": {
+          "day": "day",
+          "month": "month",
+          "year": "year"
+        },
+        "range": {
+          "day": "By day",
+          "month": "By month",
+          "year": "By year"
+        },
+        "revenueDataset": "Revenue (₫)",
+        "ordersDataset": "Orders"
+      },
+      "table": {
+        "title": "Recent orders",
+        "columns": {
+          "orderId": "Order ID",
+          "customer": "Customer",
+          "amount": "Amount",
+          "status": "Status",
+          "createdAt": "Created at"
+        }
+      },
+      "topSelling": {
+        "title": "Best-selling books",
+        "empty": "No best-selling data yet",
+        "salesLine": "{{count}} copies · {{revenue}}",
+        "rank": {
+          "1": "Top 1",
+          "2": "Top 2",
+          "3": "Top 3",
+          "default": "Top {{rank}}"
+        },
+        "placeholder": "Book {{index}}"
+      },
+      "topRated": {
+        "title": "Top 3 five-star books",
+        "empty": "No review data yet",
+        "placeholder": "Book {{index}}"
+      },
+      "statuses": {
+        "completed": "Completed",
+        "pending": "Pending",
+        "shipped": "Shipped",
+        "processing": "Processing",
+        "cancelled": "Cancelled"
+      },
+      "errors": {
+        "unauthorized": "You do not have permission to view the admin dashboard",
+        "apiRequest": "API request failed",
+        "fetchFailed": "Unable to load dashboard data",
+        "generic": "Something went wrong while loading the dashboard"
+      }
+    }
+  }
+}
+

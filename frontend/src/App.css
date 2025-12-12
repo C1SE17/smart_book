@@ -1,0 +1,249 @@
+/* Custom styles for SMART BOOK header */
+
+/* Top bar styling */
+.bg-light {
+  background-color: #f8f9fa !important;
+}
+
+/* Navigation styling */
+.navbar-brand {
+  font-weight: 700 !important;
+  font-size: 1.5rem !important;
+}
+
+.nav-link {
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+  color: #007bff !important;
+}
+
+/* Notification bell styling */
+.position-relative .badge {
+  background-color: #000 !important;
+  border: 1px solid #fff;
+}
+
+/* Pink border styling */
+.pink-border {
+  height: 2px;
+  background-color: #ffc0cb;
+  width: 100%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .navbar-nav {
+    text-align: center;
+    margin-top: 1rem;
+  }
+  
+  .nav-link {
+    margin: 0.5rem 0;
+  }
+  
+  .d-flex.align-items-center {
+    justify-content: center;
+    margin-top: 1rem;
+  }
+}
+
+
+/* Footer styling */
+footer {
+  background-color: #f8f9fa !important;
+}
+
+footer h5 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333 !important;
+  margin-bottom: 1rem;
+}
+
+footer p {
+  font-size: 0.9rem;
+  color: #555 !important;
+  line-height: 1.5;
+  margin-bottom: 0.5rem;
+}
+
+footer p:last-child {
+  margin-bottom: 0;
+}
+
+/* Footer responsive adjustments */
+@media (max-width: 768px) {
+  footer .col-lg-2 {
+    margin-bottom: 2rem;
+  }
+  
+  footer h5 {
+    font-size: 1rem;
+  }
+  
+  footer p {
+    font-size: 0.85rem;
+  }
+}
+
+
+/* Hero Section */
+.hero-section {
+  background: linear-gradient(135deg, #ffc0cb 0%, #ffb3ba 100%);
+}
+
+/* Book Cards */
+.card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: none;
+}
+
+.card:hover {
+  /* Hover effects removed */
+}
+
+.card-img-top {
+  background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+}
+
+
+
+/* Section Titles */
+.section-title {
+  position: relative;
+  padding-bottom: 0.5rem;
+}
+
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 50px;
+  height: 3px;
+  background-color: #007bff;
+  border-radius: 2px;
+}
+
+
+/* Star Rating */
+.bi-star-fill {
+  color: #ffc107;
+}
+
+.bi-star {
+  color: #dee2e6;
+}
+
+/* Sticky footer layout */
+.min-vh-100 {
+  min-height: 100vh;
+}
+
+.flex-grow-1 {
+  flex-grow: 1;
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Prevent scroll jump on page navigation */
+body {
+  scroll-behavior: smooth;
+}
+
+/* Toast animations */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.toast-slide-in {
+  animation: slideInRight 0.4s ease-out;
+}
+
+.toast-slide-out {
+  animation: slideOutRight 0.3s ease-in;
+}
+
+.toast-fade-in {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+/* Hide scrollbar for recommendation slider */
+.reco-slider {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+.reco-slider::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
+
+/* Slide Animations */
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+.slide-content {
+  animation-fill-mode: both;
+}
