@@ -140,6 +140,12 @@ const Login = ({ onToggleMode, onLoginSuccess, onForgotPassword }) => {
       localStorage.setItem('user', JSON.stringify(userInfo));
       localStorage.setItem('token', token);
       
+      // Hiển thị toast thành công
+      if (window.showToast) {
+        const successMessage = response?.message || 'Đăng nhập thành công!';
+        window.showToast(successMessage, 'success', 3000);
+      }
+      
       // Gọi callback thành công với dữ liệu user
       console.log('Login successful, calling onLoginSuccess with:', userInfo);
       if (onLoginSuccess) {
@@ -162,19 +168,24 @@ const Login = ({ onToggleMode, onLoginSuccess, onForgotPassword }) => {
       });
       
       // Xử lý thông báo lỗi cụ thể
-      let errorMessage = 'Login failed. Please try again.';
+      let errorMessage = 'Đăng nhập thất bại. Vui lòng thử lại.';
       
       if (error.message) {
         const msg = error.message.toLowerCase();
         if (msg.includes('email không tồn tại') || msg.includes('email không') || msg.includes('not found')) {
-          errorMessage = 'We could not find an account with that email. Please sign up if you are a new user.';
+          errorMessage = 'Email không tồn tại. Vui lòng đăng ký nếu bạn là người dùng mới.';
         } else if (msg.includes('mật khẩu không đúng') || msg.includes('password') || msg.includes('incorrect')) {
-          errorMessage = 'Incorrect password. Please try again.';
+          errorMessage = 'Mật khẩu không đúng. Vui lòng thử lại.';
         } else if (msg.includes('thiếu email') || msg.includes('missing email') || msg.includes('missing password')) {
-          errorMessage = 'Please provide both email and password.';
+          errorMessage = 'Vui lòng nhập đầy đủ email và mật khẩu.';
         } else if (msg.includes('unauthorized') || msg.includes('401')) {
-          errorMessage = 'Invalid email or password. Please try again.';
+          errorMessage = 'Email hoặc mật khẩu không đúng. Vui lòng thử lại.';
+        } else if (msg.includes('invalid email or password')) {
+          errorMessage = 'Email hoặc mật khẩu không đúng.';
+        } else if (msg.includes('no response from server') || msg.includes('network')) {
+          errorMessage = 'Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.';
         } else {
+          // Giữ nguyên message nếu là tiếng Việt, nếu không thì dịch
           errorMessage = error.message;
         }
       }
@@ -186,9 +197,9 @@ const Login = ({ onToggleMode, onLoginSuccess, onForgotPassword }) => {
       //   captchaRef.current.refresh();
       // }
       
-      // Hiển thị toast nếu có
+      // Hiển thị toast lỗi
       if (window.showToast) {
-        window.showToast(errorMessage, 'error');
+        window.showToast(errorMessage, 'error', 4000);
       }
     } finally {
       setLoading(false);
@@ -357,7 +368,7 @@ const Login = ({ onToggleMode, onLoginSuccess, onForgotPassword }) => {
                   Signing in...
                 </>
               ) : (
-                'Login'
+                'Sign in'
               )}
             </button>
           </form>

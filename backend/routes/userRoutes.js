@@ -23,6 +23,8 @@ router.put('/change-password', auth, UserController.changePassword); // Yêu c�
 router.get('/', auth, adminOnly, UserController.getAllUsers); // Chỉ admin
 // Tuyến lấy tổng số người dùng cho dashboard (chỉ admin) - PHẢI ĐẶT TRƯỚC /:user_id
 router.get('/count', auth, adminOnly, UserController.getTotalUsersCount); // Chỉ admin
+// Tuyến lấy thông tin profile của user đang đăng nhập - PHẢI ĐẶT TRƯỚC /:user_id
+router.get('/profile', auth, UserController.getProfile); // Lấy thông tin user hiện tại
 // Tuyến lấy thông tin người dùng
 router.get('/:user_id', auth, UserController.getUser); // User lấy bản thân, admin lấy bất kỳ
 // Tuyến xóa người dùng

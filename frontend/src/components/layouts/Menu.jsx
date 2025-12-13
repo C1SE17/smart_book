@@ -189,16 +189,6 @@ const MenuClient = ({ onNavigateTo, onBackToHome, user, onLogout }) => {
               <a
                 className="nav-link text-white fw-normal"
                 href="#"
-                onClick={(e) => { e.preventDefault(); onNavigateTo('translation'); }}
-                style={{ fontSize: '1rem', fontFamily: 'sans-serif' }}
-              >
-                {nav.translation}
-              </a>
-            </li>
-            <li className="nav-item">
-              <a
-                className="nav-link text-white fw-normal"
-                href="#"
                 onClick={(e) => { e.preventDefault(); onNavigateTo('ai-ask'); }}
                 style={{ fontSize: '1rem', fontFamily: 'sans-serif' }}
               >

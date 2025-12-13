@@ -38,12 +38,6 @@ const config = {
 
   // AI/ML configuration
   ai: {
-    translation: {
-      glossaryPath: path.join(__dirname, '../../../ai/resources/book_glossary.json'),
-      corpusPath: path.join(__dirname, '../../../ai/resources/book_parallel.json'),
-      defaultModel: process.env.TRANSLATION_MODEL || 'Helsinki-NLP/opus-mt-vi-en',
-      embeddingModel: process.env.EMBEDDING_MODEL || 'sentence-transformers/all-MiniLM-L6-v2',
-    },
     analytics: {
       modelDir: path.join(__dirname, '../../../ai/models'),
     },

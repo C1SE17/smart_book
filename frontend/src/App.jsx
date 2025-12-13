@@ -15,8 +15,7 @@ import {
   AboutUs,
   Authors,
   AuthorDetail,
-  AIAsk,
-  BookTranslation
+  AIAsk
 } from './components/client'
 import Slide from './components/layouts/Slide'
 import MenuClient from './components/layouts/Menu'
@@ -331,7 +330,6 @@ function AppContent() {
       'contact': '/contact',
       'about': '/about',
       'ai-ask': '/ai-ask',
-      'translation': '/translation',
       'admin-dashboard': '/admin/dashboard',
       'admin-books': '/admin/books',
       'admin-categories': '/admin/categories',
@@ -587,19 +585,6 @@ function AppContent() {
         </ErrorBoundary>
       </Layout>
     )}
-      {currentPage === 'translation' && (
-        <Layout
-          onViewAllNotifications={handleViewAllNotifications}
-          onNavigateTo={handleNavigateTo}
-          onBackToHome={handleBackToHome}
-          user={user}
-          onLogout={handleLogout}
-        >
-          <ErrorBoundary>
-            <BookTranslation />
-          </ErrorBoundary>
-        </Layout>
-      )}
       {currentPage === 'about' && (
         <Layout 
           onViewAllNotifications={handleViewAllNotifications}

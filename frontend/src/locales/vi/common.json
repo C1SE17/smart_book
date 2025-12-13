@@ -6,7 +6,6 @@
     "author": "Tác Giả",
     "about": "Về Chúng Tôi",
     "contact": "Liên Hệ",
-    "translation": "Dịch Nội Dung",
     "aiAsk": "AI Ask",
     "login": "Đăng nhập",
     "register": "Đăng ký",
@@ -37,31 +36,6 @@
       "buttonText": "Xem tất cả"
     }
   ],
-  "translationPage": {
-    "title": "Dịch Nội Dung Sách",
-    "subtitle": "Sử dụng mô hình đa ngữ kết hợp glossary để dịch chính xác mô tả sản phẩm, chương truyện, đánh giá và nội dung marketing.",
-    "directionLabel": "Chọn hướng dịch",
-    "directions": {
-      "auto": "Tự phát hiện",
-      "en_vi": "Tiếng Anh → Tiếng Việt",
-      "vi_en": "Tiếng Việt → Tiếng Anh"
-    },
-    "sourceLabel": "Nội dung nguồn",
-    "placeholder": "Nhập mô tả sản phẩm, tiêu đề sách, chương truyện hoặc nội dung marketing bạn muốn dịch...",
-    "example": "Ví dụ: “Một tiểu thuyết kỳ ảo về hành trình trưởng thành của cô bé mồ côi tại hiệu sách cổ.”",
-    "swap": "Đảo chiều",
-    "action": "Dịch nội dung",
-    "translating": "Đang dịch...",
-    "resultTitle": "Kết quả",
-    "glossaryTitle": "Thuật ngữ ưu tiên",
-    "exampleTitle": "Ví dụ tham chiếu",
-    "exampleSource": "Nguồn",
-    "exampleTarget": "Bản dịch",
-    "errors": {
-      "empty": "Vui lòng nhập nội dung cần dịch.",
-      "generic": "Đã xảy ra lỗi khi dịch nội dung."
-    }
-  },
   "aiAsk": {
     "header": {
       "title": "AI Gợi ý Sách thông minh",

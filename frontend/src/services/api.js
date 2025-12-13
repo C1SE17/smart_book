@@ -18,7 +18,6 @@ import trackingApi from './trackingApi.js';
 import recommendationApi from './recommendationApi.js';
 import BaseApiService from './baseApi.js';
 import passwordResetApi from './passwordResetApi.js';
-import translationApi from './translationApi.js';
 
 // Tạo một instance của BaseApiService để có các method chung
 const baseApi = new BaseApiService();
@@ -146,10 +145,6 @@ const apiService = {
   recommendations: recommendationApi,
   getRecommendedProducts: recommendationApi.getRecommendedProducts.bind(recommendationApi),
   subscribeRecommendationUpdates: recommendationApi.subscribeUpdates.bind(recommendationApi),
-
-  // Translation API
-  translation: translationApi,
-  translateText: translationApi.translate.bind(translationApi),
 };
 
 // Export default để tương thích với code cũ
@@ -169,7 +164,6 @@ export {
   warehouseApi,
   trackingApi,
   recommendationApi,
-  translationApi,
   passwordResetApi,
   baseApi
 };

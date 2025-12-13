@@ -15,8 +15,7 @@ export const LanguageProvider = ({ children }) => {
     () => ({
       nav: t('nav', { returnObjects: true }),
       languageToggle: t('languageToggle', { returnObjects: true }),
-      slides: t('slides', { returnObjects: true }),
-      translationPage: t('translationPage', { returnObjects: true })
+      slides: t('slides', { returnObjects: true })
     }),
     [t, i18n.language]
   );

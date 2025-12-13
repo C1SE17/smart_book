@@ -19,7 +19,6 @@ export const routes = {
   contact: "/contact",
   about: "/about",
   "ai-ask": "/ai-ask",
-  translation: "/translation",
   author: "/author",
   "author-detail": "/author-detail",
   "admin-dashboard": "/admin/dashboard",
@@ -111,8 +110,6 @@ export const handleRoute = (
     setCurrentPage("about");
   } else if (path === "/ai-ask") {
     setCurrentPage("ai-ask");
-  } else if (path === "/translation") {
-    setCurrentPage("translation");
   } else if (path === "/author") {
     setCurrentPage("author");
   } else if (path.startsWith("/author-detail")) {

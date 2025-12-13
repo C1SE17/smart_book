@@ -29,7 +29,6 @@ export { default as Search } from './search/Search';
 export { default as Cart } from './carts/Cart';
 export { default as Notification } from './notification/Notification';
 export { default as AIAsk } from './ai/AIAsk';
-export { default as BookTranslation } from './ai/BookTranslation';
 export { default as BlogDetail } from './blog/BlogDetail';
 export { default as BlogPage } from './blog/BlogPage';
 

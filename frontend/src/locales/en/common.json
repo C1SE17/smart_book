@@ -6,7 +6,6 @@
     "author": "Authors",
     "about": "About Us",
     "contact": "Contact",
-    "translation": "Translate Content",
     "aiAsk": "AI Ask",
     "login": "Log in",
     "register": "Register",
@@ -37,31 +36,6 @@
       "buttonText": "View all"
     }
   ],
-  "translationPage": {
-    "title": "Bookstore Translation",
-    "subtitle": "Harness a multilingual LLM with domain glossary support to translate product copy, chapters, reviews, and marketing content accurately.",
-    "directionLabel": "Select direction",
-    "directions": {
-      "auto": "Auto detect",
-      "en_vi": "English → Vietnamese",
-      "vi_en": "Vietnamese → English"
-    },
-    "sourceLabel": "Source text",
-    "placeholder": "Paste your product blurb, book title, chapter excerpt, or marketing copy here...",
-    "example": "Example: “A heartwarming coming-of-age tale set in a vintage Hanoi bookshop.”",
-    "swap": "Swap direction",
-    "action": "Translate",
-    "translating": "Translating...",
-    "resultTitle": "Result",
-    "glossaryTitle": "Glossary hints",
-    "exampleTitle": "Reference example",
-    "exampleSource": "Source",
-    "exampleTarget": "Target",
-    "errors": {
-      "empty": "Please enter content to translate.",
-      "generic": "An error occurred while translating."
-    }
-  },
   "aiAsk": {
     "header": {
       "title": "Smart AI Book Advisor",
