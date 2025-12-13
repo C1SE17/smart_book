@@ -1,0 +1,155 @@
+/* Menu Component Styles */
+.menu-navbar {
+    border-top: 3px solid #8B5CF6;
+    z-index: 1000;
+}
+
+.menu-brand {
+    font-size: 1.5rem;
+    font-family: sans-serif;
+    letter-spacing: 0.5px;
+}
+
+.menu-nav-link {
+    font-size: 1rem;
+    font-family: sans-serif;
+}
+
+/* Custom Dropdown Menu */
+.custom-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 800px;
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    animation: fadeIn 0.3s ease-in-out;
+    margin-top: 8px;
+}
+
+.dropdown-content {
+    display: flex;
+    padding: 30px;
+    gap: 40px;
+}
+
+.dropdown-column {
+    flex: 1;
+    min-width: 0;
+}
+
+.column-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #8B5CF6;
+}
+
+.column-items {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Removed old menu-dropdown-title as we now use column-title */
+
+.dropdown-link {
+    font-size: 1rem;
+    line-height: 1.4;
+    color: #333;
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    display: block;
+}
+
+.dropdown-link:hover {
+    background-color: #f8f9fa;
+    color: #8B5CF6;
+    text-decoration: none;
+    transform: translateX(5px);
+}
+
+.dropdown-link:focus {
+    outline: 2px solid #8B5CF6;
+    outline-offset: 2px;
+}
+
+.dropdown-link.clickable {
+    cursor: pointer;
+}
+
+.menu-icon {
+    font-size: 1.2rem;
+}
+
+.menu-notification-badge {
+    font-size: 0.6rem;
+    width: 8px;
+    height: 8px;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Remove old dropdown-item hover styles as we have new ones above */
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .custom-dropdown-menu {
+        min-width: 100%;
+        position: fixed;
+        top: 100%;
+        left: 0;
+        right: 0;
+        margin: 0;
+    }
+
+    .dropdown-content {
+        flex-direction: column;
+        padding: 20px;
+        gap: 20px;
+    }
+
+    .dropdown-column {
+        margin-bottom: 15px;
+    }
+}
+
+/* Dropdown positioning */
+.nav-item.dropdown {
+    position: relative;
+}
+
+/* Accessibility improvements */
+.nav-link:focus {
+    outline: 2px solid #8B5CF6;
+    outline-offset: 2px;
+}
+
+.dropdown-item:focus {
+    outline: 2px solid #8B5CF6;
+    outline-offset: -2px;
+}
+
+/* Ensure dropdown doesn't interfere with other elements */
+.custom-dropdown-menu {
+    background: white;
+    border: 1px solid #e9ecef;
+}

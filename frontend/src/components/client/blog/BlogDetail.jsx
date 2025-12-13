@@ -1,0 +1,240 @@
+import React, { useState } from 'react';
+import { useLanguage } from '../../../contexts/LanguageContext';
+
+const BlogDetail = ({ onNavigateTo, blogId }) => {
+  const { t } = useLanguage();
+  const [isLiked, setIsLiked] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+  const [showShareDropdown, setShowShareDropdown] = useState(false);
+  const [likeCount, setLikeCount] = useState(156);
+
+  const authors = t('blog.filters.authors', { returnObjects: true }) || {};
+  const blogsDetail = t('blogDetail.posts', { returnObjects: true }) || {};
+  const blogList = t('blog.posts', { returnObjects: true }) || [];
+  const currentBlog = blogsDetail[blogId] || blogsDetail['1'];
+  const blogMeta = blogList.find((post) => `${post.id}` === `${blogId}`) || blogList[0] || {};
+  const authorLabel =
+    authors[blogMeta?.authorKey] ||
+    authors[currentBlog?.authorKey] ||
+    '';
+  const shareMenu = t('blogDetail.share.menu', { returnObjects: true }) || {};
+
+  const handleLike = () => {
+    if (isLiked) {
+      setLikeCount(prev => prev - 1);
+    } else {
+      setLikeCount(prev => prev + 1);
+    }
+    setIsLiked(!isLiked);
+  };
+
+  const handleSave = () => {
+    setIsSaved(!isSaved);
+  };
+
+  const handleShare = (platform) => {
+    const url = window.location.href;
+    const title = currentBlog.title;
+    
+    switch (platform) {
+      case 'facebook':
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
+        break;
+      case 'twitter':
+        window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`, '_blank');
+        break;
+      case 'linkedin':
+        window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`, '_blank');
+        break;
+      case 'copy':
+        navigator.clipboard.writeText(url);
+        alert(t('blogDetail.share.copySuccess'));
+        break;
+      default:
+        break;
+    }
+    setShowShareDropdown(false);
+  };
+
+  return (
+    <div className="min-vh-100" style={{ backgroundColor: '#f8f9fa' }}>
+      <div className="container py-5">
+        {/* Breadcrumb */}
+        <div className="mb-4">
+          <button
+            className="btn btn-link text-dark p-0 no-hover"
+            onClick={() => onNavigateTo('blog')}
+            style={{
+              border: 'none',
+              background: 'none',
+              fontSize: '16px',
+              textDecoration: 'none',
+              boxShadow: 'none',
+              fontWeight: '500'
+            }}
+          >
+            <i className="fas fa-arrow-left me-2"></i>
+            {t('blogDetail.breadcrumb.home')} / {t('blogDetail.breadcrumb.blog')} /
+            <span className="fw-bold ms-1" style={{ fontSize: '16px' }}> {currentBlog.title}</span>
+          </button>
+        </div>
+
+        <div className="row justify-content-center">
+          <div className="col-lg-8 col-xl-7">
+            {/* Main Content */}
+            <div className="card border-0 shadow-lg">
+              {/* Hero Image */}
+              <img
+                src={currentBlog.image}
+                alt={currentBlog.title}
+                className="card-img-top"
+                style={{ height: '400px', objectFit: 'cover' }}
+              />
+              
+              <div className="card-body p-5">
+                {/* Tags */}
+                <div className="mb-4">
+                  {currentBlog.tags.map((tag, index) => (
+                    <span key={index} className="badge bg-light text-dark me-2 mb-2" style={{ fontSize: '0.8rem' }}>
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Interaction Buttons */}
+                <div className="d-flex align-items-center justify-content-between mb-4">
+                  <div className="d-flex align-items-center">
+                    <button
+                    className={`btn me-3 ${isLiked ? 'btn-danger' : 'btn-outline-danger'}`}
+                      onClick={handleLike}
+                      style={{ 
+                        borderRadius: '20px',
+                        backgroundColor: isLiked ? '#dc3545' : 'transparent',
+                        borderColor: '#dc3545',
+                        color: isLiked ? 'white' : '#dc3545',
+                        fontWeight: '600',
+                        boxShadow: isLiked ? '0 4px 8px rgba(220, 53, 69, 0.3)' : 'none',
+                        transform: isLiked ? 'scale(1.05)' : 'scale(1)',
+                        transition: 'all 0.3s ease'
+                      }}
+                    >
+                      <i className={`fas fa-heart ${isLiked ? 'text-white' : 'text-danger'}`}></i>
+                    <span className="ms-2">{t('blogDetail.buttons.like', { count: likeCount })}</span>
+                    </button>
+                    
+                    <button
+                      className={`btn me-3 ${isSaved ? 'btn-warning' : 'btn-outline-warning'}`}
+                      onClick={handleSave}
+                      style={{ 
+                        borderRadius: '20px',
+                        backgroundColor: isSaved ? '#ffc107' : 'transparent',
+                        borderColor: '#ffc107',
+                        color: isSaved ? 'white' : '#ffc107',
+                        fontWeight: '600',
+                        boxShadow: isSaved ? '0 4px 8px rgba(255, 193, 7, 0.3)' : 'none',
+                        transform: isSaved ? 'scale(1.05)' : 'scale(1)',
+                        transition: 'all 0.3s ease'
+                      }}
+                    >
+                      <i className={`fas fa-bookmark ${isSaved ? 'text-white' : 'text-warning'}`}></i>
+                    <span className="ms-2">{t('blogDetail.buttons.save')}</span>
+                    </button>
+                  </div>
+
+                  {/* Share Button */}
+                  <div className="position-relative">
+                    <button
+                      className="btn btn-dark"
+                      onClick={() => setShowShareDropdown(!showShareDropdown)}
+                      style={{ borderRadius: '8px' }}
+                    >
+                      <i className="fas fa-share-alt me-2"></i>
+                    {t('blogDetail.buttons.share')}
+                      <i className="fas fa-chevron-down ms-2"></i>
+                    </button>
+                    
+                    {showShareDropdown && (
+                      <div className="dropdown-menu show position-absolute" style={{ top: '100%', right: '0', zIndex: 1000 }}>
+                        <button
+                          className="dropdown-item"
+                          onClick={() => handleShare('facebook')}
+                        >
+                          <i className="fab fa-facebook text-primary me-2"></i>
+                          {shareMenu.facebook || 'Facebook'}
+                        </button>
+                        <button
+                          className="dropdown-item"
+                          onClick={() => handleShare('twitter')}
+                        >
+                          <i className="fab fa-twitter text-info me-2"></i>
+                          {shareMenu.twitter || 'Twitter'}
+                        </button>
+                        <button
+                          className="dropdown-item"
+                          onClick={() => handleShare('linkedin')}
+                        >
+                          <i className="fab fa-linkedin text-primary me-2"></i>
+                          {shareMenu.linkedin || 'LinkedIn'}
+                        </button>
+                        <hr className="dropdown-divider" />
+                        <button
+                          className="dropdown-item"
+                          onClick={() => handleShare('copy')}
+                        >
+                          <i className="fas fa-copy text-muted me-2"></i>
+                          {shareMenu.copy || 'Copy'}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Title */}
+                <h1 className="display-5 fw-bold text-dark mb-4">{currentBlog.title}</h1>
+
+                {/* Author and Date */}
+                <div className="d-flex align-items-center mb-4">
+                  <img
+                    src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=50&h=50&fit=crop&crop=face"
+                    alt={authorLabel}
+                    className="rounded-circle me-3"
+                    style={{ width: '50px', height: '50px', objectFit: 'cover' }}
+                  />
+                  <div className="me-auto">
+                    <div className="fw-bold text-dark">{authorLabel}</div>
+                    <div className="text-muted small">{currentBlog.date}</div>
+                  </div>
+                  <div className="text-muted">
+                    <i className="fas fa-clock me-1"></i>
+                    {currentBlog.readTime}
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div 
+                  className="blog-content"
+                  dangerouslySetInnerHTML={{ __html: currentBlog.content }}
+                  style={{ fontSize: '1.1rem', lineHeight: '1.8' }}
+                />
+
+                {/* Back to Blog Button */}
+                <div className="text-center mt-5">
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => onNavigateTo('blog')}
+                    style={{ borderRadius: '25px', padding: '10px 30px' }}
+                  >
+                    <i className="fas fa-arrow-left me-2"></i>
+                    {t('blogDetail.buttons.back')}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default BlogDetail;

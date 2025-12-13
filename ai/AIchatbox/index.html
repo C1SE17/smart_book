@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chatbox - Smart Book Store</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="ai-chatbox-wrapper">
+        <!-- Header -->
+        <header class="ai-chatbox-header">
+            <div class="ai-chatbox-header-content">
+                <h2>
+                    <i class="fas fa-users"></i>
+                    AI Assistant
+                </h2>
+                <p>Hỏi về dữ liệu analytics, doanh thu, tồn kho, đánh giá và hành vi khách hàng</p>
+            </div>
+        </header>
+
+        <!-- Chat Container -->
+        <div class="admin-chat-container">
+            <!-- Messages Area -->
+            <div class="admin-chat-messages" id="chatMessages">
+                <!-- Welcome Message -->
+                <div class="admin-chat-welcome">
+                    <p>Xin chào! Tôi có thể giúp bạn phân tích dữ liệu analytics và trả lời các câu hỏi về cửa hàng.</p>
+                    <p>Hãy thử hỏi:</p>
+                    <ul>
+                        <li>"Doanh thu tháng này như thế nào?"</li>
+                        <li>"Sản phẩm nào đang tồn kho thấp?"</li>
+                        <li>"Tỷ lệ chuyển đổi hiện tại là bao nhiêu?"</li>
+                        <li>"Khách hàng đến từ nguồn nào nhiều nhất?"</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="admin-chat-input-area">
+                <!-- File Preview -->
+                <div class="admin-chat-file-preview" id="filePreview" style="display: none;">
+                    <i class="fas fa-paperclip"></i>
+                    <span id="fileName"></span>
+                    <button 
+                        type="button" 
+                        class="admin-chat-file-remove"
+                        id="removeFile"
+                        aria-label="Xóa file"
+                    >
+                        ×
+                    </button>
+                </div>
+
+                <!-- Input Wrapper -->
+                <div class="admin-chat-input-wrapper">
+                    <!-- File Input (Hidden) -->
+                    <input
+                        type="file"
+                        id="fileInput"
+                        accept="image/*,.pdf,.doc,.docx"
+                        style="display: none;"
+                    />
+                    
+                    <!-- Attach Button -->
+                    <label for="fileInput" class="admin-chat-attach-btn" title="Đính kèm file">
+                        <i class="fas fa-paperclip"></i>
+                    </label>
+
+                    <!-- Text Input -->
+                    <input
+                        type="text"
+                        class="admin-chat-text-input"
+                        id="chatInput"
+                        placeholder="Nhập câu hỏi về doanh thu, kho, khách hàng..."
+                        autocomplete="off"
+                    />
+
+                    <!-- Send Button -->
+                    <button
+                        type="button"
+                        class="admin-chat-send-btn"
+                        id="sendButton"
+                        title="Gửi tin nhắn"
+                    >
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load JavaScript -->
+    <!-- Load config.js nếu có (file này không được commit, mỗi dev tự tạo) -->
+    <script src="config.js" defer></script>
+    <script src="chatbox.js"></script>
+</body>
+</html>
+

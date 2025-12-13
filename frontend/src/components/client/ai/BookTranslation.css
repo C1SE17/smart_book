@@ -1,0 +1,147 @@
+.translation-page {
+  color: #1f2937;
+}
+
+.translation-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 2.5rem;
+  border: 1px solid rgba(99, 102, 241, 0.1);
+  backdrop-filter: blur(8px);
+}
+
+.translation-card__header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.translation-title {
+  font-weight: 700;
+  font-size: 2rem;
+  color: #111827;
+  margin-bottom: 0.5rem;
+}
+
+.translation-subtitle {
+  color: #4b5563;
+  margin: 0 auto;
+  max-width: 640px;
+}
+
+.translation-form__group {
+  margin-bottom: 1.5rem;
+}
+
+.direction-selector {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.direction-selector .form-select {
+  flex: 1;
+  min-width: 240px;
+}
+
+.swap-button {
+  white-space: nowrap;
+}
+
+.source-text {
+  resize: vertical;
+  min-height: 160px;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.translation-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-translate {
+  min-width: 180px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.translation-result {
+  border-top: 1px solid rgba(99, 102, 241, 0.2);
+  padding-top: 1.5rem;
+}
+
+.translation-result__title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.translation-output {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(167, 139, 250, 0.08));
+  border-radius: 12px;
+  padding: 1.5rem;
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: #111827;
+}
+
+.translation-metadata,
+.translation-example {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-top: 1.5rem;
+  border: 1px solid rgba(17, 24, 39, 0.05);
+}
+
+.translation-metadata h3,
+.translation-example h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: #1f2937;
+}
+
+.translation-metadata ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  color: #374151;
+}
+
+.translation-example p {
+  margin-bottom: 0.5rem;
+  color: #374151;
+}
+
+.example-source {
+  font-style: italic;
+}
+
+@media (max-width: 767px) {
+  .translation-card {
+    padding: 1.5rem;
+  }
+
+  .translation-title {
+    font-size: 1.6rem;
+  }
+
+  .direction-selector {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .swap-button {
+    width: 100%;
+  }
+
+  .translation-actions {
+    justify-content: center;
+  }
+}
+
+

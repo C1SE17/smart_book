@@ -1,0 +1,24 @@
+{
+  "name": "smart-book",
+  "version": "2.0.0",
+  "description": "Smart Book E-commerce System - Clean Architecture",
+  "main": "src/presentation/api/app.js",
+  "scripts": {
+    "start": "node backend/index.js",
+    "start:new": "node src/presentation/api/app.js",
+    "dev": "nodemon backend/index.js",
+    "dev:new": "nodemon src/presentation/api/app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "e-commerce",
+    "bookstore",
+    "clean-architecture"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "vnpay": "^2.4.4"
+  }
+}

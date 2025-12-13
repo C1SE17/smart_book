@@ -113,10 +113,45 @@ CREATE TABLE order_items (
 CREATE TABLE payments (
     payment_id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'ID thanh toán',
     order_id INT NOT NULL COMMENT 'Đơn hàng được thanh toán',
-    payment_method ENUM('momo', 'stripe', 'cod') NOT NULL COMMENT 'Phương thức thanh toán',
+    payment_method ENUM('momo', 'stripe', 'cod', 'vnpay') NOT NULL COMMENT 'Phương thức thanh toán',
     amount DECIMAL(10,2) NOT NULL COMMENT 'Số tiền',
     status ENUM('pending', 'success', 'failed') DEFAULT 'pending' COMMENT 'Trạng thái',
     transaction_id VARCHAR(255) COMMENT 'Mã giao dịch cổng thanh toán',
     paid_at TIMESTAMP NULL COMMENT 'Thời gian thanh toán',
     FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE
 ) COMMENT='Thông tin thanh toán';
+
+-- 11 . review (bình luận + đánh giá sao)
+CREATE TABLE reviews (
+    review_id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'ID đánh giá',
+    user_id INT NOT NULL COMMENT 'Người đánh giá',
+    book_id INT NOT NULL COMMENT 'Sách được đánh giá',
+    rating TINYINT NOT NULL COMMENT 'Số sao đánh giá (1-5)',
+    review_text TEXT NULL COMMENT 'Nội dung đánh giá (tùy chọn)',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Ngày đánh giá',
+    CONSTRAINT chk_rating CHECK (rating BETWEEN 1 AND 5),
+    CONSTRAINT fk_review_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    CONSTRAINT fk_review_book FOREIGN KEY (book_id) REFERENCES books(book_id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+USE smart_book;
+-- 12. review_replies (phản hồi bình luận)
+CREATE TABLE review_replies (
+    reply_id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'ID phản hồi',
+    review_id INT NOT NULL COMMENT 'Bình luận được phản hồi',
+    user_id INT NOT NULL COMMENT 'Người phản hồi',
+    reply_text TEXT NOT NULL COMMENT 'Nội dung phản hồi',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Ngày phản hồi',
+    CONSTRAINT fk_reply_review FOREIGN KEY (review_id) REFERENCES reviews(review_id) ON DELETE CASCADE,
+    CONSTRAINT fk_reply_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+USE smart_book;
+-- bảng warehouse (ràng buộc với books)
+CREATE TABLE warehouse (
+    warehouse_id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'ID kho',
+    book_id INT NOT NULL COMMENT 'ID sách',
+    quantity INT DEFAULT 0 COMMENT 'Số lượng sách trong kho',
+    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (book_id) REFERENCES books(book_id) ON DELETE CASCADE,
+    UNIQUE KEY uq_warehouse_book (book_id) -- mỗi sách chỉ có 1 dòng trong kho
+) COMMENT='Kho sách (liên kết chặt với bảng books)';
