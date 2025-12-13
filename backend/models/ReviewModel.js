@@ -107,6 +107,13 @@ const ReviewModel = {
 };
 
 const ReplyModel = {
+    // Kiểm tra review đã có reply chưa
+    hasReply: async (review_id) => {
+        const [rows] = await db.promise().query(
+            'SELECT reply_id FROM review_replies WHERE review_id = ?', [review_id]
+        );
+        return rows.length > 0;
+    },
     // Thêm phản hồi
     create: async (review_id, user_id, reply_text) => {
         const [result] = await db.promise().query(

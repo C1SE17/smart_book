@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faStar, faUser, faThumbsUp, faThumbsDown, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faStar, faUser, faTrash, faEdit, faTimes, faCheck } from '@fortawesome/free-solid-svg-icons';
 import apiService from '../../../services/api';
 import { useLanguage } from '../../../contexts/LanguageContext';
 
@@ -10,25 +10,40 @@ const ReviewSection = ({ productId, reviews = [], loading = false, user = null, 
     rating: 5,
     review_text: ''
   });
-  const [newComment, setNewComment] = useState({
-    name: '',
-    comment: ''
-  });
-  const [newReply, setNewReply] = useState({
-    commentId: null,
-    content: ''
-  });
   const [submitting, setSubmitting] = useState(false);
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
-  const [replySubmitting, setReplySubmitting] = useState(false);
+  const [reviewError, setReviewError] = useState('');
+  const [reviewSuccess, setReviewSuccess] = useState('');
   const [filterRating, setFilterRating] = useState('all'); // 'all', '5', '4', '3', '2', '1'
   const [sortBy, setSortBy] = useState('newest'); // 'newest', 'oldest', 'highest', 'lowest'
-  
+
   // State cho dữ liệu thật từ API
   const [realReviews, setRealReviews] = useState([]);
   const [realLoading, setRealLoading] = useState(false);
   const [averageRating, setAverageRating] = useState(0);
   const [totalReviews, setTotalReviews] = useState(0);
+
+  // State cho edit review
+  const [editingReviewId, setEditingReviewId] = useState(null);
+  const [editReviewData, setEditReviewData] = useState({
+    rating: 5,
+    review_text: ''
+  });
+  const [editSubmitting, setEditSubmitting] = useState(false);
+
+  // State cho reply review (admin)
+  const [replyingReviewId, setReplyingReviewId] = useState(null);
+  const [replyData, setReplyData] = useState({
+    reply_text: ''
+  });
+  const [replySubmitting, setReplySubmitting] = useState(false);
+  const [replyError, setReplyError] = useState('');
+  const [editingReplyId, setEditingReplyId] = useState(null);
+  const [editReplyData, setEditReplyData] = useState({
+    reply_text: ''
+  });
+  const [editReplySubmitting, setEditReplySubmitting] = useState(false);
+  const [editReplyError, setEditReplyError] = useState('');
 
   // Load dữ liệu thật từ API khi component mount hoặc productId thay đổi
   useEffect(() => {
@@ -43,10 +58,10 @@ const ReviewSection = ({ productId, reviews = [], loading = false, user = null, 
     try {
       setRealLoading(true);
       console.log('Đang load reviews cho productId:', productId);
-      
+
       const response = await apiService.getReviews({ book_id: productId });
       console.log('Response từ API:', response);
-      
+
       // Kiểm tra response structure từ baseApi
       if (response && response.success && Array.isArray(response.data)) {
         setRealReviews(response.data);
@@ -72,10 +87,10 @@ const ReviewSection = ({ productId, reviews = [], loading = false, user = null, 
   const loadAverageRating = async () => {
     try {
       console.log('Đang load average rating cho productId:', productId);
-      
+
       const response = await apiService.getAverageRating(productId);
       console.log('Average rating response:', response);
-      
+
       // Kiểm tra response structure từ baseApi
       if (response && response.success && response.data) {
         setAverageRating(parseFloat(response.data.average_rating) || 0);
@@ -102,7 +117,7 @@ const ReviewSection = ({ productId, reviews = [], loading = false, user = null, 
   const filteredAndSortedReviews = React.useMemo(() => {
     // Chỉ sử dụng dữ liệu thật từ API, không fallback về props mock
     const reviewsToUse = realReviews;
-    
+
     if (!reviewsToUse || reviewsToUse.length === 0) return [];
 
     let filtered = reviewsToUse;
@@ -132,15 +147,6 @@ const ReviewSection = ({ productId, reviews = [], loading = false, user = null, 
     return sorted;
   }, [realReviews, reviews, filterRating, sortBy]);
 
-  // Auto-fill name when user is logged in
-  useEffect(() => {
-    if (user && user.name) {
-      setNewComment(prev => ({
-        ...prev,
-        name: user.name
-      }));
-    }
-  }, [user]);
 
   // Submit review thật lên API
   const handleSubmitRealReview = async () => {
@@ -173,7 +179,7 @@ const ReviewSection = ({ productId, reviews = [], loading = false, user = null, 
       if (response) {
         alert(t('productDetail.notifications.reviewSubmitSuccess'));
         setNewReview({ rating: 5, review_text: '' });
-        
+
         // Reload reviews và average rating
         await loadRealReviews();
         await loadAverageRating();
@@ -196,21 +202,32 @@ const ReviewSection = ({ productId, reviews = [], loading = false, user = null, 
     }
 
     if (!newReview.review_text.trim()) {
-      alert(t('productDetail.notifications.reviewContentRequired'));
+      setReviewError(t('productDetail.notifications.reviewContentError'));
+      // Scroll to error message
+      setTimeout(() => {
+        const textarea = document.getElementById('reviewText');
+        if (textarea) {
+          textarea.focus();
+          textarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
       return;
     }
+
+    // Clear error if review is valid
+    setReviewError('');
 
     // Check if user already reviewed this product
     const existingReview = realReviews.find(review =>
       review.user_id === user.user_id && review.book_id === parseInt(productId)
     );
 
-      if (existingReview) {
-        if (window.showToast) {
-          window.showToast(t('productDetail.notifications.reviewAlreadyExists'), 'warning');
-        } else {
-          alert(t('productDetail.notifications.reviewAlreadyExists'));
-        }
+    if (existingReview) {
+      if (window.showToast) {
+        window.showToast(t('productDetail.notifications.reviewAlreadyExists'), 'warning');
+      } else {
+        alert(t('productDetail.notifications.reviewAlreadyExists'));
+      }
       return;
     }
 
@@ -237,13 +254,20 @@ const ReviewSection = ({ productId, reviews = [], loading = false, user = null, 
           rating: 5,
           review_text: ''
         });
+        setReviewError('');
+        setReviewSuccess(t('productDetail.notifications.reviewSubmitSuccess'));
 
-        // Show success message
+        // Show success message using toast
         if (window.showToast) {
           window.showToast(t('productDetail.notifications.reviewSubmitSuccess'), 'success');
         } else {
           alert(t('productDetail.notifications.reviewSubmitSuccess'));
         }
+
+        // Auto hide success message after 5 seconds
+        setTimeout(() => {
+          setReviewSuccess('');
+        }, 5000);
 
         // Reload reviews và average rating
         await loadRealReviews();
@@ -266,179 +290,265 @@ const ReviewSection = ({ productId, reviews = [], loading = false, user = null, 
     }
   };
 
-  // Initialize comments with proper book_id
-  const [comments, setComments] = useState(() => [
-    {
-      id: 1,
-      user: "Nguyễn Thị D",
-      user_id: 1,
-      book_id: parseInt(productId) || 1,
-      date: "2024-01-20",
-      question: "Sách này có phù hợp với người mới bắt đầu không?",
-      likes: 5,
-      dislikes: 1,
-      adminReply: {
-        user: "Admin",
-        date: "2024-01-21",
-        content: "Có, sách này rất phù hợp với người mới bắt đầu. Tác giả giải thích rất chi tiết và dễ hiểu."
+  // Start editing a review
+  const handleStartEdit = (review) => {
+    setEditingReviewId(review.review_id);
+    setEditReviewData({
+      rating: review.rating,
+      review_text: review.review_text || ''
+    });
+  };
+
+  // Cancel editing
+  const handleCancelEdit = () => {
+    setEditingReviewId(null);
+    setEditReviewData({
+      rating: 5,
+      review_text: ''
+    });
+  };
+
+  // Handle update review
+  const handleUpdateReview = async (reviewId) => {
+    if (!editReviewData.review_text.trim()) {
+      if (window.showToast) {
+        window.showToast(t('productDetail.notifications.reviewEditContentRequired'), 'error');
+      } else {
+        alert(t('productDetail.notifications.reviewEditContentRequired'));
       }
-    },
-    {
-      id: 2,
-      user: "Phạm Văn E",
-      user_id: 2,
-      book_id: parseInt(productId) || 1,
-      date: "2024-01-18",
-      question: "Có thể đổi trả sách nếu không hài lòng không?",
-      likes: 3,
-      dislikes: 0,
-      adminReply: {
-        user: "Admin",
-        date: "2024-01-19",
-        content: "Chúng tôi có chính sách đổi trả trong vòng 7 ngày nếu sách còn nguyên vẹn."
-      }
-    },
-    {
-      id: 3,
-      user: "Trần Văn F",
-      user_id: 3,
-      book_id: parseInt(productId) || 1,
-      date: "2024-01-22",
-      question: "Sách có kèm CD hoặc tài liệu bổ sung không?",
-      likes: 2,
-      dislikes: 0
-      // Không có adminReply để test chức năng reply
-    },
-    {
-      id: 4,
-      user: "Lê Thị G",
-      user_id: 4,
-      book_id: parseInt(productId) || 1,
-      date: "2024-01-23",
-      question: "Sách này có phù hợp cho người đã có kinh nghiệm không?",
-      likes: 1,
-      dislikes: 0
-      // Không có adminReply để test chức năng reply
+      return;
     }
-  ]);
 
-  // Update comments when productId changes
-  useEffect(() => {
-    setComments(prev => prev.map(comment => ({
-      ...comment,
-      book_id: parseInt(productId) || 1
-    })));
-  }, [productId]);
+    setEditSubmitting(true);
+    try {
+      console.log('Đang cập nhật review:', {
+        review_id: reviewId,
+        rating: editReviewData.rating,
+        review_text: editReviewData.review_text
+      });
 
+      const response = await apiService.updateReview(reviewId, {
+        rating: editReviewData.rating,
+        review_text: editReviewData.review_text
+      });
 
-  // Handle comment submission
-  const handleSubmitComment = (e) => {
-    e.preventDefault();
-    if (!newComment.name.trim() || !newComment.comment.trim()) return;
+      console.log('Update review response:', response);
 
-    // Check if user already commented on this product
-    if (user) {
-      const existingComment = comments.find(comment =>
-        comment.user_id === user.user_id && comment.book_id === parseInt(productId)
-      );
-
-      if (existingComment) {
+      if (response) {
         if (window.showToast) {
-          window.showToast(t('productDetail.notifications.commentAlreadyExists'), 'warning');
+          window.showToast(t('productDetail.notifications.reviewUpdateSuccess'), 'success');
         } else {
-          alert(t('productDetail.notifications.commentAlreadyExists'));
+          alert(t('productDetail.notifications.reviewUpdateSuccess'));
         }
-        return;
+
+        // Cancel edit mode
+        handleCancelEdit();
+
+        // Reload reviews và average rating
+        await loadRealReviews();
+        await loadAverageRating();
+      }
+    } catch (error) {
+      console.error('Error updating review:', error);
+      if (window.showToast) {
+        window.showToast(t('productDetail.notifications.reviewUpdateError'), 'error');
+      } else {
+        alert(t('productDetail.notifications.reviewUpdateError'));
+      }
+    } finally {
+      setEditSubmitting(false);
+    }
+  };
+
+  // Handle delete review (chỉ admin mới được xóa)
+  const handleDeleteReview = async (reviewId, isAdmin = false) => {
+    if (!window.confirm(t('productDetail.notifications.reviewDeleteConfirm'))) {
+      return;
+    }
+
+    try {
+      console.log('Đang xóa review:', reviewId, isAdmin ? '(admin)' : '');
+
+      let response;
+      if (isAdmin) {
+        response = await apiService.adminDeleteReview(reviewId);
+      } else {
+        // User không được xóa review nữa, chỉ admin mới được xóa
+        throw new Error('Only admin can delete reviews');
+      }
+
+      console.log('Delete review response:', response);
+
+      if (response) {
+        if (window.showToast) {
+          window.showToast(t('productDetail.notifications.reviewDeleteSuccess'), 'success');
+        } else {
+          alert(t('productDetail.notifications.reviewDeleteSuccess'));
+        }
+
+        // Reload reviews và average rating
+        await loadRealReviews();
+        await loadAverageRating();
+      }
+    } catch (error) {
+      console.error('Error deleting review:', error);
+      if (window.showToast) {
+        window.showToast(t('productDetail.notifications.reviewDeleteError'), 'error');
+      } else {
+        alert(t('productDetail.notifications.reviewDeleteError'));
       }
     }
-
-    const newCommentData = {
-      id: comments.length + 1,
-      user: newComment.name,
-      user_id: user ? user.user_id : null, // Lưu user_id nếu có user
-      book_id: parseInt(productId), // Lưu book_id để theo dõi
-      date: new Date().toISOString().split('T')[0],
-      question: newComment.comment,
-      likes: 0,
-      dislikes: 0
-    };
-
-    setComments(prev => [...prev, newCommentData]);
-    setNewComment({ name: '', comment: '' });
-
-    // Show success message using toast
-    if (window.showToast) {
-      window.showToast(t('productDetail.notifications.commentSubmitSuccess'), 'success');
-    } else {
-      alert(t('productDetail.notifications.commentSubmitSuccess'));
-    }
   };
 
-  // Handle admin reply submission
-  const handleSubmitReply = (e) => {
-    e.preventDefault();
-    if (!newReply.content.trim()) return;
-
-    setReplySubmitting(true);
-
-    // Simulate API call delay
-    setTimeout(() => {
-      setComments(prev => prev.map(comment =>
-        comment.id === newReply.commentId
-          ? {
-            ...comment,
-            adminReply: {
-              user: "Admin",
-              date: new Date().toISOString().split('T')[0],
-              content: newReply.content.trim()
-            }
-          }
-          : comment
-      ));
-
-      setNewReply({ commentId: null, content: '' });
-      setReplySubmitting(false);
-
-      // Show success message using toast
-    if (window.showToast) {
-      window.showToast(t('productDetail.notifications.replySubmitSuccess'), 'success');
-    } else {
-      alert(t('productDetail.notifications.replySubmitSuccess'));
-    }
-    }, 1000);
-  };
-
-  // Start replying to a comment
-  const startReply = (commentId) => {
-    const comment = comments.find(c => c.id === commentId);
-    const existingReply = comment?.adminReply?.content || '';
-    setNewReply({ commentId, content: existingReply });
+  // Start replying to a review
+  const handleStartReply = (reviewId) => {
+    setReplyingReviewId(reviewId);
+    setReplyData({ reply_text: '' });
+    setReplyError('');
   };
 
   // Cancel reply
-  const cancelReply = () => {
-    setNewReply({ commentId: null, content: '' });
+  const handleCancelReply = () => {
+    setReplyingReviewId(null);
+    setReplyData({ reply_text: '' });
+    setReplyError('');
   };
 
+  // Handle submit reply
+  const handleSubmitReply = async (reviewId) => {
+    if (!replyData.reply_text.trim()) {
+      setReplyError(t('productDetail.reviews.reply.contentRequired'));
+      return;
+    }
 
-  // Handle delete admin reply
-  const handleDeleteReply = (commentId) => {
-    if (window.confirm(t('productDetail.notifications.replyDeleteConfirm'))) {
-      setComments(prev => prev.map(comment =>
-        comment.id === commentId
-          ? { ...comment, adminReply: null }
-          : comment
-      ));
+    setReplyError('');
+    setReplySubmitting(true);
+    try {
+      console.log('Đang gửi reply cho review:', reviewId);
 
-      // Show success message using toast
-      if (window.showToast) {
-        window.showToast(t('productDetail.notifications.replyDeleteSuccess'), 'success');
-      } else {
-        alert(t('productDetail.notifications.replyDeleteSuccess'));
+      const response = await apiService.createReply(reviewId, {
+        reply_text: replyData.reply_text
+      });
+
+      console.log('Submit reply response:', response);
+
+      if (response) {
+        if (window.showToast) {
+          window.showToast(t('productDetail.reviews.reply.submitSuccess'), 'success');
+        } else {
+          alert(t('productDetail.reviews.reply.submitSuccess'));
+        }
+
+        // Cancel reply mode
+        handleCancelReply();
+
+        // Reload reviews
+        await loadRealReviews();
       }
+    } catch (error) {
+      console.error('Error submitting reply:', error);
+      if (window.showToast) {
+        window.showToast(t('productDetail.reviews.reply.submitError'), 'error');
+      } else {
+        alert(t('productDetail.reviews.reply.submitError'));
+      }
+    } finally {
+      setReplySubmitting(false);
     }
   };
 
+  // Start editing a reply
+  const handleStartEditReply = (reply) => {
+    setEditingReplyId(reply.reply_id);
+    setEditReplyData({
+      reply_text: reply.reply_text || ''
+    });
+    setEditReplyError('');
+    setReplyingReviewId(null); // Close reply form if open
+  };
+
+  // Cancel editing reply
+  const handleCancelEditReply = () => {
+    setEditingReplyId(null);
+    setEditReplyData({ reply_text: '' });
+    setEditReplyError('');
+  };
+
+  // Handle update reply
+  const handleUpdateReply = async (replyId) => {
+    if (!editReplyData.reply_text.trim()) {
+      setEditReplyError(t('productDetail.reviews.reply.contentRequired'));
+      return;
+    }
+
+    setEditReplyError('');
+    setEditReplySubmitting(true);
+    try {
+      console.log('Đang cập nhật reply:', replyId);
+
+      const response = await apiService.updateReply(replyId, {
+        reply_text: editReplyData.reply_text
+      });
+
+      console.log('Update reply response:', response);
+
+      if (response) {
+        if (window.showToast) {
+          window.showToast(t('productDetail.reviews.reply.updateSuccess'), 'success');
+        } else {
+          alert(t('productDetail.reviews.reply.updateSuccess'));
+        }
+
+        // Cancel edit mode
+        handleCancelEditReply();
+
+        // Reload reviews
+        await loadRealReviews();
+      }
+    } catch (error) {
+      console.error('Error updating reply:', error);
+      if (window.showToast) {
+        window.showToast(t('productDetail.reviews.reply.updateError'), 'error');
+      } else {
+        alert(t('productDetail.reviews.reply.updateError'));
+      }
+    } finally {
+      setEditReplySubmitting(false);
+    }
+  };
+
+  // Handle delete reply
+  const handleDeleteReply = async (replyId) => {
+    if (!window.confirm(t('productDetail.reviews.reply.deleteConfirm'))) {
+      return;
+    }
+
+    try {
+      console.log('Đang xóa reply:', replyId);
+
+      const response = await apiService.deleteReply(replyId);
+
+      console.log('Delete reply response:', response);
+
+      if (response) {
+        if (window.showToast) {
+          window.showToast(t('productDetail.reviews.reply.deleteSuccess'), 'success');
+        } else {
+          alert(t('productDetail.reviews.reply.deleteSuccess'));
+        }
+
+        // Reload reviews
+        await loadRealReviews();
+      }
+    } catch (error) {
+      console.error('Error deleting reply:', error);
+      if (window.showToast) {
+        window.showToast(t('productDetail.reviews.reply.deleteError'), 'error');
+      } else {
+        alert(t('productDetail.reviews.reply.deleteError'));
+      }
+    }
+  };
 
   // Render star rating
   const renderStars = (rating, interactive = false, onChange = null) => {
@@ -577,40 +687,301 @@ const ReviewSection = ({ productId, reviews = [], loading = false, user = null, 
           </div>
         ) : (
           <div className="reviews">
-            {filteredAndSortedReviews.map((review) => (
-              <div key={review.review_id} className="card mb-3" style={{ backgroundColor: '#f8f9fa', border: 'none' }}>
-                <div className="card-body">
-                  <div className="d-flex align-items-center mb-2">
-                    <div className="avatar me-3">
-                      <FontAwesomeIcon icon={faUser} className="text-muted" size="lg" />
-                    </div>
-                    <div className="flex-grow-1">
-                      <div className="d-flex align-items-center mb-1">
-                        <strong className="me-2">
-                          {review.username || review.user?.name || t('productDetail.reviews.anonymousUser')}
-                        </strong>
-                        <div className="me-2">
-                          {renderStars(review.rating)}
+            {filteredAndSortedReviews.map((review) => {
+              const isOwner = user && review.user_id === user.user_id;
+              const isEditing = editingReviewId === review.review_id;
+
+              return (
+                <div key={review.review_id} className="card mb-3" style={{ backgroundColor: '#f8f9fa', border: 'none' }}>
+                  <div className="card-body">
+                    {!isEditing ? (
+                      <>
+                        <div className="d-flex align-items-center mb-2">
+                          <div className="avatar me-3">
+                            <FontAwesomeIcon icon={faUser} className="text-muted" size="lg" />
+                          </div>
+                          <div className="flex-grow-1">
+                            <div className="d-flex align-items-center mb-1">
+                              <strong className="me-2">
+                                {review.username || review.user?.name || t('productDetail.reviews.anonymousUser')}
+                              </strong>
+                              <div className="me-2">
+                                {renderStars(review.rating)}
+                              </div>
+                              <small className="text-muted">
+                                {new Date(review.created_at).toLocaleDateString('vi-VN')}
+                              </small>
+                            </div>
+                          </div>
+                          <div className="d-flex align-items-center">
+                            {isOwner && user.role !== 'admin' && (
+                              <div>
+                                <button
+                                  className="btn btn-sm btn-outline-primary"
+                                  onClick={() => handleStartEdit(review)}
+                                  title={t('productDetail.reviews.actions.edit')}
+                                >
+                                  <FontAwesomeIcon icon={faEdit} />
+                                </button>
+                              </div>
+                            )}
+                            {user && user.role === 'admin' && (
+                              <div>
+                                {isOwner && (
+                                  <button
+                                    className="btn btn-sm btn-outline-primary me-1"
+                                    onClick={() => handleStartEdit(review)}
+                                    title={t('productDetail.reviews.actions.edit')}
+                                  >
+                                    <FontAwesomeIcon icon={faEdit} />
+                                  </button>
+                                )}
+                                <button
+                                  className="btn btn-sm btn-outline-danger"
+                                  onClick={() => handleDeleteReview(review.review_id, true)}
+                                  title={t('productDetail.reviews.actions.delete')}
+                                >
+                                  <FontAwesomeIcon icon={faTrash} />
+                                </button>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                        <small className="text-muted">
-                          {new Date(review.created_at).toLocaleDateString('vi-VN')}
-                        </small>
+                        <p className="mb-2">{review.review_text}</p>
+
+                        {/* Admin Reply Display */}
+                        {review.replies && review.replies.length > 0 && review.replies.map((reply) => {
+                          const isEditingReply = editingReplyId === reply.reply_id;
+                          return (
+                            <div key={reply.reply_id} className="border-start border-3 border-primary ps-3 mt-3">
+                              {!isEditingReply ? (
+                                <>
+                                  <div className="d-flex justify-content-between align-items-center mb-2">
+                                    <div className="d-flex align-items-center">
+                                      <strong className="me-2">{reply.username || 'Admin'}</strong>
+                                      <span className="badge bg-primary">Admin</span>
+                                      <small className="text-muted ms-2">
+                                        {new Date(reply.created_at).toLocaleDateString('vi-VN')}
+                                      </small>
+                                    </div>
+                                    {user && user.role === 'admin' && replyingReviewId !== review.review_id && (
+                                      <div>
+                                        <button
+                                          className="btn btn-outline-warning btn-sm me-1"
+                                          onClick={() => handleStartEditReply(reply)}
+                                          title={t('productDetail.reviews.reply.edit')}
+                                        >
+                                          <FontAwesomeIcon icon={faEdit} />
+                                        </button>
+                                        <button
+                                          className="btn btn-outline-danger btn-sm"
+                                          onClick={() => handleDeleteReply(reply.reply_id)}
+                                          title={t('productDetail.reviews.reply.delete')}
+                                        >
+                                          <FontAwesomeIcon icon={faTrash} />
+                                        </button>
+                                      </div>
+                                    )}
+                                  </div>
+                                  <p className="mb-0">{reply.reply_text}</p>
+                                </>
+                              ) : (
+                                <div>
+                                  <div className="mb-3">
+                                    <label className="form-label fw-medium">
+                                      {t('productDetail.reviews.actions.edit')} <span className="text-danger">*</span>
+                                    </label>
+                                    <textarea
+                                      className={`form-control ${editReplyError ? 'is-invalid' : ''}`}
+                                      rows="3"
+                                      placeholder={t('productDetail.reviews.reply.contentPlaceholder')}
+                                      value={editReplyData.reply_text}
+                                      onChange={(e) => {
+                                        setEditReplyData(prev => ({ ...prev, reply_text: e.target.value }));
+                                        if (editReplyError) {
+                                          setEditReplyError('');
+                                        }
+                                      }}
+                                      disabled={editReplySubmitting}
+                                    />
+                                    {editReplyError && (
+                                      <div className="text-danger mt-2" style={{ fontSize: '0.875rem' }}>
+                                        {editReplyError}
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div className="d-flex justify-content-end gap-2">
+                                    <button
+                                      type="button"
+                                      className="btn btn-primary btn-sm"
+                                      onClick={() => handleUpdateReply(reply.reply_id)}
+                                      disabled={editReplySubmitting}
+                                    >
+                                      {editReplySubmitting ? (
+                                        <>
+                                          <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                          {t('productDetail.reviews.reply.saving')}
+                                        </>
+                                      ) : (
+                                        <>
+                                          <FontAwesomeIcon icon={faCheck} className="me-2" />
+                                          {t('productDetail.reviews.reply.save')}
+                                        </>
+                                      )}
+                                    </button>
+                                    <button
+                                      type="button"
+                                      className="btn btn-outline-secondary btn-sm"
+                                      onClick={handleCancelEditReply}
+                                      disabled={editReplySubmitting}
+                                    >
+                                      <FontAwesomeIcon icon={faTimes} className="me-2" />
+                                      {t('productDetail.reviews.reply.cancel')}
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+
+                        {/* Admin Reply Form */}
+                        {user && user.role === 'admin' && replyingReviewId === review.review_id && (
+                          <div className="border-start border-3 border-warning ps-3 mt-3">
+                            <div className="mb-3">
+                              <label className="form-label fw-medium">
+                                {t('productDetail.reviews.reply.contentLabel')} <span className="text-danger">*</span>
+                              </label>
+                              <textarea
+                                className={`form-control ${replyError ? 'is-invalid' : ''}`}
+                                rows="3"
+                                placeholder={t('productDetail.reviews.reply.contentPlaceholder')}
+                                value={replyData.reply_text}
+                                onChange={(e) => {
+                                  setReplyData(prev => ({ ...prev, reply_text: e.target.value }));
+                                  if (replyError) {
+                                    setReplyError('');
+                                  }
+                                }}
+                                disabled={replySubmitting}
+                              />
+                              {replyError && (
+                                <div className="text-danger mt-2" style={{ fontSize: '0.875rem' }}>
+                                  {replyError}
+                                </div>
+                              )}
+                            </div>
+                            <div className="d-flex gap-2">
+                              <button
+                                type="button"
+                                className="btn btn-primary btn-sm"
+                                onClick={() => handleSubmitReply(review.review_id)}
+                                disabled={replySubmitting}
+                              >
+                                {replySubmitting ? (
+                                  <>
+                                    <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                                    {t('productDetail.reviews.reply.submitting')}
+                                  </>
+                                ) : (
+                                  t('productDetail.reviews.reply.submit')
+                                )}
+                              </button>
+                              <button
+                                type="button"
+                                className="btn btn-outline-secondary btn-sm"
+                                onClick={handleCancelReply}
+                                disabled={replySubmitting}
+                              >
+                                {t('productDetail.reviews.reply.cancel')}
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Admin Reply Button - Only show if no reply exists */}
+                        {user && user.role === 'admin' && replyingReviewId !== review.review_id && editingReplyId === null && (!review.replies || review.replies.length === 0) && (
+                          <div className="mt-2">
+                            <button
+                              className="btn btn-outline-primary btn-sm"
+                              onClick={() => handleStartReply(review.review_id)}
+                            >
+                              <FontAwesomeIcon icon={faUser} className="me-1" />
+                              {t('productDetail.reviews.reply.reply')}
+                            </button>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <div>
+                        <div className="mb-3">
+                          <label className="form-label fw-medium">
+                            {t('productDetail.reviews.editForm.ratingLabel')} <span className="text-danger">*</span>
+                          </label>
+                          <div className="d-flex align-items-center mb-2">
+                            <div className="rating-input">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <button
+                                  key={star}
+                                  type="button"
+                                  className={`btn btn-sm p-0 me-1 ${editReviewData.rating >= star ? 'text-warning' : 'text-muted'}`}
+                                  onClick={() => setEditReviewData(prev => ({ ...prev, rating: star }))}
+                                  disabled={editSubmitting}
+                                >
+                                  <FontAwesomeIcon icon={faStar} size="lg" />
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="mb-3">
+                          <label className="form-label fw-medium">
+                            {t('productDetail.reviews.editForm.contentLabel')} <span className="text-danger">*</span>
+                          </label>
+                          <textarea
+                            className="form-control"
+                            rows="4"
+                            placeholder={t('productDetail.reviews.editForm.contentPlaceholder')}
+                            value={editReviewData.review_text}
+                            onChange={(e) => setEditReviewData(prev => ({ ...prev, review_text: e.target.value }))}
+                            disabled={editSubmitting}
+                          />
+                        </div>
+                        <div className="d-flex justify-content-end gap-2">
+                          <button
+                            type="button"
+                            className="btn btn-primary"
+                            onClick={() => handleUpdateReview(review.review_id)}
+                            disabled={editSubmitting || !editReviewData.review_text.trim()}
+                          >
+                            {editSubmitting ? (
+                              <>
+                                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                {t('productDetail.reviews.editForm.saving')}
+                              </>
+                            ) : (
+                              <>
+                                <FontAwesomeIcon icon={faCheck} className="me-2" />
+                                {t('productDetail.reviews.editForm.save')}
+                              </>
+                            )}
+                          </button>
+                          <button
+                            type="button"
+                            className="btn btn-outline-secondary"
+                            onClick={handleCancelEdit}
+                            disabled={editSubmitting}
+                          >
+                            <FontAwesomeIcon icon={faTimes} className="me-2" />
+                            {t('productDetail.reviews.editForm.cancel')}
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                    <div className="d-flex align-items-center">
-                      <small className="text-muted me-3">
-                        {t('productDetail.reviews.helpfulQuestion')}
-                      </small>
-                      <button className="btn btn-sm btn-outline-secondary me-2">
-                        <FontAwesomeIcon icon={faThumbsUp} className="me-1" />
-                        {t('productDetail.reviews.helpfulCount', { count: 12 })}
-                      </button>
-                    </div>
+                    )}
                   </div>
-                  <p className="mb-0">{review.review_text}</p>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
@@ -662,22 +1033,44 @@ const ReviewSection = ({ productId, reviews = [], loading = false, user = null, 
                     {t('productDetail.reviews.form.contentLabel')} <span className="text-danger">*</span>
                   </label>
                   <textarea
-                    className="form-control"
+                    className={`form-control ${reviewError ? 'is-invalid' : ''}`}
                     id="reviewText"
                     rows="4"
                     placeholder={t('productDetail.reviews.form.contentPlaceholder')}
                     value={newReview.review_text}
-                    onChange={(e) => setNewReview(prev => ({ ...prev, review_text: e.target.value }))}
+                    onChange={(e) => {
+                      setNewReview(prev => ({ ...prev, review_text: e.target.value }));
+                      // Clear error and success when user starts typing
+                      if (reviewError) {
+                        setReviewError('');
+                      }
+                      if (reviewSuccess) {
+                        setReviewSuccess('');
+                      }
+                    }}
                     disabled={reviewSubmitting}
-                    required
+                    style={{
+                      backgroundColor: 'white',
+                      border: reviewError ? '1px solid #dc3545' : '1px solid #e9ecef'
+                    }}
                   />
+                  {reviewError && (
+                    <div className="text-danger mt-2" style={{ fontSize: '0.875rem', display: 'block' }}>
+                      {reviewError}
+                    </div>
+                  )}
+                  {reviewSuccess && (
+                    <div className="text-success mt-2" style={{ fontSize: '0.875rem', display: 'block' }}>
+                      {reviewSuccess}
+                    </div>
+                  )}
                 </div>
 
                 <div className="d-flex justify-content-end">
                   <button
                     type="submit"
                     className="btn btn-primary"
-                    disabled={reviewSubmitting || !newReview.review_text.trim()}
+                    disabled={reviewSubmitting}
                   >
                     {reviewSubmitting ? (
                       <>
@@ -704,243 +1097,6 @@ const ReviewSection = ({ productId, reviews = [], loading = false, user = null, 
               <FontAwesomeIcon icon={faUser} className="text-primary me-2" />
               <span className="text-primary fw-medium">{t('productDetail.reviews.adminNotice.title')}</span>
               <p className="text-muted small mb-0 mt-2">{t('productDetail.reviews.adminNotice.description')}</p>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Separator */}
-      <hr className="my-5" style={{ borderTop: '2px solid #e9ecef' }} />
-
-      {/* Comments Section */}
-      <div className="mb-5">
-        <h5 className="mb-4 fw-bold text-primary">
-          <FontAwesomeIcon icon={faUser} className="me-2" />
-          {t('productDetail.comments.title', { count: comments.length })}
-        </h5>
-
-        {/* Admin Instructions */}
-        {user && user.role === 'admin' && (
-          <div className="alert alert-info mb-4" role="alert">
-            <FontAwesomeIcon icon={faUser} className="me-2" />
-            <strong>{t('productDetail.comments.adminInstructions.title')}</strong>
-            <ul className="mb-0 mt-2">
-              <li>{t('productDetail.comments.adminInstructions.reply')}</li>
-              <li>{t('productDetail.comments.adminInstructions.edit')}</li>
-              <li>{t('productDetail.comments.adminInstructions.delete')}</li>
-              <li><em>{t('productDetail.comments.adminInstructions.note')}</em></li>
-            </ul>
-          </div>
-        )}
-
-        {/* Comments List */}
-        <div className="comments">
-          {comments.map((comment) => (
-            <div key={comment.id} className="card mb-3" style={{ backgroundColor: '#f8f9fa', border: 'none' }}>
-              <div className="card-body">
-                {/* User Question */}
-                <div className="mb-3">
-                  <div className="d-flex justify-content-between align-items-start mb-2">
-                    <div>
-                      <strong>{comment.user}</strong>
-                      <small className="text-muted ms-2">{comment.date}</small>
-                    </div>
-                    <div className="d-flex align-items-center">
-                      <button className="btn btn-sm btn-outline-secondary me-2">
-                        <FontAwesomeIcon icon={faThumbsUp} className="me-1" />
-                        {comment.likes}
-                      </button>
-                      <button className="btn btn-sm btn-outline-secondary">
-                        <FontAwesomeIcon icon={faThumbsDown} className="me-1" />
-                        {comment.dislikes}
-                      </button>
-                    </div>
-                  </div>
-                  <p className="mb-2">{comment.question}</p>
-                  <div className="text-muted small">
-                    {t('productDetail.comments.adminOnly')}
-                  </div>
-                </div>
-
-                {/* Admin Reply */}
-                {comment.adminReply && (
-                  <div className="border-start border-3 border-primary ps-3">
-                    <div className="d-flex justify-content-between align-items-center mb-2">
-                      <div className="d-flex align-items-center">
-                        <strong className="me-2">{comment.adminReply.user}</strong>
-                        <span className="badge bg-primary">Admin</span>
-                        <small className="text-muted ms-2">{comment.adminReply.date}</small>
-                      </div>
-                      {/* Delete Reply Button for Admin */}
-                      {user && user.role === 'admin' && newReply.commentId !== comment.id && (
-                        <button
-                          className="btn btn-outline-danger btn-sm"
-                          onClick={() => handleDeleteReply(comment.id)}
-                          title={t('productDetail.comments.reply.delete')}
-                        >
-                          <FontAwesomeIcon icon={faTrash} size="xs" />
-                        </button>
-                      )}
-                    </div>
-                    <p className="mb-0">{comment.adminReply.content}</p>
-                  </div>
-                )}
-
-                {/* Admin Reply Form */}
-                {user && user.role === 'admin' && newReply.commentId === comment.id && (
-                  <div className="border-start border-3 border-warning ps-3 mt-3">
-                    <form onSubmit={handleSubmitReply}>
-                      <div className="mb-3">
-                        <label className="form-label fw-medium">
-                        {t('productDetail.comments.reply.label')} <span className="text-danger">*</span>
-                        </label>
-                        <textarea
-                          className="form-control"
-                          rows="3"
-                        placeholder={t('productDetail.comments.reply.placeholder')}
-                          value={newReply.content}
-                          onChange={(e) => setNewReply(prev => ({ ...prev, content: e.target.value }))}
-                          required
-                          disabled={replySubmitting}
-                        />
-                      </div>
-                      <div className="d-flex gap-2">
-                        <button
-                          type="submit"
-                          className="btn btn-primary btn-sm"
-                          disabled={replySubmitting || !newReply.content.trim()}
-                        >
-                          {replySubmitting ? (
-                            <>
-                              <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                            {t('productDetail.comments.reply.submitting')}
-                            </>
-                          ) : (
-                          t('productDetail.comments.reply.submit')
-                          )}
-                        </button>
-                        <button
-                          type="button"
-                          className="btn btn-outline-secondary btn-sm"
-                          onClick={cancelReply}
-                          disabled={replySubmitting}
-                        >
-                          {t('productDetail.comments.reply.cancel')}
-                        </button>
-                      </div>
-                    </form>
-                  </div>
-                )}
-
-                {/* Admin Action Buttons */}
-                {user && user.role === 'admin' && newReply.commentId !== comment.id && (
-                  <div className="mt-2">
-                    {/* Reply/Edit Reply Button */}
-                    {!comment.adminReply ? (
-                      <button
-                        className="btn btn-outline-primary btn-sm"
-                        onClick={() => startReply(comment.id)}
-                      >
-                        <FontAwesomeIcon icon={faUser} className="me-1" />
-                        {t('productDetail.comments.reply.reply')}
-                      </button>
-                    ) : (
-                      <button
-                        className="btn btn-outline-warning btn-sm"
-                        onClick={() => startReply(comment.id)}
-                      >
-                        <FontAwesomeIcon icon={faUser} className="me-1" />
-                        {t('productDetail.comments.reply.edit')}
-                      </button>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Comment Form - Only show for non-admin users who haven't commented */}
-        {user && user.role !== 'admin' && !comments.find(comment => comment.user_id === user.user_id && comment.book_id === parseInt(productId)) && (
-          <div className="card" style={{ backgroundColor: '#f8f9fa', border: 'none' }}>
-            <div className="card-body">
-              <form onSubmit={handleSubmitComment}>
-                <div className="mb-3">
-                  <label htmlFor="commentName" className="form-label fw-medium">
-                    {t('productDetail.comments.user.nameLabel')} <span className="text-danger">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="commentName"
-                    placeholder={
-                      user
-                        ? t('productDetail.comments.user.nameAutofill')
-                        : t('productDetail.comments.user.namePlaceholder')
-                    }
-                    value={newComment.name}
-                    onChange={(e) => setNewComment(prev => ({ ...prev, name: e.target.value }))}
-                    required
-                    disabled={!!user}
-                    style={{
-                      backgroundColor: user ? '#f8f9fa' : 'white',
-                      border: '1px solid #e9ecef',
-                      cursor: user ? 'not-allowed' : 'text'
-                    }}
-                  />
-                  {user && (
-                    <small className="text-muted">
-                      <FontAwesomeIcon icon={faUser} className="me-1" />
-                      {t('productDetail.comments.user.nameHint')}
-                    </small>
-                  )}
-                </div>
-
-                <div className="mb-3">
-                  <label htmlFor="commentText" className="form-label fw-medium">
-                    {t('productDetail.comments.form.commentLabel')} <span className="text-danger">*</span>
-                  </label>
-                  <textarea
-                    className="form-control"
-                    id="commentText"
-                    rows="4"
-                    placeholder={t('productDetail.comments.form.commentPlaceholder')}
-                    value={newComment.comment}
-                    onChange={(e) => setNewComment(prev => ({ ...prev, comment: e.target.value }))}
-                    required
-                    style={{ backgroundColor: 'white', border: '1px solid #e9ecef' }}
-                  ></textarea>
-                </div>
-
-                <button
-                  type="submit"
-                  className="btn btn-dark"
-                  disabled={!newComment.name.trim() || !newComment.comment.trim()}
-                >
-                  {t('productDetail.comments.form.submit')}
-                </button>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* User Comment Status Message */}
-        {user && user.role !== 'admin' && comments.find(comment => comment.user_id === user.user_id && comment.book_id === parseInt(productId)) && (
-          <div className="card mt-4" style={{ backgroundColor: '#e8f5e8', border: '1px solid #28a745' }}>
-            <div className="card-body text-center">
-              <FontAwesomeIcon icon={faUser} className="text-success me-2" />
-              <span className="text-success fw-medium">{t('productDetail.comments.messages.alreadyCommented')}</span>
-            </div>
-          </div>
-        )}
-
-        {/* Admin Comment Notice */}
-        {user && user.role === 'admin' && (
-          <div className="card" style={{ backgroundColor: '#fff3cd', border: '1px solid #ffc107' }}>
-            <div className="card-body text-center">
-              <FontAwesomeIcon icon={faUser} className="text-warning me-2" />
-              <span className="text-warning fw-medium">{t('productDetail.comments.messages.adminCannotComment')}</span>
-              <p className="text-muted small mb-0 mt-2">{t('productDetail.comments.messages.adminCannotCommentHint')}</p>
             </div>
           </div>
         )}

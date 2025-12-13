@@ -90,6 +90,20 @@ class ReviewApiService extends BaseApiService {
     }
   }
 
+  async adminDeleteReview(id) {
+    try {
+      console.log(`[ReviewAPI] Đang xóa đánh giá ID (admin): ${id}`);
+      const result = await this.apiCall(`/reviews/admin/${id}`, {
+        method: 'DELETE'
+      });
+      console.log(`[ReviewAPI] Kết quả xóa đánh giá (admin):`, result);
+      return result;
+    } catch (error) {
+      console.error(`[ReviewAPI] Lỗi khi xóa đánh giá ID ${id} (admin):`, error);
+      throw error;
+    }
+  }
+
   async getAverageRating(bookId) {
     try {
       console.log(`[ReviewAPI] Đang lấy đánh giá trung bình cho book ID: ${bookId}`);
@@ -110,6 +124,51 @@ class ReviewApiService extends BaseApiService {
       return result;
     } catch (error) {
       console.error(`[ReviewAPI] Lỗi khi lấy tất cả đánh giá:`, error);
+      throw error;
+    }
+  }
+
+  // ==================== REVIEW REPLIES ====================
+  async createReply(reviewId, replyData) {
+    try {
+      console.log(`[ReviewAPI] Đang tạo phản hồi cho review ID ${reviewId} với dữ liệu:`, replyData);
+      const result = await this.apiCall(`/reviews/${reviewId}/reply`, {
+        method: 'POST',
+        body: JSON.stringify(replyData)
+      });
+      console.log(`[ReviewAPI] Kết quả tạo phản hồi:`, result);
+      return result;
+    } catch (error) {
+      console.error(`[ReviewAPI] Lỗi khi tạo phản hồi cho review ${reviewId}:`, error);
+      throw error;
+    }
+  }
+
+  async updateReply(replyId, replyData) {
+    try {
+      console.log(`[ReviewAPI] Đang cập nhật phản hồi ID ${replyId} với dữ liệu:`, replyData);
+      const result = await this.apiCall(`/reviews/reply/${replyId}`, {
+        method: 'PUT',
+        body: JSON.stringify(replyData)
+      });
+      console.log(`[ReviewAPI] Kết quả cập nhật phản hồi:`, result);
+      return result;
+    } catch (error) {
+      console.error(`[ReviewAPI] Lỗi khi cập nhật phản hồi ID ${replyId}:`, error);
+      throw error;
+    }
+  }
+
+  async deleteReply(replyId) {
+    try {
+      console.log(`[ReviewAPI] Đang xóa phản hồi ID: ${replyId}`);
+      const result = await this.apiCall(`/reviews/reply/${replyId}`, {
+        method: 'DELETE'
+      });
+      console.log(`[ReviewAPI] Kết quả xóa phản hồi:`, result);
+      return result;
+    } catch (error) {
+      console.error(`[ReviewAPI] Lỗi khi xóa phản hồi ID ${replyId}:`, error);
       throw error;
     }
   }

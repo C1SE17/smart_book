@@ -869,20 +869,20 @@ const Checkout = ({ onBackToHome, onNavigateTo }) => {
                                                 {t('checkout.form.googlePlacesHint') || 'Gõ địa chỉ để tự động điền'}
                                             </small>
                                         </label>
-                                        <input
+                                            <input
                                             ref={(el) => setAddressInputRef(el)}
-                                            type="text"
+                                                type="text"
                                             className={`form-control ${errors.address ? 'is-invalid' : ''}`}
                                             name="address"
                                             value={formData.address}
-                                            onChange={handleInputChange}
+                                                onChange={handleInputChange}
                                             placeholder={t('checkout.form.addressPlaceholder')}
                                             disabled={useDefaultAddress}
                                             autoComplete="off"
-                                        />
+                                            />
                                         {errors.address && (
                                             <div className="invalid-feedback">{errors.address}</div>
-                                        )}
+                                            )}
                                         <small className="text-muted">
                                             <i className="fas fa-info-circle me-1"></i>
                                             {t('checkout.form.googlePlacesHelp') || 'Nhập địa chỉ và chọn từ gợi ý để tự động điền thông tin'}

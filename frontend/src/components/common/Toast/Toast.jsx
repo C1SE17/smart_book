@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 const Toast = ({ message, type = 'success', duration = 3000, onClose }) => {
-    const { t, i18n } = useTranslation();
+    const { t, i18n } = useTranslation('common');
     const [isVisible, setIsVisible] = useState(true);
 
     useEffect(() => {
@@ -69,10 +69,9 @@ const Toast = ({ message, type = 'success', duration = 3000, onClose }) => {
             <i className={`bi ${getIcon()}`} style={{ fontSize: '20px' }}></i>
             <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: '600', marginBottom: '4px' }}>
-                    {type === 'success' ? (i18n.language === 'vi' ? 'Thành công!' : 'Success') :
-                        type === 'error' ? (i18n.language === 'vi' ? 'Lỗi!' : 'Error') :
-                            type === 'warning' ? (i18n.language === 'vi' ? 'Cảnh báo!' : 'Warning') : 
-                                (i18n.language === 'vi' ? 'Thông báo!' : 'Info')}
+                    {type === 'success' ? 'Success' :
+                        type === 'error' ? 'Error' :
+                            type === 'warning' ? 'Warning' : 'Info'}
                 </div>
                 <div style={{ fontSize: '14px' }}>{message}</div>
             </div>

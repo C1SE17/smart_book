@@ -203,7 +203,7 @@
 
 .aiask-dropdown-menu {
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + 4px);
   left: 0;
   width: max-content;
   min-width: 220px;
@@ -397,6 +397,13 @@
   border-left: 4px solid #0f766e;
   border-radius: 14px;
   color: #0f172a;
+}
+
+.aiask-message-warning {
+  background: rgba(245, 158, 11, 0.12) !important;
+  border-left-color: #f59e0b !important;
+  color: #92400e !important;
+  font-weight: 600;
 }
 
 .aiask-insights {

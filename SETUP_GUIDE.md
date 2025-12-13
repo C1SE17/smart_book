@@ -1,12 +1,10 @@
-Script setup.ps1 / setup.sh sẽ tự động:
-- Tạo frontend/.env với API key thật
-- Tạo ai/AIchatbox/config.js với API key thật
+BE 
+Tạo file .env
 
-### Frontend API Key:
-1. Copy file `frontend/.env.example` thành `frontend/.env`
-2. Mở `frontend/.env` và thay `YOUR_GROQ_API_KEY_HERE` bằng API key thật
-API thật liên hệ admin để có
+FE
+Tạo file .env
 
-### AI Chatbox API Key:
-1. Copy file `ai/AIchatbox/config.example.js` thành `ai/AIchatbox/config.js`
-2. Mở `ai/AIchatbox/config.js` và thay `YOUR_GROQ_API_KEY_HERE` bằng API key thật
+AI
+Tạo file config
+
+đổi all port 3306 thành 5000

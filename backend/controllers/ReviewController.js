@@ -79,13 +79,19 @@ class ReviewController {
         }
     }
 
-    // Thêm phản hồi cho bình luận (chỉ admin)
+    // Thêm phản hồi cho bình luận (chỉ admin, mỗi review chỉ được reply 1 lần)
     static async createReply(req, res) {
         if (req.user.role !== 'admin') return res.status(403).json({ error: 'Chỉ admin được phản hồi' });
         const user_id = req.user.userId;
         const { reply_text } = req.body;
         const review_id = req.params.review_id;
         if (!reply_text) return res.status(400).json({ error: 'Thiếu nội dung phản hồi' });
+        
+        // Kiểm tra review đã có reply chưa
+        if (await ReplyModel.hasReply(review_id)) {
+            return res.status(400).json({ error: 'Review này đã có phản hồi. Chỉ được phản hồi 1 lần.' });
+        }
+        
         const reply_id = await ReplyModel.create(review_id, user_id, reply_text);
         res.status(201).json({ message: 'Admin đã phản hồi', reply_id });
     }

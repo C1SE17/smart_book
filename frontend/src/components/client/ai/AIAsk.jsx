@@ -131,10 +131,12 @@ const AIAsk = ({ onNavigateTo, onSearch }) => {
   // 👂 Lắng nghe click ngoài dropdown để đóng popup gợi ý/bộ lọc cho gọn giao diện
   useEffect(() => {
     const handleClickOutside = (event) => {
+      // Kiểm tra click bên ngoài filter control (button + dropdown menu)
       if (!event.target.closest('.aiask-filter-control') && !event.target.closest('.aiask-suggestion-panel')) {
         closeDropdown();
       }
-      if (!event.target.closest('.aiask-search-input')) {
+      // Kiểm tra click bên ngoài search input và suggestion panel
+      if (!event.target.closest('.aiask-search-wrapper') && !event.target.closest('.aiask-suggestion-panel')) {
         setShowSuggestions(false);
       }
     };
@@ -398,21 +400,21 @@ const AIAsk = ({ onNavigateTo, onSearch }) => {
     // Category: sách chỉ cần thuộc MỘT trong các category đã chọn (không phải tất cả)
     if (filters.categories.length > 0) {
       if (!categoryId || !filters.categories.includes(categoryId)) {
-      return false;
+        return false;
       }
     }
 
     // Author: sách chỉ cần thuộc MỘT trong các author đã chọn
     if (filters.authors.length > 0) {
       if (!authorId || !filters.authors.includes(authorId)) {
-      return false;
+        return false;
       }
     }
 
     // Publisher: sách chỉ cần thuộc MỘT trong các publisher đã chọn
     if (filters.publishers.length > 0) {
       if (!publisherId || !filters.publishers.includes(publisherId)) {
-      return false;
+        return false;
       }
     }
 
@@ -523,7 +525,7 @@ const AIAsk = ({ onNavigateTo, onSearch }) => {
       let addedCount = 0;
       let filteredCount = 0;
       let noIdCount = 0;
-      
+
       books.forEach((book) => {
         const id = book?.book_id || book?.id;
         if (!id) {
@@ -531,12 +533,12 @@ const AIAsk = ({ onNavigateTo, onSearch }) => {
           console.warn('Sách không có ID:', book);
           return;
         }
-        
+
         if (!matchesFilters(book)) {
           filteredCount++;
           return;
         }
-        
+
         if (!uniqueBooks.has(id)) {
           uniqueBooks.set(id, book);
           reasons.set(id, new Set());
@@ -546,7 +548,7 @@ const AIAsk = ({ onNavigateTo, onSearch }) => {
           reasons.get(id)?.add(reason);
         }
       });
-      
+
       if (books.length > 0) {
         console.log(`PushBooks kết quả: ${addedCount} thêm, ${filteredCount} bị filter, ${noIdCount} không có ID, tổng: ${books.length}`);
       }
@@ -561,7 +563,7 @@ const AIAsk = ({ onNavigateTo, onSearch }) => {
     try {
       console.log('[AIAsk] Bắt đầu handleQuickRecommend với filters:', filters);
       console.log('MIN_AI_RESULTS:', MIN_AI_RESULTS, 'MAX_AI_RESULTS:', MAX_AI_RESULTS);
-      
+
       let isFallback = false;
 
       const ensureCount = async (fetchParams, reasonLabel) => {
@@ -570,14 +572,14 @@ const AIAsk = ({ onNavigateTo, onSearch }) => {
           console.log('Đang gọi advancedSearch với params:', fetchParams);
           const response = await searchApi.advancedSearch(fetchParams);
           console.log('Response từ advancedSearch:', response);
-          
+
           if (response?.success) {
             // Backend trả về: { success: true, data: result.books, pagination: ... }
             // response.data là array books
             const list = Array.isArray(response.data) ? response.data : response.data?.books || [];
             console.log('Danh sách sách nhận được:', list.length, 'cuốn');
             console.log('Chi tiết sách:', list.slice(0, 3));
-            
+
             if (list.length > 0) {
               const beforeCount = uniqueBooks.size;
               pushBooks(list, reasonLabel);
@@ -600,8 +602,8 @@ const AIAsk = ({ onNavigateTo, onSearch }) => {
         console.log('Ưu tiên 1: Tìm sách theo category đã chọn', filters.categories);
         for (const categoryId of filters.categories.slice(0, 3)) {
           const categoryParams = {
-              category_id: categoryId, 
-              author_id: undefined,
+            category_id: categoryId,
+            author_id: undefined,
             publisher_id: undefined,
             query: undefined, // Bỏ query để tìm tất cả sách trong category
             min_price: filters.price[0] > 0 ? filters.price[0] : undefined,
@@ -616,7 +618,7 @@ const AIAsk = ({ onNavigateTo, onSearch }) => {
             sort: 'rating',
             order: 'DESC'
           };
-          
+
           await ensureCount(
             categoryParams,
             t('aiAsk.reasons.category', { name: categoryMap.get(categoryId) || categoryId })
@@ -631,10 +633,10 @@ const AIAsk = ({ onNavigateTo, onSearch }) => {
         console.log('Ưu tiên 2: Tìm sách theo author đã chọn', filters.authors);
         for (const authorId of filters.authors.slice(0, 3)) {
           await ensureCount(
-            buildAdvancedParams({ 
-              author_id: authorId, 
+            buildAdvancedParams({
+              author_id: authorId,
               category_id: filters.categories.length > 0 ? filters.categories[0] : undefined, // Giữ category nếu có
-              limit: 20 
+              limit: 20
             }),
             t('aiAsk.reasons.author', { name: authorMap.get(authorId) || authorId })
           );
@@ -648,7 +650,7 @@ const AIAsk = ({ onNavigateTo, onSearch }) => {
           console.log('Ưu tiên 3: Đang lấy recommendation từ API...');
           const recoRes = await recommendationApi.getRecommendedProducts({ limit: 12 });
           console.log('Recommendation response:', recoRes);
-          
+
           if (recoRes?.success && Array.isArray(recoRes.data?.products)) {
             const reason = recoRes.data?.fallback
               ? t('aiAsk.reasons.systemTrend')
@@ -691,7 +693,7 @@ const AIAsk = ({ onNavigateTo, onSearch }) => {
         try {
           const fallbackBooksRes = await bookApi.getBooks({ limit: 20, sort: 'rating', order: 'DESC' });
           console.log('Fallback getBooks response:', fallbackBooksRes);
-          
+
           if (fallbackBooksRes?.success && Array.isArray(fallbackBooksRes.data)) {
             console.log('Có', fallbackBooksRes.data.length, 'sách từ fallback getBooks');
             // Vẫn áp dụng matchesFilters
@@ -769,7 +771,7 @@ const AIAsk = ({ onNavigateTo, onSearch }) => {
       setRecommendations(finalList);
       setSelectedBook(finalList[0] || null);
       console.log('Đã set recommendations:', finalList.length, 'sách');
-      
+
       if (!finalList.length) {
         console.warn('Không có sách nào để hiển thị!');
         setInsights([]);
@@ -979,15 +981,15 @@ const AIAsk = ({ onNavigateTo, onSearch }) => {
           const bAuthor = (b.author_id || b.authorId) === authorId;
           const aPublisher = (a.publisher_id || a.publisherId) === publisherId;
           const bPublisher = (b.publisher_id || b.publisherId) === publisherId;
-          
+
           // Tính điểm tương đồng
           const aScore = (aCategory ? 3 : 0) + (aAuthor ? 2 : 0) + (aPublisher ? 1 : 0);
           const bScore = (bCategory ? 3 : 0) + (bAuthor ? 2 : 0) + (bPublisher ? 1 : 0);
-          
+
           if (aScore !== bScore) {
             return bScore - aScore; // Sắp xếp theo điểm tương đồng giảm dần
           }
-          
+
           // Nếu điểm tương đồng bằng nhau, sắp xếp theo rating
           return Number(b?.rating ?? b?.avg_rating ?? 0) - Number(a?.rating ?? a?.avg_rating ?? 0);
         })
@@ -1463,7 +1465,7 @@ const AIAsk = ({ onNavigateTo, onSearch }) => {
         </section>
 
         <section className="aiask-message">
-          <p>{message}</p>
+          <p className={messageState.key === 'aiAsk.messages.emptyQuery' ? 'aiask-message-warning' : ''}>{message}</p>
           {insights.length > 0 && (
             <ul className="aiask-insights">
               {insights.map((line, index) => (
@@ -1501,8 +1503,8 @@ const AIAsk = ({ onNavigateTo, onSearch }) => {
                         height: '450px',
                         backgroundColor: isActive ? '#f0f7ff' : 'white',
                         border: isActive ? '3px solid #007bff' : '1px solid #e0e0e0',
-                        boxShadow: isActive 
-                          ? '0 8px 24px rgba(0, 123, 255, 0.25), 0 0 0 1px rgba(0, 123, 255, 0.1)' 
+                        boxShadow: isActive
+                          ? '0 8px 24px rgba(0, 123, 255, 0.25), 0 0 0 1px rgba(0, 123, 255, 0.1)'
                           : '0 2px 4px rgba(0,0,0,0.1)'
                       }}
                       onClick={() => setSelectedBook(book)}

@@ -67,6 +67,17 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch 
         
         console.log(` Filtered ${filteredResults.length} results from ${response.data.length} total`);
         setSearchResults(filteredResults);
+        
+        // Hiển thị toast thông báo tìm kiếm thành công
+        if (filteredResults.length > 0) {
+          notify(
+            t('searchPage.messages.searchSuccess', {
+              count: filteredResults.length,
+              query: query.trim()
+            }),
+            'success'
+          );
+        }
       } else {
         setSearchResults([]);
       }

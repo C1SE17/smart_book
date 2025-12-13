@@ -22,7 +22,8 @@ const UserManagement = () => {
         role: 'customer'
     });
     const [formErrors, setFormErrors] = useState({});
-    
+    const [deleteConfirmation, setDeleteConfirmation] = useState(''); // State cho input xác nhận xóa
+
     // Pagination and sort state
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -34,12 +35,12 @@ const UserManagement = () => {
     const handleSearch = useCallback(async (searchValue) => {
         setSearchTerm(searchValue);
         setCurrentPage(1);
-        
+
         // Clear existing timeout
         if (searchTimeoutRef.current) {
             clearTimeout(searchTimeoutRef.current);
         }
-        
+
         // Set new timeout for debounced search
         searchTimeoutRef.current = setTimeout(async () => {
             try {
@@ -65,11 +66,11 @@ const UserManagement = () => {
         if (sortBy === field && sortOrder === 'ASC') {
             newSortOrder = 'DESC';
         }
-        
+
         setSortBy(field);
         setSortOrder(newSortOrder);
         setCurrentPage(1);
-        
+
         try {
             await loadUsersOnly(1, itemsPerPage, searchTerm, field, newSortOrder, false);
         } catch (error) {
@@ -93,7 +94,7 @@ const UserManagement = () => {
     // Handle page change
     const handlePageChange = async (page) => {
         if (page === currentPage) return;
-        
+
         setCurrentPage(page);
         await loadUsersOnly(page, itemsPerPage, searchTerm, sortBy, sortOrder, false);
     };
@@ -102,7 +103,7 @@ const UserManagement = () => {
     const handleItemsPerPageChange = async (newItemsPerPage) => {
         setItemsPerPage(newItemsPerPage);
         setCurrentPage(1);
-        
+
         try {
             await loadUsersOnly(1, newItemsPerPage, searchTerm, sortBy, sortOrder);
         } catch (error) {
@@ -128,26 +129,36 @@ const UserManagement = () => {
     // Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
-        if (actionType === 'delete') {
-            if (window.confirm(t('userManagement.confirm.delete', { name: selectedUser.name }))) {
-                try {
-                    console.log('Deleting user:', selectedUser.user_id);
-                    
-                    await deleteUser(selectedUser.user_id);
 
-                    // Refresh the current page to get updated data
-                    await loadUsersOnly(currentPage, itemsPerPage, searchTerm, sortBy, sortOrder);
-                    setShowModal(false);
-                    
-                    if (window.showToast) {
-                        window.showToast(t('userManagement.messages.deleteSuccess'), 'success');
-                    }
-                } catch (error) {
-                    console.error('Error deleting user:', error);
-                    if (window.showToast) {
-                        window.showToast(t('userManagement.messages.deleteError'), 'error');
-                    }
+        if (actionType === 'delete') {
+            // Validate: phải nhập đúng tên account
+            if (!deleteConfirmation || deleteConfirmation.trim() !== selectedUser.name) {
+                setFormErrors({
+                    deleteConfirmation: t('userManagement.modal.confirmation.error', { name: selectedUser.name })
+                });
+                return;
+            }
+
+            // Clear errors
+            setFormErrors({});
+
+            try {
+                console.log('Deleting user:', selectedUser.user_id);
+
+                await deleteUser(selectedUser.user_id);
+
+                // Refresh the current page to get updated data
+                await loadUsersOnly(currentPage, itemsPerPage, searchTerm, sortBy, sortOrder);
+                setShowModal(false);
+                setDeleteConfirmation(''); // Reset confirmation input
+
+                if (window.showToast) {
+                    window.showToast(t('userManagement.messages.deleteSuccess'), 'success');
+                }
+            } catch (error) {
+                console.error('Error deleting user:', error);
+                if (window.showToast) {
+                    window.showToast(t('userManagement.messages.deleteError'), 'error');
                 }
             }
         }
@@ -166,6 +177,7 @@ const UserManagement = () => {
             role: 'customer'
         });
         setFormErrors({});
+        setDeleteConfirmation(''); // Reset confirmation input
     };
     // Format date
     const formatDate = (dateString) => {
@@ -277,7 +289,7 @@ const UserManagement = () => {
                     opacity: 0.6;
                 }
             `}</style>
-            
+
             {/* Header */}
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <div>
@@ -312,9 +324,9 @@ const UserManagement = () => {
                                     onChange={(e) => handleSearch(e.target.value)}
                                 />
                                 {searchTerm && (
-                                    <button 
-                                        type="button" 
-                                        className="btn btn-outline-secondary" 
+                                    <button
+                                        type="button"
+                                        className="btn btn-outline-secondary"
                                         onClick={() => handleSearch('')}
                                     >
                                         <FontAwesomeIcon icon={faTrash} />
@@ -386,11 +398,11 @@ const UserManagement = () => {
             {/* Users Table */}
             <div className="card">
                 <div className="card-body position-relative">
-                    
+
                     <div className="table-responsive" style={{ minHeight: '400px' }}>
-                        <table 
-                            className="table table-hover table-fixed" 
-                            style={{ 
+                        <table
+                            className="table table-hover table-fixed"
+                            style={{
                                 tableLayout: "fixed",
                                 width: "100%"
                             }}
@@ -398,7 +410,7 @@ const UserManagement = () => {
                             <thead className="table-light">
                                 <tr>
                                     <th style={{ width: "40%" }} className="py-3 fw-semibold text-secondary">
-                                        <button 
+                                        <button
                                             className="btn btn-link p-0 text-decoration-none text-secondary fw-semibold"
                                             onClick={() => handleSort('name')}
                                         >
@@ -407,7 +419,7 @@ const UserManagement = () => {
                                         </button>
                                     </th>
                                     <th style={{ width: "40%" }} className="py-3 fw-semibold text-secondary">
-                                        <button 
+                                        <button
                                             className="btn btn-link p-0 text-decoration-none text-secondary fw-semibold"
                                             onClick={() => handleSort('email')}
                                         >
@@ -483,12 +495,12 @@ const UserManagement = () => {
                                     })}
                                 </span>
                             </div>
-                            
+
                             <nav>
                                 <ul className="pagination pagination-sm mb-0">
                                     <li className={`page-item ${!pagination.hasPrevPage || false ? 'disabled' : ''}`}>
-                                        <button 
-                                            className="page-link" 
+                                        <button
+                                            className="page-link"
                                             onClick={() => handlePageChange(1)}
                                             disabled={!pagination.hasPrevPage || false}
                                             title={t('userManagement.pagination.first')}
@@ -498,8 +510,8 @@ const UserManagement = () => {
                                         </button>
                                     </li>
                                     <li className={`page-item ${!pagination.hasPrevPage || false ? 'disabled' : ''}`}>
-                                        <button 
-                                            className="page-link" 
+                                        <button
+                                            className="page-link"
                                             onClick={() => handlePageChange(pagination.currentPage - 1)}
                                             disabled={!pagination.hasPrevPage || false}
                                             title={t('userManagement.pagination.previous')}
@@ -508,7 +520,7 @@ const UserManagement = () => {
                                             <i className="fas fa-chevron-left"></i>
                                         </button>
                                     </li>
-                                    
+
                                     {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
                                         let pageNum;
                                         if (pagination.totalPages <= 5) {
@@ -519,11 +531,11 @@ const UserManagement = () => {
                                             pageNum = startPage + i;
                                             if (pageNum > endPage) return null;
                                         }
-                                        
+
                                         return (
                                             <li key={pageNum} className={`page-item ${pagination.currentPage === pageNum ? 'active' : ''} ${false ? 'disabled' : ''}`}>
-                                                <button 
-                                                    className="page-link" 
+                                                <button
+                                                    className="page-link"
                                                     onClick={() => handlePageChange(pageNum)}
                                                     disabled={false}
                                                     style={{ transition: 'all 0.2s ease' }}
@@ -533,10 +545,10 @@ const UserManagement = () => {
                                             </li>
                                         );
                                     })}
-                                    
+
                                     <li className={`page-item ${!pagination.hasNextPage || false ? 'disabled' : ''}`}>
-                                        <button 
-                                            className="page-link" 
+                                        <button
+                                            className="page-link"
                                             onClick={() => handlePageChange(pagination.currentPage + 1)}
                                             disabled={!pagination.hasNextPage || false}
                                             title={t('userManagement.pagination.next')}
@@ -546,8 +558,8 @@ const UserManagement = () => {
                                         </button>
                                     </li>
                                     <li className={`page-item ${!pagination.hasNextPage || false ? 'disabled' : ''}`}>
-                                        <button 
-                                            className="page-link" 
+                                        <button
+                                            className="page-link"
                                             onClick={() => handlePageChange(pagination.totalPages)}
                                             disabled={!pagination.hasNextPage || false}
                                             title={t('userManagement.pagination.last')}
@@ -590,7 +602,7 @@ const UserManagement = () => {
                                                 <p><strong>{t('userManagement.modal.labels.email')}</strong> {selectedUser?.email}</p>
                                                 <p><strong>{t('userManagement.modal.labels.phone')}</strong> {selectedUser?.phone || t('userManagement.table.notProvided')}</p>
                                                 <p><strong>{t('userManagement.modal.labels.address')}</strong> {selectedUser?.address || t('userManagement.table.notProvided')}</p>
-                                                <p><strong>{t('userManagement.modal.labels.role')}</strong> 
+                                                <p><strong>{t('userManagement.modal.labels.role')}</strong>
                                                     <span className={`badge ms-2 ${selectedUser?.role === 'admin' ? 'bg-danger' : 'bg-primary'}`}>
                                                         {selectedUser?.role === 'admin' ? t('userManagement.roles.admin') : t('userManagement.roles.customer')}
                                                     </span>
@@ -616,10 +628,23 @@ const UserManagement = () => {
                                             <label className="form-label">{t('userManagement.modal.confirmation.label')}</label>
                                             <input
                                                 type="text"
-                                                className="form-control"
+                                                className={`form-control ${formErrors.deleteConfirmation ? 'is-invalid' : ''}`}
                                                 placeholder={t('userManagement.modal.confirmation.placeholder', { name: selectedUser?.name })}
+                                                value={deleteConfirmation}
+                                                onChange={(e) => {
+                                                    setDeleteConfirmation(e.target.value);
+                                                    // Clear error khi user bắt đầu nhập
+                                                    if (formErrors.deleteConfirmation) {
+                                                        setFormErrors({});
+                                                    }
+                                                }}
                                                 required
                                             />
+                                            {formErrors.deleteConfirmation && (
+                                                <div className="invalid-feedback">
+                                                    {formErrors.deleteConfirmation}
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                 </div>
@@ -634,9 +659,8 @@ const UserManagement = () => {
                                     {actionType !== 'view' && (
                                         <button
                                             type="submit"
-                                            className={`btn ${
-                                                actionType === 'delete' ? 'btn-danger' : 'btn-primary'
-                                            }`}
+                                            className={`btn ${actionType === 'delete' ? 'btn-danger' : 'btn-primary'
+                                                }`}
                                         >
                                             {actionType === 'delete' && t('userManagement.modal.buttons.delete')}
                                         </button>

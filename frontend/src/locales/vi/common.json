@@ -713,7 +713,8 @@
       },
       "confirmation": {
         "label": "Xác nhận xóa tài khoản:",
-        "placeholder": "Nhập \"{{name}}\" để xác nhận"
+        "placeholder": "Nhập \"{{name}}\" để xác nhận",
+        "error": "Vui lòng nhập đúng tên tài khoản \"{{name}}\" để xác nhận xóa"
       },
       "buttons": {
         "cancel": "Hủy",
@@ -974,7 +975,8 @@
       "loginRequired": "Bạn cần đăng nhập để đặt sản phẩm",
       "addToCartSuccess": "Đã thêm sản phẩm vào giỏ hàng!",
       "addToCartError": "Có lỗi xảy ra khi thêm sản phẩm vào giỏ hàng!",
-      "wishlistComingSoon": "Tính năng yêu thích sẽ được bổ sung sớm!"
+      "wishlistComingSoon": "Tính năng yêu thích sẽ được bổ sung sớm!",
+      "searchSuccess": "Tìm thấy {{count}} kết quả cho \"{{query}}\""
     }
   },
   "profilePage": {
@@ -1416,7 +1418,13 @@
       "linkCopied": "Link đã được sao chép!"
     },
     "toasts": {
-      "addedToCart": "{{quantity}} x \"{{title}}\" đã được thêm vào giỏ hàng!"
+      "addedToCart": "{{quantity}} x \"{{title}}\" đã được thêm vào giỏ hàng!",
+      "titles": {
+        "success": "Thành công!",
+        "error": "Lỗi!",
+        "warning": "Cảnh báo!",
+        "info": "Thông báo!"
+      }
     },
     "reviews": {
       "title": "Đánh giá sản phẩm",
@@ -1459,6 +1467,39 @@
         "submit": "Gửi đánh giá",
         "submitting": "Đang gửi..."
       },
+      "editForm": {
+        "ratingLabel": "Đánh giá sao",
+        "contentLabel": "Nội dung đánh giá",
+        "contentPlaceholder": "Nhập nội dung đánh giá của bạn",
+        "save": "Lưu",
+        "saving": "Đang lưu...",
+        "cancel": "Hủy"
+      },
+      "actions": {
+        "edit": "Sửa đánh giá",
+        "delete": "Xóa đánh giá"
+      },
+      "reply": {
+        "reply": "Trả lời đánh giá",
+        "addReply": "Thêm phản hồi",
+        "contentLabel": "Nội dung phản hồi",
+        "contentPlaceholder": "Nhập phản hồi của bạn...",
+        "contentRequired": "Vui lòng nhập phản hồi",
+        "submit": "Gửi phản hồi",
+        "submitting": "Đang gửi...",
+        "submitSuccess": "Đã gửi phản hồi thành công!",
+        "submitError": "Lỗi khi gửi phản hồi!",
+        "edit": "Sửa phản hồi",
+        "save": "Lưu",
+        "saving": "Đang lưu...",
+        "cancel": "Hủy",
+        "updateSuccess": "Đã cập nhật phản hồi thành công!",
+        "updateError": "Lỗi khi cập nhật phản hồi!",
+        "delete": "Xóa phản hồi",
+        "deleteConfirm": "Bạn có chắc chắn muốn xóa phản hồi này?",
+        "deleteSuccess": "Đã xóa phản hồi thành công!",
+        "deleteError": "Lỗi khi xóa phản hồi!"
+      },
       "adminNotice": {
         "title": "Bạn đang đăng nhập với tư cách Admin",
         "description": "Admin không thể viết đánh giá, chỉ có thể trả lời bình luận của người dùng."
@@ -1495,6 +1536,16 @@
         "commentPlaceholder": "Viết bình luận của bạn...",
         "submit": "Gửi bình luận"
       },
+      "editForm": {
+        "contentLabel": "Nội dung bình luận",
+        "contentPlaceholder": "Nhập nội dung bình luận của bạn",
+        "save": "Lưu",
+        "saving": "Đang lưu...",
+        "cancel": "Hủy"
+      },
+      "actions": {
+        "edit": "Sửa bình luận"
+      },
       "messages": {
         "alreadyCommented": "Bạn đã bình luận sản phẩm này!",
         "adminCannotComment": "Admin không thể tạo bình luận mới",
@@ -1504,11 +1555,21 @@
     "notifications": {
       "reviewLoginRequired": "Vui lòng đăng nhập để đánh giá sản phẩm!",
       "reviewContentRequired": "Vui lòng nhập nội dung đánh giá!",
+      "reviewContentError": "Vui lòng nhập đánh giá của bạn!",
       "reviewSubmitSuccess": "Đánh giá đã được gửi thành công!",
       "reviewSubmitError": "Có lỗi xảy ra khi gửi đánh giá!",
       "reviewAlreadyExists": "Bạn đã đánh giá sản phẩm này rồi!",
+      "reviewUpdateSuccess": "Đã cập nhật đánh giá thành công!",
+      "reviewUpdateError": "Lỗi khi cập nhật đánh giá!",
+      "reviewDeleteSuccess": "Đã xóa đánh giá thành công!",
+      "reviewDeleteError": "Lỗi khi xóa đánh giá!",
+      "reviewDeleteConfirm": "Bạn có chắc chắn muốn xóa đánh giá này?",
+      "reviewEditContentRequired": "Vui lòng nhập nội dung đánh giá!",
+      "commentContentError": "Vui lòng nhập bình luận của bạn!",
       "commentSubmitSuccess": "Bình luận đã được gửi thành công!",
       "commentAlreadyExists": "Bạn đã bình luận sản phẩm này rồi!",
+      "commentUpdateSuccess": "Đã cập nhật bình luận thành công!",
+      "commentUpdateError": "Lỗi khi cập nhật bình luận!",
       "replySubmitSuccess": "Phản hồi đã được gửi thành công!",
       "replyDeleteConfirm": "Bạn có chắc chắn muốn xóa phản hồi này không?",
       "replyDeleteSuccess": "Phản hồi đã được xóa thành công!"
