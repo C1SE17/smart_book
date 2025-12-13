@@ -197,40 +197,61 @@ function AppContent() {
   }, []);
 
   const handleLoginSuccess = useCallback((userData) => {
-    console.log('User logged in:', userData);
-    // Force reload user from localStorage after login
-    const userDataFromStorage = localStorage.getItem('user');
-    if (userDataFromStorage) {
-      try {
-        const parsedUser = JSON.parse(userDataFromStorage);
-        console.log('Setting user after login:', parsedUser);
-        console.log('User role:', parsedUser.role);
-        setUser(parsedUser);
-
-        // Kiểm tra role và chuyển hướng phù hợp
-        if (parsedUser.role === 'admin') {
-          // Admin chuyển hướng đến homepage trước
+    console.log('[App] handleLoginSuccess called with:', userData);
+    
+    // Sử dụng userData trực tiếp từ parameter hoặc lấy từ localStorage
+    let userToSet = userData;
+    
+    if (!userToSet) {
+      console.log('[App] userData is null, trying to get from localStorage');
+      // Fallback: lấy từ localStorage nếu userData không có
+      const userDataFromStorage = localStorage.getItem('user');
+      if (userDataFromStorage) {
+        try {
+          userToSet = JSON.parse(userDataFromStorage);
+          console.log('[App] Got user from localStorage:', userToSet);
+        } catch (error) {
+          console.error('[App] Error parsing user data after login:', error);
           navigateTo('/');
-          console.log('Admin logged in, redirecting to homepage');
-        } else {
-          // User thường chuyển hướng về trang chủ
-          navigateTo('/');
-          console.log('Customer logged in, redirecting to home');
+          return;
         }
-      } catch (error) {
-        console.error('Error parsing user data after login:', error);
-        // Fallback về trang chủ nếu có lỗi
-        navigateTo('/');
+      } else {
+        console.error('[App] No user data in localStorage either');
       }
-    } else {
-      // Fallback về trang chủ nếu không có dữ liệu user
-      navigateTo('/');
     }
-
-    setSearchQuery(''); // Xóa tìm kiếm
-    setProductId(null); // Xóa ID sản phẩm
-    // Đặt lại vị trí cuộn lên đầu sau khi đăng nhập
-    window.scrollTo(0, 0);
+    
+    if (!userToSet || !userToSet.user_id) {
+      console.error('[App] Invalid user data after login:', userToSet);
+      navigateTo('/');
+      return;
+    }
+    
+    console.log('[App] Setting user after login:', userToSet);
+    console.log('[App] User role:', userToSet.role);
+    
+    // Set user state trước
+    setUser(userToSet);
+    console.log('[App] User state set, current user:', userToSet);
+    
+    // Đợi một chút để state được update, sau đó navigate
+    setTimeout(() => {
+      console.log('[App] Navigating after login...');
+      // Kiểm tra role và chuyển hướng phù hợp
+      if (userToSet.role === 'admin') {
+        // Admin chuyển hướng đến homepage
+        navigateTo('/');
+        console.log('[App] Admin logged in, redirecting to homepage');
+      } else {
+        // User thường chuyển hướng về trang chủ
+        navigateTo('/');
+        console.log('[App] Customer logged in, redirecting to home');
+      }
+      
+      setSearchQuery(''); // Xóa tìm kiếm
+      setProductId(null); // Xóa ID sản phẩm
+      // Đặt lại vị trí cuộn lên đầu sau khi đăng nhập
+      window.scrollTo(0, 0);
+    }, 100);
   }, []);
 
   const handleLogout = useCallback(() => {

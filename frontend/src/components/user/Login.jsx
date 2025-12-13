@@ -70,6 +70,7 @@ const Login = ({ onToggleMode, onLoginSuccess, onForgotPassword }) => {
     
     try {
       // Gọi real API để đăng nhập
+      console.log('Attempting login with email:', formData.email);
       const response = await apiService.login({
         email: formData.email,
         password: formData.password
@@ -77,9 +78,16 @@ const Login = ({ onToggleMode, onLoginSuccess, onForgotPassword }) => {
       });
       
       console.log('Login response:', response);
+      console.log('Response type:', typeof response);
+      console.log('Response success:', response?.success);
       
       // Check if response is successful
-      if (!response || response.success === false) {
+      if (!response) {
+        console.error('No response received');
+        throw new Error('No response from server');
+      }
+      
+      if (response.success === false) {
         const errorMsg = response?.message || response?.error || 'Login failed';
         console.error('Login failed:', errorMsg);
         throw new Error(errorMsg);
@@ -133,11 +141,16 @@ const Login = ({ onToggleMode, onLoginSuccess, onForgotPassword }) => {
       localStorage.setItem('token', token);
       
       // Gọi callback thành công với dữ liệu user
+      console.log('Login successful, calling onLoginSuccess with:', userInfo);
       if (onLoginSuccess) {
+        console.log('onLoginSuccess callback exists, calling it...');
         onLoginSuccess({
           ...userInfo,
           isLoggedIn: true
         });
+        console.log('onLoginSuccess callback called');
+      } else {
+        console.warn('onLoginSuccess callback is not provided!');
       }
       
     } catch (error) {
