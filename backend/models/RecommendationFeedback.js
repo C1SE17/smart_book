@@ -4,9 +4,7 @@ const EVENT_TYPES = [
   'view_detail',
   'recommendation_click',
   'add_to_cart',
-  'purchase',
-  'like',
-  'dislike'
+  'purchase'
 ];
 
 const recommendationFeedbackSchema = new mongoose.Schema({

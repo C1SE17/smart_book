@@ -5,9 +5,7 @@ const SCORE_MAP = {
   view_detail: 1,
   recommendation_click: 2,
   add_to_cart: 3,
-  purchase: 4,
-  like: 2,
-  dislike: -1
+  purchase: 4
 };
 
 const HALF_LIFE_DAYS = 30;

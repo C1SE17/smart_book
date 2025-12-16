@@ -53,8 +53,6 @@ EVENT_WEIGHTS = {
     "recommendation_click": 2.0,
     "add_to_cart": 4.0,
     "purchase": 6.0,
-    "like": 3.0,
-    "dislike": -2.0,
     "impression": 0.25,
 }
 
