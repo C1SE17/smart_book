@@ -1,6 +1,8 @@
 import React, { useMemo, useCallback, useState, useEffect, useRef } from 'react';
 import apiService from '../../services';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUser } from '@fortawesome/free-solid-svg-icons';
 
 const parseStoredUser = () => {
   if (typeof window === 'undefined') return null;
@@ -38,6 +40,10 @@ const Home = ({ onNavigateTo }) => {
   // State cho danh mục
   const [categories, setCategories] = useState([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
+
+  // State cho authors
+  const [authors, setAuthors] = useState([]);
+  const [authorsLoading, setAuthorsLoading] = useState(true);
 
   // State cho user role và quyền hiển thị đề xuất
   const [userRole, setUserRole] = useState(() => {
@@ -390,6 +396,34 @@ const Home = ({ onNavigateTo }) => {
     fetchCategoriesWithBookCount();
   }, []);
 
+  // Lấy authors từ API
+  useEffect(() => {
+    const fetchAuthors = async () => {
+      setAuthorsLoading(true);
+      try {
+        console.log('Home: Fetching authors...');
+        const authorsResponse = await apiService.getAllAuthors();
+        
+        if (authorsResponse.success) {
+          const authorsData = authorsResponse.data || [];
+          console.log('Home: Authors loaded:', authorsData.length);
+          // Lấy tối đa 6 authors đầu tiên để hiển thị
+          setAuthors(authorsData.slice(0, 6));
+        } else {
+          console.error('Failed to fetch authors:', authorsResponse);
+          setAuthors([]);
+        }
+      } catch (error) {
+        console.error('Error fetching authors:', error);
+        setAuthors([]);
+      } finally {
+        setAuthorsLoading(false);
+      }
+    };
+
+    fetchAuthors();
+  }, []);
+
   // Lấy user role và trạng thái hồ sơ để kiểm tra quyền đặt hàng và hiển thị đề xuất
   useEffect(() => {
     const updateUserState = () => {
@@ -469,7 +503,7 @@ const Home = ({ onNavigateTo }) => {
     }
 
     if (user.role === 'admin') {
-      const message = 'Admin không thể thêm sản phẩm vào giỏ.';
+      const message = 'Admin không thể thêm giỏ hàng';
       if (window.showToast) {
         window.showToast(message, 'warning');
       } else {
@@ -1598,46 +1632,85 @@ const Home = ({ onNavigateTo }) => {
           </div>
 
           <div className="row g-4 justify-content-center">
-            {[
-              { id: 2, name: "Fujiko F. Fujio", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face" },
-              { id: 7, name: "Delia Owens", image: "https://photo.znews.vn/w960/Uploaded/sgorvz/2025_05_23/tac_gia_70_tuoi.jpg" },
-              { id: 1, name: "Koyoharu Gotouge", image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face" },
-              { id: 4, name: "Gosho Aoyama", image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&crop=face" },
-              { id: 8, name: "Haruki Murakami", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face" },
-              { id: 3, name: "J.K. Rowling", image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&crop=face" }
-            ].map((author, index) => (
-              <div key={index} className="col-lg-2 col-md-3 col-sm-4 col-6">
-                <div
-                  className="text-center"
-                  style={{
-                    cursor: 'pointer',
-                    transition: 'transform 0.3s ease',
-                    padding: '10px',
-                    borderRadius: '10px'
-                  }}
-                  onClick={() => onNavigateTo('author-detail', { id: author.id })}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-5px)';
-                    e.currentTarget.style.backgroundColor = '#f8f9fa';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.backgroundColor = 'transparent';
-                  }}
-                >
-                  <img
-                    src={author.image}
-                    alt={author.name}
-                    className="rounded-circle mx-auto mb-3"
-                    style={{ width: '80px', height: '80px', objectFit: 'cover' }}
-                    onError={(e) => {
-                      e.target.src = 'https://via.placeholder.com/80x80/6c757d/ffffff?text=' + encodeURIComponent(author.name.charAt(0));
-                    }}
-                  />
-                  <h6 className="text-dark mb-0">{author.name}</h6>
+            {authorsLoading ? (
+              <div className="col-12 text-center py-4">
+                <div className="spinner-border text-primary" role="status">
+                  <span className="visually-hidden">Loading...</span>
                 </div>
               </div>
-            ))}
+            ) : authors.length > 0 ? (
+              authors.map((author) => (
+                <div key={author.author_id} className="col-lg-2 col-md-3 col-sm-4 col-6">
+                  <div
+                    className="text-center"
+                    style={{
+                      cursor: 'pointer',
+                      transition: 'transform 0.3s ease',
+                      padding: '10px',
+                      borderRadius: '10px'
+                    }}
+                    onClick={() => onNavigateTo('author-detail', { id: author.author_id })}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-5px)';
+                      e.currentTarget.style.backgroundColor = '#f8f9fa';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                    }}
+                  >
+                    <div className="position-relative mx-auto mb-3" style={{ width: '80px', height: '80px' }}>
+                      {(author.avatar || author.image) && (
+                        <img
+                          src={author.avatar || author.image}
+                          alt={author.name}
+                          className="rounded-circle"
+                          style={{ 
+                            width: '80px', 
+                            height: '80px', 
+                            objectFit: 'cover',
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            zIndex: 1
+                          }}
+                          onError={(e) => {
+                            // Nếu ảnh lỗi, ẩn img để hiển thị icon
+                            e.target.style.display = 'none';
+                          }}
+                        />
+                      )}
+                      <div
+                        className="author-icon-placeholder rounded-circle d-flex align-items-center justify-content-center"
+                        style={{
+                          width: '80px',
+                          height: '80px',
+                          backgroundColor: '#6c757d',
+                          display: 'flex',
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          zIndex: (author.avatar || author.image) ? 0 : 1
+                        }}
+                      >
+                        <FontAwesomeIcon 
+                          icon={faUser} 
+                          style={{ 
+                            fontSize: '40px', 
+                            color: '#ffffff' 
+                          }} 
+                        />
+                      </div>
+                    </div>
+                    <h6 className="text-dark mb-0">{author.name}</h6>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="col-12 text-center py-4">
+                <p className="text-muted">Không có tác giả nào</p>
+              </div>
+            )}
           </div>
         </div>
       </section>

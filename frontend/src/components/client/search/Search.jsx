@@ -138,17 +138,14 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch 
   const handleSuggestionClick = (suggestion) => {
     setSearchQuery(suggestion.title);
     setShowSuggestions(false);
-    // Only search if there's a query
-    if (suggestion.title.trim()) {
-      performSearch(suggestion.title);
-    }
+    // Don't auto-search - user must click search button
   };
 
   // Handle popular keyword click
   const handlePopularKeywordClick = (keyword) => {
     setSearchQuery(keyword);
     setShowSuggestions(false);
-    performSearch(keyword);
+    // Don't auto-search - user must click search button
   };
 
   // Handle book click
@@ -293,27 +290,20 @@ const Search = ({ onBackToHome, onNavigateTo, initialSearchQuery = '', onSearch 
     };
   }, [fallbackKeywords, language]);
 
-  // Auto search on mount if initial query provided
+  // Initialize component - always reset search state on mount
   useEffect(() => {
+    // Always reset search results and hasSearched when component mounts
+    setSearchResults([]);
+    setHasSearched(false);
+    
+    // Only set search query if initialSearchQuery is provided
     if (initialSearchQuery) {
-      performSearch(initialSearchQuery);
+      setSearchQuery(initialSearchQuery);
+      // Don't auto-search - user must click search button
     } else {
-      // Reset search results when component mounts without initial query
-      setSearchResults([]);
-      setHasSearched(false);
       setSearchQuery('');
     }
-  }, [initialSearchQuery, performSearch]);
-
-  // Reset search when component mounts (for back navigation)
-  useEffect(() => {
-    // If no initial search query, reset everything
-    if (!initialSearchQuery) {
-      setSearchResults([]);
-      setHasSearched(false);
-      setSearchQuery('');
-    }
-  }, []);
+  }, [initialSearchQuery]);
 
   return (
     <div className="container py-4" style={{ maxWidth: '1200px' }}>

@@ -192,7 +192,7 @@ const ProductDetail = ({ productId, onNavigateTo, onNavigateToProduct, user = nu
       return;
     }
     if (currentUser.role === 'admin') {
-      showToast('Admin không thể thêm sản phẩm vào giỏ.', 'warning');
+      showToast('Admin không thể thêm giỏ hàng', 'warning');
       return;
     }
     const item = specificItem || product;

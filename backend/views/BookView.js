@@ -31,9 +31,10 @@ class BookView extends BaseView {
       publisher_name: book.publisher_name,
       category_name: book.category_name,
       // Rating và reviews
-      rating: Number(book.rating) || 0,
+      rating: Number(book.rating || book.average_rating || book.avg_rating) || 0,
       review_count: Number(book.review_count) || 0,
-      avg_rating: Number(book.rating) || 0 // Alias cho compatibility
+      avg_rating: Number(book.rating || book.average_rating || book.avg_rating) || 0, // Alias cho compatibility
+      average_rating: Number(book.average_rating || book.rating || book.avg_rating) || 0 // Alias cho compatibility với Author detail
     };
   }
 

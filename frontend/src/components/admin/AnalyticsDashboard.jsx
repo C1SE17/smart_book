@@ -8,6 +8,7 @@ import {
   faExclamationTriangle,
   faUserPlus,
   faChartLine,
+  faChartBar,
   faWarehouse,
   faStar,
   faUsers,
@@ -1145,7 +1146,10 @@ HƯỚNG DẪN TRẢ LỜI:
     <div className="ai-analytics-wrapper">
       <header className="ai-analytics-header">
         <div className="ai-analytics-title">
-          <h1>{t('reports.header.title')}</h1>
+          <h1>
+            <FontAwesomeIcon icon={faChartBar} className="me-2" style={{ color: '#007bff' }} />
+            {t('reports.header.title')}
+          </h1>
           <p>{t('reports.header.lastUpdated', { time: lastUpdatedText })}</p>
         </div>
         <div className="ai-analytics-actions">

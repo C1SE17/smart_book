@@ -380,10 +380,10 @@ const BookManagement = () => {
             `}</style>
             
             <div className="card-header bg-white border-0 d-flex align-items-center justify-content-between">
-                <h5 className="fw-bold text-dark mb-0">
+                <h2 className="fw-bold text-dark mb-0" style={{fontSize: '1.75rem'}}>
                     <i className="fas fa-book-open text-primary me-2"></i>
                     {t('bookManagement.title')}
-                </h5>
+                </h2>
                 <button className="btn btn-primary btn-sm" onClick={handleAddBook}>
                     <i className="fas fa-plus me-1"></i> {t('bookManagement.addButton')}
                 </button>
@@ -395,7 +395,6 @@ const BookManagement = () => {
                     <div className="d-flex justify-content-between align-items-center mb-3">
                         <div className="d-flex align-items-center gap-3">
                             <span className="text-muted">
-                                <i className="fas fa-book me-1"></i>
                                 {t('bookManagement.stats.totalLabel')}{' '}
                                 <strong className="text-primary">{formatNumber(totalItems)}</strong>
                             </span>

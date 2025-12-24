@@ -342,11 +342,11 @@ const ReviewManagement = () => {
             {/* Header */}
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <h2 className="mb-1">
+                    <h2 className="mb-1 fw-bold text-dark" style={{fontSize: '1.75rem'}}>
                         <FontAwesomeIcon icon={faStar} className="me-2 text-warning" />
                         {t('reviewManagement.title')}
                     </h2>
-                    <p className="text-muted mb-0">{t('reviewManagement.subtitle')}</p>
+                    <p className="text-muted mb-0" style={{fontSize: '0.95rem'}}>{t('reviewManagement.subtitle')}</p>
                 </div>
                 <div className="d-flex align-items-center">
                     <span className="badge bg-dark">

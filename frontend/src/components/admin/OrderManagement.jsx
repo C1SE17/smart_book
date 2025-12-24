@@ -738,8 +738,11 @@ const OrderManagement = () => {
             {/* Header Section */}
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <h1 className="fw-bold text-dark mb-1">{t('orderManagement.title')}</h1>
-                    <p className="text-muted mb-0">{t('orderManagement.subtitle')}</p>
+                    <h2 className="fw-bold text-dark mb-1" style={{fontSize: '1.75rem'}}>
+                        <i className="fas fa-shopping-cart text-primary me-2"></i>
+                        {t('orderManagement.title')}
+                    </h2>
+                    <p className="text-muted mb-0" style={{fontSize: '0.95rem'}}>{t('orderManagement.subtitle')}</p>
                 </div>
                 <div className="d-flex align-items-center gap-3">
                     <button

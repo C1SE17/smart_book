@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { validateEmail } from '../../utils';
 import apiService from '../../services';
-// import Captcha from '../common/Captcha';
 
 const Login = ({ onToggleMode, onLoginSuccess, onForgotPassword }) => {
   const [formData, setFormData] = useState({
@@ -13,9 +12,6 @@ const Login = ({ onToggleMode, onLoginSuccess, onForgotPassword }) => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  // const [captchaCode, setCaptchaCode] = useState('');
-  // const [captchaInput, setCaptchaInput] = useState('');
-  // const captchaRef = React.useRef(null);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -48,13 +44,6 @@ const Login = ({ onToggleMode, onLoginSuccess, onForgotPassword }) => {
       newErrors.password = 'Password must be at least 6 characters';
     }
 
-    // Captcha validation - commented out
-    // if (!captchaInput) {
-    //   newErrors.captcha = 'Captcha is required';
-    // } else if (captchaInput.toUpperCase() !== captchaCode) {
-    //   newErrors.captcha = 'Captcha code is incorrect';
-    // }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -74,7 +63,6 @@ const Login = ({ onToggleMode, onLoginSuccess, onForgotPassword }) => {
       const response = await apiService.login({
         email: formData.email,
         password: formData.password
-        // captcha: captchaInput.toUpperCase() // Captcha - commented out
       });
       
       console.log('Login response:', response);
@@ -192,10 +180,6 @@ const Login = ({ onToggleMode, onLoginSuccess, onForgotPassword }) => {
       
       setErrors({ general: errorMessage });
       
-      // Regenerate captcha on login failure for security - commented out
-      // if (captchaRef.current && typeof captchaRef.current.refresh === 'function') {
-      //   captchaRef.current.refresh();
-      // }
       
       // Hiển thị toast lỗi
       if (window.showToast) {
@@ -301,27 +285,6 @@ const Login = ({ onToggleMode, onLoginSuccess, onForgotPassword }) => {
                 </div>
               )}
             </div>
-
-            {/* Captcha Field - commented out */}
-            {/* <div className="mb-3">
-              <Captcha
-                ref={captchaRef}
-                onCaptchaChange={(value) => {
-                  setCaptchaInput(value);
-                  // Clear error when user starts typing
-                  if (errors.captcha) {
-                    setErrors(prev => ({
-                      ...prev,
-                      captcha: ''
-                    }));
-                  }
-                }}
-                onCodeGenerated={(code) => {
-                  setCaptchaCode(code);
-                }}
-                error={errors.captcha}
-              />
-            </div> */}
 
             {/* Remember Me & Lost Password */}
             <div className="d-flex justify-content-between align-items-center mb-4">

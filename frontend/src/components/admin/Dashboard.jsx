@@ -328,7 +328,10 @@ const Dashboard = () => {
         <div>
             {/* Header */}
             <div className="d-flex justify-content-between align-items-center mb-4">
-                <h2 className="fw-bold text-dark">{t('admin.dashboard.title')}</h2>
+                <h2 className="fw-bold text-dark">
+                    <i className="fas fa-chart-pie text-primary me-2"></i>
+                    {t('admin.dashboard.title')}
+                </h2>
                 <div className="d-flex align-items-center gap-3">
                     <button 
                         className="btn btn-outline-primary btn-sm"

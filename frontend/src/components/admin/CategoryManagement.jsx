@@ -224,7 +224,10 @@ const CategoryManagement = () => {
         <div>
             {/* Header */}
             <div className="d-flex justify-content-between align-items-center mb-4">
-                <h2 className="fw-bold text-dark">{t('categoryManagement.title')}</h2>
+                <h2 className="fw-bold text-dark" style={{fontSize: '1.75rem'}}>
+                    <i className="fas fa-tags text-primary me-2"></i>
+                    {t('categoryManagement.title')}
+                </h2>
                 <button
                     className="btn btn-primary"
                     onClick={handleAddCategory}

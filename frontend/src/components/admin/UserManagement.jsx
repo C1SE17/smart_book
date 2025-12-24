@@ -293,11 +293,11 @@ const UserManagement = () => {
             {/* Header */}
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <h2 className="mb-1">
+                    <h2 className="mb-1 fw-bold text-dark" style={{fontSize: '1.75rem'}}>
                         <FontAwesomeIcon icon={faUser} className="me-2 text-primary" />
                         {t('userManagement.title')}
                     </h2>
-                    <p className="text-muted mb-0">{t('userManagement.subtitle')}</p>
+                    <p className="text-muted mb-0" style={{fontSize: '0.95rem'}}>{t('userManagement.subtitle')}</p>
                 </div>
                 <div className="d-flex align-items-center">
                     <span className="badge bg-primary">

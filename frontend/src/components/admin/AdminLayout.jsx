@@ -1,9 +1,18 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 const AdminLayout = ({ children, onNavigateTo, onLogout, onBackToHome, currentPage }) => {
-    const [sidebarOpen, setSidebarOpen] = useState(true);
+    // Load sidebar state from localStorage, default to true if not set
+    const [sidebarOpen, setSidebarOpen] = useState(() => {
+        const saved = localStorage.getItem('adminSidebarOpen');
+        return saved !== null ? saved === 'true' : true;
+    });
     const { t } = useTranslation();
+
+    // Save sidebar state to localStorage whenever it changes
+    useEffect(() => {
+        localStorage.setItem('adminSidebarOpen', sidebarOpen.toString());
+    }, [sidebarOpen]);
 
     const menuItems = useMemo(() => [
         { id: 'dashboard', name: t('admin.layout.menu.dashboard'), icon: 'fas fa-chart-pie', path: 'admin-dashboard' },
@@ -17,6 +26,8 @@ const AdminLayout = ({ children, onNavigateTo, onLogout, onBackToHome, currentPa
     ], [t]);
 
     const handleMenuClick = (path) => {
+        // Navigate to the page without changing sidebar state
+        // Sidebar will remain in its current state (collapsed or expanded)
         onNavigateTo(path);
     };
 
@@ -38,10 +49,12 @@ const AdminLayout = ({ children, onNavigateTo, onLogout, onBackToHome, currentPa
                     height: '100vh',
                     transition: 'width 0.3s ease',
                     zIndex: 1000,
-                    paddingTop: '80px'
+                    paddingTop: '10px',
+                    overflowY: 'auto',
+                    overflowX: 'hidden'
                 }}
             >
-                <div className="p-3">
+                <div className="p-3" style={{paddingBottom: '20px'}}>
                     {/* Toggle Button */}
                     <button
                         className="btn btn-outline-light btn-sm mb-4"
@@ -114,7 +127,7 @@ const AdminLayout = ({ children, onNavigateTo, onLogout, onBackToHome, currentPa
                 style={{
                     marginLeft: sidebarOpen ? '250px' : '70px',
                     transition: 'margin-left 0.3s ease',
-                    paddingTop: '80px'
+                    paddingTop: '10px'
                 }}
             >
                 <div className="container-fluid p-4">

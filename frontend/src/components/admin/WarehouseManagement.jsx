@@ -436,7 +436,10 @@ const WarehouseManagement = () => {
             
             {/* Header */}
             <div className="d-flex justify-content-between align-items-center mb-4">
-                <h2 className="fw-bold text-dark">{t('warehouseManagement.title')}</h2>
+                <h2 className="fw-bold text-dark" style={{fontSize: '1.75rem'}}>
+                    <i className="fas fa-warehouse text-primary me-2"></i>
+                    {t('warehouseManagement.title')}
+                </h2>
                 <div>
                     <button
                         className="btn btn-success me-2"

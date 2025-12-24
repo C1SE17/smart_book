@@ -70,6 +70,12 @@ const AuthorDetail = ({ onNavigateTo, authorId }) => {
                 return;
             }
 
+            // Kiểm tra nếu user là admin thì không cho thêm giỏ hàng
+            if (user.role === 'admin') {
+                window.showToast('Admin không thể thêm giỏ hàng', 'warning');
+                return;
+            }
+
             const cartData = {
                 book_id: book.book_id,
                 quantity: 1
@@ -337,32 +343,32 @@ const AuthorDetail = ({ onNavigateTo, authorId }) => {
                                                     <button
                                                         className="btn btn-sm"
                                                         style={{
-                                                            width: '35px',
-                                                            height: '35px',
+                                                            width: '36px',
+                                                            height: '36px',
                                                             display: 'flex',
                                                             alignItems: 'center',
                                                             justifyContent: 'center',
-                                                            backgroundColor: 'rgba(255,255,255,0.95)',
-                                                            border: '1px solid rgba(0,0,0,0.1)',
-                                                            borderRadius: '8px',
-                                                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                                                            backgroundColor: 'white',
+                                                            border: '1px solid rgba(0,0,0,0.2)',
+                                                            borderRadius: '4px',
+                                                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
                                                             transition: 'all 0.3s ease',
-                                                            backdropFilter: 'blur(10px)'
+                                                            padding: 0
                                                         }}
                                                         onClick={(e) => handleAddToWishlist(book, e)}
                                                         onMouseEnter={(e) => {
-                                                            e.target.style.backgroundColor = 'rgba(255,255,255,1)';
+                                                            e.target.style.backgroundColor = '#f8f9fa';
                                                             e.target.style.transform = 'scale(1.05)';
-                                                            e.target.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+                                                            e.target.style.boxShadow = '0 4px 8px rgba(0,0,0,0.15)';
                                                         }}
                                                         onMouseLeave={(e) => {
-                                                            e.target.style.backgroundColor = 'rgba(255,255,255,0.95)';
+                                                            e.target.style.backgroundColor = 'white';
                                                             e.target.style.transform = 'scale(1)';
-                                                            e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+                                                            e.target.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
                                                         }}
                                                         title={t('authorDetail.tooltips.addToWishlist')}
                                                     >
-                                                        <i className="bi bi-heart text-dark" style={{ fontSize: '14px' }}></i>
+                                                        <i className="bi bi-heart text-dark" style={{ fontSize: '16px' }}></i>
                                                     </button>
                                                 </div>
 
@@ -371,32 +377,32 @@ const AuthorDetail = ({ onNavigateTo, authorId }) => {
                                                     <button
                                                         className="btn btn-sm"
                                                         style={{
-                                                            width: '35px',
-                                                            height: '35px',
+                                                            width: '36px',
+                                                            height: '36px',
                                                             display: 'flex',
                                                             alignItems: 'center',
                                                             justifyContent: 'center',
-                                                            backgroundColor: 'rgba(0,123,255,0.95)',
-                                                            border: '1px solid rgba(0,123,255,0.3)',
-                                                            borderRadius: '8px',
-                                                            boxShadow: '0 2px 8px rgba(0,123,255,0.2)',
+                                                            backgroundColor: '#007bff',
+                                                            border: 'none',
+                                                            borderRadius: '4px',
+                                                            boxShadow: '0 2px 4px rgba(0,123,255,0.3)',
                                                             transition: 'all 0.3s ease',
-                                                            backdropFilter: 'blur(10px)'
+                                                            padding: 0
                                                         }}
                                                         onClick={(e) => handleAddToCart(book, e)}
                                                         onMouseEnter={(e) => {
-                                                            e.target.style.backgroundColor = 'rgba(0,123,255,1)';
+                                                            e.target.style.backgroundColor = '#0056b3';
                                                             e.target.style.transform = 'scale(1.05)';
-                                                            e.target.style.boxShadow = '0 4px 12px rgba(0,123,255,0.3)';
+                                                            e.target.style.boxShadow = '0 4px 8px rgba(0,123,255,0.4)';
                                                         }}
                                                         onMouseLeave={(e) => {
-                                                            e.target.style.backgroundColor = 'rgba(0,123,255,0.95)';
+                                                            e.target.style.backgroundColor = '#007bff';
                                                             e.target.style.transform = 'scale(1)';
-                                                            e.target.style.boxShadow = '0 2px 8px rgba(0,123,255,0.2)';
+                                                            e.target.style.boxShadow = '0 2px 4px rgba(0,123,255,0.3)';
                                                         }}
                                                         title={t('authorDetail.tooltips.addToCart')}
                                                     >
-                                                        <i className="bi bi-cart-plus text-white" style={{ fontSize: '14px' }}></i>
+                                                        <i className="bi bi-cart-plus text-white" style={{ fontSize: '16px' }}></i>
                                                     </button>
                                                 </div>
                                             </div>
@@ -416,6 +422,17 @@ const AuthorDetail = ({ onNavigateTo, authorId }) => {
                                                 </h6>
 
                                                 <p className="text-muted small mb-2" style={{
+                                                    fontSize: '13px',
+                                                    height: '1.5em',
+                                                    overflow: 'hidden',
+                                                    display: '-webkit-box',
+                                                    WebkitLineClamp: 1,
+                                                    WebkitBoxOrient: 'vertical'
+                                                }}>
+                                                    {author.name}
+                                                </p>
+
+                                                <p className="text-muted small mb-2" style={{
                                                     fontSize: '12px',
                                                     height: '1.5em',
                                                     overflow: 'hidden',
@@ -427,14 +444,36 @@ const AuthorDetail = ({ onNavigateTo, authorId }) => {
                                                 </p>
 
                                                 <div className="d-flex align-items-center mb-2">
-                                                    <div className="d-flex align-items-center me-2">
-                                                        <i className="bi bi-star-fill text-warning me-1" style={{ fontSize: '12px' }}></i>
-                                                        <span className="text-muted small">
-                                                            {book.average_rating && parseFloat(book.average_rating) > 0
-                                                                ? parseFloat(book.average_rating).toFixed(1)
-                                                                : '0.0'
-                                                            } ({book.review_count || 0})
-                                                        </span>
+                                                    <div className="d-flex align-items-center">
+                                                        {(() => {
+                                                            // Lấy rating từ nhiều nguồn có thể
+                                                            const ratingValue = parseFloat(
+                                                                book.average_rating || 
+                                                                book.avg_rating || 
+                                                                book.rating || 
+                                                                0
+                                                            );
+                                                            const reviewCount = book.review_count || 0;
+                                                            
+                                                            return (
+                                                                <>
+                                                                    {Array.from({ length: 5 }, (_, i) => {
+                                                                        const isFilled = i < Math.floor(ratingValue);
+                                                                        const isHalf = i === Math.floor(ratingValue) && ratingValue % 1 >= 0.5;
+                                                                        return (
+                                                                            <i
+                                                                                key={i}
+                                                                                className={`bi ${isFilled ? 'bi-star-fill' : isHalf ? 'bi-star-half' : 'bi-star'} text-warning`}
+                                                                                style={{ fontSize: '14px', marginRight: '2px' }}
+                                                                            ></i>
+                                                                        );
+                                                                    })}
+                                                                    <span className="text-muted small ms-1">
+                                                                        {ratingValue > 0 ? ratingValue.toFixed(1) : '0.0'} ({reviewCount})
+                                                                    </span>
+                                                                </>
+                                                            );
+                                                        })()}
                                                     </div>
                                                 </div>
 
@@ -453,15 +492,16 @@ const AuthorDetail = ({ onNavigateTo, authorId }) => {
                                                     </div>
 
                                                     <button
-                                                        className="btn btn-outline-primary w-100"
+                                                        className="btn w-100"
                                                         style={{
                                                             fontSize: '14px',
                                                             padding: '8px 16px',
                                                             borderRadius: '6px',
                                                             border: '1px solid #007bff',
-                                                            backgroundColor: 'transparent',
+                                                            backgroundColor: 'white',
                                                             color: '#007bff',
-                                                            transition: 'all 0.3s ease'
+                                                            transition: 'all 0.3s ease',
+                                                            fontWeight: '500'
                                                         }}
                                                         onClick={(e) => {
                                                             e.stopPropagation();
@@ -472,7 +512,7 @@ const AuthorDetail = ({ onNavigateTo, authorId }) => {
                                                             e.target.style.color = 'white';
                                                         }}
                                                         onMouseLeave={(e) => {
-                                                            e.target.style.backgroundColor = 'transparent';
+                                                            e.target.style.backgroundColor = 'white';
                                                             e.target.style.color = '#007bff';
                                                         }}
                                                     >

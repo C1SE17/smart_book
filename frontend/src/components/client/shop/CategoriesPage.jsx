@@ -427,6 +427,17 @@ const CategoriesPage = ({ onNavigateTo }) => {
       return;
     }
 
+    // Kiểm tra nếu user là admin thì không cho thêm giỏ hàng
+    if (user.role === 'admin') {
+      const message = 'Admin không thể thêm giỏ hàng';
+      if (window.showToast) {
+        window.showToast(message, 'warning');
+      } else {
+        alert(message);
+      }
+      return;
+    }
+
     try {
 
       // Find the product details
