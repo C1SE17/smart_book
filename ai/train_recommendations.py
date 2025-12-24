@@ -1,6 +1,6 @@
 """
 
-1. Đọc các sự kiện phản hồi (view/click/add_to_cart/purchase/...) từ collection
+1. Đọc các sự kiện phản hồi (carttracks/producttracks/purchasetracks/searchtracks/...) từ collection
    `recommendation_feedbacks` do backend ghi nhận khi người dùng tương tác.
 2. Tính điểm tích luỹ cho từng sách theo từng profile (user:<id> hoặc session ẩn danh).
 3. Lọc/xếp hạng -> lưu lại vào hai collection:
@@ -49,11 +49,10 @@ EMBEDDING_RERANK_WEIGHTS = {"behavior": 0.6, "embedding": 0.3, "popularity": 0.1
 
 # Thang điểm rút gọn nếu sự kiện không có finalScore/value riêng
 EVENT_WEIGHTS = {
-    "view_detail": 0.5,
-    "recommendation_click": 2.0,
-    "add_to_cart": 4.0,
-    "purchase": 6.0,
-    "impression": 0.25,
+    "carttracks": 0.5,
+    "producttracks": 2.0,
+    "purchasetracks": 4.0,
+    "searchtracks": 6.0,
 }
 
 
