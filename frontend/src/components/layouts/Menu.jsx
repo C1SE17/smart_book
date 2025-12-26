@@ -4,37 +4,30 @@ import { useLanguage } from '../../contexts/LanguageContext';
 const MenuClient = ({ onNavigateTo, onBackToHome, user, onLogout }) => {
   const [cartItemCount, setCartItemCount] = useState(0);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState(user); // Local state để đảm bảo cập nhật
   const dropdownRef = useRef(null);
   const { t, language, toggleLanguage } = useLanguage();
   const nav = t('nav', { returnObjects: true });
   const languageToggle = t('languageToggle', { returnObjects: true });
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = currentUser?.role === 'admin';
 
 
-  // Cập nhật số lượng mục trong giỏ hàng
   const updateCartCount = useCallback(async () => {
-    if (!user || user.role === 'admin') {
+    if (!currentUser || currentUser.role === 'admin') {
       setCartItemCount(0);
       return;
     }
 
     try {
-      // Get cart items from localStorage
-      const cartKey = `cart_${user.user_id}`;
+      const cartKey = `cart_${currentUser.user_id}`;
       const cartItems = JSON.parse(localStorage.getItem(cartKey) || '[]');
-      
-      // Calculate total quantity of all items
       const totalQuantity = cartItems.reduce((total, item) => total + (item.quantity || 0), 0);
       setCartItemCount(totalQuantity);
-      
-      console.log(' Cart count updated:', totalQuantity, 'items');
     } catch (error) {
-      console.error('Error fetching cart count:', error);
       setCartItemCount(0);
     }
-  }, [user]);
+  }, [currentUser]);
 
-  // Lắng nghe cập nhật giỏ hàng
   useEffect(() => {
     updateCartCount();
 
@@ -42,10 +35,7 @@ const MenuClient = ({ onNavigateTo, onBackToHome, user, onLogout }) => {
       updateCartCount();
     };
 
-    // Listen for custom cart update events
     window.addEventListener('cartUpdated', handleCartUpdate);
-
-    // Listen for storage changes (when cart is updated from another component)
     window.addEventListener('storage', handleCartUpdate);
 
     return () => {
@@ -54,10 +44,32 @@ const MenuClient = ({ onNavigateTo, onBackToHome, user, onLogout }) => {
     };
   }, [updateCartCount]);
 
-  // Reload cart count when user changes
   useEffect(() => {
     updateCartCount();
-  }, [user, updateCartCount]);
+  }, [currentUser, updateCartCount]);
+
+  useEffect(() => {
+    setCurrentUser(user);
+  }, [user]);
+
+  useEffect(() => {
+    const handleUserLoggedIn = () => {
+      const userData = localStorage.getItem('user');
+      if (userData) {
+        try {
+          const parsedUser = JSON.parse(userData);
+          setCurrentUser(parsedUser);
+        } catch (error) {
+          // Silent fail
+        }
+      }
+    };
+
+    window.addEventListener('userLoggedIn', handleUserLoggedIn);
+    return () => {
+      window.removeEventListener('userLoggedIn', handleUserLoggedIn);
+    };
+  }, []);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -259,7 +271,7 @@ const MenuClient = ({ onNavigateTo, onBackToHome, user, onLogout }) => {
 
             {/* User Profile */}
             <li className="nav-item">
-              {user ? (
+              {currentUser ? (
                 <div className="dropdown" ref={dropdownRef}>
                   <a
                     className="nav-link dropdown-toggle d-flex align-items-center"
@@ -271,12 +283,10 @@ const MenuClient = ({ onNavigateTo, onBackToHome, user, onLogout }) => {
                     onClick={(e) => {
                       e.preventDefault();
                       setDropdownOpen(!dropdownOpen);
-                      console.log('Current user data:', user);
-                      console.log('User role:', user.role);
                     }}
                   >
                     <i className="fas fa-user me-2" style={{ fontSize: '1.2rem', width: '20px', height: '20px' }}></i>
-                    <span className="fw-medium">{user.name || user.email || user.role || 'User'}</span>
+                    <span className="fw-medium">{currentUser.name || currentUser.email || currentUser.role || 'User'}</span>
                   </a>
                   <ul className={`dropdown-menu dropdown-menu-end ${dropdownOpen ? 'show' : ''}`}>
                     <li>
@@ -301,7 +311,7 @@ const MenuClient = ({ onNavigateTo, onBackToHome, user, onLogout }) => {
                         {nav.profile}
                       </a>
                     </li>
-                    {user.role !== 'admin' && (
+                    {currentUser.role !== 'admin' && (
                       <li>
                         <a
                           className="dropdown-item"
@@ -325,7 +335,7 @@ const MenuClient = ({ onNavigateTo, onBackToHome, user, onLogout }) => {
                         </a>
                       </li>
                     )}
-                    {user.role === 'admin' && (
+                    {currentUser.role === 'admin' && (
                       <li>
                         <a
                           className="dropdown-item"

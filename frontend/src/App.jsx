@@ -51,17 +51,17 @@ function AppContent() {
   const [profileTab, setProfileTab] = useState('profile'); // State tab profile
   const [adminWantsHome, setAdminWantsHome] = useState(false); // State để theo dõi admin có muốn ở trang chủ
 
-  // Khởi tạo state người dùng từ localStorage - chỉ load nếu có cả user và token hợp lệ
   useEffect(() => {
+    let isLoggingIn = false;
+    
     const loadUser = () => {
+      if (isLoggingIn) return;
+      
       const userData = localStorage.getItem('user');
       const token = localStorage.getItem('token');
       
-      // Chỉ load user nếu có cả user data và token
-      // Nếu không có token, coi như đã đăng xuất và xóa user data
       if (!token) {
         if (userData) {
-          console.log('[App] No token found, clearing user data');
           localStorage.removeItem('user');
           localStorage.removeItem('userToken');
           localStorage.removeItem('userEmail');
@@ -73,10 +73,7 @@ function AppContent() {
       if (userData) {
         try {
           const parsedUser = JSON.parse(userData);
-          
-          // Kiểm tra user có hợp lệ không (phải có user_id)
           if (!parsedUser || typeof parsedUser !== 'object' || !parsedUser.user_id) {
-            console.log('[App] Invalid user data, clearing');
             localStorage.removeItem('user');
             localStorage.removeItem('token');
             localStorage.removeItem('userToken');
@@ -84,11 +81,8 @@ function AppContent() {
             setUser(null);
             return;
           }
-          
-          console.log('[App] Loading user from localStorage:', parsedUser);
           setUser(parsedUser);
         } catch (error) {
-          console.error('[App] Error parsing user data:', error);
           localStorage.removeItem('user');
           localStorage.removeItem('token');
           localStorage.removeItem('userToken');
@@ -96,9 +90,7 @@ function AppContent() {
           setUser(null);
         }
       } else {
-        // Nếu không có user data nhưng có token, xóa token
         if (token) {
-          console.log('[App] User data missing but token exists, clearing token');
           localStorage.removeItem('token');
         }
         setUser(null);
@@ -107,19 +99,40 @@ function AppContent() {
 
     loadUser();
 
-    // Listen for storage changes (when user logs in from another tab)
-    window.addEventListener('storage', loadUser);
+    const handleStorageChange = (e) => {
+      if (e.key === 'user' || e.key === 'token') {
+        loadUser();
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
 
-    // Listen for logout all devices event
+    const handleUserLoggedIn = () => {
+      isLoggingIn = true;
+      setTimeout(() => {
+        const userData = localStorage.getItem('user');
+        const token = localStorage.getItem('token');
+        
+        if (userData && token) {
+          try {
+            const parsedUser = JSON.parse(userData);
+            if (parsedUser && parsedUser.user_id) {
+              setUser(parsedUser);
+            }
+          } catch (error) {
+            // Silent fail
+          }
+        }
+        isLoggingIn = false;
+      }, 50);
+    };
+    window.addEventListener('userLoggedIn', handleUserLoggedIn);
+
     const handleUserLoggedOut = () => {
-      console.log('[App] User logged out event received');
-      // Xóa tất cả dữ liệu user
       localStorage.removeItem('user');
       localStorage.removeItem('token');
       localStorage.removeItem('userToken');
       localStorage.removeItem('userEmail');
       
-      // Xóa tất cả cart keys
       try {
         Object.keys(localStorage).forEach(key => {
           if (key.startsWith('cart_')) {
@@ -127,7 +140,7 @@ function AppContent() {
           }
         });
       } catch (e) {
-        console.error('Error clearing cart data:', e);
+        // Silent fail
       }
       
       setUser(null);
@@ -135,17 +148,16 @@ function AppContent() {
     window.addEventListener('userLoggedOut', handleUserLoggedOut);
 
     return () => {
-      window.removeEventListener('storage', loadUser);
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('userLoggedIn', handleUserLoggedIn);
       window.removeEventListener('userLoggedOut', handleUserLoggedOut);
     };
-  }, []); // Bỏ currentPage khỏi dependency để tránh vòng lặp
+  }, []);
 
   // Effect riêng để xử lý admin redirect
   useEffect(() => {
-    // Admin có thể truy cập homepage, không cần redirect tự động
     if (user && user.role === 'admin' && currentPage === 'home' && window.location.pathname === '/') {
-      console.log('Admin đang truy cập homepage');
-      // Không redirect, để admin có thể ở homepage
+      // Admin có thể truy cập homepage
     }
   }, [user, currentPage, adminWantsHome]);
 
@@ -160,6 +172,7 @@ function AppContent() {
   // Xử lý định tuyến URL
   useEffect(() => {
     const handlePopState = () => {
+      // Không reset user state khi navigate
       handleRoute(window.location.pathname, setCurrentPage, setProductId, setSearchQuery, setProfileTab, setBlogId, setAuthorId);
     };
 
@@ -196,61 +209,55 @@ function AppContent() {
   }, []);
 
   const handleLoginSuccess = useCallback((userData) => {
-    console.log('[App] handleLoginSuccess called with:', userData);
-    
-    // Sử dụng userData trực tiếp từ parameter hoặc lấy từ localStorage
     let userToSet = userData;
     
     if (!userToSet) {
-      console.log('[App] userData is null, trying to get from localStorage');
-      // Fallback: lấy từ localStorage nếu userData không có
       const userDataFromStorage = localStorage.getItem('user');
       if (userDataFromStorage) {
         try {
           userToSet = JSON.parse(userDataFromStorage);
-          console.log('[App] Got user from localStorage:', userToSet);
         } catch (error) {
-          console.error('[App] Error parsing user data after login:', error);
           navigateTo('/');
           return;
         }
       } else {
-        console.error('[App] No user data in localStorage either');
+        return;
       }
     }
     
     if (!userToSet || !userToSet.user_id) {
-      console.error('[App] Invalid user data after login:', userToSet);
       navigateTo('/');
       return;
     }
     
-    console.log('[App] Setting user after login:', userToSet);
-    console.log('[App] User role:', userToSet.role);
+    const token = localStorage.getItem('token');
+    if (!token) {
+      return;
+    }
     
-    // Set user state trước
-    setUser(userToSet);
-    console.log('[App] User state set, current user:', userToSet);
+    setUser({ ...userToSet });
+    window.dispatchEvent(new CustomEvent('userLoggedIn', { detail: userToSet }));
     
-    // Đợi một chút để state được update, sau đó navigate
-    setTimeout(() => {
-      console.log('[App] Navigating after login...');
-      // Kiểm tra role và chuyển hướng phù hợp
-      if (userToSet.role === 'admin') {
-        // Admin chuyển hướng đến homepage
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        const currentUser = localStorage.getItem('user');
+        if (!currentUser) {
+          try {
+            const reloadedUser = JSON.parse(localStorage.getItem('user') || '{}');
+            if (reloadedUser.user_id) {
+              setUser(reloadedUser);
+            }
+          } catch (e) {
+            // Silent fail
+          }
+        }
+        
         navigateTo('/');
-        console.log('[App] Admin logged in, redirecting to homepage');
-      } else {
-        // User thường chuyển hướng về trang chủ
-        navigateTo('/');
-        console.log('[App] Customer logged in, redirecting to home');
-      }
-      
-      setSearchQuery(''); // Xóa tìm kiếm
-      setProductId(null); // Xóa ID sản phẩm
-      // Đặt lại vị trí cuộn lên đầu sau khi đăng nhập
-      window.scrollTo(0, 0);
-    }, 100);
+        setSearchQuery('');
+        setProductId(null);
+        window.scrollTo(0, 0);
+      }, 150);
+    });
   }, []);
 
   const handleLogout = useCallback(() => {
@@ -275,7 +282,7 @@ function AppContent() {
         }
       });
     } catch (e) {
-      console.error('Error clearing cart data:', e);
+      // Silent fail
     }
     
     setUser(null); // Xóa dữ liệu người dùng
@@ -293,7 +300,6 @@ function AppContent() {
   }, [user]);
 
   const handleViewAllNotifications = useCallback(() => {
-    console.log('Navigate to all notifications');
     navigateTo('/notification');
   }, []);
 
@@ -350,7 +356,6 @@ function AppContent() {
     // Handle product page with productId
     if (page === 'product' && (params.productId || params.id)) {
       const id = params.productId || params.id;
-      console.log(' [App] Setting productId:', id, 'from params:', params);
       setProductId(id);
       navigateTo(path, { id });
     }
