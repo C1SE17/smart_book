@@ -117,6 +117,10 @@ Build smart_book from the source and install dependencies:
 ❯ pip install numpy pandas scikit-learn xgboost joblib bertopic sentence-transformers transformers openai google-generativeai faiss-cpu
 ```
 
+5. **Create file .venv:**
+# frontend/.env
+# backend/.env
+
 ### Usage
 
 Run the project with:
