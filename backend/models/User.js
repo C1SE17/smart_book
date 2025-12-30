@@ -13,8 +13,8 @@ class User {
         
         console.log('Bắt đầu tạo user:', { name, email: normalizedEmail, phone, address, role });
         
-        if (!normalizedEmail.endsWith('@gmail.com')) {
-            return callback(new Error('Email phải là @gmail.com'), null);
+        if (!normalizedEmail.endsWith('@gmail.com') && !normalizedEmail.endsWith('@yahoo.com') &&!normalizedEmail.endsWith('@edu.vn')) {
+            return callback(new Error('Email phải là @gmail.com, @yahoo.com hoặc @edu.vn'), null);
         }
         
         // Mã hóa mật khẩu

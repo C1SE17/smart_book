@@ -1,4 +1,4 @@
-USE smart_book;
+﻿USE smart_book;
 -- 1. USERS (Người dùng)
 CREATE TABLE users (
     user_id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'ID người dùng',
@@ -113,7 +113,7 @@ CREATE TABLE order_items (
 CREATE TABLE payments (
     payment_id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'ID thanh toán',
     order_id INT NOT NULL COMMENT 'Đơn hàng được thanh toán',
-    payment_method ENUM('momo', 'stripe', 'cod', 'vnpay') NOT NULL COMMENT 'Phương thức thanh toán',
+    payment_method ENUM('momo', 'stripe', 'cod') NOT NULL COMMENT 'Phương thức thanh toán',
     amount DECIMAL(10,2) NOT NULL COMMENT 'Số tiền',
     status ENUM('pending', 'success', 'failed') DEFAULT 'pending' COMMENT 'Trạng thái',
     transaction_id VARCHAR(255) COMMENT 'Mã giao dịch cổng thanh toán',
@@ -155,3 +155,4 @@ CREATE TABLE warehouse (
     FOREIGN KEY (book_id) REFERENCES books(book_id) ON DELETE CASCADE,
     UNIQUE KEY uq_warehouse_book (book_id) -- mỗi sách chỉ có 1 dòng trong kho
 ) COMMENT='Kho sách (liên kết chặt với bảng books)';
+
