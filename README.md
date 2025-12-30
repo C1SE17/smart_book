@@ -118,8 +118,8 @@ Build smart_book from the source and install dependencies:
 ```
 
 5. **Create file .venv:**
-### frontend/.env
-### backend/.env
+```frontend/.env```
+```backend/.env```
 
 ### Usage
 
