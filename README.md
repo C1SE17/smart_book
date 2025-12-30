@@ -74,7 +74,9 @@ This project requires the following dependencies:
 
 - **Programming Language:** JavaScript, ReactJS, NodeJS, Python
 - **Package Manager:** Npm
-
+- **Databases:** MySQL 8.0+, MongoDB 4.4+
+- **System Requirements:** Node.js 16.x+, Python 3.8+
+  
 ### Installation
 
 Build smart_book from the source and install dependencies:
@@ -96,7 +98,23 @@ Build smart_book from the source and install dependencies:
 **Using [npm](https://www.npmjs.com/):**
 
 ```sh
+❯ cd frontend
 ❯ npm install
+```
+4. **Set up Python AI module (optional):**
+
+```sh
+# Create virtual environment
+❯ python -m venv venv
+
+# Activate virtual environment
+# Windows:
+❯ venv\Scripts\activate
+# Linux/Mac:
+❯ source venv/bin/activate
+
+# Install Python packages
+❯ pip install numpy pandas scikit-learn xgboost joblib bertopic sentence-transformers transformers openai google-generativeai faiss-cpu
 ```
 
 ### Usage
@@ -105,26 +123,26 @@ Run the project with:
 
 **Using [npm](https://www.npmjs.com/):**
 
+**Backend Server:**
 ```
 ❯ cd backend
-  npm start
+❯ npm start
 ```
+
+**Frontend Development Server:**
 ```
 ❯ cd frontend
-  npm run dev
+❯ npm run dev
 ```
 
 ### Testing
 
-Smart_book uses the {__test_framework__} test framework. Run the test suite with:
+Smart_book uses the npm test framework. Run the test suite with:
 
 **Using [npm](https://www.npmjs.com/):**
 
 ```sh
 npm test
 ```
-
----
-
 <div align="left"><a href="#top">⬆ Return</a></div>
 
