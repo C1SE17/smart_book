@@ -94,7 +94,7 @@ Build smart_book from the source and install dependencies:
 
 3. **Install the dependencies:**
 
-**Using [npm](https://www.npmjs.com/):**
+**Using [npm] Install (https://www.npmjs.com/):**
 
 ```sh
 ❯ cd frontend
