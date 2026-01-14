@@ -4,7 +4,7 @@
 <div align="center">
 
 
-# SMART_BOOK
+# Smart Bookstore: AI-Based Personalized Recommendations and Business Analytic Dashboard
 
 <em>Empowering Discovery, Inspiring Connection, Transforming Experience</em>
 
